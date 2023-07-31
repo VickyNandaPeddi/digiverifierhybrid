@@ -1,0 +1,37 @@
+<div class="pageHeader">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="pageTitle"></h2>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container container-sm">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card section">
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-md-10 offset-1">
+                            <h4 *ngIf="this.msgStat == 'INVITATIONEXPIRED'">
+                                This invitation has already expired.
+                            </h4>
+                            <h4 *ngIf="this.msgStat == 'PROCESSDECLINED'">
+                                You have already declined the process.
+                            </h4>
+                            <h4 *ngIf="this.msgStat == 'SUBMITTED'">
+                                You have already completed the verification process.
+                            </h4>
+                            <h4 *ngIf="this.msgStat == 'CANCELLED'">
+                                Your verification process has been cancelled.
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

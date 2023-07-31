@@ -1,0 +1,79 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Digiverifier</title>
+  <link rel="stylesheet" href="https://img1.digitallocker.gov.in/public/smart/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://img1.digitallocker.gov.in/public/smart/css/global-style-v5_071219.css">
+</head>
+<body>
+<div class="col-sm-12 col-md-8 col-lg-4 col-xl-4 mx-auto">
+<section class="card-signin">
+<div class="row setup-content">
+<div class="col-xs-12 col-md-12">
+<div class="row"><img src="assets/img/digilockerlogo.png" class="mx-auto d-block"></div>
+<br>
+<div class="pageHeader">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="pageTitle"></h2>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container container-md">
+	<div class="col-xs-12">
+	    <div class="row">
+	        <div class="col-xs-12 col-md-12">
+	            <div class="container container-md">
+                    <form [formGroup]="formEPFOlogin" (ngSubmit)="onSubmit()" class="mb-5 mt-10" >
+                        <div class="card mb-1 mt-1 box-shadow">
+                            <div class="card-body">
+                                <h4 class="card-title mb-4">Sign In to your account!</h4>
+                
+                                <div class="form-group" id="user_div" style="margin-top:5px !important;">
+                                    <input class="form-control" minlength="3"  formControlName="aadhaar" placeholder="Aadhaar/Username*" tabindex="1"/>
+                                    
+                                </div>
+                                
+                                <!-- <div class="form-group" style="display: block;" id="pin">
+                                    <div class="aadhar-input">
+                                        <input type="password" class="form-control" minlength="3" formControlName="securitypin" placeholder="6 digit security PIN*" tabindex="2">
+                                       
+                                    </div>
+                                </div>    
+                                <div class="form-group d-flex  mt-0 mb-0"> 
+                                    <label> <a href="https://accounts.digilocker.gov.in/signin/set_pin/775d5714aee5067f0e5901972b9fb688--enS">Forgot security PIN?</a> </label>
+                                </div> -->
+
+                                <div class="form-group">
+                                    <div class="row justify-content-md-center justify-content-sm-center">
+                                        <div class="col text-center mt-2">
+                                            <button class="btn btn-success btn-lg btn-block " style="width: 100%; padding: 0px 10px;"  type="submit" >Proceed</button>
+                                        </div>
+                                    </div>
+                
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-md-center justify-content-sm-center mt-2">
+                            <div class="col text-center">
+                                <div class="form-group">
+                                    <label>Do not have an account? <a href="https://accounts.digitallocker.gov.in/oauth_partner/register/%252Foauth2%252F1%252Fconsent%253Fresponse_type%253Dcode%2526client_id%253DEABCF5B4%2526state%253D12345%2526redirect_uri%253Dhttps%25253A%25252F%25252Fwww.digiverifier.com%2526orgid%253D002483%2526txn%253D6396f6e098338oauth21670837984%2526hashkey%253De823761440be064f196b6ba48d4c7d9fd39ae5d76e04321ce6f9fb24e02c2f90%2526requst_pdf%253DY%2526app_name%253DcHJvdG90eXBl%2526signup%253Dsignup">Sign Up</a> </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+</div>
+</body>
+</html>
+
+

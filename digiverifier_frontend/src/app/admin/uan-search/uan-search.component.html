@@ -1,0 +1,185 @@
+
+
+<!-- Add this code to your Angular template file (e.g., app.component.html) -->
+<!---->
+<div class="container mt-3 dashboard_container card pt-2">
+  <div class="row justify-content-end">
+    <div class="col-auto ml-auto">
+      <button class="btn btn-primary" (click)="refreshData()">
+        <i class="fas fa-sync"></i>
+        Refresh
+      </button>
+    </div>
+    <div class="col-auto">
+      <input type="text" style="height: 39px;" class="form-control form-control-sm" placeholder="Sort By">
+    </div>
+    <div class="col-auto">
+      <div class="input-group date-picker">
+        <input
+          #rangeFrom="ngbDatepicker"
+          class="form-control form-control-sm text-right"
+          ngbDatepicker
+          readonly
+          placeholder="Date"
+          id="inputFromDate"
+          style="height: 39px;"
+        />
+        <div class="input-group-append">
+          <button
+            class="btn btn-outline-secondary"
+            (click)="rangeFrom.toggle()"
+            type="button"
+          >
+            <img src="../assets/img/calendar.png" />
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-primary" (click)="triggerModal(bulkUanSearch)"  >
+        <i class="fas fa-user"></i>
+        Bulk UAN Search
+      </button>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-primary" (click)="triggerModal(singleuan)">
+        <i class="fas fa-search"></i>
+        Single UAN Search
+      </button>
+    </div>
+  </div>
+
+  <div class="table-responsive mt-3">
+    <table class="table table-bordered" id="tbl-uploaddetails">
+      <thead>
+          <th>SI#</th>
+          <th>Uploaded By</th>
+          <th>Uploaded On</th>
+          <th>Total Record Uploaded</th>
+          <th>Total Record Fetched</th>
+          <th>Total Record Failed</th> 
+          <th>Action</th>
+      </thead>
+      <tbody>
+
+        <tr *ngFor="let item of uanData; let i=index">
+          <td>{{i+1}}</td>
+          
+          <td>{{ item.uploadedBy }}</td>
+          <td>{{item.uploadedOn | date: 'dd/MM/yyyy'}}</td>
+          <td>{{item.totalRecordUploaded}}</td>
+          <td>{{item.totalRecordFetched}}</td>
+          <td>{{item.totalRecordFailed}}</td>
+          <td><button type="button"  class="btn btn-warning btn-sm" (click)="downloadFile(item)"  title="Edit"><i class="fa fa-download"></i></button></td>
+      </tr>
+          
+      </tbody>
+  </table>
+  </div>
+
+
+
+</div>
+
+
+  
+
+  <!-- Modal -->
+ <!-- <div class="modal" tabindex="-1" role="dialog" id="uploadModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Upload UAN List</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="file" class="form-control-file">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="submitUpload()">Submit</button>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<ng-template #bulkUanSearch let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">bulkUANSearch</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <div class="modal-body">
+      <form >
+          <div class="row text-center">
+              <div class="col">
+                  <a href="./assets/docs/BulkUanSearch.xlsx" class="btn btn-primary btn-sm">
+                      Sample XLS <i class="fas fa-download"></i>
+                  </a>
+              </div>
+          </div>
+          <hr>
+          <div class="row">
+              <div class="col">
+                  <div class="form-group">
+                      <div class="col">
+                          <input type="file" class="form-control-file form-control" required (change)="selectFile($event)"  accept=".xlsx, .xls, .csv">
+                      </div>
+
+                  </div>
+              </div>
+          </div>
+          <div class="row">
+              <div class="col-md-12 text-center mt-3 pb-3">
+                  <button class="btn btn-success btn-sm" [disabled]="!selectedFiles" (click)="bulkUANSearch()">Submit</button>
+                  <button type="button" class="btn btn-danger btn-sm" (click)="modal.close('Save click')">Close</button>
+              </div>
+          </div>
+      </form>
+  </div>
+</ng-template>
+
+
+
+<ng-template #singleuan let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">SingleUAN Search</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="singleUanData" (ngSubmit)="searchSingleUAN()" >
+          <input type="hidden" formControlName="candidateCode">
+        <input type="hidden" formControlName="transactionid">
+          <div class="row " >
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="applicantId" class="required">Enter ApplicantID</label>
+                    <input type="text" formControlName="applicantId" class="form-control form-control-sm" >
+                    </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="uanNumber" class="required">Enter UAN Number</label>
+                    <input type="text" formControlName="uanusername" class="form-control form-control-sm" >
+                    </div>
+            </div>  
+            </div>
+            <hr>
+            
+            <div class="row">
+                <div class="col-md-12 text-center mt-3 pb-3">
+                    <button class="btn btn-success btn-sm" [disabled]="singleUanData.invalid">Submit</button>
+                    <button type="button" class="btn btn-danger btn-sm" (click)="modal.close('Save click')">Close</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    
+  </ng-template>
+
+  

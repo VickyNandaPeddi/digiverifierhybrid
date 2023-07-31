@@ -1,0 +1,565 @@
+<div class="pageHeader">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="pageTitle">{{ pageTitle }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <form [formGroup]="candidateForm">
+        <input type="hidden" formControlName="candidateCode">
+    <div class="row">
+        <div class="col-md-12 mb-1" *ngIf="!candidateAddressData_stat">
+            <small class="text-danger float-right">
+               <b style="font-size: 13px; font-weight:500;"> ( Note: Relative address verification is pending. Please complete it before proceeding for final submission. Please reload after verification of address.)</b>
+            </small>
+        </div>
+        <div class="col-md-6">
+            <div class="card stat_cards">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>
+                                <i class="fas fa-user"></i>
+                                <span style="padding: 12px 0 0 0;">{{ candidateName }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat_cards">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>
+                                <i class="fas fa-calendar-alt"></i>
+                                <span class="text-center">{{dateOfBirth}}</span>
+                                <b>DOB</b>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat_cards">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>
+                                <i class="fas fa-address-card"></i>
+                                <span class="text-center">{{panNumber}}</span>
+                                <b>PAN</b>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        Education Details
+                        <button type="button" (click)="openModal(modalData)" class="btn btn-primary btn-sm float-right">Add Education <i class="fas fa-plus"></i></button>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>SI#</th>
+                                        <th>Degree</th>
+                                        <th>College</th>
+                                        <th>University/ Board</th>
+                                        <th>Year Of Passing</th>
+                                        <!-- <th>Total Marks Secured</th> -->
+                                        <th>% or CGPA</th>
+                                        <th style="width: 50px;">Select Highest Qualification</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let item of candidateEduData; let j=index;">
+                                        <td>{{j+1}}</td>
+                                        <td>{{item.qualificationName}}</td>
+                                        <td>{{item.schoolOrCollegeName}}</td>
+                                        <td>{{item.boardOrUniversityName}}</td>
+                                        <td>{{item.yearOfPassing}}</td>
+                                        <!-- <td>{{item.totalMarks}}</td> -->
+                                        <td>{{item.percentage}}</td>
+                                        <td>
+                                            <input type="radio" name="HighestQualification" value="HighestQualification{{item.candidateCafEducationId}}" class="HighestQualification_check"
+                                            id="{{item.candidateCafEducationId}}"  (change)="selectHighestQualification($event)" formControlName="isHighestQualification">
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12" *ngIf="!isFresher">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Employment Details
+                        <button type="button" (click)="openModal(EXPmodalData)" class="btn btn-primary btn-sm float-right">Add Experience <i class="fas fa-plus"></i></button>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 table-responsive">
+                            <p *ngIf="isUanSkipped == false">
+                                <span class="float-right">UAN: {{candidateUan}}</span>
+                            </p>
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="3">SI#</th>
+                                        <th rowspan="3">Company Name</th>
+                                        <!-- <th rowspan="3">Source</th> -->
+                                        <th colspan="2" style="text-align: center;">Tenure
+                                        </th>
+                                        <th rowspan="3">Working Days</th>
+                                        <th rowspan="3">Action</th>
+                                    </tr>
+                                    <tr>
+                                        <th style="text-align: center;">Date of Joining </th>
+                                        <th style="text-align: center;">Last Working Day</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let item of candidateEXPData; let i=index;">
+                                        <td>{{ i+1 }}</td>
+                                        <td>{{ item.candidateEmployerName }}</td>
+                                        <!-- <td>{{ item.serviceName }}</td> -->
+                                        <td>{{ item.inputDateOfJoining == null?'Not-Available': item.inputDateOfJoining}}</td>
+                                        <td>{{item.inputDateOfExit == null?'Not-Available': item.inputDateOfExit}}</td>
+                                        <td>{{ item.inputDateOfJoining != null && item.inputDateOfExit != null?calculateDiff(item.inputDateOfExit,item.inputDateOfJoining) : 'Not-Available'}}</td>
+                                        <td>
+                                            <button *ngIf="item.serviceName == 'ITR' || item.serviceName == 'Candidate' || item.inputDateOfJoining == null || item.inputDateOfExit == null" type="button" (click)="ITRedit(modalITRedit, item.candidateCafExperienceId, item.inputDateOfJoining, item.inputDateOfExit, item.serviceName, i)" class="btn btn-warning btn-sm" data-toggle="tooltip" title="Edit Tenure"><i class="fas fa-edit"></i></button> <!--|| (i!=0 && item.inputDateOfExit == null)-->
+                                            <span *ngIf="item.serviceName != 'ITR' && item.serviceName != 'Candidate' && item.inputDateOfJoining != null && item.inputDateOfExit != null">No Action</span> <!--&& ((i!=0 && item.inputDateOfExit != null)  || (i==0 && item.inputDateOfExit == null))-->                                      
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Address
+                        <button type="button" (click)="addAddress(ModalAddAddress)" class="btn btn-primary btn-sm float-right">Add Address <i class="fas fa-plus"></i></button>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="3">SI#</th>
+                                        <th rowspan="3">Name</th>
+                                        <th rowspan="3">Address</th>
+                                        <!-- <th rowspan="3">Source</th> -->
+                                        <th colspan="3" style="text-align: center;">Address Selection
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th style="text-align: center;">Communication </th>
+                                        <th style="text-align: center;">Present</th>
+                                        <th style="text-align: center;">Permanent </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let item of candidateAddressData; let i=index;">
+                                        <td>{{ i+1 }}<input type="hidden" class="hdnCandidateIds" value="{{item.candidateCafAddressId}}"></td>
+                                        <td>{{ item.name }}
+                                            <span *ngIf="item.name == 'LANDLORD'"
+                                            (click)="openLandlordAgreement(modalLandlordAgreement,item.addressVerificationCandidateCafRelationshipDocumentUploaded)"
+                                            style="display: block;font-weight: 600;cursor: pointer;color: #106aff;font-size: 13px;">
+                                                (View Agreement)
+                                            </span>
+                                        </td>
+                                        <td>{{ item.candidateAddress == null ?'NA':item.candidateAddress}}</td>
+                                        <!-- <td>{{ item.serviceName == null ?'Candidate':item.serviceName}}</td> -->
+                                        <td class="text-center">
+                                            <input type="radio" name="AssetDeliveryAddress" class="assetDeliveryAddress{{item.candidateCafAddressId}} assetDeliveryAddress_check" value="assetDeliveryAddress{{item.candidateCafAddressId}}" id="{{item.candidateCafAddressId}}" formControlName="isAssetDeliveryAddress">
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="radio" name="PermanentAddress" class="permanentAddress{{item.candidateCafAddressId}} permanentAddress_check"  value="PermanentAddress{{item.candidateCafAddressId}}" id="{{item.candidateCafAddressId}}" formControlName="isPermanentAddress">
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="radio" name="PresentAddress" class="presentAddress{{item.candidateCafAddressId}} presentAddress_check"  value="PresentAddress{{item.candidateCafAddressId}}" id="{{item.candidateCafAddressId}}" formControlName="isPresentAddress">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Upload Resume (.pdf only)</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input type="file" (change)="selectResume($event)" accept=".pdf" name="" id="" formControlName="resume">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 text-center" style="margin-bottom: 50px;" >
+            <button type="submit" class="btn btn-success" (click)="onSubmit(candidateForm)">Submit</button>
+        </div>
+        <!-- *ngIf="candidateAddressData_stat" -->
+
+    </div>
+    </form>
+</div>
+
+<ng-template #modalData let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Add Education</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="formCandidateEdu">
+            <input type="hidden" formControlName="candidateCode">
+            <div class="row ">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="" class="required">Degree</label>
+                        <select class="form-control form-control-sm" id="" formControlName="qualificationId">
+                            <option [value]="" disabled>--Select--</option>
+                            <option *ngFor="let item of QualificationList" [value]="item.qualificationId">{{ item.qualificationName }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="" class="required">College/School</label>
+                        <input type="text"
+                            class="form-control form-control-sm" formControlName="schoolOrCollegeName">
+                    </div>
+                        
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="" class="required">University/Board</label>
+                        <!-- <select class="form-control form-control-sm" (change)="valUniversity($event)" >
+                            <option [value]="" disabled>--Select--</option>
+                            <option *ngFor="let item of AllSuspectClgList" [value]="item.suspectClgMasterId">{{ item.suspectInstitutionName }}</option>
+                        </select> -->
+                        <div class="ng-autocomplete" >
+                            <ng-autocomplete
+                              [data]="AllSuspectClgList"
+                              [searchKeyword]="keyword"
+                              formControlName="suspectClgMasterId"
+                              (selected)='selectEvent($event)'
+                              placeholder=""
+                              [itemTemplate]="itemTemplate"
+                              [notFoundTemplate]="notFoundTemplate">
+                            </ng-autocomplete>
+                          
+                            <ng-template #itemTemplate let-item>
+                              <a [innerHTML]="item.suspectInstitutionName"></a>
+                            </ng-template>
+                          
+                            <ng-template #notFoundTemplate let-notFound>
+                              <div [innerHTML]="notFound"></div>
+                            </ng-template>
+                            
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12" *ngIf="serachBoardOther">
+                    <div class="form-group">
+                        <label for="" class="required">Your University/Board Name</label>
+                        <input class="form-control form-control-sm" formControlName="boardOrUniversityName" >
+                    </div>
+                </div>
+                <div class="col-md-6" style="padding-right: 0;">
+                    <div class="form-group">
+                        <label for="" class="required">Year of Passing</label>
+                        <input class="form-control form-control-sm" maxlength="4" placeholder="YYYY" formControlName="yearOfPassing" >
+                    </div>
+                </div>
+                <!-- <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="" class="">Total Marks</label>
+                        <input class="form-control form-control-sm" placeholder="" formControlName="totalMarks" >
+                    </div>
+                </div> -->
+                <div class="col-md-6">
+                    <div class="form-group" style="margin: 0 10px;">
+                        <label for="" class="required">% or CGPA</label>
+                        <input type="text" class="form-control form-control-sm" formControlName="percentage">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="" class="required">Upload Certificate (.pdf only)</label>
+                        <input type="file"
+                            class="form-control form-control-sm" formControlName="file"  required (change)="selectFile($event)" accept=".pdf">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-center mt-3 pb-3">
+                    <button type="submit"  class="btn btn-primary btn-sm" (click)="onSubmitEdu(formCandidateEdu)" >Submit</button>
+                    <button type="button" class="btn btn-danger btn-sm" (click)="modal.close('Save click')">Close</button>
+                </div>
+            </div>
+        </form>
+    </div>
+  </ng-template>
+
+  <ng-template #EXPmodalData let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Add Experience</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="formCandidateEXP">
+            <input type="hidden" formControlName="candidateCode">
+            <div class="row ">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="" class="required">Company Name</label>
+                        <select class="form-control form-control-sm" (change)="valEmpMaster($event)" formControlName="suspectEmpMasterId">
+                            <option [value]="" disabled>--Select--</option>
+                            <option *ngFor="let item of AllSuspectEmpList" [value]="item.suspectEmpMasterId">{{ item.suspectCompanyName }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-12" *ngIf="formCandidateEXP.value.suspectEmpMasterId == '0'">
+                    <div class="form-group">
+                        <label for="" class="required">Your Company Name</label>
+                        <input type="text"
+                            class="form-control form-control-sm" formControlName="candidateEmployerName">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="" class="required">Date of Joining</label>
+                        <div class="input-group">
+                            <input #dateOfJoining="ngbDatepicker" class="form-control form-control-sm" 
+                            (dateSelect)="onJoiningDate($event)" formControlName="inputDateOfJoining" 
+                            [maxDate]="getToday" ngbDatepicker readonly/>
+                            <div class="input-group-append">
+                                <button  class="btn btn-sm btn-outline-secondary" (click)="dateOfJoining.toggle()" type="button"><img src="../assets/img/calendar.png"/></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="" class="required">Last Working Day</label>
+                        <div class="input-group">
+                            <input #lastWorkingDay="ngbDatepicker" class="form-control form-control-sm" 
+                            (dateSelect)="onExitDate($event)" formControlName="inputDateOfExit" [startDate]="getMinDate" [minDate]="getMinDate" 
+                            [maxDate]="getToday" ngbDatepicker readonly/>
+                            <div class="input-group-append">
+                                <button  class="btn btn-sm btn-outline-secondary" (click)="lastWorkingDay.toggle()" type="button"><img src="../assets/img/calendar.png"/></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="" class="required">Bank Statement / Salary Slip</label>
+                        <input type="file"
+                            class="form-control form-control-sm" formControlName="certificate"  required (change)="selectCertificate($event)" accept=".pdf">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-center mt-3 pb-3">
+                    <button type="submit"  class="btn btn-primary btn-sm" (click)="onSubmitEXP(formCandidateEXP)" >Submit</button>
+                    <button type="button" class="btn btn-danger btn-sm" (click)="modal.close('Save click')">Close</button> 
+                </div>
+            </div>
+        </form>
+    </div>
+  </ng-template>
+
+  <ng-template #modalLandlordAgreement let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">View Landlord Agreement</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-md-12">
+                <iframe id="viewLandlordAgreement" style="width: 100%;height: 600px;"></iframe>
+            </div>
+        </div>
+    </div>
+  </ng-template>
+
+  <ng-template #ModalAddAddress let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Add Address</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="formCandidateAddress">
+            <input type="hidden" formControlName="candidateCode">
+            <div class="row ">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="" class="required">House Owner Name</label>
+                        <input type="text"
+                            class="form-control form-control-sm" formControlName="name">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="" class="required">State</label>
+                            <select class="form-control form-control-sm" formControlName="state">
+                                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                <option value="Assam">Assam</option>
+                                <option value="Bihar">Bihar</option>
+                                <option value="Chandigarh">Chandigarh</option>
+                                <option value="Chhattisgarh">Chhattisgarh</option>
+                                <option value="Dadar and Nagar Haveli">Dadar and Nagar Haveli</option>
+                                <option value="Daman and Diu">Daman and Diu</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Lakshadweep">Lakshadweep</option>
+                                <option value="Puducherry">Puducherry</option>
+                                <option value="Goa">Goa</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Haryana">Haryana</option>
+                                <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                <option value="Jharkhand">Jharkhand</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Kerala">Kerala</option>
+                                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Manipur">Manipur</option>
+                                <option value="Meghalaya">Meghalaya</option>
+                                <option value="Mizoram">Mizoram</option>
+                                <option value="Nagaland">Nagaland</option>
+                                <option value="Odisha">Odisha</option>
+                                <option value="Punjab">Punjab</option>
+                                <option value="Rajasthan">Rajasthan</option>
+                                <option value="Sikkim">Sikkim</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Telangana">Telangana</option>
+                                <option value="Tripura">Tripura</option>
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                <option value="Uttarakhand">Uttarakhand</option>
+                                <option value="West Bengal">West Bengal</option>
+                            </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="" class="required">City</label>
+                        <input type="text"
+                            class="form-control form-control-sm" formControlName="city">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="" class="required">Pincode</label>
+                        <input type="text"
+                            class="form-control form-control-sm" maxlength="6" formControlName="pinCode">
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="" class="required">Address</label>
+                        <textarea class="form-control form-control-sm" formControlName="candidateAddress"></textarea>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-center mt-3 pb-3">
+                    <button type="submit"  class="btn btn-primary btn-sm" (click)="onSubmitAddress(formCandidateAddress)" >Submit</button>
+                    <button type="button" class="btn btn-danger btn-sm" (click)="modal.close('Save click')">Close</button> 
+                </div>
+            </div>
+        </form>
+    </div>
+  </ng-template>
+
+  <ng-template #modalITRedit let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Edit Tenure</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="formITRedit">
+            <input type="hidden" formControlName="candidateCode">
+            <input type="hidden" formControlName="candidateCafExperienceId">
+            <div class="row ">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="" class="required">Date of Joining</label>
+                        <div class="input-group">
+                            <input #TenureDOJ="ngbDatepicker" class="form-control form-control-sm" (dateSelect)="onTenureDOJ($event)" formControlName="inputDateOfJoining" ngbDatepicker readonly />
+                            <div class="input-group-append">
+                                <button class="btn btn-sm btn-outline-secondary" (click)="TenureDOJ.toggle()" type="button" [disabled]="!editableDOJ"><img src="../assets/img/calendar.png"/></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="" class="required">Last Working Day</label>
+                        <div class="input-group">
+                            <input #TenureLWD="ngbDatepicker" class="form-control form-control-sm" (dateSelect)="onTenureLWD($event)" formControlName="inputDateOfExit" ngbDatepicker readonly />
+                            <div class="input-group-append">
+                                <button  class="btn btn-sm btn-outline-secondary" (click)="TenureLWD.toggle()" type="button" [disabled]="!editableLWD"><img src="../assets/img/calendar.png"/></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-center mt-3 pb-3">
+                    <button type="button"  class="btn btn-primary btn-sm" (click)="onSubmitITRedit(formITRedit, modal)" >Update</button>
+                    <button type="button" class="btn btn-danger btn-sm" (click)="modal.close('Save click')">Close</button> 
+                </div>
+            </div>
+        </form>
+    </div>
+  </ng-template>
+

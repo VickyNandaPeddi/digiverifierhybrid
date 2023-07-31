@@ -1,0 +1,60 @@
+<div class="card-body" style="padding: 5px;" class="float-right">
+<input type="text" placeholder="search" class="float-right" [(ngModel)]="searchText" *ngIf="containerStat">
+</div>
+        <div class="table-responsive" *ngIf="containerStat">
+            <table class="table table-bordered" id="tbl-uploaddetails">
+                <thead>
+                    <th>SI#</th>
+                    <th>Agent Name</th>
+                    <th>Candidate Name</th>
+                    <th>Contact Number</th>
+                    <th>Email ID</th>
+                    <th>Applicant ID</th>
+                    <th>Status</th>
+                    <th>Data uploaded</th>
+                    <th>Invited On</th>
+                    <th>CAF Submitted On</th>
+                    <th>Pre Approval Report</th>
+                    <th *ngIf="finalreport">Interim Report</th>
+                    <th *ngIf="finalreport">Final Report</th>
+                    <th *ngIf="interimreport">Interim Report</th>
+                    <th *ngIf="Action">Action</th>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of CharReportDeliverypagination(); let i=index" [hidden]="!searchFilter(item)">
+                        <td>{{i+1}}</td>
+                        <td>{{ item.createdByUserFirstName }} {{ item.createdByUserLastName }}</td>
+                        <td>{{item.candidateName}}</td>
+                        <td>{{item.contactNumber}}</td>
+                        <td>{{item.emailId}}</td>
+                        <td>{{item.applicantId}}</td>
+                        <td>{{item.candidateStatusName}}</td>
+                        <td>{{item.createdOn}}</td>
+                        <td>{{item.dateOfEmailInvite}}</td>
+                        <td>{{item.submittedOn}}</td>
+                        <td>
+                            <button type="button" (click)="downloadPreApprovalReport(item)" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button>
+                        </td>
+                        <td *ngIf="finalreport">
+                            <button type="button"  (click)="downloadFinalReport(item, 'INTERIM')" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button>
+                        </td>
+                        <td *ngIf="finalreport">
+                            <button type="button"  (click)="downloadFinalReport(item, 'FINAL')" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button>
+                        </td>
+                        <td *ngIf="interimreport">
+                            <button type="button"  (click)="downloadInterimReport(item)" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button>
+                        </td>
+                        <td *ngIf="Action">
+                            <button type="button" *ngIf="stat_linkAdminApproval" (click)="linkAdminApproval(item.candidateCode)" class="btn btn-sm btn-warning" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button type="button" *ngIf="stat_linkCandidateReport" (click)="linkCandidateReport(item.candidateCode)" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination">
+                <button [disabled]="currentPageIndex == 0" (click)="goToPrevPage()">Previous</button>
+                <span>Page {{currentPageIndex}} of {{totalPages}}</span>
+                <button [disabled]="currentPageIndex == totalPages - 1" (click)="goToNextPage()">Next</button>
+            </div>
+        </div>
+
