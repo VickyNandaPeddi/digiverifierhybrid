@@ -1470,7 +1470,7 @@ public class ReportServiceImpl implements ReportService {
 											epfoDatas.add(epfoData);
 										}
 									}
-									
+
 //									for(int i=0;i<epfoDatas.size()-1;i++) {
 //										if(epfoDatas.get(i).getDoj() != null && epfoDatas.get(i+1).getDoj() != null) {
 //											DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"); 
@@ -1572,8 +1572,8 @@ public class ReportServiceImpl implements ReportService {
 											employementDetail.setInputDateOfExit(itrList.get(0).getDate());
 										}
 
-										employementDetails.add(employementDetail); 
-										candidateReportDTO.setEmployementDetailsDTOlist(employementDetails); 
+										employementDetails.add(employementDetail);
+										candidateReportDTO.setEmployementDetailsDTOlist(employementDetails);
 									}
 								}
 							});
@@ -1742,7 +1742,7 @@ public class ReportServiceImpl implements ReportService {
 				// System.out.println("candidate Report dto : " +candidateReportDTO);
 				File report = FileUtil.createUniqueTempFile("report", ".pdf");
 				String htmlStr = null;
-				if (reportType.toString() == "FINAL" && candidateReportDTO.getProject().contains("Wipro")) {
+				if (reportType.toString().equalsIgnoreCase( "FINAL") && candidateReportDTO.getProject().contains("Wipro")) {
 					htmlStr = pdfService.parseThymeleafTemplate("wipro-final", candidateReportDTO);
 				} else
 					htmlStr = pdfService.parseThymeleafTemplate("common-pdf", candidateReportDTO);
@@ -1820,10 +1820,10 @@ public class ReportServiceImpl implements ReportService {
 						}
 					}
 
-					if (reportType.toString() == "FINAL" && candidateReportDTO.getProject().contains("Wipro")) {
+					if (reportType.toString().equalsIgnoreCase( "FINAL") && candidateReportDTO.getProject().contains("Wipro")) {
 						List<InputStream> onlyReport = new ArrayList<>();
 						onlyReport.add(FileUtil.convertToInputStream(report));
-						
+
 						PdfUtil.mergePdfFiles(onlyReport, new FileOutputStream(mergedFile.getPath()));
 					} else
 						PdfUtil.mergePdfFiles(collect, new FileOutputStream(mergedFile.getPath()));
@@ -1837,11 +1837,11 @@ public class ReportServiceImpl implements ReportService {
 					content.setContentCategory(ContentCategory.OTHERS);
 					content.setContentSubCategory(ContentSubCategory.PRE_APPROVAL);
 					// System.out.println(content+"*******************************************content");
-					if (reportType.name() == "PRE_OFFER") {
+					if (reportType.name().equalsIgnoreCase("PRE_OFFER")) {
 						content.setContentSubCategory(ContentSubCategory.PRE_APPROVAL);
-					} else if (reportType.name() == "INTERIM") {
+					} else if (reportType.name().equalsIgnoreCase("INTERIM")) {
 						content.setContentSubCategory(ContentSubCategory.INTERIM);
-					} else if (reportType.name() == "FINAL") {
+					} else if (reportType.name().equalsIgnoreCase("FINAL")) {
 						content.setContentSubCategory(ContentSubCategory.FINAL);
 					}
 					content.setFileType(FileType.PDF);
@@ -2447,7 +2447,7 @@ public class ReportServiceImpl implements ReportService {
 				} else {
 					htmlStr = pdfService.parseThymeleafTemplate("pdf_wipro", candidateReportDTO);
 
-				}				
+				}
 
 				pdfService.generatePdfFromHtml(htmlStr, report);
 				List<Content> contentList = contentRepository.findAllByCandidateIdAndContentTypeIn(
@@ -2495,9 +2495,9 @@ public class ReportServiceImpl implements ReportService {
 					content.setContentCategory(ContentCategory.OTHERS);
 					content.setContentSubCategory(ContentSubCategory.PRE_APPROVAL);
 					// System.out.println(content+"*******************************************content");
-					if (reportType.name() == "PRE_OFFER") {
+					if (reportType.name().equalsIgnoreCase( "PRE_OFFER")) {
 						content.setContentSubCategory(ContentSubCategory.PRE_APPROVAL);
-					} else if (reportType.name() == "FINAL") {
+					} else if (reportType.name().equalsIgnoreCase( "FINAL")) {
 						content.setContentSubCategory(ContentSubCategory.FINAL);
 					}
 					content.setFileType(FileType.PDF);
