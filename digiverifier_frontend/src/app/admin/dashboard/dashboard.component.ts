@@ -43,7 +43,7 @@ export class DashboardComponent implements OnInit {
   });
   constructor(public loaderService:LoaderService,public calendar: NgbCalendar,private customer: CustomerService,private customers: CustomerService,private zone: NgZone,private superadminDB: SuperadminDashboardService, private http: HttpClient) {
     this.selectedCust = "ALL INCLUDED";
-    this.getToday = calendar.getToday(); 
+    this.getToday = calendar.getToday();
     let inityear = this.getToday.year;
     let initmonth = this.getToday.month <= 9 ? '0' + this.getToday.month : this.getToday.month;;
     let initday = this.getToday.day <= 9 ? '0' + this.getToday.day : this.getToday.day;
@@ -55,7 +55,7 @@ export class DashboardComponent implements OnInit {
       this.fromDate = this.initToday;
       this.toDate = this.initToday;
     }
-    
+
     var checkfromDate:any = localStorage.getItem('dbFromDate');
     let getfromDate = checkfromDate.split('/');
     this.setfromDate = { day:+getfromDate[0],month:+getfromDate[1],year:+getfromDate[2]};
@@ -72,8 +72,8 @@ export class DashboardComponent implements OnInit {
     this.customers.getCustomersBill().subscribe((data: any)=>{
       this.getCustID=data.data;
       //console.log(this.getCustID);
-    }); 
-     
+    });
+
   }
   onfromDate(event:any) {
     let year = event.year;
@@ -141,7 +141,7 @@ saDurationFilter(duration:any){
     this.customer.setToDate(this.initToday);
     window.location.reload();
   }
-  
+
   filterLast7days(){
       var date = new Date();
       date.setDate(date.getDate() - 7);
@@ -163,7 +163,7 @@ saDurationFilter(duration:any){
     this.customer.setToDate(this.initToday);
     window.location.reload();
 }
-  
+
 filterByYear() {
   var date = new Date();
   date.setFullYear(date.getFullYear() - 1);  // subtract one year instead of 30 days
@@ -235,7 +235,7 @@ filterMonthToDate() {
     const finalToDate = toDateSplit[2] + '-' + toDateSplit[1] + '-' + toDateSplit[0];
     //console.log(finalFromDate, finalToDate);
     this.getUanCount("", finalFromDate, finalToDate);
-    
+
   }
 
   onCustomerSelected($event: any, selectedValue: any) {
@@ -259,11 +259,11 @@ filterMonthToDate() {
   onDownloadInvoiceClick() {
     const fromDateSplit = this.fromDate.split('/');
     const toDateSplit = this.toDate.split('/');
-    
+
     const finalFromDate = `${fromDateSplit[2]}-${fromDateSplit[1]}-${fromDateSplit[0]}`;
     const finalToDate = `${toDateSplit[2]}-${toDateSplit[1]}-${toDateSplit[0]}`;
-  
-    this.getUanExcel(this.selectedCust, finalFromDate, finalToDate);    
+
+    this.getUanExcel(this.selectedCust, finalFromDate, finalToDate);
   }
 
   public getMethod(){
@@ -283,7 +283,7 @@ filterMonthToDate() {
       a.click();
     });
   }
-  
+
   public getUanCount(client_name: any, date_range: any, end_date: any){
     let url: string;
     if(client_name) {
@@ -320,18 +320,18 @@ UanloadCharts(success_count: any, fail_count: any){
     marker.strokeWidth = 3;
     marker.strokeOpacity = 1;
     marker.stroke = am4core.color("#000");
-    
+
     chart.logo.disabled = true;
     chart.legend.position = "right";
     chart.padding(0, 0, 0, 0);
     chart.paddingRight = 0
-    
+
     let data = [
       ({name: "Success", value: success_count}),
       ({name: "Failure", value: fail_count})
-    ];      
+    ];
       chart.data = data;
- 
+
     // Add and configure Series
     let pieSeries = chart.series.push(new am4charts.PieSeries());
 
@@ -342,14 +342,14 @@ UanloadCharts(success_count: any, fail_count: any){
     pieSeries.slices.template.stroke = am4core.color("#fff");
     pieSeries.slices.template.strokeWidth = 2;
     pieSeries.slices.template.strokeOpacity = 1;
-  
+
     // This creates initial animation
     pieSeries.hiddenState.properties.opacity = 1;
     pieSeries.hiddenState.properties.endAngle = -90;
     pieSeries.hiddenState.properties.startAngle = -90;
     pieSeries.legendSettings.itemValueText = "[bold]{value}[/bold]";
     pieSeries.colors.list = [
-      am4core.color("#08e702"),      
+      am4core.color("#08e702"),
       am4core.color("#fd352c"),
       am4core.color("#9c27b0"),
       am4core.color("#021aee"),
@@ -358,7 +358,7 @@ UanloadCharts(success_count: any, fail_count: any){
     ];
 
   });
- 
+
 }
 
   loadChart(){
@@ -377,7 +377,7 @@ UanloadCharts(success_count: any, fail_count: any){
       marker.strokeWidth = 3;
       marker.strokeOpacity = 1;
       marker.stroke = am4core.color("#000");
-      
+
       chart.logo.disabled = true;
       chart.legend.position = "right";
       chart.padding(0, 0, 0, 0);
@@ -396,13 +396,13 @@ UanloadCharts(success_count: any, fail_count: any){
         //console.log(result);
         let data = [];
         for (let i = 0; i < this.PendingDetailsData.length; i++) {
-          let obj={};
-          obj=this.PendingDetailsData[i].statusName;
+          // let obj={};
+          // obj=this.PendingDetailsData[i].statusName;
           data.push({name: this.PendingDetailsData[i].statusName, value: this.PendingDetailsData[i].count});
         }
         chart.data = data;
       });
-      
+
       // Add and configure Series
       let pieSeries = chart.series.push(new am4charts.PieSeries());
       pieSeries.slices.template.tooltipText = "{category}: {value}";
@@ -430,7 +430,7 @@ UanloadCharts(success_count: any, fail_count: any){
       ];
 
     });
-   
+
 }
 loadCharts(){
   this.zone.runOutsideAngular(() => {
@@ -448,7 +448,7 @@ loadCharts(){
     marker.strokeWidth = 3;
     marker.strokeOpacity = 1;
     marker.stroke = am4core.color("#000");
-    
+
     chart.logo.disabled = true;
     chart.legend.position = "right";
     chart.padding(0, 0, 0, 0);
@@ -461,21 +461,21 @@ loadCharts(){
       'toDate': toDate,
       'organizationId': this.selectedCustId
     }
-   
+
     this.superadminDB.getActivityDetails(filterData).subscribe((uploadinfo: any)=>{
       this.selectedActivitiesData=uploadinfo.data.candidateStatusCountDto;
       let data = [];
       for (let i = 0; i < this.selectedActivitiesData.length; i++) {
-        let obj={};
-        obj=this.selectedActivitiesData[i].statusName;
+        // let obj={};
+        // obj=this.selectedActivitiesData[i].statusName;
         data.push({name: this.selectedActivitiesData[i].statusName, value: this.selectedActivitiesData[i].count});
       }
       chart.data = data;
     });
-    
+
     // Add and configure Series
     let pieSeries = chart.series.push(new am4charts.PieSeries());
-  
+
     pieSeries.slices.template.tooltipText = "{category}: {value}";
     pieSeries.labels.template.disabled = true;
     pieSeries.dataFields.value = "value";
@@ -501,7 +501,7 @@ loadCharts(){
     ];
 
   });
- 
+
 }
 ngOnDestroy() {
   this.zone.runOutsideAngular(() => {

@@ -47,30 +47,30 @@ export class ReportDeliveryDetailsComponent implements OnInit {
       }
       this.orgadmin.getChartDetails(filterData).subscribe((data: any)=>{
         this.CharReportDelivery=data.data.candidateDtoList.reverse();
-        
+
         for(let i=0; i<this.CharReportDelivery.length; i++) {
           // let index = _.findIndex(this.CharReportDelivery[i].contentDTOList, {contentSubCategory: 'PRE_APPROVAL'});
           // this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
 
           let final = this.CharReportDelivery[i].contentDTOList;
           let interim = this.CharReportDelivery[i].candidateStatusName;
-          
+
           for (let i=0; i<final.length; i++){
             if(final[i].contentSubCategory=="FINAL" && filterData.status == 'FINALREPORT'){
-              this.finalreport = true 
+              this.finalreport = true
             }
-          } 
+          }
 
           if(interim == 'Interim Report' && filterData.status == 'INTERIMREPORT') {
             this.interimreport = true;
           }
-         
+
         }
         console.log("After : ", this.CharReportDelivery)
         //console.log(data);
         const startIndex = this.currentPageIndex * this.pageSize;
         const endIndex = startIndex + this.pageSize;
-        return this.CharReportDelivery.slice(startIndex, endIndex); 
+        return this.CharReportDelivery.slice(startIndex, endIndex);
       });
 
     }
@@ -122,8 +122,8 @@ export class ReportDeliveryDetailsComponent implements OnInit {
         //console.log(this.CharReportDeliveryData);
         let data = [];
         for (let i = 0; i < this.CharReportDeliveryData.length; i++) {
-          let obj={};
-          obj=this.CharReportDeliveryData[i].statusName;
+          // let obj={};
+          // obj=this.CharReportDeliveryData[i].statusName;
           data.push({name: this.CharReportDeliveryData[i].statusName, value: this.CharReportDeliveryData[i].count, statcode: this.CharReportDeliveryData[i].statusCode });
         }
         chart.data = data;
@@ -187,7 +187,7 @@ ngOnDestroy() {
     }
   });
 }
- 
+
   ngOnInit(): void {
     const isCBadminVal = localStorage.getItem('roles');
     if(this.getReportDeliveryStatCodes){
@@ -239,7 +239,7 @@ ngOnDestroy() {
       this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
       console.log('Lavanyafinal',index)
       this.startpredownload=true
-     
+
     }
     if(this.startpredownload==true){
       if(candidate.pre_approval_content_id != -1) {
@@ -252,14 +252,14 @@ ngOnDestroy() {
     }
   }
 
-  downloadFinalReport(candidate: any, reportType: any) { 
+  downloadFinalReport(candidate: any, reportType: any) {
     if(reportType == 'FINAL') {
       for(let i=0; i<this.CharReportDelivery.length; i++) {
         let index = _.findIndex(this.CharReportDelivery[i].contentDTOList, {contentSubCategory: 'FINAL'});
         this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
         console.log('Lavanyafinal',index)
         this.startdownload=true
-       
+
       }
     } else if(reportType == 'INTERIM') {
       for(let i=0; i<this.CharReportDelivery.length; i++) {
@@ -267,7 +267,7 @@ ngOnDestroy() {
         this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
         console.log('interim',index)
         this.startdownload=true
-       
+
       }
     }
 
@@ -280,13 +280,13 @@ ngOnDestroy() {
         });
       }
     }
-  } 
+  }
 
-  downloadInterimReport(candidate: any) { 
-    // let interimContentDto = candidate.contentDTOList.find((dto: any) => dto.path.includes('INTERIM.pdf')); 
-    
+  downloadInterimReport(candidate: any) {
+    // let interimContentDto = candidate.contentDTOList.find((dto: any) => dto.path.includes('INTERIM.pdf'));
+
     if(candidate.candidateCode) {
-      this.orgadmin.getPreSignedUrlByCandidateCode(candidate.candidateCode).subscribe((url: any)=>{ 
+      this.orgadmin.getPreSignedUrlByCandidateCode(candidate.candidateCode).subscribe((url: any)=>{
         window.open(url.data, '_blank');
       });
     }
@@ -322,7 +322,7 @@ ngOnDestroy() {
       const emailId = item.emailId.toLowerCase();
       const contactNumber = item.contactNumber.toLowerCase();
       const applicantId = item.applicantId.toLowerCase();
-  
+
       return candidateName.includes(searchText.toLowerCase()) ||
              emailId.includes(searchText.toLowerCase()) ||
              contactNumber.includes(searchText.toLowerCase()) ||
