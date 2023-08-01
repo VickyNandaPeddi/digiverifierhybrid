@@ -36,7 +36,7 @@ export class PendingDetailsComponent implements OnInit {
     candidateReferenceNo: new FormControl('', Validators.required),
     statuscode: new FormControl('', Validators.required)
   });
-
+  
   updateCandidate = new FormGroup({
     applicantId: new FormControl(''),
     candidateName: new FormControl('', Validators.required),
@@ -45,14 +45,14 @@ export class PendingDetailsComponent implements OnInit {
     contactNumber:  new FormControl('', [Validators.minLength(10), Validators.maxLength(10), Validators.pattern('[6-9]\\d{9}')]),
     emailId: new FormControl('', [Validators.required,Validators.email])
   });
-
+  
   patchUserValues() {
     this.formSendInvitation.patchValue({
       candidateReferenceNo: this.tmp,
       statuscode: "INVITATIONSENT",
     });
   }
-
+  
   reInvitePatchValues() {
     this.formSendInvitation.patchValue({
       candidateReferenceNo: this.tmp,
@@ -61,7 +61,7 @@ export class PendingDetailsComponent implements OnInit {
   }
   constructor(private zone: NgZone, private adminDashboard:OrgadminDashboardService,
     private router: Router, private modalService: NgbModal, public authService: AuthenticationService,
-    private orgadminservice: OrgadminService) {
+    private orgadminservice: OrgadminService) { 
       this.getPendingDetailsStatCode = this.adminDashboard.getPendingDetailsStatCode();
       if(this.getPendingDetailsStatCode){
         var userId:any = localStorage.getItem('userId');
@@ -82,7 +82,7 @@ export class PendingDetailsComponent implements OnInit {
           const endIndex = startIndex + this.pageSize;
           return this.CharPendingDetails.slice(startIndex, endIndex);
         });
-
+        
       }
     }
 
@@ -155,13 +155,13 @@ ngAfterViewInit() {
         //console.log(this.ChartPendingDetails);
         let data = [];
         for (let i = 0; i < this.ChartPendingDetails.length; i++) {
-          // let obj={};
-          // obj=this.ChartPendingDetails[i].statusName;
+          let obj={};
+          obj=this.ChartPendingDetails[i].statusName;
           data.push({name: this.ChartPendingDetails[i].statusName, value: this.ChartPendingDetails[i].count, statcode: this.ChartPendingDetails[i].statusCode });
         }
         chart.data = data;
       });
-
+      
 // Add and configure Series
 let pieSeries = chart.series.push(new am4charts.PieSeries());
 
@@ -209,7 +209,7 @@ chart.legend.itemContainers.template.events.on("hit", (ev) => {
 });
 pieSeries.slices.template.cursorOverStyle = am4core.MouseCursorStyle.pointer;
     });
-
+   
 }
 
 ngOnDestroy() {
@@ -300,17 +300,17 @@ selectAll(e:any){
     var  cboxRolesinput = $('.childCheck');
     var arrNumber:any = [];
     $.each(cboxRolesinput,function(idx,elem){
-      // var inputValues:any  = $(elem).val();
+      var inputValues:any  = $(elem).val();
       //console.log(inputValues);
       arrNumber.push($(this).val());
     });
-
+    
     this.tmp = arrNumber;
     //console.log(this.tmp);
   } else {
     $(".childCheck").prop('checked', false);
   }
-
+  
 }
 //*****************UPDATE CANDIDATE*****************//
 openModal(modalData:any, userId:any){

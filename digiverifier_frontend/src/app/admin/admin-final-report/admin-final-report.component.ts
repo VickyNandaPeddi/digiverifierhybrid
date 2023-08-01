@@ -90,9 +90,9 @@ export class AdminFinalReportComponent implements OnInit {
   docname8:any;
   docname9:any;
   comment:any;
-
-
-  constructor( private candidateService: CandidateService, private router: ActivatedRoute, private modalService: NgbModal,private sanitizer:DomSanitizer) {
+ 
+  
+  constructor( private candidateService: CandidateService, private router: ActivatedRoute, private modalService: NgbModal,private sanitizer:DomSanitizer) { 
     this.candidateCode = this.router.snapshot.paramMap.get('candidateCode');
     this.candidateService.getCandidateFormData_admin(this.candidateCode).subscribe((data: any)=>{
       this.cApplicationFormDetails=data.data;
@@ -143,7 +143,7 @@ export class AdminFinalReportComponent implements OnInit {
       this.digiDoc=this.cApplicationFormDetails.document;
       this.vendorproof=this.cApplicationFormDetails.vendorProofDetails;
       // console.log(this.vendorproof.length,"2345678990")
-
+     
       if(this.vendorproof){
         this.isVendor=true
         $("#doc0").attr("src", 'data:application/pdf;base64,'+this.vendorproof[0].document);
@@ -169,7 +169,7 @@ export class AdminFinalReportComponent implements OnInit {
           this.docname4=this.vendorproof[4].documentname
             $("#doc4").attr("src", 'data:application/pdf;base64,'+this.vendorproof[4].document);
         }
-        if(this.vendorproof[5]){
+        if(this.vendorproof[5]){ 
           this.isDOC5=true
           this.docname5=this.vendorproof[5].documentname
             $("#doc5").attr("src", 'data:application/pdf;base64,'+this.vendorproof[5].document);
@@ -194,17 +194,17 @@ export class AdminFinalReportComponent implements OnInit {
           this.docname9=this.vendorproof[9].documentname
            $("#doc9").attr("src", 'data:application/pdf;base64,'+this.vendorproof[9].document);
         }
-        console.log($( $("#doc3").attr("src", 'data:application/pdf;base64,')))
+        console.log($( $("#doc3").attr("src", 'data:application/pdf;base64,'))) 
       }
-
-
-
-
-
-
-
+     
+    
+      
+      
+     
+      
+     
       for (let index = 0; index < this.digiDoc.length; index++) {
-
+       
         if(this.digiDoc[index].contentSubCategory=="PAN"){
           this.isPAN=true;
           console.log(this.digiDoc[index].contentSubCategory);
@@ -225,19 +225,19 @@ export class AdminFinalReportComponent implements OnInit {
           console.log(this.digiDoc[index].contentSubCategory);
           $("#degreeDoc").attr("src", 'data:application/pdf;base64,'+this.digiDoc[index].document);
         }
-
+        
       }
-
+      
       // if(this.digiDoc){
       //   $("#digiDoc").attr("src", 'data:application/pdf;base64,'+this.cApplicationFormDetails.document);
-
+        
       // }
 
       const reportStat =this.cApplicationFormDetails.candidateStatus.statusMaster.statusCode;
       if(reportStat == "FINALREPORT" || reportStat == "INTERIMREPORT"){
-        this.reportStat = true;
+        this.reportStat = true; 
       }else {
-        this.reportStat = false;
+        this.reportStat = false; 
       }
       if(this.executiveSummary){
         var colorArray=[];
@@ -251,14 +251,14 @@ export class AdminFinalReportComponent implements OnInit {
         }else{
           this.executiveSummary_stat = 'Green';
         }
-
+        
       }
       if(this.candidateEXPData){
         var colorArray=[];
         for (let index = 0; index < this.candidateEXPData.length; index++) {
           colorArray.push(this.candidateEXPData[index].colorColorName);
           this.uanNumber=this.candidateEXPData[index].uan;
-
+         
         }
         if(colorArray.includes('Red')){
           this.candidateEXPData_stat = 'Red';
@@ -267,14 +267,14 @@ export class AdminFinalReportComponent implements OnInit {
         }else{
           this.candidateEXPData_stat = 'Green';
         }
-
+        
       }
 
       if(this.candidateAddressData){
         var colorArray=[];
         for (let index = 0; index < this.candidateAddressData.length; index++) {
           colorArray.push(this.candidateAddressData[index].colorColorName);
-
+          
         }
         if(colorArray.includes('Red')){
           this.candidateAddressData_stat = 'Red';
@@ -291,8 +291,8 @@ export class AdminFinalReportComponent implements OnInit {
           if(this.candidateEduData[index].colorColorName!=""){
             colorArray.push(this.candidateEduData[index].colorColorName);
           }
-
-
+          
+          
         }
         if(colorArray.includes('Red')){
           this.candidateEduData_stat = 'Red';
@@ -301,7 +301,7 @@ export class AdminFinalReportComponent implements OnInit {
         }else{
           this.candidateEduData_stat = 'Green';
         }
-
+        
       }
 
       if(this.candidateIdItems){
@@ -312,8 +312,8 @@ export class AdminFinalReportComponent implements OnInit {
               console.log("inside aadhar if");
               this.isAAHAR=true;
           }
-
-
+          
+          
         }
         if(colorArray.includes('Red')){
           this.candidateIdItems_stat = 'Red';
@@ -322,14 +322,14 @@ export class AdminFinalReportComponent implements OnInit {
         }else{
           this.candidateIdItems_stat = 'Green';
         }
-
+        
       }
 
       if(this.employmentDetails){
         var colorArray=[];
         for (let index = 0; index < this.employmentDetails.length; index++) {
           colorArray.push(this.employmentDetails[index].result);
-
+          
         }
         if(colorArray.includes('Red')){
           this.employmentDetails_stat = 'Red';
@@ -353,9 +353,9 @@ export class AdminFinalReportComponent implements OnInit {
       }else{
         this.epfoSkipped =false
       }
-
+      
     });
-
+    
 
     this.candidateService.getServiceConfigCodes(this.candidateCode).subscribe((result:any)=>{
       this.getServiceConfigCodes = result.data;
@@ -368,17 +368,17 @@ export class AdminFinalReportComponent implements OnInit {
       // }
     });
   }
-
+ 
 
   ngOnInit(): void {
-
+    
   }
 
 // logo(){
-
+    
 //     // return this.sanitizer.bypassSecurityTrustResourceUrl(this.organizationLogo);
 
-//     // this.imagePath = this._sanitizer.bypassSecurityTrustResourceUrl('data:image/jpg;base64,'
+//     // this.imagePath = this._sanitizer.bypassSecurityTrustResourceUrl('data:image/jpg;base64,' 
 //     // + toReturnImage.base64string);
 
 //     return this.sanitizer.bypassSecurityTrustResourceUrl('data:image/png;base64,' + this.organizationLogo);
@@ -386,7 +386,7 @@ export class AdminFinalReportComponent implements OnInit {
 // }
 
 logo(){
-  return this.sanitizer.bypassSecurityTrustResourceUrl('data:image/jpg;base64,'+this.organizationLogo);
+  return this.sanitizer.bypassSecurityTrustResourceUrl('data:image/jpg;base64,'+this.organizationLogo);      
 }
 
   printDiv(){
@@ -396,9 +396,9 @@ logo(){
   htmltoPDF(){
     console.log(this.cApplicationFormDetails,"download");
     this.candidateService.getfinal(this.cApplicationFormDetails).subscribe((data:any)=>{
-
+      
       this.result=data.key;
-
+      
       if(this.result!=null){
         // console.log(this.result,"result")
         const linkSource = 'data:application/pdf;base64,'+this.result;
@@ -406,16 +406,16 @@ logo(){
         downloadLink.href = linkSource;
         downloadLink.download = this.candidateName+".pdf"
         downloadLink.click();
-
-
+  
+     
       }
-
+      
      })
-
+    
   }
+  
 
-
-
+  
 
   //Document View
   openCertificate(modalCertificate:any, certificate:any){
@@ -444,17 +444,17 @@ calculateTotalGapsAndTenure(){
   var tenures = $(".outputTenures");
   var gaps = $(".gaps");
   var gap=0;
-  // debugger;
+  debugger;
   $.each(tenures,function(idx,elem){
 
   });
   $.each(gaps,function(idx,elem){
-    // if($(elem).val()!="Not-Available"){
-    //   let value:any = $(elem).val();
-    //   console.log("value"+value);
-    //   gap = gap + parseInt(value.toString());
-    //   console.log("gaps"+gap);
-    // }
+    if($(elem).val()!="Not-Available"){
+      let value:any = $(elem).val();
+      console.log("value"+value);
+      gap = gap + parseInt(value.toString());
+      console.log("gaps"+gap);
+    }
   });
 
   console.log("tgaps"+gap);

@@ -310,11 +310,11 @@ public interface CandidateStatusRepository extends JpaRepository<CandidateStatus
 			+ "        LEFT JOIN\r\n"
 			+ "    t_dgv_organization_master o ON o.organization_id = u.orgainzation_id\r\n"
 			+ "WHERE\r\n"
-			+ "	CB.created_by in (?1) and SM.status_code in (?2)", nativeQuery = true)
-//	List<CandidateStatusDto> findAllByCreatedByUserIdInAndStatusMasterStatusCodeIn(List<Long> agentIds,
-//			List<String> statusList, Date fromDate, Date toDate);
+			+ "	CB.created_by in (?1) and SM.status_code in (?2) AND CS.created_on BETWEEN ?3 AND ?4", nativeQuery = true)
 	List<CandidateStatusDto> findAllByCreatedByUserIdInAndStatusMasterStatusCodeIn(List<Long> agentIds,
-			List<String> statusList);
+			List<String> statusList, Date fromDate, Date toDate);
+//	List<CandidateStatusDto> findAllByCreatedByUserIdInAndStatusMasterStatusCodeIn(List<Long> agentIds,
+//			List<String> statusList);
 
 	@Query(value = "SELECT \r\n"
 			+ "    CB.candidate_code AS candidateCode,\r\n"
@@ -406,10 +406,11 @@ public interface CandidateStatusRepository extends JpaRepository<CandidateStatus
 			+ "        LEFT JOIN\r\n"
 			+ "    t_dgv_organization_master o ON o.organization_id = u.orgainzation_id\r\n"
 			+ "WHERE\r\n"
-			+ "o.organization_id in (?1) and SM.status_code in (?2)", nativeQuery = true)
-//	List<CandidateStatusDto> findAllByCandidateOrganizationOrganizationIdInAndStatusMasterStatusCodeIn(
-//			List<Long> organizationIds, List<String> statusList, Date fromDate, Date toDate);
+			+ "o.organization_id in (?1) and SM.status_code in (?2) AND CS.created_on BETWEEN ?3 AND ?4", nativeQuery = true)
 	List<CandidateStatusDto> findAllByCandidateOrganizationOrganizationIdInAndStatusMasterStatusCodeIn(
-			List<Long> organizationIds, List<String> statusList);
+			List<Long> organizationIds, List<String> statusList, Date fromDate, Date toDate);
+//	List<CandidateStatusDto> findAllByCandidateOrganizationOrganizationIdInAndStatusMasterStatusCodeIn(
+//			List<Long> organizationIds, List<String> statusList);
 
 }
+ 

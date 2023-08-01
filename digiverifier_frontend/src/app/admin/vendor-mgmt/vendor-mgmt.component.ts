@@ -33,7 +33,7 @@ export class VendorMgmtComponent implements OnInit {
         this.customers.getVendorList(localStorage.getItem('orgID')).subscribe((data: any)=>{
           this.getVendorID=data.data;
           console.log(this.getVendorID,"-------------vendoy----------------");
-          if(this.userID){
+          if(this.userID){ 
             for (var index in this.getVendorID){
                 console.log(this.getVendorID[index]["userId"],"indexxxxxxxxxxxxxxxxxxxx");
                 if(this.userID==this.getVendorID[index]["userId"]){
@@ -49,12 +49,12 @@ export class VendorMgmtComponent implements OnInit {
           // }
         });
         console.log(this.vendorlist.value,"-------------vend----------------");
-
+       
       }
       let rportData = {
         'userId': localStorage.getItem('userId')
       }
-
+      
       this.customers.getSources().subscribe((data: any)=>{
         this.getbgv=data.data;
         this.getbgv.forEach((element:any) => {
@@ -72,16 +72,16 @@ export class VendorMgmtComponent implements OnInit {
         console.log(this.getBillValues,"--------------------")
         if(this.getBillValues){
           this.getBillValues.forEach((element:any) => {
-            // $(".billrpp"+element.source.sourceId).val(element.ratePerItem);
-            // $(".billrpi"+element.source.sourceId).val(element.tatPerItem);
-            // $(".billServiceId"+element.source.sourceId).val(element.userId);
-
+            $(".billrpp"+element.source.sourceId).val(element.ratePerItem);
+            $(".billrpi"+element.source.sourceId).val(element.tatPerItem);
+            $(".billServiceId"+element.source.sourceId).val(element.userId);
+            
           });
         }
-
+  
       });
     }
-
+  
       // });
       // this.customers.getCustomersData(3).subscribe((data: any)=>{
       //   console.log(data.data);
@@ -90,28 +90,28 @@ export class VendorMgmtComponent implements OnInit {
       //     this.VendorData_stat = true;
       //   }
       // });
-
+      
     }
     getvendorid(id:any){
       this.getvendorid = id;
       let agentIdsArray: any=[];
       agentIdsArray.push(id);
       this.getvendorid = agentIdsArray;
-
+      
     }
     onKeyUp(){
      this.VendorData_stat = false;
     }
     ngOnInit(): void {
-
+       
     }
     billsubmit(){
       var billValue = $(".x-billcomponents");
       var i=0;
       $.each(billValue,function(idx,elem){
-        // if($(elem).val()!=""){
-        //   i++;
-        // }
+        if($(elem).val()!=""){
+          i++;
+        }
       })
       if(i>0){
         this.onSubmit()
@@ -148,10 +148,10 @@ export class VendorMgmtComponent implements OnInit {
       billUpdate() {
         console.log("______________inside button ------------------")
         this.getBillValues.forEach((element:any) => {
-          // element.ratePerItem = $(".billrpp"+element.source.sourceId).val();
-          // element.tatPerItem = $(".billrpi"+element.source.sourceId).val();
-          // element.serviceId = $(".billServiceId"+element.source.userId).val();
-
+          element.ratePerItem = $(".billrpp"+element.source.sourceId).val();
+          element.tatPerItem = $(".billrpi"+element.source.sourceId).val();
+          element.serviceId = $(".billServiceId"+element.source.userId).val();
+  
         });
         return this.customers.saveVendorChecks(this.getBillValues,this.userID ).subscribe((result:any)=>{
           console.log(result,'--------------------return---------------');
@@ -173,6 +173,7 @@ export class VendorMgmtComponent implements OnInit {
           }
         });
       }
-
+  
   }
-
+  
+  

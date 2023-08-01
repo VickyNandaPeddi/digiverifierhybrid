@@ -15,7 +15,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -79,6 +81,7 @@ import com.aashdit.digiverifier.config.candidate.dto.CandidateReportDTO;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateStatusDto;
 import com.aashdit.digiverifier.config.candidate.dto.EPFODataDto;
 import com.aashdit.digiverifier.config.candidate.dto.EducationVerificationDTO;
+import com.aashdit.digiverifier.config.candidate.dto.EmploymentDetailsDto;
 import com.aashdit.digiverifier.config.candidate.dto.EmploymentTenureVerificationDto;
 import com.aashdit.digiverifier.config.candidate.dto.EmploymentVerificationDto;
 import com.aashdit.digiverifier.config.candidate.dto.EpfoDataResDTO;
@@ -835,10 +838,10 @@ public class ReportServiceImpl implements ReportService {
 				Collections.addAll(statusList, "PENDINGAPPROVAL", "FINALREPORT", "INTERIMREPORT");
 				if (reportSearchDto.getAgentIds() != null && !reportSearchDto.getAgentIds().isEmpty()
 						&& reportSearchDto.getAgentIds().get(0) != 0) {
-//					candidateList = candidateStatusRepository.findAllByCreatedByUserIdInAndStatusMasterStatusCodeIn(
-//							reportSearchDto.getAgentIds(), statusList, startDate, endDate);
 					candidateList = candidateStatusRepository.findAllByCreatedByUserIdInAndStatusMasterStatusCodeIn(
-							reportSearchDto.getAgentIds(), statusList);
+							reportSearchDto.getAgentIds(), statusList, startDate, endDate);
+//					candidateList = candidateStatusRepository.findAllByCreatedByUserIdInAndStatusMasterStatusCodeIn(
+//							reportSearchDto.getAgentIds(), statusList);
 				} else {
 					if (user.getRole().getRoleCode().equals("ROLE_CBADMIN")
 							|| user.getRole().getRoleCode().equals("ROLE_ADMIN")
@@ -857,12 +860,12 @@ public class ReportServiceImpl implements ReportService {
 						} else {
 							orgIds.add(0, user.getOrganization().getOrganizationId());
 						}
-//						candidateList = candidateStatusRepository
-//								.findAllByCandidateOrganizationOrganizationIdInAndStatusMasterStatusCodeIn(orgIds,
-//										statusList, startDate, endDate);
 						candidateList = candidateStatusRepository
 								.findAllByCandidateOrganizationOrganizationIdInAndStatusMasterStatusCodeIn(orgIds,
-										statusList);
+										statusList, startDate, endDate);
+//						candidateList = candidateStatusRepository
+//								.findAllByCandidateOrganizationOrganizationIdInAndStatusMasterStatusCodeIn(orgIds,
+//										statusList);
 					}
 					if (user.getRole().getRoleCode().equals("ROLE_AGENTSUPERVISOR")
 							|| user.getRole().getRoleCode().equals("ROLE_AGENTHR")) {
@@ -871,10 +874,10 @@ public class ReportServiceImpl implements ReportService {
 							agentIds = agentList.parallelStream().map(x -> x.getUserId()).collect(Collectors.toList());
 						}
 						agentIds.add(user.getUserId());
+						candidateList = candidateStatusRepository.findAllByCreatedByUserIdInAndStatusMasterStatusCodeIn(
+								agentIds, statusList, startDate, endDate);
 //						candidateList = candidateStatusRepository
-//								.findAllByCreatedByUserIdInAndStatusMasterStatusCodeIn(agentIds, statusList, startDate, endDate);
-						candidateList = candidateStatusRepository
-								.findAllByCreatedByUserIdInAndStatusMasterStatusCodeIn(agentIds, statusList);
+//								.findAllByCreatedByUserIdInAndStatusMasterStatusCodeIn(agentIds, statusList);
 					}
 				}
 				if (candidateList != null && !candidateList.isEmpty()) {
@@ -1335,9 +1338,17 @@ public class ReportServiceImpl implements ReportService {
 								String str = "NOT_AVAILABLE";
 								CandidateCafExperienceDto candidateCafExperienceDto = this.modelMapper
 										.map(candidateCafExperience, CandidateCafExperienceDto.class);
+//								candidateCafExperienceDto.setInputDateOfJoining(
+//										dateWith1Days != null ? sdf.format(dateWith1Days) : null);
+//								candidateCafExperienceDto.setInputDateOfExit(doee != null ? sdf.format(doee) : str);
+
 								candidateCafExperienceDto.setInputDateOfJoining(
-										dateWith1Days != null ? sdf.format(dateWith1Days) : null);
-								candidateCafExperienceDto.setInputDateOfExit(doee != null ? sdf.format(doee) : str);
+										dateWith1Days != null ? new SimpleDateFormat("dd-MM-yyyy").format(dateWith1Days)
+												: null);
+
+								candidateCafExperienceDto.setInputDateOfExit(
+										doee != null ? new SimpleDateFormat("dd-MM-yyyy").format(doee) : str);
+
 								candidateCafExperienceDto
 										.setCandidateEmployerName(candidateCafExperience.getCandidateEmployerName());
 								candidateCafExperienceDto
@@ -1376,13 +1387,14 @@ public class ReportServiceImpl implements ReportService {
 
 							List<EmploymentTenureVerificationDto> employmentTenureDtoList = validateAndCompareExperienceTenure(
 									employmentVerificationDtoList, candidateExperienceFromItrEpfo,
-									toleranceConfigByOrgId.getData());
+									toleranceConfigByOrgId.getData(), candidateCafExperienceList);
 
 							int totalYears = 0;
 							int totalMonths = 0;
 
 							for (EmploymentTenureVerificationDto data : employmentTenureDtoList) {
-								String[] parts = data.getOutput().split(" ");
+//								String[] parts = data.getOutput().split(" ");
+								String[] parts = data.getInput().split(" ");
 								int years = Integer.parseInt(parts[0]);
 								int months = Integer.parseInt(parts[2]);
 
@@ -1428,7 +1440,8 @@ public class ReportServiceImpl implements ReportService {
 							for (EmploymentTenureVerificationDto s : employmentTenureDtoList) {
 								if (s.getVerificationStatus().equals(VerificationStatus.RED)) {
 									redArray_emp.add("count");
-								} else if (s.getVerificationStatus().equals(VerificationStatus.AMBER) || s.getVerificationStatus().equals(VerificationStatus.MOONLIGHTING)) {
+								} else if (s.getVerificationStatus().equals(VerificationStatus.AMBER)
+										|| s.getVerificationStatus().equals(VerificationStatus.MOONLIGHTING)) {
 									amberArray_emp.add("count");
 								} else {
 									greenArray_emp.add("count");
@@ -1471,45 +1484,6 @@ public class ReportServiceImpl implements ReportService {
 										}
 									}
 
-//									for(int i=0;i<epfoDatas.size()-1;i++) {
-//										if(epfoDatas.get(i).getDoj() != null && epfoDatas.get(i+1).getDoj() != null) {
-//											DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"); 
-//
-//											DateTime start1 = formatter.parseDateTime(epfoDatas.get(i).getDoj() + " 00:00:00");
-//											DateTime end1 = null;
-//											if(epfoDatas.get(i).getDoe().equalsIgnoreCase("NOT_AVAILABLE")) {
-//												end1 = DateTime.now();
-//											}else {
-//												end1 = formatter.parseDateTime(epfoDatas.get(i).getDoe() + " 00:00:00");
-//											}
-//
-//											DateTime start2 = formatter.parseDateTime(epfoDatas.get(i+1).getDoj() + " 00:00:00");
-//											DateTime end2 = null;
-//											if(epfoDatas.get(i+1).getDoe().equalsIgnoreCase("NOT_AVAILABLE")) {
-//												end2 = DateTime.now();
-//											}else {
-//												end2 = formatter.parseDateTime(epfoDatas.get(i+1).getDoe() + " 00:00:00");
-//											}
-//
-//											Interval interval = new Interval( start1, end1 );
-//											Interval interval2 = new Interval( start2, end2 );
-//											
-//											log.info("result {}", interval.overlaps( interval2 ));
-//											if(interval.overlaps( interval2 )) { 
-//												for(EmploymentTenureVerificationDto employementDetails  :candidateReportDTO.getEmploymentTenureVerificationDtoList()) {
-//													if(employementDetails.getEmployerName().equalsIgnoreCase(epfoDatas.get(i).getCompany())) {
-////														employementDetails.setEmployerName(employementDetails.getEmployerName()+" (moonlighting)");
-//														employementDetails.setVerificationStatus(VerificationStatus.MOONLIGHTING);
-//													}
-//													if(employementDetails.getEmployerName().equalsIgnoreCase(epfoDatas.get(i+1).getCompany())) {
-////														employementDetails.setEmployerName(employementDetails.getEmployerName()+" (moonlighting)");
-//														employementDetails.setVerificationStatus(VerificationStatus.MOONLIGHTING);
-//													}
-//												} 
-//											}
-//										}
-//									}
-
 									epfoDataDto.setCandidateName(epfoDatas.stream().map(EpfoDataResDTO::getName)
 											.filter(StringUtils::isNotEmpty).findFirst().orElse(null));
 									epfoDataDto.setUANno(canditateItrEpfoResponseOptional.get().getUan());
@@ -1526,6 +1500,93 @@ public class ReportServiceImpl implements ReportService {
 										cafExperience.setServiceName("EPFO");
 										cafExperiences.add(cafExperience);
 									});
+
+//									int i = 0;
+//									for (EpfoDataResDTO experience : epfoDatas) {
+//										String inputTenure = "";
+//										String outputTenure = "";
+//										Date idoj = new Date(experience.getDoj());
+//										Date idoe = new Date();
+//										if (experience.getDoe() != null
+//												&& !experience.getDoe().equalsIgnoreCase("NOT_AVAILABLE")) {
+//											idoe = new Date(experience.getDoe());
+//										}
+//
+//										String gap = "0y 0m";
+//
+//										if (idoj == null) {
+//											inputTenure = 0 + "y " + 0 + "m";
+//										} else {
+//											LocalDate inputdoj = idoj.toInstant().atZone(ZoneId.systemDefault())
+//													.toLocalDate();
+//											LocalDate inputdoe = idoe == null ? LocalDate.now()
+//													: idoe.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+//											Period inputdiff = Period.between(inputdoj, inputdoe);
+//
+//											int years = inputdiff.getYears();
+//											int months = inputdiff.getMonths();
+//
+//											if (inputdiff.getDays() > 0) {
+//												months += 1;
+//											}
+//											inputTenure = years + "y " + months + "m";
+//										}
+//
+//										Date odoj = new Date(experience.getDoj());
+//										Date odoe = new Date();
+//										if (experience.getDoe() != null
+//												&& !experience.getDoe().equalsIgnoreCase("NOT_AVAILABLE"))
+//											odoe = new Date(experience.getDoe());
+//
+//										if (odoj == null) {
+//											outputTenure = 0 + "y " + 0 + "m";
+//										} else {
+//											LocalDate outputdoj = odoj.toInstant().atZone(ZoneId.systemDefault())
+//													.toLocalDate();
+//											LocalDate outputdoe = odoe == null ? LocalDate.now()
+//													: odoe.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+//											Period outputdiff = Period.between(outputdoj, outputdoe);
+//											int oyears = outputdiff.getYears();
+//											int omonths = outputdiff.getMonths();
+//											if (outputdiff.getDays() > 0) {
+//												omonths += 1;
+//											}
+//											outputTenure = oyears + "y " + omonths + "m";
+//
+//											if (i < epfoDatas.size()) {
+//												EpfoDataResDTO experience1 = epfoDatas.get(i);
+//												if (i + 1 < epfoDatas.size() && experience1.getDoj() != null) {
+//													EpfoDataResDTO experience2 = epfoDatas.get(i + 1);
+//													LocalDate experience1Inputdoj = new Date(experience1.getDoj())
+//															.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+//													LocalDate experience2Outputdoe = new Date(
+//															experience2.getDoe()) == null
+//																	? LocalDate.now()
+//																	: new Date(experience2.getDoe()).toInstant()
+//																			.atZone(ZoneId.systemDefault())
+//																			.toLocalDate();
+//													Period gapPeriod = Period.between(experience2Outputdoe,
+//															experience1Inputdoj);
+//													int gapYears = gapPeriod.getYears();
+//													int gapMonths = gapPeriod.getMonths();
+//													if (gapPeriod.getDays() > 0) {
+//														gapMonths += 1;
+//													}
+//													gap = gapYears + "y " + gapMonths + "m";
+//												}
+//												i++;
+//											}
+//										}
+//
+//										for (EmploymentTenureVerificationDto employementDetails : candidateReportDTO
+//												.getEmploymentTenureVerificationDtoList()) {
+//											if (employementDetails.getEmployerName()
+//													.equalsIgnoreCase(experience.getCompany())) {
+//												employementDetails.setInput(inputTenure);
+//											}
+//										}
+//
+//									}
 
 								} catch (JsonProcessingException e) {
 									e.printStackTrace();
@@ -1742,7 +1803,7 @@ public class ReportServiceImpl implements ReportService {
 				// System.out.println("candidate Report dto : " +candidateReportDTO);
 				File report = FileUtil.createUniqueTempFile("report", ".pdf");
 				String htmlStr = null;
-				if (reportType.toString().equalsIgnoreCase( "FINAL") && candidateReportDTO.getProject().contains("Wipro")) {
+				if (reportType.toString() == "FINAL" && candidateReportDTO.getProject().contains("Wipro")) {
 					htmlStr = pdfService.parseThymeleafTemplate("wipro-final", candidateReportDTO);
 				} else
 					htmlStr = pdfService.parseThymeleafTemplate("common-pdf", candidateReportDTO);
@@ -1820,7 +1881,7 @@ public class ReportServiceImpl implements ReportService {
 						}
 					}
 
-					if (reportType.toString().equalsIgnoreCase( "FINAL") && candidateReportDTO.getProject().contains("Wipro")) {
+					if (reportType.toString() == "FINAL" && candidateReportDTO.getProject().contains("Wipro")) {
 						List<InputStream> onlyReport = new ArrayList<>();
 						onlyReport.add(FileUtil.convertToInputStream(report));
 
@@ -1837,11 +1898,11 @@ public class ReportServiceImpl implements ReportService {
 					content.setContentCategory(ContentCategory.OTHERS);
 					content.setContentSubCategory(ContentSubCategory.PRE_APPROVAL);
 					// System.out.println(content+"*******************************************content");
-					if (reportType.name().equalsIgnoreCase("PRE_OFFER")) {
+					if (reportType.name() == "PRE_OFFER") {
 						content.setContentSubCategory(ContentSubCategory.PRE_APPROVAL);
-					} else if (reportType.name().equalsIgnoreCase("INTERIM")) {
+					} else if (reportType.name() == "INTERIM") {
 						content.setContentSubCategory(ContentSubCategory.INTERIM);
-					} else if (reportType.name().equalsIgnoreCase("FINAL")) {
+					} else if (reportType.name() == "FINAL") {
 						content.setContentSubCategory(ContentSubCategory.FINAL);
 					}
 					content.setFileType(FileType.PDF);
@@ -2226,9 +2287,16 @@ public class ReportServiceImpl implements ReportService {
 								String str = "NOT_AVAILABLE";
 								CandidateCafExperienceDto candidateCafExperienceDto = this.modelMapper
 										.map(candidateCafExperience, CandidateCafExperienceDto.class);
+//								candidateCafExperienceDto.setInputDateOfJoining(
+//										dateWith1Days != null ? sdf.format(dateWith1Days) : null);
+//								candidateCafExperienceDto.setInputDateOfExit(doee != null ? sdf.format(doee) : str);
+
 								candidateCafExperienceDto.setInputDateOfJoining(
-										dateWith1Days != null ? sdf.format(dateWith1Days) : null);
-								candidateCafExperienceDto.setInputDateOfExit(doee != null ? sdf.format(doee) : str);
+										dateWith1Days != null ? new SimpleDateFormat("dd-MM-yyyy").format(dateWith1Days)
+												: null);
+								candidateCafExperienceDto.setInputDateOfExit(
+										doee != null ? new SimpleDateFormat("dd-MM-yyyy").format(doee) : str);
+
 								candidateCafExperienceDto
 										.setCandidateEmployerName(candidateCafExperience.getCandidateEmployerName());
 								candidateCafExperienceDto
@@ -2267,7 +2335,7 @@ public class ReportServiceImpl implements ReportService {
 
 							List<EmploymentTenureVerificationDto> employmentTenureDtoList = validateAndCompareExperienceTenure(
 									employmentVerificationDtoList, candidateExperienceFromItrEpfo,
-									toleranceConfigByOrgId.getData());
+									toleranceConfigByOrgId.getData(), candidateCafExperienceList);
 							employmentTenureDtoList
 									.sort(Comparator.comparing(EmploymentTenureVerificationDto::getDoj).reversed());
 							candidateReportDTO.setEmploymentTenureVerificationDtoList(employmentTenureDtoList);
@@ -2495,9 +2563,9 @@ public class ReportServiceImpl implements ReportService {
 					content.setContentCategory(ContentCategory.OTHERS);
 					content.setContentSubCategory(ContentSubCategory.PRE_APPROVAL);
 					// System.out.println(content+"*******************************************content");
-					if (reportType.name().equalsIgnoreCase( "PRE_OFFER")) {
+					if (reportType.name() == "PRE_OFFER") {
 						content.setContentSubCategory(ContentSubCategory.PRE_APPROVAL);
-					} else if (reportType.name().equalsIgnoreCase( "FINAL")) {
+					} else if (reportType.name() == "FINAL") {
 						content.setContentSubCategory(ContentSubCategory.FINAL);
 					}
 					content.setFileType(FileType.PDF);
@@ -2596,19 +2664,32 @@ public class ReportServiceImpl implements ReportService {
 
 	private List<EmploymentTenureVerificationDto> validateAndCompareExperienceTenure(
 			List<EmploymentVerificationDto> candidateCafExperienceList,
-			List<CandidateCafExperience> candidateExperienceFromItrEpfo, ToleranceConfig toleranceConfig) {
+			List<CandidateCafExperience> candidateExperienceFromItrEpfo, ToleranceConfig toleranceConfig,
+			List<CandidateCafExperience> candidateCafExperienceMainList) {
 
 		return candidateCafExperienceList.stream().map(employmentVerificationDto -> {
 			EmploymentTenureVerificationDto employmentTenureVerificationDto = new EmploymentTenureVerificationDto();
-			long inputDifference1 = DateUtil.differenceInMonths(employmentVerificationDto.getDoj(),
-					employmentVerificationDto.getDoe());
+
+			List<CandidateCafExperience> tempcandidateCafExperience = candidateCafExperienceMainList.stream()
+					.filter(temp -> temp.getCandidateEmployerName().equalsIgnoreCase(employmentVerificationDto.getInput())).collect(Collectors.toList());
+			
+			long inputDifference1 = Long.valueOf(0);
+			if(tempcandidateCafExperience.size() > 0) {
+				
+				inputDifference1 = DateUtil.differenceInMonths(tempcandidateCafExperience.get(0).getInputDateOfJoining(),
+						employmentVerificationDto.getDoe());
+			} else {
+				inputDifference1 = DateUtil.differenceInMonths(employmentVerificationDto.getDoj(),
+						employmentVerificationDto.getDoe());
+			}
+
 			employmentTenureVerificationDto.setDoj(employmentVerificationDto.getDoj());
 			employmentTenureVerificationDto
 					.setInput(inputDifference1 / 12 + " Years, " + inputDifference1 % 12 + " months");
-			employmentTenureVerificationDto
-					.setOutput(inputDifference1 / 12 + " Years, " + inputDifference1 % 12 + " months");
+//			employmentTenureVerificationDto
+//					.setOutput(inputDifference1 / 12 + " Years, " + inputDifference1 % 12 + " months");
 			employmentTenureVerificationDto.setSource(employmentVerificationDto.getSource());
-			// employmentTenureVerificationDto.setOutput("Data Not Found");
+			employmentTenureVerificationDto.setOutput("Data Not Found");
 			employmentTenureVerificationDto.setVerificationStatus(VerificationStatus.AMBER);
 			Integer tenure = toleranceConfig.getTenure();
 			employmentTenureVerificationDto.setEmployerName(employmentVerificationDto.getInput());
@@ -2625,8 +2706,18 @@ public class ReportServiceImpl implements ReportService {
 				employmentTenureVerificationDto.setVerificationStatus(
 						VerificationStatus.valueOf(candidateCafExperience.getColor().getColorCode()));
 
-				long inputDifference = DateUtil.differenceInMonths(employmentVerificationDto.getDoj(),
-						employmentVerificationDto.getDoe());
+//				long inputDifference = DateUtil.differenceInMonths(employmentVerificationDto.getDoj(),
+//						employmentVerificationDto.getDoe());
+				
+				long inputDifference = Long.valueOf(0);
+				if(tempcandidateCafExperience.size() > 0) {
+					
+					inputDifference = DateUtil.differenceInMonths(tempcandidateCafExperience.get(0).getInputDateOfJoining(),
+							employmentVerificationDto.getDoe());
+				} else {
+					inputDifference = DateUtil.differenceInMonths(employmentVerificationDto.getDoj(),
+							employmentVerificationDto.getDoe()); 
+				}
 				employmentTenureVerificationDto
 						.setInput(inputDifference / 12 + " Years, " + inputDifference % 12 + " months");
 
@@ -2663,6 +2754,7 @@ public class ReportServiceImpl implements ReportService {
 //
 //			return employmentTenureVerificationDto;
 //		}).collect(Collectors.toList());
+
 	}
 
 	private List<EmploymentVerificationDto> validateAndCompareExperience(

@@ -12,7 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 export class CustomerBillComponent implements OnInit {
   pageTitle = 'Customers Bill';
-
+  
   orgID: any;
   getbgv: any=[];
   getBillValues: any=[];
@@ -33,10 +33,10 @@ export class CustomerBillComponent implements OnInit {
       this.getBillValues=data.data;
       if(this.getBillValues){
         this.getBillValues.forEach((element:any) => {
-          // $(".billrpp"+element.source.sourceId).val(element.ratePerReport);
-          // $(".billrpi"+element.source.sourceId).val(element.ratePerItem);
-          // $(".billServiceId"+element.source.sourceId).val(element.serviceId);
-
+          $(".billrpp"+element.source.sourceId).val(element.ratePerReport);
+          $(".billrpi"+element.source.sourceId).val(element.ratePerItem);
+          $(".billServiceId"+element.source.sourceId).val(element.serviceId);
+          
         });
       }
 
@@ -48,21 +48,21 @@ export class CustomerBillComponent implements OnInit {
         this.BillData_stat = true;
       }
     });
-
+    
   }
   onKeyUp(){
    this.BillData_stat = false;
   }
   ngOnInit(): void {
-
+     
   }
   billsubmit(){
     var billValue = $(".x-billcomponents");
     var i=0;
     $.each(billValue,function(idx,elem){
-      // if($(elem).val()!=""){
-      //   i++;
-      // }
+      if($(elem).val()!=""){
+        i++;
+      }
     })
     if(i>0){
       this.onSubmit()
@@ -91,9 +91,9 @@ export class CustomerBillComponent implements OnInit {
   }
     billUpdate() {
       this.getBillValues.forEach((element:any) => {
-        // element.ratePerReport = $(".billrpp"+element.source.sourceId).val();
-        // element.ratePerItem = $(".billrpi"+element.source.sourceId).val();
-        // element.serviceId = $(".billServiceId"+element.source.sourceId).val();
+        element.ratePerReport = $(".billrpp"+element.source.sourceId).val();
+        element.ratePerItem = $(".billrpi"+element.source.sourceId).val();
+        element.serviceId = $(".billServiceId"+element.source.sourceId).val();
 
       });
       return this.customers.saveCustomersBill(this.getBillValues,this.orgID ).subscribe((result:any)=>{

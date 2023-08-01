@@ -54,14 +54,14 @@ export class VendorInitiateComponent implements OnInit {
       this.vendorlist.patchValue({
         sourceId: this.tmp,
         candidateId: this.candidateId,
-      });
+      });  
     }
 
     formEditEdu = new FormGroup({
       documentname: new FormControl('', Validators.required),
       vendorId: new FormControl(''),
       sourceId: new FormControl('', Validators.required),
-      candidateId: new FormControl(''),
+      candidateId: new FormControl(''), 
       value: new FormControl('')
     });
     patcheduValues() {
@@ -70,7 +70,7 @@ export class VendorInitiateComponent implements OnInit {
         candidateId: this.candidateId,
         vendorId:this.vendorid
       });
-
+      
     }
 
     foremployements = new FormGroup({
@@ -86,9 +86,9 @@ export class VendorInitiateComponent implements OnInit {
         candidateId: this.candidateId,
         vendorId:this.vendorid
       });
-
+      
     }
-
+    
     forAddressCrimnalGlobal = new FormGroup({
       // candidateName: new FormControl('', Validators.required),
       dateOfBirth: new FormControl('', Validators.required),
@@ -106,7 +106,7 @@ export class VendorInitiateComponent implements OnInit {
         candidateId: this.candidateId,
         vendorId:this.vendorid
       });
-
+      
     }
 
     forDrugTest = new FormGroup({
@@ -128,7 +128,7 @@ export class VendorInitiateComponent implements OnInit {
         candidateId: this.candidateId,
         vendorId:this.vendorid
       });
-
+      
     }
 
     formpassport = new FormGroup({
@@ -137,7 +137,7 @@ export class VendorInitiateComponent implements OnInit {
       vendorId: new FormControl(''),
       sourceId: new FormControl('', Validators.required),
       candidateId: new FormControl(''),
-
+     
     });
     patchpassport() {
       this.formpassport.patchValue({
@@ -145,18 +145,18 @@ export class VendorInitiateComponent implements OnInit {
         candidateId: this.candidateId,
         vendorId:this.vendorid
       });
-
+      
     }
 
 
 
-    constructor( private customers:CustomerService, private router:ActivatedRoute, private fb: FormBuilder,authService: AuthenticationService,
+    constructor( private customers:CustomerService, private router:ActivatedRoute, private fb: FormBuilder,authService: AuthenticationService, 
       private modalService: NgbModal, private navRouter: Router) {
       this.userID = this.router.snapshot.paramMap.get('userId');
       this.candidateId = this.router.snapshot.paramMap.get('candidateId');
       console.log(this.candidateId,"-----------------------------------")
       this.customers.getVendorCheckDetails(this.candidateId).subscribe((data: any)=>{
-
+        
         this.vendorchecksupload=data.data;
         console.log(this.vendorchecksupload[0])
         if(this.getVendorID){
@@ -176,7 +176,7 @@ export class VendorInitiateComponent implements OnInit {
         this.customers.getVendorList(localStorage.getItem('orgID')).subscribe((data: any)=>{
           this.getVendorID=data.data;
           console.log(this.getVendorID,"-------------vendoy----------------");
-          if(this.userID){
+          if(this.userID){ 
             for (var index in this.getVendorID){
                 console.log(this.getVendorID[index]["userId"],"indexxxxxxxxxxxxxxxxxxxx");
                 if(this.userID==this.getVendorID[index]["userId"]){
@@ -192,17 +192,18 @@ export class VendorInitiateComponent implements OnInit {
           // }
         });
         console.log(this.vendorlist.value,"-------------vend----------------");
-
+       
       }
       let rportData = {
         'userId': localStorage.getItem('userId')
       }
-
+      
       this.customers.getSources().subscribe((data: any)=>{
         this.getbgv=data.data;
         console.log(this.getbgv,"-------------getbgv----------------");
         this.getbgv.forEach((element:any) => {
           element.serviceId = '';
+          element.ratePerItem = '';
           element.ratePerItem = '';
 
         });
@@ -215,16 +216,16 @@ export class VendorInitiateComponent implements OnInit {
         console.log(this.getBillValues,"--------------------")
         if(this.getBillValues){
           this.getBillValues.forEach((element:any) => {
-            // $(".billrpp"+element.source.sourceId).val(element.ratePerItem);
-            // $(".billrpi"+element.source.sourceId).val(element.tatPerItem);
-            // $(".billServiceId"+element.source.sourceId).val(element.userId);
-
+            $(".billrpp"+element.source.sourceId).val(element.ratePerItem);
+            $(".billrpi"+element.source.sourceId).val(element.tatPerItem);
+            $(".billServiceId"+element.source.sourceId).val(element.userId);
+            
           });
         }
-
+  
       });
     }
-
+   
     }
 
     uploadGlobalCaseDetails(event:any) {
@@ -257,21 +258,21 @@ export class VendorInitiateComponent implements OnInit {
 
     selectAll(e:any){
       if (e.target.checked) {
-        // $(e.target).parent().siblings().find(".billServiceId").prop('checked', true);
+        $(e.target).parent().siblings().find(".billServiceId").prop('checked', true);
        var  iteminput = $('.item input');
         var arrNumber:any = [];
         $.each(iteminput,function(idx,elem){
-          // var inputValues:any  = $(elem).val();
-          // console.log(inputValues);
+          var inputValues:any  = $(elem).val();
+          console.log(inputValues);
           arrNumber.push($(this).val());
         });
-
+        
         this.tmp = arrNumber;
         console.log(this.tmp);
       } else {
-        // $(e.target).parent().siblings().find(".billServiceId").prop('checked', false);
+        $(e.target).parent().siblings().find(".billServiceId").prop('checked', false);
       }
-
+      
     }
 
     getvendorid(id:any){
@@ -282,12 +283,12 @@ export class VendorInitiateComponent implements OnInit {
      this.VendorData_stat = false;
     }
     ngOnInit(): void {
-
+       
     }
-
+    
 
     submitEditEdu(formEditEdu: FormGroup) {
-
+     
       this.patcheduValues()
       console.log("....................",this.formEditEdu.value)
       const formData = new FormData();
@@ -301,7 +302,7 @@ export class VendorInitiateComponent implements OnInit {
       // this.educationAgentAttributeCheckMapped = {...this.formEditEdu.value, ...educationAttributeValues}
       const mergedData = {
         ...this.formEditEdu.value,
-        ...educationAttributeValues,
+        ...educationAttributeValues, 
       };
       formData.append('vendorchecks', JSON.stringify(mergedData));
       formData.append('file', this.proofDocumentNew);
@@ -397,7 +398,7 @@ export class VendorInitiateComponent implements OnInit {
 
             ...this.forAddressCrimnalGlobal.value,
 
-          ...this.crimnalGlobalAgentAttributeCheckMapped,
+          ...this.crimnalGlobalAgentAttributeCheckMapped, 
 
         };
 
@@ -511,7 +512,7 @@ export class VendorInitiateComponent implements OnInit {
         this.Address=false;
         this.IDItems=false;
         this.crimnal=false;
-        this.DrugTest=false;
+        this.DrugTest=false; 
       }
       if(this.sourceid == "2"){
         this.education=true;
@@ -520,7 +521,7 @@ export class VendorInitiateComponent implements OnInit {
         this.Address=false;
         this.IDItems=false;
         this.crimnal=false;
-        this.DrugTest=false;
+        this.DrugTest=false; 
       }
       // if(this.sourceid == "3"){
       //   this.GlobalDatabasecheck=true;
@@ -529,7 +530,7 @@ export class VendorInitiateComponent implements OnInit {
       //   this.Address=false;
       //   this.IDItems=false;
       //   this.crimnal=false;
-      //   this.DrugTest=false;
+      //   this.DrugTest=false; 
       // }
       // if(this.sourceid == "4"){
       //   this.Address=true;
@@ -538,7 +539,7 @@ export class VendorInitiateComponent implements OnInit {
       //   this.GlobalDatabasecheck=false;
       //   this.IDItems=false;
       //   this.crimnal=false;
-      //   this.DrugTest=false;
+      //   this.DrugTest=false; 
       // }
       if(this.sourceid == "5"){
         this.IDItems=true;
@@ -547,7 +548,7 @@ export class VendorInitiateComponent implements OnInit {
         this.GlobalDatabasecheck=false;
         this.Address=false;
         this.crimnal=false;
-        this.DrugTest=false;
+        this.DrugTest=false; 
       }
       if((this.sourceid == "6") || (this.sourceid == "3")||(this.sourceid == "4")){
         this.crimnal=true;
@@ -556,7 +557,7 @@ export class VendorInitiateComponent implements OnInit {
         this.GlobalDatabasecheck=false;
         this.Address=false;
         this.IDItems=false;
-        this.DrugTest=false;
+        this.DrugTest=false; 
       }
       if(this.sourceid == "10"){
         this.DrugTest=true;
@@ -565,11 +566,11 @@ export class VendorInitiateComponent implements OnInit {
         this.GlobalDatabasecheck=false;
         this.Address=false;
         this.IDItems=false;
-        this.crimnal=false;
+        this.crimnal=false; 
       }
 
     }
-
+    
     opentemplate(id: any) {
 
       console.warn("IDDDDD::",id);
@@ -599,7 +600,7 @@ export class VendorInitiateComponent implements OnInit {
       }, (res) => {
         this.closeModal = `Dismissed ${this.getDismissReason(res)}`;
       });
-
+  
     }
 
     private getDismissReason(reason: any): string {
@@ -615,10 +616,10 @@ export class VendorInitiateComponent implements OnInit {
       billUpdate() {
         console.log("______________inside button ------------------")
         this.getBillValues.forEach((element:any) => {
-          // element.ratePerItem = $(".billrpp"+element.source.sourceId).val();
-          // element.tatPerItem = $(".billrpi"+element.source.sourceId).val();
-          // element.serviceId = $(".billServiceId"+element.source.userId).val();
-
+          element.ratePerItem = $(".billrpp"+element.source.sourceId).val();
+          element.tatPerItem = $(".billrpi"+element.source.sourceId).val();
+          element.serviceId = $(".billServiceId"+element.source.userId).val();
+  
         });
         return this.customers.saveVendorChecks(this.getBillValues,this.userID ).subscribe((result:any)=>{
           console.log(result,'--------------------return---------------');
@@ -640,6 +641,7 @@ export class VendorInitiateComponent implements OnInit {
           }
         });
       }
-
+  
   }
-
+  
+  

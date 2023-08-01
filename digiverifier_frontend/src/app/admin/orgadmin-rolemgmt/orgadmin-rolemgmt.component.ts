@@ -23,7 +23,7 @@ export class OrgadminRolemgmtComponent implements OnInit {
       roleId: this.getroleId
 		});
 	}
-  constructor(private orgadmin:OrgadminService) {
+  constructor(private orgadmin:OrgadminService) { 
     this.orgadmin.getRoleDropdown().subscribe((data: any)=>{
       this.getRoleDropdown=data.data;
       console.log(this.getRoleDropdown);
@@ -33,7 +33,7 @@ export class OrgadminRolemgmtComponent implements OnInit {
       this.getAllRolePermission=data.data;
       console.log(this.getAllRolePermission);
     });
-
+    
   }
 
   ngOnInit(): void {
@@ -80,26 +80,26 @@ export class OrgadminRolemgmtComponent implements OnInit {
   childCheckselected(sid:any){
     this.tmp.push(sid);
   }
-
+  
   selectAll(e:any){
     if (e.target.checked) {
-      // $(e.target).parent().siblings().find(".rolecboxbtn").prop('checked', true);
+      $(e.target).parent().siblings().find(".rolecboxbtn").prop('checked', true);
      var  cboxRolesinput = $('.cboxRoles input');
       var arrNumber:any = [];
       $.each(cboxRolesinput,function(idx,elem){
-        // var inputValues:any  = $(elem).val();
-        // console.log(inputValues);
+        var inputValues:any  = $(elem).val();
+        console.log(inputValues);
         arrNumber.push($(this).val());
       });
-
+      
       this.tmp = arrNumber;
       console.log(this.tmp);
     } else {
-      // $(e.target).parent().siblings().find(".rolecboxbtn").prop('checked', false);
+      $(e.target).parent().siblings().find(".rolecboxbtn").prop('checked', false);
     }
-
+    
   }
-
+  
   getroleId:  any=[];
   roleDropdown(e:any){
     this.tmp = [];
@@ -110,15 +110,11 @@ export class OrgadminRolemgmtComponent implements OnInit {
       const rolepermissionarray = getRoleMgmtStat.data['permissionId'];
       rolepermissionarray.forEach((element: any) =>{
         this.childCheckselected(element);
-       // $(".rolecboxbtn"+element).prop('checked', true);
+       $(".rolecboxbtn"+element).prop('checked', true);
       });
-
-
-
-
     });
   }
-
+  
 
 }
 

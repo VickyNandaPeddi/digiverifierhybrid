@@ -26,8 +26,7 @@ public class AesUtil {
 		this.keySize = keySize;
 		this.iterationCount = iterationCount;
 		try {
-			String cipherData="AES/GCM/NoPadding";
-			cipher = Cipher.getInstance(cipherData);
+			cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			throw fail(e);
 		}
@@ -123,8 +122,7 @@ public class AesUtil {
 	public static String encrypt(final String strToEncrypt, final String secret) {
 		try {
 			setKey(secret);
-			String cipherData="AES/GCM/NoPadding";
-			Cipher cipher = Cipher.getInstance(cipherData);
+			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
 			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 			return java.util.Base64.getEncoder()
 				.encodeToString(cipher.doFinal(strToEncrypt.getBytes("UTF-8")));
@@ -137,8 +135,7 @@ public class AesUtil {
 	public static String decrypt(final String strToDecrypt, final String secret) {
 		try {
 			setKey(secret);
-			String cipherData="AES/GCM/NoPadding";
-			Cipher cipher = Cipher.getInstance(cipherData);
+			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
 			cipher.init(Cipher.DECRYPT_MODE, secretKey);
 			return new String(cipher.doFinal(java.util.Base64.getDecoder()
 				.decode(strToDecrypt)));

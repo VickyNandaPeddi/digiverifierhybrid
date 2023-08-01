@@ -30,8 +30,8 @@ export class DNHComponent implements OnInit {
   admin:boolean=false;
   tmp: any=[];
 
-
-
+  
+ 
 
   formSuSpectEMP = new FormGroup({
     suspectCompanyName:new FormControl(''),
@@ -44,7 +44,7 @@ export class DNHComponent implements OnInit {
   formToDelete = new FormGroup({
     suspectEmpMasterId: new FormControl('', Validators.required),
   });
-
+ 
   constructor(private orgadmin:OrgadminService,private customers:CustomerService,private candidateService: CandidateService,  private modalService: NgbModal) {
     this.orgid= localStorage.getItem('orgID');
     this.customers.getCustomersBill().subscribe((data: any)=>{
@@ -54,13 +54,13 @@ export class DNHComponent implements OnInit {
       }
       else{
         this.admin=true
-        this.organization =data.data;
+        this.organization =data.data; 
         for (let item in this.organization){
           console.log(this.organization[item].organizationId);
           if(this.organization[item].organizationId==this.orgid){
               this.organizationame=this.organization[item].organizationName
           }
-
+          
         }
       }
     })
@@ -68,7 +68,7 @@ export class DNHComponent implements OnInit {
    }
 
   ngOnInit(): void {
-
+   
   }
 
   deletePatchValues() {
@@ -76,10 +76,10 @@ export class DNHComponent implements OnInit {
       suspectEmpMasterId: this.tmp,
     });
   }
-
+ 
   getCustomerData(organizationId:any){
     this.organizationId=organizationId;
-
+   
     console.log(organizationId,"organizationId")
     this.candidateService.getAllSuspectEmpListtt(organizationId).subscribe((data: any)=>{
       console.log(organizationId,",,,,,,,,,,,,,,,,,,")
@@ -127,7 +127,7 @@ export class DNHComponent implements OnInit {
     console.warn("SELECTED CHECKS 3::",this.tmp);
   }
 
-  // select all
+  // select all 
   selectAll(e:any){
     console.warn("SELECT ALL:: 5:",e);
     if (e.target.checked) {
@@ -135,20 +135,20 @@ export class DNHComponent implements OnInit {
       var  cboxRolesinput = $('.childCheck');
       var arrNumber:any = [];
       $.each(cboxRolesinput,function(idx,elem){
-        // var inputValues:any  = $(elem).val();
+        var inputValues:any  = $(elem).val();
         // console.log(inputValues);
         arrNumber.push($(this).val());
       });
-
+      
       this.tmp = arrNumber;
       console.warn("SELECT ALL TEMP 4::",this.tmp);
     } else {
       $(".childCheck").prop('checked', false);
     }
-
+    
   }
 
-
+  
 
   private getDismissReason(reason: any): string {
     if (reason === ModalDismissReasons.ESC) {
@@ -213,7 +213,7 @@ export class DNHComponent implements OnInit {
                 title: data.message,
                 icon: 'warning'
               })
-            }
+            } 
            })
       }
     });
@@ -245,11 +245,11 @@ export class DNHComponent implements OnInit {
                 title: data.message,
                 icon: 'warning'
               })
-            }
+            } 
            })
       }
     });
-
+    
   }
 
   submitSuspectEmploye(){
