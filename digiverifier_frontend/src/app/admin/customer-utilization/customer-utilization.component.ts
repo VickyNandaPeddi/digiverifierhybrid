@@ -120,7 +120,7 @@ export class CustomerUtilizationComponent implements OnInit {
     console.log('Inside excel', this.company);
 
     const fileName = 'Customer Utilization Report.xlsx';
-    // const sheetName = ['sheet1', 'sheet2', 'sheet3'];
+    const sheetName = ['sheet1', 'sheet2', 'sheet3'];
 
     //   let wb = XLSX.utils.book_new();
     //   for (var i = 0; i < sheetName.length; i++) {
@@ -136,9 +136,6 @@ export class CustomerUtilizationComponent implements OnInit {
     let ws_PENDINGAPPROVAL: any = {};
     let ws_INVITATIONEXPIRED: any = {};
     let ws_REINVITE: any = {};
-    let ws_ReportDelivered: any = {};
-    let REPORTDELIVERED = 0;
-    let OLD_REPORTDELIVERED_LEN = 0;
     let NEWUPLOAD = 0;
     let PENDINGNOW = 0;
     let FINALREPORT = 0;
@@ -217,47 +214,19 @@ export class CustomerUtilizationComponent implements OnInit {
         if (NEWUPLOAD == 0) {
           console.log('Inside zero', key, value.length, value);
           ws_newupload = XLSX.utils.json_to_sheet(value);
-
           NEWUPLOAD = 1;
           OLD_NEWUPLOAD_LEN = OLD_NEWUPLOAD_LEN + value.length;
-
-          // new block start
-          let tempValueList = value.filter((temp: any) => {
-            if(temp.statusName == "QC Pending" || temp.statusName == "Interim Report" || temp.statusName == "Final Report") {
-              return temp;
-            } 
-          })
-          console.log('Report delivered', tempValueList)
-          ws_ReportDelivered = XLSX.utils.json_to_sheet(tempValueList);
-
-          REPORTDELIVERED = 1;
-          OLD_REPORTDELIVERED_LEN = OLD_REPORTDELIVERED_LEN + tempValueList.length;
-          // end
-
         } else {
           console.log('Inside Non zero', key, OLD_NEWUPLOAD_LEN, value);
           XLSX.utils.sheet_add_json(ws_newupload, value, {
             skipHeader: false,
             origin: `A${OLD_NEWUPLOAD_LEN + 2}`,
           });
-
           OLD_NEWUPLOAD_LEN = OLD_NEWUPLOAD_LEN + value.length;
           console.log('OLD_NEWUPLOAD_LEN', OLD_NEWUPLOAD_LEN);
-
-          // new block start
-          let tempValueList = value.filter((temp: any) => {
-            if(temp.statusName == 'PENDINGAPPROVAL' || temp.statusName == 'INTERIMREPORT' || temp.statusName == 'FINALREPORT')
-              return temp;
-          })
-
-          console.log('Report delivered ELSE', tempValueList)
-          ws_ReportDelivered = XLSX.utils.sheet_add_json(ws_ReportDelivered, tempValueList);
-          OLD_REPORTDELIVERED_LEN = OLD_REPORTDELIVERED_LEN + tempValueList.length;
-          // end
         }
 
         ws_newupload['!cols'] = columnWidths;
-        ws_ReportDelivered['!cols'] = columnWidths;
       } else if (key.includes('FINALREPORT')) {
         // console.log("Outside",key, value.length, value)
         if (FINALREPORT == 0) {
@@ -487,7 +456,6 @@ export class CustomerUtilizationComponent implements OnInit {
     XLSX.utils.book_append_sheet(wb, ws_INVITATIONEXPIRED, 'InvitationExpired');
     XLSX.utils.book_append_sheet(wb, ws_REINVITE, 'Reinvite');
     XLSX.utils.book_append_sheet(wb, ws_ekycReport, 'EkycReport');
-    XLSX.utils.book_append_sheet(wb, ws_ReportDelivered, 'ReportDelivered');
 
     XLSX.writeFile(wb, fileName);
 
@@ -643,7 +611,7 @@ export class CustomerUtilizationComponent implements OnInit {
           this.geteKycReport = data.data.candidateDetailsDto;
           this.orgKycReport = data.data.candidateDetailsDto;
 
-          let no = 1;
+          let no = 0;
           for (let item in this.geteKycReport) {
             delete this.geteKycReport[item]['candidateCode'];
             delete this.geteKycReport[item]['createdByUserFirstName'];
@@ -653,8 +621,7 @@ export class CustomerUtilizationComponent implements OnInit {
             delete this.geteKycReport[item]['dateOfBirth'];
             delete this.geteKycReport[item]['contactNumber'];
             delete this.geteKycReport[item]['emailId'];
-            this.geteKycReport[item]['SNo'] = no;
-            no++;
+            this.geteKycReport[item]['SNo'] = item + 1;
             this.geteKycReport[item]['Applicant ID'] =
               this.geteKycReport[item]['applicantId'];
             delete this.geteKycReport[item]['applicantId'];
@@ -1495,7 +1462,7 @@ export class CustomerUtilizationComponent implements OnInit {
         this.geteKycReport = data.data.candidateDetailsDto;
         this.orgKycReport = data.data.candidateDetailsDto;
         console.log(data, '------------------------------------');
-        let no = 1;
+        let no = 0;
         for (let item in this.geteKycReport) {
           delete this.geteKycReport[item]['candidateCode'];
           delete this.geteKycReport[item]['createdByUserFirstName'];
@@ -1505,8 +1472,7 @@ export class CustomerUtilizationComponent implements OnInit {
           delete this.geteKycReport[item]['dateOfBirth'];
           delete this.geteKycReport[item]['contactNumber'];
           delete this.geteKycReport[item]['emailId'];
-          this.geteKycReport[item]['SNo'] = no;
-          no++;
+          this.geteKycReport[item]['SNo'] = item + 1;
           this.geteKycReport[item]['Applicant ID'] =
             this.geteKycReport[item]['applicantId'];
           delete this.geteKycReport[item]['applicantId'];

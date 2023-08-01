@@ -124,52 +124,6 @@ span {
 .black-box {
 	border: 1px solid black;
 }
-/* Base styles for the table */
-.table-st {
-            width: 100%;
-            border-collapse: collapse;
-        } 
-
-.table-st td {
-            padding: 7px;
-            border: 1px solid #ccc;
-        } 
-
-/* Media query for small screens */
-        @media screen and (max-width: 480px) {
-            .table-st td {
-                display: block;
-                width: 100%;
-            }
-        } 
-
-        /* Additional styles for specific elements */
-        .text-center {
-            text-align: center;
-        } 
-
-        .text-left {
-            text-align: left;
-        } 
-
-        .sub-heading {
-            font-size: 14px;
-            font-weight: 600;
-            color: whitesmoke;
-        } 
-
-        /* Optional styles for the logo */
-        /* You can modify these styles based on your preference */
-        .table-st img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-
-        .profile-width{
-            min-width:160px;
-        }
 </style>
 </head>
 <body
@@ -180,28 +134,33 @@ span {
 
 		<table class="table-st">
 			<tr style="padding: 7px">
-				<td class="text-center"><span style="width: 50%; font-size: 15px; font-weight: 600; color: black;">
-					<b th:text="${root.organizationName}">Organization Name</b></span></td>
-				<td class="text-center blue-bg" style="width: 50%;font-size: 20px; color: whitesmoke">
-					<span class="sub-heading">Digital BGC Report</span></td>
-				</tr>
-				<tr>
-					<td class="text-left"><span style="font-size: 12px; color: #605f5f; width: 50%">
-						<b th:text="${root.organizationLocation}">Organization Location</b></span></td>
-					<td class="text-center" style="width: 50%; ">
-						<img style="height: 15%; width: 70%;" th:src="${root.organizationLogo}" /></td>
-				</tr>
+				<td class="text-center"><span
+					style="width: 50%; font-size: 14px; font-weight: 600; color: black;">
+						<b th:text="${root.organizationName}"></b>
+				</span></td>
+				<td class="text-center blue-bg" style="width: 50%;"><span
+					class="sub-heading" style="color: whitesmoke; font-weight: 600;">
+						Digital BGC Report</span></td>
+			</tr>
+			<tr>
+				<td class="text-left"><span
+					style="font-size: 12px; color: #605f5f; width: 50%"><b
+						th:text="${root.organizationLocation}"></b> </span></td>
+				<td class="text-center" style="width: 50%; padding: 15px"><img
+					style="height: 50px; width: 200px;"
+					th:src="${root.organizationLogo}" /></td>
+			</tr>
 		</table>
 		<span class="line-break"></span> <span class="line-break"></span>
 
 		<table class="table_head table-st">
 			<!--concept Title head-->
 			<tr class="text-center">
-				<td class="blue-bg" colspan="2"><span
-					class="td-heading black-text" style="color: whitesmoke">BACKGROUND PROFILE</span></td>
+				<td class="grey-bg" colspan="2"><span
+					class="td-heading black-text">BACKGROUND PROFILE</span></td>
 			</tr>
 			<tr>
-				<td style="padding: 5px;" class="grey-bg text-left profile-width"><span
+				<td style="padding: 5px;" class="grey-bg text-left"><span
 					class="black-text"> <b>Name of the Candidate</b>
 				</span></td>
 				<td style="padding: 5px;" class="text-left"><span
@@ -209,7 +168,7 @@ span {
 				</span></td>
 			</tr>
 			<tr>
-				<td style="padding: 5px;" class="grey-bg text-left profile-width"><span
+				<td style="padding: 5px;" class="grey-bg text-left"><span
 					class="black-text"> <b>Date of Birth</b>
 				</span></td>
 				<td style="padding: 5px;" class="text-left"><span
@@ -217,7 +176,7 @@ span {
 				</span></td>
 			</tr>
 			<tr>
-				<td style="padding: 5px;" class="grey-bg text-left profile-width"><span
+				<td style="padding: 5px;" class="grey-bg text-left"><span
 					class="black-text"> <b>Contact No</b>
 				</span></td>
 				<td style="padding: 5px;" class="text-left"><span
@@ -225,7 +184,7 @@ span {
 				</span></td>
 			</tr>
 			<tr>
-				<td style="padding: 5px;" class="grey-bg text-left profile-width"><span
+				<td style="padding: 5px;" class="grey-bg text-left"><span
 					class="black-text"> <b>Email ID</b>
 				</span></td>
 				<td style="padding: 5px;" class="text-left"><span
@@ -233,7 +192,7 @@ span {
 				</span></td>
 			</tr>
 			<tr>
-				<td style="padding: 5px;" class="grey-bg text-left profile-width"><span
+				<td style="padding: 5px;" class="grey-bg text-left"><span
 					class="black-text"> <b>Reference ID</b>
 				</span></td>
 				<td style="padding: 5px;" class="text-left"><span
@@ -241,7 +200,7 @@ span {
 				</span></td>
 			</tr>
 			<tr>
-				<td style="text-align: left; padding: 5px;" class="grey-bg text-left profile-width"><span
+				<td style="text-align: left; padding: 5px;" class="grey-bg"><span
 					class="black-text"> <b>Client Name</b>
 				</span></td>
 				<td style="padding: 5px;" class="text-left"><span
@@ -249,7 +208,7 @@ span {
 				</span></td>
 			</tr>
 			<tr>
-				<td style="text-align: left; padding: 5px;" class="grey-bg text-left profile-width"><span
+				<td style="text-align: left; padding: 5px;" class="grey-bg"><span
 					class="black-text"> <b>Account Name</b>
 				</span></td>
 				<td style="padding: 5px;" class="text-left"><span
@@ -257,7 +216,7 @@ span {
 				</span></td>
 			</tr>
 			<tr>
-				<td style="text-align: left; padding: 5px;" class="grey-bg text-left profile-width"><span
+				<td style="text-align: left; padding: 5px;" class="grey-bg"><span
 					class="black-text"> <b>Fresher/ Experienced</b>
 				</span></td>
 				<td style="padding: 5px" class="text-left"><span
@@ -278,27 +237,27 @@ span {
 			<!--        </tr>-->
 
 			<tr>
-				<td style="padding: 5px" class="grey-bg text-left profile-width"><span
+				<td style="padding: 5px" class="grey-bg text-left"><span
 					class="black-text"> <b>Case Inititaion Date & Time</b>
 				</span></td>
 				<td style="padding: 5px" class="text-left"><span
-					class="grey-text"> <b th:text="${#strings.toUpperCase(#dates.format(root.caseInitiationDate, 'dd-MMM-yyyy HH:mm'))}"></b>
+					class="grey-text"> <b th:text="${#dates.format(root.caseInitiationDate, 'dd-MM-yyyy HH:mm:ss')}"></b>
 				</span></td>
 			</tr>
 
 			<tr>
-				<td style="padding: 5px" class="grey-bg text-left profile-width"><span
+				<td style="padding: 5px" class="grey-bg text-left"><span
 					class="black-text"> <b>Report Delivered Date & Time</b>
 				</span></td>
 				<td style="padding: 5px;" class="text-left"><span
-					class="grey-text"> <b th:text="${#strings.toUpperCase(#dates.format(root.finalReportDate, 'dd-MMM-yyyy HH:mm'))}"></b>
+					class="grey-text"> <b th:text="${#dates.format(root.finalReportDate, 'dd-MM-yyyy HH:mm:ss')}"></b>
 				</span></td>
 			</tr>
 
 
 			<tr style="padding: 5px">
 				<td style="text-align: left; width: 25%; padding: 10px 5px;"
-					class="grey-bg text-left profile-width"><span class="black-text"> <b>Verification
+					class="grey-bg"><span class="black-text"> <b>Verification
 							Status</b>
 				</span></td>
 				<td style="border-collapse: collapse; padding: 10px 5px;"
@@ -322,7 +281,7 @@ span {
 					class="invalid-status grey-text" th:case="*">INVALID</span></td>
 			</tr>
 			<tr>
-				<td style="padding: 5px" class="grey-bg text-left profile-width"><span
+				<td style="padding: 5px" class="grey-bg text-left"><span
 					class="black-text"> <b>Remarks/Comments</b>
 				</span></td>
 				<td style="padding: 5px;" class="text-left"><span
@@ -339,10 +298,10 @@ span {
 			th:if="${!#strings.equalsIgnoreCase(root.project, 'accolite')}">
 			<!--concept Title head-->
 			<tr>
-				<td class="blue-bg" colspan="2"><span
-					class="td-heading black-text" style="color: whitesmoke;">Reasons for Red/Amber</span></td>
-				<td class="blue-bg" colspan="1"><span
-					class="td-heading black-text" style="color: whitesmoke;">Results</span></td>
+				<td class="grey-bg" colspan="2"><span
+					class="td-heading black-text">Reasons for Red/Amber</span></td>
+				<td class="grey-bg" colspan="1"><span
+					class="td-heading black-text">Results</span></td>
 			</tr>
 			<tr>
 				<td style="padding: 5px;" class="grey-bg text-left"><span
@@ -515,8 +474,8 @@ span {
 			th:if="${!#strings.equalsIgnoreCase(root.project, 'accolite')}">
 			<!--concept Title head-->
 			<tr>
-				<td class="blue-bg text-center" colspan="4"><span
-					class="td-heading black-text" style="color: whitesmoke;">ITR Section</span></td>
+				<td class="grey-bg" colspan="4"><span
+					class="td-heading black-text">ITR Section</span></td>
 			</tr>
 			<tr>
 				<td style="padding: 5px;" class="grey-bg text-left"><span
@@ -567,9 +526,9 @@ span {
 
 		<table class="table-st">
 			<tr>
-				<td colspan="3" class="blue-bg text-center"><span
+				<td colspan="3" class="grey-bg text-center"><span
 					class="td-heading black-text"
-					style="font-size: 14px; font-weight: bold; color: whitesmoke;">COLOR CODE</span></td>
+					style="font-size: 14px; font-weight: bold;">COLOR CODE</span></td>
 			</tr>
 		</table>
 		<table class="table-st">
@@ -906,10 +865,7 @@ span {
 					class="white-text text-center">Employers</span></td>
 				<td
 					style="width: 25%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
-					class="white-text text-center">Input Tenure</span></td>
-				<td
-					style="width: 25%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
-					class="white-text text-center">Output Tenure</span></td>
+					class="white-text text-center">Tenure </span></td>
 				<td
 					style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
 					class="white-text text-center">Source</span></td>
@@ -923,8 +879,6 @@ span {
 					th:text="${stat.index + 1}"></span></td>
 				<td class="grey-text text-left"><span style="font-size: 12px"
 					th:text="${employmentTenureVerification.employerName}"></span></td>
-				<td class="grey-text text-center"><span style="font-size: 12px"
-					th:text="${employmentTenureVerification.input}"></span></td>
 				<td class="grey-text text-center"><span style="font-size: 12px"
 					th:text="${employmentTenureVerification.output}"></span></td>
 				<td class="grey-text text-center"><span style="font-size: 12px"
@@ -967,8 +921,8 @@ span {
 			<table class="table-st" border="0">
 				<tr>
 					<td colspan="6" class="text-center blue-bg "><span
-						class="td-heading" style="color: whitesmoke;">
-						<b>Section ⅠⅠⅠ: Education Verification </b></span></td>
+						class="td-heading" style="color: whitesmoke;"><b>Section
+								ⅠⅠⅠ: Education Verification </b> </span></td>
 				</tr>
 				<tr class="text-center">
 					<td
@@ -1022,11 +976,8 @@ span {
 			<table class="table-st" border="0">
 				<tr>
 					<td colspan="6" class="text-center blue-bg "><span
-						class="td-heading" style="color: whitesmoke;">
-						<b>
-							<span th:if="${#lists.isEmpty(root.educationVerificationDTOList)}">Section ⅠⅠⅠ: </span>
-							<span th:unless="${#lists.isEmpty(root.educationVerificationDTOList)}">Section ⅠV: </span>
-						</b>Address Verification</span></td>
+						class="td-heading" style="color: whitesmoke;"><b>Section
+								ⅠV: Address Verification </b> </span></td>
 				</tr>
 				<tr class="text-center">
 					<td
@@ -1083,7 +1034,7 @@ span {
 				<tr>
 					<td colspan="6" class="text-center blue-bg "><span
 						class="td-heading" style="color: whitesmoke;"><b>
-								Employment Details </b> </span></td>
+								Employement Details </b> </span></td>
 				</tr>
 				<tr rowspan="2" class="text-center">
 					<td style="width: 5.5%; padding: 5px; background-color: #DDDDDD;">
@@ -1127,10 +1078,10 @@ span {
 							style="font-size: 12px" th:text="${stat.index + 1}"></span></b></td>
 					<td class="grey-text text-left"><b><span
 							style="font-size: 12px" th:text="${epfo.candidateEmployerName}"></span></b></td>
-							<td class="grey-text text-center"><span
-								style="font-size: 12px" th:text="${epfo.inputDateOfJoining}"></span></td>
-							<td class="grey-text text-center"><span
-								style="font-size: 12px" th:text="${epfo.inputDateOfExit}"></span></td>
+					<td class="grey-text text-center"><span
+						style="font-size: 12px" th:text="${epfo.inputDateOfJoining}"></span></td>
+					<td class="grey-text text-center"><span
+						style="font-size: 12px" th:text="${epfo.inputDateOfExit}"></span></td>
 					<!-- <td class="grey-text text-center"><span style="font-size:12px" th:text="${epfo.serviceName}"></span></td> -->
 				</tr>
 			</table>

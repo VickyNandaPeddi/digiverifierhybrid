@@ -92,12 +92,12 @@ reInvitePatchValues() {
         const endIndex = startIndex + this.pageSize;
         return this.ChartDataListing.slice(startIndex, endIndex);
       });
-      
+
     }
 
-    
+
   }
-  
+
   ngOnInit(): void {
     const isCBadminVal = localStorage.getItem('roles');
     if(this.getStatCodes){
@@ -147,7 +147,7 @@ reInvitePatchValues() {
       //console.log(this.isCBadmin);
       }
 
-     
+
 
 //Role Management
 this.orgadminservice.getRolePerMissionCodes(localStorage.getItem('roles')).subscribe(
@@ -212,13 +212,13 @@ this.orgadminservice.getRolePerMissionCodes(localStorage.getItem('roles')).subsc
         //console.log(this.getuploadinfo);
         let data = [];
         for (let i = 0; i < this.getuploadinfo.length; i++) {
-          let obj={};
-          obj=this.getuploadinfo[i].statusName;
+          // let obj={};
+          // obj=this.getuploadinfo[i].statusName;
           data.push({name: this.getuploadinfo[i].statusName, value: this.getuploadinfo[i].count, statcode: this.getuploadinfo[i].statusCode });
-        
+
         }
         chart.data = data;
-        
+
       });
 // Add and configure Series
 let pieSeries = chart.series.push(new am4charts.PieSeries());
@@ -266,7 +266,7 @@ chart.legend.itemContainers.template.events.on("hit", (ev) => {
 });
 pieSeries.slices.template.cursorOverStyle = am4core.MouseCursorStyle.pointer;
     });
-   
+
 }
   ngOnDestroy() {
     this.zone.runOutsideAngular(() => {
@@ -275,7 +275,7 @@ pieSeries.slices.template.cursorOverStyle = am4core.MouseCursorStyle.pointer;
       }
     });
   }
- 
+
   sendinvitation(){
     this.patchUserValues();
     return this.orgadmin.saveInvitationSent(this.formSendInvitation.value).subscribe((result:any)=>{
@@ -356,17 +356,17 @@ pieSeries.slices.template.cursorOverStyle = am4core.MouseCursorStyle.pointer;
       var  cboxRolesinput = $('.childCheck');
       var arrNumber:any = [];
       $.each(cboxRolesinput,function(idx,elem){
-        var inputValues:any  = $(elem).val();
+        // var inputValues:any  = $(elem).val();
         // console.log(inputValues);
         arrNumber.push($(this).val());
       });
-      
+
       this.tmp = arrNumber;
       console.log(this.tmp);
     } else {
       $(".childCheck").prop('checked', false);
     }
-    
+
   }
 //*****************UPDATE CANDIDATE*****************//
   openModal(modalData:any, userId:any){
@@ -436,7 +436,7 @@ pieSeries.slices.template.cursorOverStyle = am4core.MouseCursorStyle.pointer;
     const filteredItems = this.ChartDataListing.filter((item: any) => this.searchFilter(item));
     return Math.ceil(filteredItems.length / this.pageSize);
     }
-  
+
     searchFilter(item: any): boolean {
       const searchText = this.searchText.toLowerCase();
       const candidateName = item.candidateName.toLowerCase();
@@ -444,11 +444,11 @@ pieSeries.slices.template.cursorOverStyle = am4core.MouseCursorStyle.pointer;
       const contactNumber = item.contactNumber.toLowerCase();
       const applicantId = item.applicantId.toLowerCase();
       const candidateStatusName = item.candidateStatusName.toLowerCase();
-  
+
       return candidateName.includes(searchText.toLowerCase()) ||
              emailId.includes(searchText.toLowerCase()) ||
              contactNumber.includes(searchText.toLowerCase()) ||
-             applicantId.includes(searchText.toLowerCase()) || 
+             applicantId.includes(searchText.toLowerCase()) ||
              candidateStatusName.includes(searchText.toLocaleLowerCase());
   }
 

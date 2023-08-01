@@ -62,7 +62,7 @@ export class CustomerActivitiesComponent implements OnInit {
       marker.strokeWidth = 3;
       marker.strokeOpacity = 1;
       marker.stroke = am4core.color("#000");
-      
+
       chart.logo.disabled = true;
       chart.legend.position = "right";
       chart.padding(0, 0, 0, 0);
@@ -81,13 +81,13 @@ export class CustomerActivitiesComponent implements OnInit {
         //console.log(result);
         let data = [];
         for (let i = 0; i < this.PendingDetailsData.length; i++) {
-          let obj={};
-          obj=this.PendingDetailsData[i].statusName;
+          // let obj={};
+          // obj=this.PendingDetailsData[i].statusName;
           data.push({name: this.PendingDetailsData[i].statusName, value: this.PendingDetailsData[i].count});
         }
         chart.data = data;
       });
-      
+
       // Add and configure Series
       let pieSeries = chart.series.push(new am4charts.PieSeries());
       pieSeries.slices.template.tooltipText = "{category}: {value}";
@@ -115,7 +115,7 @@ export class CustomerActivitiesComponent implements OnInit {
       ];
 
     });
-   
+
 }
 
   ngOnDestroy() {
@@ -128,7 +128,7 @@ export class CustomerActivitiesComponent implements OnInit {
 
 
   ngOnInit(): void {
-    
+
   }
 
 }

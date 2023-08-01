@@ -47,33 +47,33 @@ export class CustomerConfigComponent implements OnInit {
   getCustConfigs: any=[];
   userstatcheck: any;
   constructor(private customers:CustomerService, private router: Router,
-     private ActivatedRouter: ActivatedRoute  , private fb:FormBuilder) { 
+     private ActivatedRouter: ActivatedRoute  , private fb:FormBuilder) {
     this.customers.getColors().subscribe((data: any)=>{
       this.getColors=data.data;
     });
-    
+
     this.customers.getCustomersData(this.ActivatedRouter.snapshot.params.organizationId).subscribe((result: any)=>{
       this.orgID = result.data['organizationId'];
       this.customers.getCustConfigs(this.orgID).subscribe((data: any)=>{
         this.getCustConfigs=data.data;
       });
       this.customers.getCustconfigDetails(this.orgID).subscribe((userconfigObj: any)=>{
-        
+
         this.userstatcheck = userconfigObj.data;
         console.log(this.userstatcheck);
         if(this.userstatcheck!=null){
           $("label.required").addClass("editMode");
           const RelativesBillstat = this.userstatcheck.toleranceConfig['accessToRelativesBill'];
           const sourceServicearray = this.userstatcheck['sourceServiceId'];
-          
+
           setTimeout(() =>{
             sourceServicearray.forEach((element: any) =>{
-              $(".childcboxinput"+element).attr('checked', 'true');
+              // $(".childcboxinput"+element).attr('checked', 'true');
               this.childCheckselected(element);
              });
           },1500);
-          
-          
+
+
           this.serviceConfig = new FormGroup({
             tenure: new FormControl(this.userstatcheck.toleranceConfig['tenure'], Validators.required),
             dataRetentionPeriod: new FormControl(this.userstatcheck.toleranceConfig['dataRetentionPeriod'], Validators.required),
@@ -99,7 +99,7 @@ export class CustomerConfigComponent implements OnInit {
 
   onSubmit(){
     this.patchUserValues();
-    let dict=this.serviceConfig.value  
+    let dict=this.serviceConfig.value
     dict["executiveId"]=this.exctive,
     dict['weight']=this.weight
     console.log(dict)
@@ -124,12 +124,12 @@ export class CustomerConfigComponent implements OnInit {
     });
   }
 
-  parentCheck(e:any){ 
+  parentCheck(e:any){
     if (e.target.checked) {
-      $(e.target).parent().parent().addClass("childCboxActive");
+      // $(e.target).parent().parent().addClass("childCboxActive");
     }
     else{
-      $(e.target).parent().parent().removeClass("childCboxActive");
+      // $(e.target).parent().parent().removeClass("childCboxActive");
     }
   }
 
@@ -140,30 +140,30 @@ export class CustomerConfigComponent implements OnInit {
       if(!this.tmp.includes(sid)){
         this.tmp.push(sid);
       }
-      
+
     } else {
         this.tmp = this.arrayRemove(this.tmp, sid);
     }
   }
-  arrayRemove(arr:any, value:any) { 
-    
-    return arr.filter(function(ele:any){ 
-        return ele != value; 
+  arrayRemove(arr:any, value:any) {
+
+    return arr.filter(function(ele:any){
+        return ele != value;
     });
 }
 
   childCheckselected(sid:any){
     this.tmp.push(sid);
     this.selectCheckboxes(sid);
-    
+
   }
 
   selectCheckboxes(element:any){
     //alert($(".childcboxinput"+element).is(':checked'));
-    if($(".childcboxinput"+element).is(':checked')){
-      $(".childcboxinput"+element).parent().parent().parent().addClass("childCboxActive");
-      $(".childcboxinput"+element).parent().parent().parent().find("li").find(".pcboxinput").attr("checked", "true");
-      }
+    // if($(".childcboxinput"+element).is(':checked')){
+    //   $(".childcboxinput"+element).parent().parent().parent().addClass("childCboxActive");
+    //   $(".childcboxinput"+element).parent().parent().parent().find("li").find(".pcboxinput").attr("checked", "true");
+    //   }
   }
 
 }
