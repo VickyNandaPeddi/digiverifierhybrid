@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit {
     if(this.authService.isLoggedIn()!==null && this.authService.getRoles() == '"ROLE_CBADMIN"'){
       this.router.navigate(['admin']);
     }else if(this.authService.isLoggedIn()!==null && this.authService.getRoles() !== '"ROLE_CBADMIN"'){
-      this.router.navigate(['/admin/orgadminDashboard']);
+      this.router.navigate(['/admin/BGVverification']);
     }else{
       this.router.navigate(['login']);
     }
@@ -59,15 +59,15 @@ export class LoginComponent implements OnInit {
         if(role === "ROLE_CBADMIN"){
           this.router.navigate(['/admin']);
         }else if(role === "ROLE_ADMIN"){
-          this.router.navigate(['/admin/orgadminDashboard']);
+          this.router.navigate(['/admin/BGVverification']);
         }else if(role === "ROLE_PARTNERADMIN"){
-          this.router.navigate(['/admin/orgadminDashboard']);
+          this.router.navigate(['/admin/BGVverification']);
         }else if(role === "ROLE_AGENTSUPERVISOR"){
-          this.router.navigate(['/admin/orgadminDashboard']);
+          this.router.navigate(['/admin/BGVverification']);
         }else if(role === "ROLE_AGENTHR"){
-          this.router.navigate(['/admin/orgadminDashboard']);
+          this.router.navigate(['/admin/BGVverification']);
         }else if(role === "ROLE_VENDOR"){
-          this.router.navigate(['/admin/orgadminDashboard']);
+          this.router.navigate(['/admin/uploadvendorcheck']);
         }else{
           this.router.navigate(['/login']);
         }

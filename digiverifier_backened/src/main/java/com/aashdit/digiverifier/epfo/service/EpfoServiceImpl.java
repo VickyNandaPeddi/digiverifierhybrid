@@ -397,7 +397,6 @@ public class EpfoServiceImpl implements EpfoService {
 				response = restTemplate.exchange(epfoSecurityConfig.getFinalSubmitPostUrl()+epfoDetails.getTransactionid(), HttpMethod.POST, entity, String.class);
 				String responseBody=response.getBody();
 				JSONObject obj = new JSONObject(responseBody);
-				JSONArray messagee = obj.getJSONArray("message");
 				System.out.println("\n--------obj --------- "+obj);
 				ServiceOutcome<CandidateDetailsDto> candidateByCandidateCode = candidateService.getCandidateByCandidateCode(
 					epfoDetails.getCandidateCode());
@@ -409,13 +408,7 @@ public class EpfoServiceImpl implements EpfoService {
 				CandidateEPFOResponse candidateEPFOResponse = candidateEPFOResponseRepository
 					.findByCandidateIdAndUan(candidateByCandidateCode.getData().getCandidateId(),epfoDetails.getUanusername())
 					.orElse(new CandidateEPFOResponse());
-				System.out.println("\n--------message --------- "+messagee);
-				for(int i=0; i<messagee.length();i++) {
-					JSONObject object = messagee.getJSONObject(i);
-					if(object.length()!=0) {
-						candidateEPFOResponse.setUanName (object.getString("name"));
-					}
-				}
+				System.out.println("\n--------resMsg --------- "+candidateEPFOResponse);
 				candidateEPFOResponse.setEPFOResponse(resMsg);
 				candidateEPFOResponse.setUan(epfoDetails.getUanusername());
 				candidateEPFOResponse.setCandidateId(candidateByCandidateCode.getData().getCandidateId());
@@ -457,27 +450,19 @@ public class EpfoServiceImpl implements EpfoService {
 							epfoData1.setDoj(DateUtil.getDate(epfo.getDoj(),"dd/MM/yyyy"));
 							epfoData1.setDoe(DateUtil.getDate(epfo.getDoe(),"dd/MM/yyyy"));
 							epfoExperiencesList.add(epfoData1);
-							
 		        		}
 		        		
 		        		if(epfoExperiencesList!=null && epfoExperiencesList.size()>0) {
 		        			epfoDataRepository.saveAll(epfoExperiencesList);
 		        			
-		        			if(epfoDetails.isUanSearch()) {
-		        				
-		        				System.out.println("ByPASS");
-		        			}
-		        			else {
-		        				CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(epfoDetails.getCandidateCode());
-			        			candidateStatus.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("EPFO"));
-			        			candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("EPFO"));
-			        			candidateStatus.setLastUpdatedOn(new Date());
-			        			candidateStatusRepository.save(candidateStatus);
-			        			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
-		        			}
+		        			CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(epfoDetails.getCandidateCode());
+		        			candidateStatus.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("EPFO"));
+		        			candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("EPFO"));
+		        			candidateStatus.setLastUpdatedOn(new Date());
+		        			candidateStatusRepository.save(candidateStatus);
+		        			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
 		        			
 		        			outcomeBoolean=true;
-		        			
 		        		}else {
 		        			message = "Unable to save epfo details";
 			        		outcomeBoolean=false;

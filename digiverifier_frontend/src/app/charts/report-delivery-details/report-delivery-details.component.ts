@@ -17,21 +17,16 @@ am4core.useTheme(am4themes_animated);
 export class ReportDeliveryDetailsComponent implements OnInit {
   private chart: am4charts.XYChart | undefined;
   getReportDeliveryStatCodes: any;
-  searchText: string = '';
   CharReportDelivery: any=[];
   CharReportDeliveryData: any=[];
   containerStat:boolean = false;
   stat_linkAdminApproval:boolean = false;
   stat_linkCandidateReport:boolean = false;
+  stat_linkConventional:boolean = false;
   finalreport:boolean=false;
-  interimreport:boolean=false;
   startdownload:boolean=false;
-  Action:boolean=false;
   startpredownload:boolean=false;
   isCBadmin:boolean = false;
-  currentPage = 1;
-  pageSize: number = 10;
-  currentPageIndex: number = 0;
   constructor(private zone: NgZone, private orgadmin:OrgadminDashboardService,private customers:CustomerService,
     private router: Router) {
     this.getReportDeliveryStatCodes = this.orgadmin.getReportDeliveryStatCode();
@@ -46,31 +41,25 @@ export class ReportDeliveryDetailsComponent implements OnInit {
         'status': this.getReportDeliveryStatCodes
       }
       this.orgadmin.getChartDetails(filterData).subscribe((data: any)=>{
-        this.CharReportDelivery=data.data.candidateDtoList.reverse();
-
+        this.CharReportDelivery=data.data.candidateDtoList;
+        console.log("Before : ", this.CharReportDelivery)
         for(let i=0; i<this.CharReportDelivery.length; i++) {
           // let index = _.findIndex(this.CharReportDelivery[i].contentDTOList, {contentSubCategory: 'PRE_APPROVAL'});
           // this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
-
+          // console.log('Lavanyapre',index)
           let final = this.CharReportDelivery[i].contentDTOList;
-          let interim = this.CharReportDelivery[i].candidateStatusName;
-
           for (let i=0; i<final.length; i++){
-            if(final[i].contentSubCategory=="FINAL" && filterData.status == 'FINALREPORT'){
+            if(final[i].contentSubCategory=="FINAL"){
               this.finalreport = true
+              console.log('Lavanyafinal',final[i].contentSubCategory)
             }
           }
 
-          if(interim == 'Interim Report' && filterData.status == 'INTERIMREPORT') {
-            this.interimreport = true;
-          }
-
         }
+
+
         console.log("After : ", this.CharReportDelivery)
         //console.log(data);
-        const startIndex = this.currentPageIndex * this.pageSize;
-        const endIndex = startIndex + this.pageSize;
-        return this.CharReportDelivery.slice(startIndex, endIndex);
       });
 
     }
@@ -122,8 +111,6 @@ export class ReportDeliveryDetailsComponent implements OnInit {
         //console.log(this.CharReportDeliveryData);
         let data = [];
         for (let i = 0; i < this.CharReportDeliveryData.length; i++) {
-          // let obj={};
-          // obj=this.CharReportDeliveryData[i].statusName;
           data.push({name: this.CharReportDeliveryData[i].statusName, value: this.CharReportDeliveryData[i].count, statcode: this.CharReportDeliveryData[i].statusCode });
         }
         chart.data = data;
@@ -195,22 +182,19 @@ ngOnDestroy() {
         $(".dbtabheading").text("QC Pending");
         this.stat_linkAdminApproval = true;
         this.stat_linkCandidateReport = false;
-        this.Action = true;
       }else if(this.getReportDeliveryStatCodes === "INTERIMREPORT"){
         $(".dbtabheading").text("Interim Report");
         this.stat_linkAdminApproval = false;
         this.stat_linkCandidateReport = true;
-        this.Action = true;
       }else if(this.getReportDeliveryStatCodes === "FINALREPORT"){
         $(".dbtabheading").text("Final Report");
         this.stat_linkAdminApproval = false;
-        this.stat_linkCandidateReport = false;
-        this.Action = false;
+        this.stat_linkCandidateReport = true;
       }else if(this.getReportDeliveryStatCodes === "PROCESSDECLINED"){
         $(".dbtabheading").text("Process Declined");
         this.stat_linkAdminApproval = false;
         this.stat_linkCandidateReport = false;
-        this.Action = false;
+
       }
       this.containerStat = true;
       //isCBadmin required for drilldown dashboard at Superadmin
@@ -222,6 +206,7 @@ ngOnDestroy() {
       }
     }
   }
+
 
   linkAdminApproval(candidateCode:any){
     const billUrl = 'admin/cReportApproval/'+[candidateCode];
@@ -252,25 +237,15 @@ ngOnDestroy() {
     }
   }
 
-  downloadFinalReport(candidate: any, reportType: any) {
-    if(reportType == 'FINAL') {
-      for(let i=0; i<this.CharReportDelivery.length; i++) {
-        let index = _.findIndex(this.CharReportDelivery[i].contentDTOList, {contentSubCategory: 'FINAL'});
-        this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
-        console.log('Lavanyafinal',index)
-        this.startdownload=true
+  downloadFinalReport(candidate: any) {
+    console.log("final");
+    for(let i=0; i<this.CharReportDelivery.length; i++) {
+      let index = _.findIndex(this.CharReportDelivery[i].contentDTOList, {contentSubCategory: 'FINAL'});
+      this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
+      console.log('Lavanyafinal',index)
+      this.startdownload=true
 
-      }
-    } else if(reportType == 'INTERIM') {
-      for(let i=0; i<this.CharReportDelivery.length; i++) {
-        let index = this.CharReportDelivery[i].contentDTOList.findIndex((item: any)=> item.path.includes('INTERIM.pdf'));
-        this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
-        console.log('interim',index)
-        this.startdownload=true
-
-      }
     }
-
     if(this.startdownload==true){
       if(candidate.pre_approval_content_id != -1) {
         console.log(candidate,"-----if--------");
@@ -282,50 +257,4 @@ ngOnDestroy() {
     }
   }
 
-  downloadInterimReport(candidate: any) {
-    // let interimContentDto = candidate.contentDTOList.find((dto: any) => dto.path.includes('INTERIM.pdf'));
-
-    if(candidate.candidateCode) {
-      this.orgadmin.getPreSignedUrlByCandidateCode(candidate.candidateCode).subscribe((url: any)=>{
-        window.open(url.data, '_blank');
-      });
-    }
-  }
-  CharReportDeliverypagination(): any[] {
-    const filteredItems = this.CharReportDelivery.filter((item: any) => this.searchFilter(item));
-    const startIndex = this.currentPageIndex * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    return filteredItems.slice(startIndex, endIndex);
-  }
-
-  goToNextPage(): void {
-    if (this.currentPageIndex < this.totalPages - 1) {
-    this.currentPageIndex++;
-    }
-    }
-
-  goToPrevPage(): void {
-    // this.idvalue=idvalue;
-    if (this.currentPageIndex > 0) {
-    this.currentPageIndex--;
-    }
-    }
-
-  get totalPages(): number {
-    const filteredItems = this.CharReportDelivery.filter((item: any) => this.searchFilter(item));
-    return Math.ceil(filteredItems.length / this.pageSize);
-    }
-
-    searchFilter(item: any): boolean {
-      const searchText = this.searchText.toLowerCase();
-      const candidateName = item.candidateName.toLowerCase();
-      const emailId = item.emailId.toLowerCase();
-      const contactNumber = item.contactNumber.toLowerCase();
-      const applicantId = item.applicantId.toLowerCase();
-
-      return candidateName.includes(searchText.toLowerCase()) ||
-             emailId.includes(searchText.toLowerCase()) ||
-             contactNumber.includes(searchText.toLowerCase()) ||
-             applicantId.includes(searchText.toLowerCase());
-  }
 }

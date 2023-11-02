@@ -31,8 +31,6 @@ export class AgentDetailsComponent implements OnInit {
         //console.log(this.CharReportDelivery);
         let data = [];
         for (let i = 0; i < this.CharReportDelivery.length; i++) {
-          // let obj={};
-          // obj=this.CharReportDelivery[i].statusName;
           data.push({name: this.CharReportDelivery[i].id, value: this.CharReportDelivery[i].id});
         }
         chart.data = data;

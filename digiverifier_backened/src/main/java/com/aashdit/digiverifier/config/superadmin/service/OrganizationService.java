@@ -15,43 +15,45 @@ import com.aashdit.digiverifier.config.superadmin.dto.OrgDto;
 
 public interface OrganizationService {
 
-	ServiceOutcome<Organization> saveOrganization(String organization,Boolean showValidation, MultipartFile file);
+    ServiceOutcome<Organization> saveOrganization(String organization, Boolean showValidation, MultipartFile file);
 
-	// ServiceOutcome<List<OrgDto>> getAllOrganization();
+    // ServiceOutcome<List<OrgDto>> getAllOrganization();
 
-	ServiceOutcome<List<Organization>> getAllOrganization();
+    ServiceOutcome<List<Organization>> getAllOrganization();
 
-	ServiceOutcome<Organization> getOrganizationById(Long organizationId);
+    ServiceOutcome<Organization> getOrganizationById(Long organizationId);
 
-	ServiceOutcome<Organization> activeAndInactiveOrganizationById(Long organizationId, Boolean isActive);
+    ServiceOutcome<Organization> activeAndInactiveOrganizationById(Long organizationId, Boolean isActive);
 
-	ServiceOutcome<List<Source>> getAllSource();
-	
-	ServiceOutcome<List<ServiceMaster>> saveOrganizationBilling(Long organizationId,List<ServiceMasterDto> serviceMaster);
+    ServiceOutcome<List<Source>> getAllSource();
 
-	ServiceOutcome<List<ServiceMaster>> getAllServicesByOrganizationId(Long organizationId);
+    ServiceOutcome<List<ServiceMaster>> saveOrganizationBilling(Long organizationId, List<ServiceMasterDto> serviceMaster);
 
-	ServiceOutcome<ServiceConfigurationDto> saveOrganizationServiceConfiguration(ServiceConfigurationDto serviceConfigurationDto);
+    ServiceOutcome<List<ServiceMaster>> getAllServicesByOrganizationId(Long organizationId);
 
-	ServiceOutcome<List<Color>> getAllColor();
+    ServiceOutcome<ServiceConfigurationDto> saveOrganizationServiceConfiguration(ServiceConfigurationDto serviceConfigurationDto);
 
-	ServiceOutcome<List<ServiceTypeConfig>> getServiceTypeConfigByOrgId(Long organizationId);
+    ServiceOutcome<List<Color>> getAllColor();
 
-	ServiceOutcome<ToleranceConfig> getToleranceConfigByOrgId(Long organizationId);
+    ServiceOutcome<List<ServiceTypeConfig>> getServiceTypeConfigByOrgId(Long organizationId);
 
-	ServiceOutcome<List<SourceServiceListDto>> getSourceServiceList(Long organizationId);
+    ServiceOutcome<ToleranceConfig> getToleranceConfigByOrgId(Long organizationId);
 
-	ServiceOutcome<List<OrganizationDto>> getOrganizationListAfterBilling();
-	
-	List<OrganizationExecutive> getOrganizationExecutiveByOrganizationId(Long organizationId);
+    ServiceOutcome<List<SourceServiceListDto>> getSourceServiceList(Long organizationId);
 
-	ServiceOutcome<Boolean> getShowvalidation (Long organizationId);
+    ServiceOutcome<List<OrganizationDto>> getOrganizationListAfterBilling();
 
-	ServiceOutcome<List<VendorMasterNew>> getAllVendorServicesUserId(Long organizationId);
+    List<OrganizationExecutive> getOrganizationExecutiveByOrganizationId(Long organizationId);
 
-	ServiceOutcome<List<VendorMasterNew>> saveVendorChecks(Long userId, List<VendorMasterDto> vendorMasterNew);
+    ServiceOutcome<Boolean> getShowvalidation(Long organizationId);
 
-	ServiceOutcome<Boolean> saveclientscopeInformation(MultipartFile file);
+    ServiceOutcome<List<VendorMasterNew>> getAllVendorServicesUserId(Long organizationId);
 
-	ServiceOutcome<List<VendorCheckStatusMaster>> getAllVenorcheckStatus();
+    ServiceOutcome<List<VendorMasterNew>> saveVendorChecks(Long userId, List<VendorMasterDto> vendorMasterNew);
+
+    ServiceOutcome<Boolean> saveclientscopeInformation(MultipartFile file);
+
+    ServiceOutcome<List<VendorCheckStatusMaster>> getAllVenorcheckStatus();
+
+    ServiceOutcome<List<VendorCheckStatusMaster>> getAllVenorcheckStatusForVendor();
 }

@@ -22,9 +22,6 @@ public class CandidateEPFOResponse {
 	
 	@Column(name = "uan")
 	private String uan;
-
-	@Column(name = "uan_nme")
-	private String uanName;
 	
 	@Column(name = "created_timestamp")
 	private Date createdOn;

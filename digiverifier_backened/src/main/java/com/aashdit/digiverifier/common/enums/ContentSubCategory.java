@@ -8,7 +8,6 @@ public enum ContentSubCategory {
 	DEGREE_CERTIFICATE,
 	RESUME,
 	PRE_APPROVAL,
-	FINAL,
-	INTERIM
+	FINAL
 	
 }

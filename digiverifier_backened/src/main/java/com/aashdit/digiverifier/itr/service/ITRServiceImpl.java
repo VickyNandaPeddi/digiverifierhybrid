@@ -165,11 +165,6 @@ public class ITRServiceImpl implements ITRService {
 		ServiceOutcome<String> result = new ServiceOutcome<String>();
 		if(StringUtils.isNoneBlank(accessToken) || StringUtils.isNoneBlank(iTRDetails.getCandidateCode())
 				|| StringUtils.isNoneBlank(iTRDetails.getUserName()) || StringUtils.isNoneBlank(iTRDetails.getPassword())) {
-			
-			Candidate candidate = candidateRepository.findByCandidateCode(iTRDetails.getCandidateCode());
-			candidate.setItrPanNumber(iTRDetails.getUserName());
-			candidateRepository.save(candidate);
-			
 			ResponseEntity<String> response = null;
 			HttpHeaders headers = new HttpHeaders();
 			setHeaderDetails(headers);
@@ -262,13 +257,11 @@ public class ITRServiceImpl implements ITRService {
 						outcome.setMessage(obj.getString("message"));
 					}else {
 						String itrDetails = obj.getString("message");
-						System.out.println(itrDetails+"itrDetails");
 						if(response.getStatusCode() == HttpStatus.OK && !itrDetails.equals("")) {
 			        		log.info("Post Login Information retrieved successfully");
 			        		JSONObject form26ASInfo = new JSONObject(itrDetails).getJSONObject("Form26ASInfo");
 							resMsg = form26ASInfo.toString();
-			        		JSONArray tDSDetails = form26ASInfo.getJSONArray("TDSDetails");	
-							System.out.println(tDSDetails+"tDSDetailsssss");
+			        		JSONArray tDSDetails = form26ASInfo.getJSONArray("TDSDetails");		
 			        		List<ITRDataFromApiDto> finalItrList = new ArrayList<ITRDataFromApiDto>();
 			        		for(int i=0; i<tDSDetails.length();i++) {
 			        			JSONObject object = tDSDetails.getJSONObject(i);
@@ -376,27 +369,6 @@ public class ITRServiceImpl implements ITRService {
 					canditateItrEpfoResponse.setCreatedOn(new Date());
 					canditateItrEpfoResponse.setLastUpdatedOn(new Date());
 					canditateItrEpfoResponseRepository.save(canditateItrEpfoResponse);
-					String itrDetails = obj.getString("message");
-					JSONObject form26ASInfo = new JSONObject(itrDetails).getJSONObject("Form26ASInfo");
-					JSONArray personalDetails = form26ASInfo.getJSONArray("PersonalDetails");
-					System.out.println(personalDetails+"tDSDetails")	;
-					for(int i=0; i<personalDetails.length();i++) {
-						JSONObject object = personalDetails.getJSONObject(i);
-						if(object.length()!=0) {
-							JSONObject name = object.getJSONObject("$");
-							candidate.setPanDob(name.getString("dob"));
-							candidate.setPanName(name.getString("name"));
-							System.out.println(name.getString("dob")+"****"+name.getString("name")+"personal data");
-							candidateRepository.save(candidate);
-						}
-					}
-					
-					
-					// String name = personalDetails.getString("$");
-					// candidate.setPanDob(name.getString("dob"));
-					// candidate.setPanName(name.getString("name"));
-					// System.out.println(name.getString("dob")+"****"+name.getString("name")+"personal data");
-					// candidateRepository.save(candidate);
 					return outcome;
 		        }catch (Exception jsn) {
 		        	log.error("Exception occured in itr: ",jsn); 

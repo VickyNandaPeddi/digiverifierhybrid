@@ -1,14 +1,10 @@
 package com.aashdit.digiverifier.digilocker.controller;
 import java.io.IOException;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
 
 import com.aashdit.digiverifier.globalConfig.EnvironmentVal;
-
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,8 +23,6 @@ import com.aashdit.digiverifier.constants.DigilockerConstants;
 import com.aashdit.digiverifier.digilocker.service.DigilockerService;
 import com.aashdit.digiverifier.digilocker.dto.DigiLockerDetailsDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.http.MediaType;
 
 import io.swagger.annotations.ApiOperation;
@@ -53,26 +47,6 @@ public class DigilockerAccessController {
 	
 	@Autowired
 	private EnvironmentVal environmentVal;
-
-
-	@ApiOperation(value = "Getting the access code from Digilocker site")
-	@GetMapping(value = "/checkAgnetMail/{employeid}")
-    public void redirectAgent(@PathVariable String employeid,HttpServletResponse res){
-		try {
-			if(employeid!=null) {
-				res.sendRedirect(environmentVal.getAgentcreatepasswrd()+employeid);
-				System.out.println("now i am in digicontroller");
-
-			}
-		// 	else {
-		// 		log.error("CANDIDATE CODE NAHI--->Candidate code is either empty or null-->"+employeid);
-		// }
-		
-		
-		}catch(Exception e) {
-			log.error("Something went wrong in redirect method-->"+employeid,e);
-		}
-    }
 	
 	@ApiOperation(value = "Getting the access code from Digilocker site")
 	@GetMapping(value = "/checkMail/{candidateCode}")
@@ -99,18 +73,15 @@ public class DigilockerAccessController {
 				case "DIGILOCKER":
 					if(candidate.getData().getCandidate().getIsFresher()==null) {
 						res.sendRedirect(environmentVal.getIsFreshPage()+candidateCode);
-						log.info("Is fresher page url {}", environmentVal.getIsFreshPage());
 					}else {
 						if(!candidate.getData().getCandidate().getIsFresher()) {
 							if(configCodes.getOutcome()) {
 								if(configCodes.getData().contains("ITR") && candidate.getData().getStatusMaster().getStatusCode().equals("DIGILOCKER")) {
 									ServiceOutcome<ServiceSourceMaster> ssm = serviceSource.getServiceSourceMasterByServiceCode("DIGILOCKER");
-//									res.sendRedirect(ssm.getData().getServiceApi()+candidateCode);
-									res.sendRedirect(environmentVal.getITRLogin()+candidateCode);
+									res.sendRedirect(ssm.getData().getServiceApi()+candidateCode);
 								}else if(configCodes.getData().contains("EPFO") && !candidate.getData().getCandidate().getIsUanSkipped() && (candidate.getData().getStatusMaster().getStatusCode().equals("DIGILOCKER") || candidate.getData().getStatusMaster().getStatusCode().equals("ITR"))) {
 									ServiceOutcome<ServiceSourceMaster> ssm = serviceSource.getServiceSourceMasterByServiceCode("ITR");
-//									res.sendRedirect(ssm.getData().getServiceApi()+candidateCode);
-									res.sendRedirect(environmentVal.getEPFOLogin()+candidateCode);
+									res.sendRedirect(ssm.getData().getServiceApi()+candidateCode);
 								}else if(configCodes.getData().contains("RELBILLTRUE") && (candidate.getData().getStatusMaster().getStatusCode().equals("DIGILOCKER") || candidate.getData().getStatusMaster().getStatusCode().equals("ITR")|| candidate.getData().getStatusMaster().getStatusCode().equals("EPFO"))) {
 									res.sendRedirect(environmentVal.getRelativeBillPage()+candidateCode);
 								}else {
@@ -132,8 +103,7 @@ public class DigilockerAccessController {
 							res.sendRedirect(environmentVal.getUanConfirmPage()+candidateCode+"/1");
 						}else if(configCodes.getData().contains("EPFO") && !candidate.getData().getCandidate().getIsUanSkipped()) {
 							ServiceOutcome<ServiceSourceMaster> ssm = serviceSource.getServiceSourceMasterByServiceCode("ITR");
-//							res.sendRedirect(ssm.getData().getServiceApi()+candidateCode);
-							res.sendRedirect(environmentVal.getEPFOLogin()+candidateCode);
+							res.sendRedirect(ssm.getData().getServiceApi()+candidateCode);
 						}else if(configCodes.getData().contains("EPFO") && candidate.getData().getCandidate().getIsUanSkipped()) {
 							//res.sendRedirect(environmentVal.getUanConfirmPage()+candidateCode+"/2");
 							if(configCodes.getData().contains("RELBILLTRUE")) {
@@ -222,12 +192,10 @@ public class DigilockerAccessController {
 	 */
 	@ApiOperation(value = "generating an access token from the Digilocker site")
 	@GetMapping(value = "/getDigilockerDetails")
-	public ServiceOutcome<String> getDigilockerDetails(String code,String state,HttpServletResponse response) throws JsonProcessingException, IOException {
+	public ResponseEntity<String> getDigilockerDetails(String code,String state,HttpServletResponse response) throws JsonProcessingException, IOException {
 		System.out.println("code:"+code);
-		//String message = digilockerService.getDigilockerDetails(code,state,response,"SELF");
-		ServiceOutcome<String> outcome = digilockerService.getDigilockerDetails(code,state,response,"SELF");
-		//return new ResponseEntity<>(message, HttpStatus.OK);
-		return outcome;
+		String message = digilockerService.getDigilockerDetails(code,state,response,"SELF");
+		return new ResponseEntity<>(message, HttpStatus.OK);
     }
 	
 	public String decodeBase64(String encodedData){
@@ -272,12 +240,9 @@ public class DigilockerAccessController {
 	
 	@ApiOperation(value = "generating an access token from the Digilocker site and get relationship address details.")
 	@GetMapping(value = "/getRelationDigilockerDetails" )
-	public ServiceOutcome<String> getRelationDigilockerDetails(String code,String state,HttpServletRequest req,HttpServletResponse response) throws JsonProcessingException, IOException {
-		System.out.println("req state param :"+ req.getParameter("state"));
-		//String message = digilockerService.getDigilockerDetails(code,state,response,"RELATION");
-		ServiceOutcome<String> outcome = digilockerService.getDigilockerDetails(code,state,response,"RELATION");
-		//return new ResponseEntity<>(message, HttpStatus.OK);
-		return outcome;
+	public ResponseEntity<String> getRelationDigilockerDetails(String code,String state,HttpServletResponse response) throws JsonProcessingException, IOException {
+		String message = digilockerService.getDigilockerDetails(code,state,response,"RELATION");
+		return new ResponseEntity<>(message, HttpStatus.OK);
     }
 	
 	private String createAccessCodeUriForRelation(String state) {
@@ -327,36 +292,10 @@ public class DigilockerAccessController {
 		return new ResponseEntity<ServiceOutcome<String>>(new ServiceOutcome<>(), HttpStatus.OK);
 	}
 
-	//New API FOR DIrecting user to digilocker original login screen  (23-06-2023)
-	
-		@ApiOperation(value = "New API for redirecting user to digilocker original login screen")
-		@PostMapping(value = "/getDigiLockerdetail")
-		public ServiceOutcome<String> getDigiLockerdetail(@RequestBody DigiLockerDetailsDto digilockerDetails,HttpServletResponse res){
-			System.out.println(digilockerDetails+"digi request----------------details");
-			ServiceOutcome<String> response = new ServiceOutcome();
-			if(StringUtils.isNotEmpty(digilockerDetails.getCandidateCode()) && StringUtils.isNotEmpty(digilockerDetails.getAadhaar())) {
-			 try {
-		        String digilockerDetailsString =digilockerDetails.getAadhaar()+"_"+digilockerDetails.getCandidateCode();
-		        System.out.println(digilockerDetailsString+"digi request----------------details in JsonString");
-		        
-		        //create the full authorize url for redirecting to digi login
-		        String redirectToLogin = createAccessCodeUriForRelation(digilockerDetailsString);
-		        System.out.println(redirectToLogin+"digi----------------Login Page URI");
-		        
-		        // res.sendRedirect(redirectToLogin);
-				response.setData(redirectToLogin);
-				log.info("response {}", response);
-			 }catch(Exception e) {
-				log.error("Something went wrong in getDigiLockerLogin redirect method-->"+e);
-			 }
-			}
-
-			return response;
-		}
 	
 
 	@ApiOperation(value = "Getting the digi details from Digilocker site")
-	@PostMapping(value = "/getDigiLockerdetail_old")
+	@PostMapping(value = "/getDigiLockerdetail")
 	public ServiceOutcome<String> getDigiLockerdetail(@RequestBody DigiLockerDetailsDto digilockerDetails){
 		System.out.println(digilockerDetails+"digi----------------details");
 		ServiceOutcome<String> response =  digilockerService.getDigiLockerdetail(digilockerDetails);

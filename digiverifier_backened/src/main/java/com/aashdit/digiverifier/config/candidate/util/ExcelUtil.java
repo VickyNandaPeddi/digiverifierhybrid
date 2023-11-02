@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -19,20 +18,13 @@ import com.aashdit.digiverifier.config.admin.model.User;
 import com.aashdit.digiverifier.config.candidate.model.Candidate;
 import com.aashdit.digiverifier.config.candidate.model.SuspectClgMaster;
 import com.aashdit.digiverifier.config.candidate.model.SuspectEmpMaster;
-import com.aashdit.digiverifier.config.superadmin.repository.OrganizationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import java.time.LocalDate;
-import java.util.Date;
 // import java.util.concurrent.ThreadLocalRandom; 
-import com.aashdit.digiverifier.common.util.RandomString;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @Slf4j
 public class ExcelUtil {
-	@Autowired
-	private OrganizationRepository organizationRepository;
 	 public static String TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 	  public static boolean hasExcelFormat(MultipartFile file) {
@@ -43,95 +35,33 @@ public class ExcelUtil {
 	  }
       
 	  public  List<Candidate> excelToCandidate(InputStream is) {
-	        try {
-	              ArrayList<Candidate> candidateList = new ArrayList<Candidate>();
-	              XSSFWorkbook workbook = new XSSFWorkbook(is);
-	              XSSFSheet worksheet = workbook.getSheetAt(0);
-	              for(int i=1;i<worksheet.getPhysicalNumberOfRows() ;i++) {
-	                  Candidate candidate = new Candidate();
+	    try {
+	    	  ArrayList<Candidate> candidateList = new ArrayList<Candidate>();
+	    	  XSSFWorkbook workbook = new XSSFWorkbook(is);
+	          XSSFSheet worksheet = workbook.getSheetAt(0);
+			    java.util.Random r = new java.util.Random();
+				int start =1000;
+				int end = 10000;
+				int result = r.nextInt(end-start) + start;
+			  for(int i=1;i<worksheet.getPhysicalNumberOfRows() ;i++) {
+				  Candidate candidate = new Candidate();
 
-	                    XSSFRow row = worksheet.getRow(i);
-	                    XSSFRow header = worksheet.getRow(0);
-	                    log.info("xls heading row {}", header.getLastCellNum());
-	                    if(!getCellValue(row, 0).equals("") && !getCellValue(row, 1).equals("")){
-	                        candidate.setCandidateName(getCellValue(row, 0));
-	                        candidate.setEmailId(getCellValue(row, 1));
-
-	                        candidate.setContactNumber(getCellValue(row, 2));
-
-
-	                        if(!getCellValue(row, 7).trim().isEmpty()|| getCellValue(row, 7).trim().equals("")) {
-
-	                            candidate.setAccountName(null);
-//	                            candidate.setShowvalidation(false);
-	                            System.out.println("AccountName is null= "+candidate.getAccountName());
-
-	                        }
-
-	                            if(getCellValue(row, 7).isEmpty()) {
-	                            System.out.println("dhjfgsjfdhj");
-	                            candidate.setAccountName(getCellValue(row, 6));
-	                            candidate.setShowvalidation(false);
-
-	                             }
-
-	                            if(!getCellValue(row, 7).isEmpty()) {
-
-	                                if(!getCellValue(row, 6).isEmpty()) {
-	                                     System.out.println("getCEllValue::"+getCellValue(row, 6));
-	                                    String cellValue = getCellValue(row, 6);
-	                                    System.out.println("CELLVALUE::"+cellValue);
-	                                    if(cellValue.trim().equalsIgnoreCase("true")) {
-	                                    candidate.setShowvalidation(true);
-	                                    System.out.println("True::::::");
-	                                    }
-
-
-	                                        if(cellValue.trim().equalsIgnoreCase("false") || cellValue.trim().equalsIgnoreCase("")) {
-	                                            candidate.setShowvalidation(false);
-	                                            System.out.println("False::::::");
-	                                     }
-	                                            candidate.setAccountName(getCellValue(row, 7));
-
-	                                }
-	                            }
-
-//	                        RandomString rd=null;
-	                        Random rnd = new Random();
-	                        int n = 100000 + rnd.nextInt(900000);
-
-	                        if(header.getLastCellNum() == 7 && getCellValue(header, 3).equals("Applicant Id")) {
-	                            if(!getCellValue(row, 3).equals("")) {
-	                                candidate.setApplicantId(getCellValue(row, 3));
-	                            }
-	                            else {
-//	                                rd = new RandomString(12);
-	                                candidate.setApplicantId(String.valueOf(n));
-	                            }
-
-	                            candidate.setCcEmailId(getCellValue(row, 4));
-	                            candidate.setExperienceInMonth(!getCellValue(row, 5).equals("")?Integer.valueOf(getCellValue(row, 5)):null);
-
-	                        } else {
-
-	                            candidate.setApplicantId(String.valueOf(n));
-	                            candidate.setCcEmailId(getCellValue(row, 4));
-
-	                            candidate.setExperienceInMonth(!getCellValue(row, 5).equals("")?Integer.valueOf(getCellValue(row, 5)):null);
-
-	                        }
-
-	                        candidateList.add(candidate);
-	                    }
-	                }
-
-	              return candidateList;
-	            }
-
-	              catch (IOException e) {
-	              throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
-	            }
-	      }
+		            XSSFRow row = worksheet.getRow(i);
+		            if(!getCellValue(row, 0).equals("") && !getCellValue(row, 1).equals("")){
+		            	candidate.setCandidateName(getCellValue(row, 0));
+						candidate.setEmailId(getCellValue(row, 1));
+						candidate.setContactNumber(getCellValue(row, 2));
+						candidate.setApplicantId(String.valueOf(result));
+						candidate.setCcEmailId(getCellValue(row, 3));
+						candidate.setExperienceInMonth(!getCellValue(row, 5).equals("")?Integer.valueOf(getCellValue(row, 4)):null);
+						candidateList.add(candidate);
+		            }
+		        }
+		      return candidateList;
+		    } catch (IOException e) {
+		      throw new RuntimeException("fail to parse Excel file: " + e.getMessage());
+		    }
+	  }
 	  
 	  private String getCellValue(Row row, int cellNo) {
 		  String cellValue=null;
@@ -173,7 +103,7 @@ public class ExcelUtil {
 		    }
 	}
 
-	public List<SuspectEmpMaster> excelToSuspectEmpMaster(InputStream inputStream,Long organizationId) {
+	public List<SuspectEmpMaster> excelToSuspectEmpMaster(InputStream inputStream) {
 		try {
 	    	  ArrayList<SuspectEmpMaster> suspectEmpMasterList = new ArrayList<SuspectEmpMaster>();
 	    	  XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
@@ -181,17 +111,15 @@ public class ExcelUtil {
 			  for(int i=1;i<worksheet.getPhysicalNumberOfRows() ;i++) {
 				  SuspectEmpMaster suspectEmpMaster = new SuspectEmpMaster();
 		            XSSFRow row = worksheet.getRow(i);
-		            if(!getCellValue(row, 0).equals("")) {
-						 
-		            	suspectEmpMaster.setSuspectCompanyName(getCellValue(row, 0));
-			            suspectEmpMaster.setAddress(getCellValue(row, 1));
-						
+		            if(!getCellValue(row, 1).equals("")) {
+		            	suspectEmpMaster.setSuspectCompanyName(getCellValue(row, 1));
+			            suspectEmpMaster.setAddress(getCellValue(row, 2));
+			            suspectEmpMaster.setLocation(getCellValue(row, 3));
+			            suspectEmpMaster.setCatagory(getCellValue(row, 4));
+			            suspectEmpMaster.setApprovalDate(getCellValue(row, 5));
+			            suspectEmpMaster.setVendor(getCellValue(row, 6));
 			            suspectEmpMaster.setIsActive(true);
-						suspectEmpMaster.setOrganization(organizationRepository.findById(organizationId).get());
-						suspectEmpMaster.setCreatedOn(new Date());
-						
 			            suspectEmpMasterList.add(suspectEmpMaster);
-						
 		            }
 		            
 		        }

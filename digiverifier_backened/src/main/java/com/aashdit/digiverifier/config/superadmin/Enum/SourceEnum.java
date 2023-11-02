@@ -5,7 +5,5 @@ public enum SourceEnum {
 	EPFO,
 	ADMIN,
 	CONVENTIONAL,
-	DIGILOCKER,
-	AADHAR,
-	CANDIDATE
+	DIGILOCKER
 }

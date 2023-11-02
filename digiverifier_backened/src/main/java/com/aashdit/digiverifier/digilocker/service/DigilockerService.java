@@ -6,8 +6,7 @@ import com.aashdit.digiverifier.common.model.ServiceOutcome;
 
 public interface DigilockerService {
 
-	//String getDigilockerDetails(String code, String state, HttpServletResponse response, String action);
-	ServiceOutcome<String> getDigilockerDetails(String code, String state, HttpServletResponse response, String action);
+	String getDigilockerDetails(String code, String state, HttpServletResponse response, String action);
 	
 	String getUserDetails(String accessToken,String code, String candidateCode,HttpServletResponse res, String action);
 

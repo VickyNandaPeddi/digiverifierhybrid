@@ -23,16 +23,12 @@ export class CandidateMgmtComponent implements OnInit {
   setfromDate:any;
   settoDate:any;
   initToday:any;
-  originalData: any=[];
-  candidateCode: any;
-  getStatus:any=[];
-  selectedFilter: any;
   dashboardFilter = new FormGroup({
     fromDate: new FormControl('', Validators.required),
     toDate: new FormControl('', Validators.required)
   });
   constructor(private orgadmin: OrgadminDashboardService, public calendar: NgbCalendar, 
-    private customer: CustomerService, private customers:CustomerService) {
+    private customer: CustomerService) {
     var userId:any = localStorage.getItem('userId');
       var fromDate:any = localStorage.getItem('dbFromDate');
       var toDate:any = localStorage.getItem('dbToDate');
@@ -42,21 +38,10 @@ export class CandidateMgmtComponent implements OnInit {
         'toDate': toDate,
         'status': 'NEWUPLOAD'
       }
-      // this.orgadmin.getChartDetails(filterData).subscribe((data: any)=>{
-      //   this.candidateData=data.data.candidateDtoList;
-      //   console.log(this.candidateData);
-      // });
-
-      this.orgadmin.getChartDetails(filterData).subscribe((data: any) => {
-        this.originalData = data.data.candidateDtoList;
-        this.candidateData = this.originalData;
-        console.log(this.candidateData);            
+      this.orgadmin.getChartDetails(filterData).subscribe((data: any)=>{
+        this.candidateData=data.data.candidateDtoList;
+        console.log(this.candidateData);
       });
-
-      this.customers.getAllStatus().subscribe((data: any)=>{
-        this.getStatus=data.data;
-        console.log(this.getStatus);
-      })
       this.defaultColDef = {
         sortable: true,
         resizable: true,
@@ -146,27 +131,6 @@ export class CandidateMgmtComponent implements OnInit {
       });
     }
    }
-
-  SelectedFilter() {
-    const selectedFilter = this.selectedFilter;    
-    if (!selectedFilter || selectedFilter === "all") {
-      if (this.originalData) {
-        this.candidateData = this.originalData;
-        this.candidateCode = this.candidateData.length > 0 ? this.candidateData[0].candidateId : null;
-        console.log(this.candidateData);
-      } else { 
-      this.orgadmin.getChartDetails(selectedFilter).subscribe((data: any) => {
-        this.originalData = data.data.candidateDtoList;
-        this.candidateData = this.originalData;
-        this.candidateCode = this.candidateData.length > 0 ? this.candidateData[0].candidateId : null;
-        console.log(this.candidateData);
-      });
-      } 
-      } else {
-      this.candidateData = this.originalData.filter((temp: any) => temp.candidateStatusName === selectedFilter);
-      this.candidateCode = this.candidateData.length > 0 ? this.candidateData[0].candidateId : null;
-      }
-  }
 
    onBtExport() {
     this.gridApi.exportDataAsCsv();

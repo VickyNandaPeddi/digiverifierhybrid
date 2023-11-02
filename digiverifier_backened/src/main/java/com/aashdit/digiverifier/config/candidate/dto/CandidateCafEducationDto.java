@@ -40,8 +40,6 @@ public class CandidateCafEducationDto {
 	
 	private String remarkMasterDescription;
 	
-	private String customRemark;
-	
 	private String candidateRollNumber;
 	
 	private Long suspectClgMasterId;

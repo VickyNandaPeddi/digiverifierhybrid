@@ -38,6 +38,4 @@ public class CandidateCafAddressDto {
 	private String state;
 	
 	private byte[] addressVerificationCandidateCafRelationshipDocumentUploaded;
-	
-	private String customRemark;
 }

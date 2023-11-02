@@ -8,6 +8,6 @@ import java.util.Date;
 public class EmploymentTenureVerificationDto extends CommonVerificationDto {
 	private Date doj;
 	private String employerName;
-	private String customRemark;
-	private Long candidateCafExperienceId;
+	
+	
 }

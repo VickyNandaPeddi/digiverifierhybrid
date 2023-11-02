@@ -13,8 +13,6 @@ import lombok.Data;
 public class EmailProperties {
 	
 	private String digiverifierForwardUrllink;
-
-	private String digiverifierAgentUrllink;
 	
 	private String digiverifierEmailSenderId;
 	

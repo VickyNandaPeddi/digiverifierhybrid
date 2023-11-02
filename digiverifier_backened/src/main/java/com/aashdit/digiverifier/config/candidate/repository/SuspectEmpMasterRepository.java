@@ -11,17 +11,10 @@ public interface SuspectEmpMasterRepository extends JpaRepository<SuspectEmpMast
 
 	List<SuspectEmpMaster> findAllByIsActiveTrue();
 
-	List<SuspectEmpMaster> findAllByOrganizationOrganizationIdAndIsActiveTrue(Long organizationId);
-
 	List<SuspectEmpMaster> findAllByIsActiveTrueOrderBySuspectEmpMasterIdAsc();
 
 	@Query("FROM SuspectEmpMaster where isActive=true AND suspectEmpMasterId > 0 order by suspectCompanyName ASC")
 	List<SuspectEmpMaster> findAllByIsActiveTrueOrderBySuspectCompanyNameAsc();
-
-	List<SuspectEmpMaster> findAllByOrganizationOrganizationId(Long organizationId);
-
-
-	void deleteById(Long id);
 
 
 }

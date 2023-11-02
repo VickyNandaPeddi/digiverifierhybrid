@@ -15,6 +15,7 @@ import { LoaderService } from './services/loader.service';
 import { LoaderInterceptor } from './services/loader.interceptor';
 import { NgbDateCustomParserFormatter } from './services/ngb-date-parser-formatter.service';
 import * as $ from 'jquery';
+
 //import $ from 'jquery';
 @NgModule({
   declarations: [
@@ -33,15 +34,18 @@ import * as $ from 'jquery';
     NgbDatepickerModule
   ],
   providers: [
-    AdminGuard,
+    AdminGuard, LoaderService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true
-    },AuthenticationService,
+    }, AuthenticationService,
     LoaderService,
-    { provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptor, multi: true }, 
-    { provide: NgbDateParserFormatter, useClass: NgbDateCustomParserFormatter } 
+    {provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptor, multi: true},
+    {provide: NgbDateParserFormatter, useClass: NgbDateCustomParserFormatter}
+  ],
+  exports: [
+    LoaderComponent
   ],
   bootstrap: [AppComponent]
 })

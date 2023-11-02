@@ -69,7 +69,7 @@
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>SI#</th>
+                                        <th>S.No</th>
                                         <th>Degree</th>
                                         <th>College</th>
                                         <th>University/Board</th>
@@ -90,16 +90,17 @@
                                         <td>{{item.percentage}}</td>
                                         <td><span class=" bg-result" [style.color]="item.colorColorHexCode">{{ item.colorColorName }}</span></td>
                                         <td class="btngroup">
-                                            <!-- <span *ngIf="item.colorColorName == 'Green'">No Action</span> -->
-                                            <button type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit" 
+                                            <span *ngIf="item.colorColorName == 'Green'">No Action</span>
+
+                                            <button *ngIf="item.colorColorName !== 'Green'" type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit" 
                                             id="edit{{i}}" (click)="openEducationModal(modalEducation, item.candidateCafEducationId,
                                             item.qualificationId,item.qualificationName,item.schoolOrCollegeName,
-                                                                item.boardOrUniversityName,item.yearOfPassing,item.percentage, item.colorColorCode, item.customRemark)">
+                                                                item.boardOrUniversityName,item.yearOfPassing,item.percentage)">
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             <button *ngIf="item.colorColorName !== 'Green'" type="button" (click)="inactiveCustEducation(item.candidateCafEducationId)" class="btn btn-danger btn-sm" title="delete" data-toggle="tooltip"><i class="fas fa-times"></i></button>
                                         </td>
-                                        <td>{{item.customRemark == null?'Not Available' : item.customRemark}}</td>
+                                        <td>{{item.remarkMasterDescription}}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -131,7 +132,7 @@
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>SI#</th>
+                                        <th>S.No</th>
                                         <th>Company Name</th>
                                         <th>DOJ</th>
                                         <th>DOE</th>
@@ -148,15 +149,15 @@
                                         <td>{{ i==0 && item.inputDateOfExit == null?'Not-Available': item.inputDateOfExit}}</td>
                                         <td><span class=" bg-result" [style.color]="item.colorColorHexCode">{{ item.colorColorName }}</span></td>
                                         <td>
-                                            <!-- <span *ngIf="item.colorColorName == 'Green'">No Action</span> -->
-                                            <button type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit" 
+                                            <span *ngIf="item.colorColorName == 'Green'">No Action</span>
+                                            <button *ngIf="item.colorColorName !== 'Green'" type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit" 
                                             id="edit{{i}}" (click)="openExperienceModal(modalExperience, item.candidateCafExperienceId,
-                                            item.candidateEmployerName, item.inputDateOfJoining, item.inputDateOfExit, item.colorColorCode, item.customRemark)">
+                                            item.candidateEmployerName, item.inputDateOfJoining, item.inputDateOfExit)">
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             <button *ngIf="item.colorColorName !== 'Green'" type="button" (click)="inactiveCust(item.candidateCafExperienceId)" class="btn btn-danger btn-sm" data-toggle="tooltip"><i class="fas fa-times"></i></button>
                                         </td>
-                                        <td>{{ item.customRemark == null?'Not Available' : item.customRemark}}</td>
+                                        <td>{{ item.remarkMasterDescription == null?'Not Available' : item.remarkMasterDescription}}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -182,7 +183,7 @@
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th rowspan="3">SI#</th>
+                                        <th rowspan="3">S.No</th>
                                         <th rowspan="3">Name</th>
                                         <th rowspan="3">Address</th>
                                         <th rowspan="3">Source</th>
@@ -219,10 +220,10 @@
                                         <td><i class="fas customColors customIcon customIcon{{ item.isPresentAddress }}"></i></td>
                                         <td><span class=" bg-result" [style.color]="item.colorColorHexCode">{{ item.colorColorName }}</span></td>
                                         <td>
-                                            <!-- <span *ngIf="item.colorColorName == 'Green'">No Action</span> -->
+                                            <span *ngIf="item.colorColorName == 'Green'">No Action</span>
                                             <button class="btn btn-warning btn-sm" title="Edit"
                                             (click)="openModalAddress(modalAddress, item.candidateCafAddressId,item.isAssetDeliveryAddress,
-                                            item.isPermanentAddress,item.isPresentAddress, item.colorColorCode, item.customRemark)">
+                                            item.isPermanentAddress,item.isPresentAddress)">
                                                 <i class="fas fa-pen"></i>
                                             </button>
                                         </td>
@@ -274,7 +275,7 @@
                                             </thead>
                                             <tbody>
                                                 <tr *ngFor="let item of candidateEXPData; let i=index;">
-                                                    <td *ngIf="item.serviceName == 'EPFO'">{{ item.candidateEmployerName }}</td>
+                                                    <td style="text-align: center;" *ngIf="item.serviceName == 'EPFO'">{{ item.candidateEmployerName }}</td>
                                                     <td *ngIf="item.serviceName == 'EPFO'">{{ item.outputDateOfJoining }}</td>
                                                     <td *ngIf="item.serviceName == 'EPFO'">{{ i==0 && item.outputDateOfExit == null?'Not-Available': item.outputDateOfExit}}</td>
                                                 </tr>
@@ -316,7 +317,7 @@
                                         border-bottom: 1px solid black;">
                                             <thead style="display: table-row-group;">
                                                 <tr>
-                                                    <th>SI#</th>
+                                                    <th>S.No</th>
                                                     <th>Financial Year </th>
                                                     <th>TAN</th>
                                                     <th>Deductor</th>
@@ -348,7 +349,7 @@
                             <div class="card-header py-3 d-flex ">
                                 <div class="col-md-5">
                                     <h6 class="m-0 font-weight-bold text-primary">
-                                        ANNEXURE - Iv
+                                        ANNEXURE - IV
                                     </h6>
                                 </div>
                                 <div class="ml-4">
@@ -366,7 +367,7 @@
                                         border-bottom: 1px solid black;">
                                             <thead style="display: table-row-group;">
                                                 <tr>
-                                                    <th>SI#</th>
+                                                    <th>S.No</th>
                                                     <th>vendor name</th>
                                                     <th>Document Name</th>
                                                     <th>View Document</th>
@@ -410,150 +411,6 @@
                                 </div>
                             </div>
                         </div>
-            <!-- start -->
-            <div class="card shadow mb-2">
-                           
-                <div class="card-header py-3 d-flex ">
-                    <div class="col-md-5">
-                        <h6 class="m-0 font-weight-bold text-primary">
-                            ANNEXURE - v
-                        </h6>
-                    </div>
-                    <div class="ml-4">
-                        <h6 class="m-0 font-weight-bold text-dark">
-                            Organization Scope
-                        </h6>
-                    </div>
-                </div>
-               
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-12">
-
-                            <table class=" table table-bordered mt-2" style="
-                            border-bottom: 1px solid black;">
-                                <thead style="display: table-row-group;">
-                                    <tr>
-                                        <th colspan="2" style="text-align: center;">Reasons for Red/Amber</th>
-                                        <th colspan="1" style="text-align: center;">Results</th>
-                                        <th colspan="1" style="text-align: center;">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td style="width: 30%;">Dual Employment (Moonlighting)</td>
-                                        <td style="width: 50%;">{{orgScopeData?.dualEmployment}}</td>
-                                        <td style="width: 10%; text-align: center;">
-                                            <span *ngIf="orgScopeData?.dualEmploymentColorId == 1" class=" bg-result"  style="color: #f54242;">Red</span>
-                                            <span *ngIf="orgScopeData?.dualEmploymentColorId == 2" class=" bg-result"  style="color: #ff9900;">Amber</span>
-                                            <span *ngIf="orgScopeData?.dualEmploymentColorId == 3" class=" bg-result"  style="color: #10c315;">Green</span>
-                                        </td>
-                                        <td style="width: 10%; text-align: center;">
-                                            <button class="btn btn-warning btn-sm" title="Edit"
-                                            id="edit0" (click)="openOrgScopeModal(modalOrgScope, 'Dual Employment')">
-                                                <i class="fas fa-pen"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="width: 30%;">Undisclosed</td>
-                                        <td style="width: 50%;">{{orgScopeData?.undisclosed}}</td>
-                                        <td style="width: 10%; text-align: center;">
-                                            <span *ngIf="orgScopeData?.undisclosedColorId == 1" class=" bg-result"  style="color: #f54242;">Red</span>
-                                            <span *ngIf="orgScopeData?.undisclosedColorId == 2" class=" bg-result"  style="color: #ff9900;">Amber</span>
-                                            <span *ngIf="orgScopeData?.undisclosedColorId == 3" class=" bg-result"  style="color: #10c315;">Green</span>
-                                        </td>
-                                        <td style="width: 10%; text-align: center;">
-                                            <button class="btn btn-warning btn-sm" title="Edit"
-                                            id="edit1" (click)="openOrgScopeModal(modalOrgScope, 'Undisclosed')">
-                                                <i class="fas fa-pen"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="width: 30%;">Data Not Found</td>
-                                        <td style="width: 50%;">{{orgScopeData?.dataNotFound}}</td>
-                                        <td style="width: 10%; text-align: center;">
-                                            <span *ngIf="orgScopeData?.dataNotFoundColorId == 1" class=" bg-result"  style="color: #f54242;">Red</span>
-                                            <span *ngIf="orgScopeData?.dataNotFoundColorId == 2" class=" bg-result"  style="color: #ff9900;">Amber</span>
-                                            <span *ngIf="orgScopeData?.dataNotFoundColorId == 3" class=" bg-result"  style="color: #10c315;">Green</span>
-                                        </td>
-                                        <td style="width: 10%; text-align: center;">
-                                            <button class="btn btn-warning btn-sm" title="Edit"
-                                            id="edit2" (click)="openOrgScopeModal(modalOrgScope, 'Data Not Found')">
-                                                <i class="fas fa-pen"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="width: 30%;">DNH DB</td>
-                                        <td style="width: 50%;">{{orgScopeData?.dnhdb}}</td>
-                                        <td style="width: 10%; text-align: center;">
-                                            <span *ngIf="orgScopeData?.dnhdbcolorId == 1" class=" bg-result"  style="color: #f54242;">Red</span>
-                                            <span *ngIf="orgScopeData?.dnhdbcolorId == 2" class=" bg-result"  style="color: #ff9900;">Amber</span>
-                                            <span *ngIf="orgScopeData?.dnhdbcolorId == 3" class=" bg-result"  style="color: #10c315;">Green</span>
-                                        </td>
-                                        <td style="width: 10%; text-align: center;">
-                                            <button class="btn btn-warning btn-sm" title="Edit"
-                                            id="edit3" (click)="openOrgScopeModal(modalOrgScope, 'DNH DB')">
-                                            
-                                                <i class="fas fa-pen"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="width: 30%;">Tenure Mismatch</td>
-                                        <td style="width: 50%;">{{orgScopeData?.tenureMismatch}}</td>
-                                        <td style="width: 10%; text-align: center;">
-                                            <span *ngIf="orgScopeData?.tenureMismatchColorId == 1" class=" bg-result"  style="color: #f54242;">Red</span>
-                                            <span *ngIf="orgScopeData?.tenureMismatchColorId == 2" class=" bg-result"  style="color: #ff9900;">Amber</span>
-                                            <span *ngIf="orgScopeData?.tenureMismatchColorId == 3" class=" bg-result"  style="color: #10c315;">Green</span>
-                                        </td>
-                                        <td style="width: 10%; text-align: center;">
-                                            <button class="btn btn-warning btn-sm" title="Edit"
-                                            id="edit4" (click)="openOrgScopeModal(modalOrgScope, 'Tenure Mismatch')">
-                                                <i class="fas fa-pen"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="width: 30%;">Overseas Employment</td>
-                                        <td style="width: 50%;">{{orgScopeData?.overseasEmployment}}</td>
-                                        <td style="width: 10%; text-align: center;">
-                                            <span *ngIf="orgScopeData?.overseasEmploymentColorId == 1" class=" bg-result"  style="color: #f54242;">Red</span>
-                                            <span *ngIf="orgScopeData?.overseasEmploymentColorId == 2" class=" bg-result"  style="color: #ff9900;">Amber</span>
-                                            <span *ngIf="orgScopeData?.overseasEmploymentColorId == 3" class=" bg-result"  style="color: #10c315;">Green</span>
-                                        </td>
-                                        <td style="width: 10%; text-align: center;">
-                                            <button class="btn btn-warning btn-sm" title="Edit"
-                                            id="edit5" (click)="openOrgScopeModal(modalOrgScope, 'Overseas Employment')">
-                                                <i class="fas fa-pen"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="width: 30%;">Others</td>
-                                        <td style="width: 50%;">{{orgScopeData?.others}}</td>
-                                        <td style="width: 10%; text-align: center;">
-                                            <span *ngIf="orgScopeData?.othersColorId == 1" class=" bg-result"  style="color: #f54242;">Red</span>
-                                            <span *ngIf="orgScopeData?.othersColorId == 2" class=" bg-result"  style="color: #ff9900;">Amber</span>
-                                            <span *ngIf="orgScopeData?.othersColorId == 3" class=" bg-result"  style="color: #10c315;">Green</span>
-                                        </td>
-                                        <td style="width: 10%; text-align: center;">
-                                            <button class="btn btn-warning btn-sm" title="Edit"
-                                            id="edit6" (click)="openOrgScopeModal(modalOrgScope, 'Others')">
-                                                <i class="fas fa-pen"></i>
-                                            </button>
-                                        </td>
-                                    </tr>                                 
-                                </tbody>
-                            </table>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-            <!-- End -->
 
             <div class="row">
                 <div class="col-md-6" *ngIf="this.getServiceConfigCodes.includes('CRIMINAL')" style="padding-right: 8px;">
@@ -618,9 +475,7 @@
                 <button type="button" (click)="openAddcommentModal(modalAddcomments)" class="btn btn-primary">Add Comments</button>
                 <button type="button" (click)="enteruan()" class="btn btn-primary">Enter UAN</button>
                 <button type="button" (click)="initiatevendor()" class="btn btn-primary">Initiate vendor checks</button>
-                <button type="button"  (click)="submitReportApproval(formReportApproval, 'INTERIMREPORT')" class="btn btn-primary">Generate Interim Report</button>
-                <button type="button"  [disabled]="isCommentAdded"  (click)="submitReportApproval(formReportApproval, 'FINALREPORT')" class="btn btn-primary">Approve Report</button>
-                <!-- <button type="button" [disabled]="isCommentAdded"  (click)="submitReportApproval(formReportApproval, 'FINALREPORT')" class="btn btn-primary">Approve Report</button> -->
+                <button type="button"  (click)="submitReportApproval(formReportApproval)" class="btn btn-primary">Approve Report</button>
             </div>
         </div>
     </div>
@@ -647,7 +502,7 @@
 
 <ng-template #modalEducation let-modal>
     <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title">Educational Verification</h4>
+      <h4 class="modal-title" id="modal-basic-title">Education Status</h4>
       <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
         <span aria-hidden="true">×</span>
       </button>
@@ -662,17 +517,9 @@
                         <select class="form-control form-control-sm" formControlName="qualificationId">
                             <option [ngValue]="null" disabled>--Select--</option>
                             <option *ngFor="let item of QualificationList" [value]="item.qualificationId">{{ item.qualificationName }}</option>
-                        </select>
-                    
-                        </div>
+                        </select>                   
+                    </div>
                 </div>
-        <div class="col-md-12">
-            <div class="form-group">
-                <label for="" class="">Collage</label>
-                <input type="text" class="form-control form-control-sm" formControlName="schoolOrCollegeName">
-            </div>
-        </div>
-            
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="" class="">University/Board</label>
@@ -680,6 +527,12 @@
                             class="form-control form-control-sm">
                     </div>
                 </div>
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="" class="">Collage</label>
+                <input type="text" class="form-control form-control-sm" formControlName="schoolOrCollegeName">
+            </div>
+        </div>  
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="" class="">Year of Passing</label>
@@ -694,7 +547,7 @@
                             class="form-control form-control-sm">
                     </div>
                 </div>
-                <div class="col-md-8 offset-2">
+                <div class="col-md-6">
                     <div class="form-group">
                         <label for="" class="required">Status</label>
                         <select class="form-control form-control-sm" formControlName="colorId">
@@ -703,14 +556,13 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-md-8 offset-2">
+                <div class="col-md-6">
                     <div class="form-group">
                         <label for="" class="required">Remarks</label>
-                        <!-- <select class="form-control form-control-sm" formControlName="remarkId">
+                        <select class="form-control form-control-sm" formControlName="remarkId">
                             <option [ngValue]="null" disabled>--Select--</option>
                             <option *ngFor="let item of getEducationRemarkType" [value]="item.remarkId" >{{ item.description }}</option>
-                        </select> -->
-                        <textarea type="text" class="form-control form-control-sm" formControlName="customRemark"> </textarea>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -759,46 +611,6 @@
     </div>
 </ng-template>
 
-<ng-template #modalOrgScope let-modal>
-    <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title">Organization Scope Status</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-        <span aria-hidden="true">×</span>
-      </button>
-    </div>
-    <div class="modal-body">
-        <!-- <form > -->
-            <form [formGroup]="formEditScope" (ngSubmit)="submitEditScope()">
-            <input type="hidden"  formControlName="id">
-
-            <div class="col-md-8 offset-2"> 
-                    <div class="form-group">
-                        <label for="" class="required">Result</label>
-                        <select class="form-control form-control-sm" formControlName="colorId">
-                            <!-- <option [ngValue]="null" disabled>{{ item.colorColorName }}</option> -->
-                            <option [ngValue]="null" disabled>--Select--</option>
-                            <option *ngFor="let item of getColors" [value]="item.colorId" >{{ item.colorName }}</option>
-                        </select>
-                    </div>
-            </div>
-
-            <div class="col-md-8 offset-2">
-                <div class="form-group">
-                    <label for="" class="required">Remarks</label> 
-                    <textarea type="text" class="form-control form-control-sm" formControlName="customRemark"> </textarea>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12 text-center mt-3 pb-3">
-                    <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-                    <button type="button" class="btn btn-danger btn-sm" (click)="modal.close('Save click')">Close</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</ng-template>
-
 
 
 <ng-template #modalExperience let-modal>
@@ -812,50 +624,49 @@
         <form [formGroup]="formEditEXP" (ngSubmit)="submitEditEXP()">
             <input type="hidden"  formControlName="id">
             <div class="row " >
-                <div class="col-md-10">
+                <div class="col-md-12">
                     <div class="form-group">
                         <label for="" class="required">Company Name</label>
-                        <input type="text" formControlName="candidateEmployerName" >
+                        <input type="text" formControlName="candidateEmployerName" class="form-control form-control-sm" >
                         <!-- value="item1.candidateEmployerName"> -->
-                        <button (click)="suspectEmpCheck()" type="button" style="padding: 0rem !important;margin-left: 10px !important;" class="btn btn-primary btn-sm">Suspect employer check</button>
                     </div>
                 </div>
-                <div class="col-md-10">
+            </div>
+            <div class="row " >
+                <div class="col-md-6">
                      <div class="form-group"> 
                         <label for="" class="required">DOJ</label>
                         <div class="input-group"> 
-                            <input type="date" formControlName="inputDateOfJoining" (click)="fetchjoinDateSelected()">
+                            <input type="date" class="form-control form-control-sm"  [(ngModel)]="getMinDate" formControlName="inputDateOfJoining" (click)="fetchjoinDateSelected()">
                          </div> 
                     </div> 
                 </div>
-                <div class="col-md-10"> 
+                <div class="col-md-6"> 
                     <div class="form-group">
                         <label for="" class="required">DOE</label>
                         <div class="input-group">
-                            <input type="date" formControlName="inputDateOfExit"(click)="fetchexitDateSelected()">
+                            <input type="date" class="form-control form-control-sm" [(ngModel)]="Dateofexit" formControlName="inputDateOfExit"(click)="fetchexitDateSelected()">
                         </div> 
                     </div>
             </div>
-                <div class="col-md-10">
+                <div class="col-md-6">
                     <div class="form-group">
                         <label for="" class="required">Result</label>
                         <select class="form-control form-control-sm" formControlName="colorId">
                             <!-- <option [ngValue]="null" disabled>{{ item.colorColorName }}</option> -->
                             <option [ngValue]="null" disabled>--Select--</option>
-                            <option *ngFor="let item of getAllColor" [value]="item.colorId" >{{ item.colorName }}</option>
+                            <option *ngFor="let item of getColors" [value]="item.colorId" >{{ item.colorName }}</option>
                         </select>
-                        <label *ngIf="suspectEmpCheckResponse" style="font-size: 10px !important; font-weight: 500 !important;" for="" >Result as per suspect employer check {{suspectEmpCheckResponse}}</label>
                     </div>
                 </div>
-                <div class="col-md-10">
+                <div class="col-md-6">
                     <div class="form-group">
                         <label for="" class="required">Remarks</label>
-                        <!-- <select class="form-control form-control-sm" formControlName="remarkId"> -->
+                        <select class="form-control form-control-sm" formControlName="remarkId">
                             <!-- <option [ngValue]="null" disabled>{{ item.remarkMasterDescription == null?'Not Available' : item.remarkMasterDescription}}</option> -->
-                            <!-- <option [ngValue]="null" disabled>--Select--</option>
+                            <option [ngValue]="null" disabled>--Select--</option>
                             <option *ngFor="let item of getEmploymentRemarkType" [value]="item.remarkId" >{{ item.description }}</option>
-                        </select> -->
-                        <textarea type="text" class="form-control form-control-sm" formControlName="customRemark"> </textarea>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -880,27 +691,29 @@
     <div class="modal-body">
         <form [formGroup]="formEditADRS" (ngSubmit)="submitEditADRS()">
             <input type="hidden"  formControlName="id">
-            <div class="row ">
-                <div class="col-md-8 offset-2">
+            <div class="row">
+                <div class="col-md-4 text-center mt-3 pb-3">
                     <div class="form-group">
-                        <label for="" class="">Communication</label>
-                        <input type="checkbox" formControlName="isAssetDeliveryAddress" (change)="roleCboxes($event)"/>
-                        <i class="fas customColors customIcon customIcon"></i>
+                        <label for="" class="">
+                        <input type="checkbox" formControlName="isAssetDeliveryAddress" (change)="roleCboxes($event)"/> Communication</label>
+                        <i class="fas customColors customIcon customIcon"></i> 
                     </div>
                 </div>
-                    <div class="col-md-8 offset-2">
+                    <div class="col-md-4 text-center mt-3 pb-3">
                         <div class="form-group">
-                            <label for="" class="">Present</label>
-                            <input type="checkbox" formControlName="isPermanentAddress" >
+                            <label for="" class="">
+                            <input type="checkbox" formControlName="isPermanentAddress" > Present</label>
                         </div>
                     </div>
-                        <div class="col-md-8 offset-2">
+                        <div class="col-md-4 text-center mt-3 pb-3"> 
                             <div class="form-group">
-                                <label for="" class="">Permanent</label>
-                                <input type="checkbox" formControlName="isPresentAddress" >
+                                <label for="" class="">
+                                <input type="checkbox" formControlName="isPresentAddress" > Permanent</label>
                             </div>
                         </div>
-                <div class="col-md-8 offset-2">
+            </div>
+            <div class="row">
+                <div class="col-md-6">
                     <div class="form-group">
                         <label for="" class="required">Status</label>
                         <select class="form-control form-control-sm" formControlName="colorId">
@@ -909,14 +722,13 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-md-8 offset-2">
+                <div class="col-md-6">
                     <div class="form-group">
                         <label for="" class="required">Remarks</label>
-                        <!-- <select class="form-control form-control-sm" formControlName="remarkId">
+                        <select class="form-control form-control-sm" formControlName="remarkId">
                             <option [ngValue]="null" disabled>--Select--</option>
                             <option *ngFor="let item of getAddressRemarkType" [value]="item.remarkId" >{{ item.description }}</option>
-                        </select> -->
-                        <textarea type="text" class="form-control form-control-sm" formControlName="customRemark"> </textarea>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -1050,7 +862,7 @@
                         <div class="form-group">
                             <label for="" class="col-md-12">Comments:
                             </label>
-                            <div class="col-md-50">
+                            <div class="col-md-12">
                                 <textarea  
                                     formControlName="addComments" style="font-family:sans-serif;font-size:2.1em;" >
                                 </textarea>

@@ -1,75 +1,116 @@
-import { Injectable } from '@angular/core';
-import { HttpClient} from '@angular/common/http';
-import { environment } from 'src/environments/environment';
-import { AuthenticationService } from './authentication.service';
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {environment} from 'src/environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class OrgadminDashboardService {
-  token: any = null;
-  constructor( private http:HttpClient, private authService: AuthenticationService) { 
-    this.token = this.authService.getToken();
+
+  constructor(private http: HttpClient) {
   }
-  
-  getUploadDetails(data:any){
+
+  getUploadDetails(data: any) {
     return this.http.post(`${environment.apiUrl}/api/candidate/getCandidateStatusAndCount`, data);
   }
-  getChartDetails(data:any){
+
+  getChartDetails(data: any) {
     return this.http.post(`${environment.apiUrl}/api/candidate/candidateList`, data);
   }
-  saveInvitationSent(data: any){
+
+  getCandidatesSubmittedDetails() {
+    return this.http.get(`${environment.apiUrl}/api/vendorCheck/findAllSubmittedCandidates`);
+  }
+
+  saveInvitationSent(data: any) {
     return this.http.post(`${environment.apiUrl}/api/candidate/invitationSent`, data);
   }
-  putAgentStat(referenceNo: any){
+
+  putAgentStat(referenceNo: any) {
     return this.http.put(`${environment.apiUrl}/api/candidate/cancelCandidate/${referenceNo}`, referenceNo);
   }
-  getCandidateDetails(referenceNo: any){
+
+  getCandidateDetails(referenceNo: any) {
     return this.http.get(`${environment.apiUrl}/api/candidate/getCandidate/${referenceNo}`, referenceNo);
   }
-  putCandidateData(referenceNo: any){
+
+  putCandidateData(referenceNo: any) {
     return this.http.put(`${environment.apiUrl}/api/candidate/updateCandidate`, referenceNo);
   }
 
-  public setStatusCode(statCode: string){
+  public setStatusCode(statCode: string) {
     localStorage.setItem('statCode', statCode);
     localStorage.removeItem('reportDeliverystatCode');
     localStorage.removeItem('PendingDetailsStatCode');
   }
-  public getStatusCode(){
+
+  public getStatusCode() {
     return localStorage.getItem('statCode');
   }
 
-  public setReportDeliveryStatCode(reportDeliverystatCode: string){
+  public setReportDeliveryStatCode(reportDeliverystatCode: string) {
     localStorage.setItem('reportDeliverystatCode', reportDeliverystatCode);
     localStorage.removeItem('statCode');
     localStorage.removeItem('PendingDetailsStatCode');
   }
-  public getReportDeliveryStatCode(){
+
+  public getReportDeliveryStatCode() {
     return localStorage.getItem('reportDeliverystatCode');
   }
 
-  public setPendingDetailsStatCode(PendingDetailsStatCode: string){
+  public setPendingDetailsStatCode(PendingDetailsStatCode: string) {
     localStorage.setItem('PendingDetailsStatCode', PendingDetailsStatCode);
     localStorage.removeItem('statCode');
     localStorage.removeItem('reportDeliverystatCode');
   }
-  public getPendingDetailsStatCode(){
+
+  public getPendingDetailsStatCode() {
     return localStorage.getItem('PendingDetailsStatCode');
   }
 
-  getReportDeliveryDetails(data:any){
+  public setPendingConventional(PendingConventionalStatCode: string) {
+    localStorage.setItem('PendingConventionalStatCode', PendingConventionalStatCode);
+    localStorage.removeItem('PendingDetailsStatCode');
+    localStorage.removeItem('reportDeliverystatCode');
+  }
+
+  public getPendingConventional() {
+    return localStorage.getItem('PendingConventionalStatCode');
+  }
+
+  getReportDeliveryDetails(data: any) {
     return this.http.post(`${environment.apiUrl}/api/candidate/getReportDeliveryDetailsStatusAndCount`, data);
   }
 
-  getPendingDetailsStatusAndCount(data:any){
+  getPendingDetailsStatusAndCount(data: any) {
     return this.http.post(`${environment.apiUrl}/api/candidate/getPendingDetailsStatusAndCount`, data);
   }
 
-  getUserByOrganizationIdAndUserId(organizationId:any, userId:any){
+
+  getCandidatesSubmittedDetailsByDateRange(data: any) {
+    return this.http.post(`${environment.apiUrl}/api/vendorCheck/findAllSubmittedCandidatesByDateRange`, data);
+  }
+
+  getConventionalUploadDetails(data: any) {
+    return this.http.post(`${environment.apiUrl}/api/candidate/getUploadDetailsStatusAndCountConventional`, data);
+  }
+
+//interim and final for charts
+  findInterimAndFinalReportForDashboard(data: any) {
+    return this.http.post(`${environment.apiUrl}/api/candidate/getConvCandInterimAndFinal`, data);
+  }
+
+//inrim and final for candidte conventional
+  findInterimAndFinalReportForCandidateDetails(data: any) {
+    return this.http.post(`${environment.apiUrl}/api/vendorCheck/findCandidateSubmittedForInterimandFinal`, data);
+  }
+
+  getUserByOrganizationIdAndUserId(organizationId: any, userId: any) {
     return this.http.get(`${environment.apiUrl}/api/user/getUserByOrganizationIdAndUserId/${organizationId}/${userId}`);
   }
 
-  getUsersByRoleCode(organizationId:any){
+
+  getUsersByRoleCode(organizationId: any) {
     return this.http.get(`${environment.apiUrl}/api/user/getUsersByRoleCode/${organizationId}`);
   }
 
@@ -77,7 +118,5 @@ export class OrgadminDashboardService {
     return this.http.get(`${environment.apiUrl}/api/candidate/content?contentId=${contentId}&type=VIEW`);
   }
 
-  getPreSignedUrlByCandidateCode(candidateCode: any) { 
-    return this.http.get(`${environment.apiUrl}/api/report?candidateCode=${candidateCode}&type=INTERIM&Authorization=${this.token}`);
-  }
+
 }

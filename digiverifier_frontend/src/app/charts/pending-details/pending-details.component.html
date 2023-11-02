@@ -2,27 +2,25 @@
         <div class="table-responsive" *ngIf="containerStat">
             <table class="table table-bordered" id="tbl-uploaddetails">
                 <thead>
-                    <th>SI#</th>
+                    <th>S.No</th>
                     <th>Agent Name</th>
                     <th>Candidate Name</th>
                     <th>Contact Number</th>
                     <th>Email ID</th>
-                    <th>Applicant ID</th> 
-                    <th>Status</th>
+                    <th>Applicant ID</th>
                     <th>Data uploaded</th>
                     <th>Invited On</th>
                     <th *ngIf="stat_INVITATIONSENT">Action</th>
                     <th *ngIf="stat_INVITATIONSENT"><input type="checkbox" (click)="selectAll($event)"></th>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let item of CharPendingDetailspagination(); let i=index">
+                    <tr *ngFor="let item of CharPendingDetails; let i=index">
                         <td>{{i+1}}</td>
                         <td>{{ item.createdByUserFirstName }} {{ item.createdByUserLastName }}</td>
                         <td>{{item.candidateName}}</td>
                         <td>{{item.contactNumber}}</td>
                         <td>{{item.emailId}}</td>
-                        <td>{{item.applicantId}}</td> 
-                        <td>{{item.candidateStatusName}}</td>
+                        <td>{{item.applicantId}}</td>
                         <td>{{item.createdOn}}</td>
                         <td>{{item.dateOfEmailInvite}}</td>
                         <td *ngIf="stat_INVITATIONSENT">
@@ -35,6 +33,8 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+
         <form [formGroup]="formSendInvitation" *ngIf="containerStat">
             <input type="hidden" formControlName="candidateReferenceNo">
             <input type="hidden" formControlName="statuscode">
@@ -43,14 +43,8 @@
                     <button type="submit" *ngIf="stat_btn_ReInvite" (click)="reInvite()" class="btn btn-sm btn-success ">Re-Invite</button>
                 </div>
             </div>
-            
+
         </form>
-        <div class="pagination">
-            <button [disabled]="currentPageIndex == 0" (click)="goToPrevPage()">Previous</button>
-            <span>Page {{currentPageIndex}} of {{totalPages}}</span>
-            <button [disabled]="currentPageIndex == totalPages - 1" (click)="goToNextPage()">Next</button>
-        </div>
-        </div>     
         <ng-template #modalData let-modal>
             <div class="modal-header">
               <h4 class="modal-title" id="modal-basic-title">Update Candidate</h4>

@@ -12,20 +12,20 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AWSConfig {
-	
-	@Autowired
-	private EnvironmentVal env;
-	
-	@Bean
-	public AmazonS3 s3() {
-		AWSCredentials awsCredentials =
-			new BasicAWSCredentials(env.getAccessKey(), env.getSecretKey());
-		return AmazonS3ClientBuilder
-			.standard()
-			.withRegion(env.getAwsRegion())
-			.withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-			.build();
-		
-	}
-	
+
+    @Autowired
+    private EnvironmentVal env;
+
+
+    @Bean
+    public AmazonS3 s3() {
+        AWSCredentials awsCredentials =
+                new BasicAWSCredentials(env.getAccessKey(), env.getSecretKey());
+        return AmazonS3ClientBuilder
+                .standard()
+                .withRegion(env.getAwsRegion())
+                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+                .build();
+
+    }
 }

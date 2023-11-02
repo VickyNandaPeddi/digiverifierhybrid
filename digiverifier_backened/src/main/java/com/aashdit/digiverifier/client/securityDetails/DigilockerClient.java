@@ -83,7 +83,13 @@ public class DigilockerClient {
 	
 	private String state;
 
-	
+	@Value("${com.dgv.client.vendor.check.url}")
+	private String vendorChecksUrl;
+
+	public String getVendorChecksUrl() {
+		return vendorChecksUrl;
+	}
+
 	public String getdocumrntSubmitPostUrl() {
 		return documrntSubmitPostUrl;
 	}

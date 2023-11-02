@@ -1,0 +1,13 @@
+.disabled-row {
+  background-color: burlywood; /* Change to your preferred disabled row background color */
+  pointer-events: none;  /* Disable interactions with the row */
+}
+/* styles.css */
+.toggle-button {
+  background-color: orange;
+  color: white;
+  border: none;
+  padding: 1px 2px;
+  margin: 5px;
+  cursor: pointer;
+}

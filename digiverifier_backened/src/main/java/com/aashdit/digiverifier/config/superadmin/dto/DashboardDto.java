@@ -13,20 +13,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DashboardDto {
-	
-	private String fromDate;
-	
-	private String toDate;
-	
-	private List<Long> organizationIds;
-	
-	private List<String> activityCode;
-	
-	private List<CandidateStatusCountDto> candidateStatusCountDto;
-	
-	private Long userId;
-	
-	private String status;
-	
-	private List<CandidateDetailsDto> candidateDtoList;
+
+    private String fromDate;
+
+    private String toDate;
+
+    private List<Long> organizationIds;
+
+    private List<String> activityCode;
+
+    private List<CandidateStatusCountDto> candidateStatusCountDto;
+
+    private Long userId;
+
+    private String status;
+
+    private List<CandidateDetailsDto> candidateDtoList;
 }

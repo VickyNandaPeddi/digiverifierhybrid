@@ -37,8 +37,6 @@ import com.aashdit.digiverifier.config.candidate.model.SuspectClgMaster;
 import com.aashdit.digiverifier.config.candidate.model.SuspectEmpMaster;
 import com.aashdit.digiverifier.config.candidate.service.CandidateService;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateDetailsDto;
-import com.aashdit.digiverifier.config.candidate.dto.CandidateReportDTO;
-import com.aashdit.digiverifier.config.admin.dto.UserDto;
 
 import io.swagger.annotations.ApiOperation;
 
@@ -61,13 +59,6 @@ public class CandidateApplicationFormController {
 	public ResponseEntity<ServiceOutcome<List<QualificationMaster>>> getQualificationList() {
 		ServiceOutcome<List<QualificationMaster>> svcSearchResult = candidateService.getQualificationList();
 		return new ResponseEntity<ServiceOutcome<List<QualificationMaster>>>(svcSearchResult, HttpStatus.OK);
-	}
-
-	@ApiOperation("Password updation")
-	@PostMapping(path = "/agentCreatepasswrd")
-	public ResponseEntity<ServiceOutcome<UserDto>> agentCreatepasswrd(@RequestBody UserDto user,@RequestHeader("Authorization") String authorization) {
-		ServiceOutcome<UserDto> svcSearchResult = candidateService.agentCreatepasswrd(user);
-		return new ResponseEntity<ServiceOutcome<UserDto>>(svcSearchResult, HttpStatus.OK);
 	}
 	
 	@ApiOperation("Get all Candidate Application form details")
@@ -126,12 +117,12 @@ public class CandidateApplicationFormController {
 		return new ResponseEntity<ServiceOutcome<List<SuspectClgMaster>>>(svcSearchResult, HttpStatus.OK);
 	}
 	
-	// @ApiOperation(" Get All Suspect College List")
-	// @GetMapping("/getAllSuspectEmpList")
-	// public ResponseEntity<ServiceOutcome<List<SuspectEmpMaster>>> getAllSuspectEmpList() {
-	// 	ServiceOutcome<List<SuspectEmpMaster>> svcSearchResult = candidateService.getAllSuspectEmpList();
-	// 	return new ResponseEntity<ServiceOutcome<List<SuspectEmpMaster>>>(svcSearchResult, HttpStatus.OK);
-	// }
+	@ApiOperation(" Get All Suspect College List")
+	@GetMapping("/getAllSuspectEmpList")
+	public ResponseEntity<ServiceOutcome<List<SuspectEmpMaster>>> getAllSuspectEmpList() {
+		ServiceOutcome<List<SuspectEmpMaster>> svcSearchResult = candidateService.getAllSuspectEmpList();
+		return new ResponseEntity<ServiceOutcome<List<SuspectEmpMaster>>>(svcSearchResult, HttpStatus.OK);
+	}
 	
 	@ApiOperation("Candidate Address verification")
 	@PostMapping("/relationshipAddressVerification")
@@ -189,11 +180,8 @@ public class CandidateApplicationFormController {
 	public ResponseEntity getReport(@RequestParam("Authorization") String authorization,@RequestParam String candidateCode,@RequestParam
 		ReportType type) {
 		ServiceOutcome svcSearchResult = new ServiceOutcome();
-		ServiceOutcome<CandidateReportDTO> data = reportService.generateDocument(candidateCode, authorization, type);
-		svcSearchResult.setData(data.getMessage());
-		svcSearchResult.setStatus(data.getStatus());
-		svcSearchResult.setOutcome(data.getOutcome());
-		svcSearchResult.setMessage(String.valueOf(data.getData().getCandidate_reportType()));
+		String url = reportService.generateDocument(candidateCode, authorization, type);
+		svcSearchResult.setData(url);
 		return new ResponseEntity<ServiceOutcome<ReportSearchDto>>(svcSearchResult, HttpStatus.OK);
 	}
 

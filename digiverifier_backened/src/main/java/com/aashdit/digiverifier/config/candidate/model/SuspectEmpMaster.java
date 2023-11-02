@@ -8,12 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import java.util.Date;
-import javax.validation.constraints.NotNull;
-
-import com.aashdit.digiverifier.config.superadmin.model.Organization;
 
 import lombok.Data;
 
@@ -21,15 +15,6 @@ import lombok.Data;
 @Entity
 @Table(name="t_dgv_suspect_emp_master")
 public class SuspectEmpMaster implements Serializable {
-
-	//updated
-//	public SuspectEmpMaster(String string, String string2) {
-//		// TODO Auto-generated constructor stub
-//	}
-
-	public SuspectEmpMaster() {
-		// TODO Auto-generated constructor stub
-	}
 
 	/**
 	 * 
@@ -46,12 +31,6 @@ public class SuspectEmpMaster implements Serializable {
 	
 	@Column(name = "address")
 	private String address;
-
-	@NotNull
-	@ManyToOne
-	@JoinColumn(name = "organization_id")
-	private Organization organization;
-
 	
 	@Column(name = "location")
 	private String location;
@@ -67,17 +46,5 @@ public class SuspectEmpMaster implements Serializable {
 	
 	@Column(name = "is_active")
 	private Boolean isActive;
-
-	@Column(name = "created_on")
-	private Date createdOn;
-
-
-	 public SuspectEmpMaster(String suspectCompanyName, String address ) {
-	 	super();
-	 	this.suspectCompanyName = suspectCompanyName;
-	 	this.address = address;
-//	 	this.isActive = isActive;
-		
-	 }
 
 }

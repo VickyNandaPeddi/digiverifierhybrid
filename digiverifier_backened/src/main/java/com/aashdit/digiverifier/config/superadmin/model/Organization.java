@@ -13,14 +13,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
+import lombok.ToString;
 import org.hibernate.annotations.Type;
 
 import com.aashdit.digiverifier.config.admin.model.User;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
-import lombok.ToString;
 
 @Data
 @Entity
@@ -116,7 +114,6 @@ public class Organization implements Serializable {
 	private Date updatedTimestamp;
 	
 	@ToString.Exclude
-	@JsonBackReference
 	@ManyToOne
 	@JoinColumn(name = "created_by")
 	private User createdBy;
@@ -125,7 +122,6 @@ public class Organization implements Serializable {
 	private Date createdOn;
 	
 	@ToString.Exclude
-	@JsonBackReference
 	@ManyToOne
 	@JoinColumn(name = "last_updated_by")
 	private User lastUpdatedBy;

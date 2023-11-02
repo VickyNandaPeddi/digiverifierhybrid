@@ -42,11 +42,4 @@ public class CandidateDetailsForReport {
 	private String aadharGender;
 	
 	
-    private Long ClearCount;
-	private Long inProgressCount;
-	private Long inSufficiencyCount;
-	private Long majorDiscrepancyCount;
-	private Long minorDiscrepancyCount;
-	private Long unableToVerifyCount;
-	
 }

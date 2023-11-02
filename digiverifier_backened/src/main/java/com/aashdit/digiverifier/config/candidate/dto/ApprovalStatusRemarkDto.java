@@ -6,8 +6,6 @@ import lombok.Data;
 public class ApprovalStatusRemarkDto {
 	public Long id;
 
-	public Long organizationid;
-
 	private Long qualificationId;
 
 	private String schoolOrCollegeName;
@@ -27,8 +25,6 @@ public class ApprovalStatusRemarkDto {
 	private Long colorId;
 	
 	private Long remarkId;
-	
-	private String customRemark;
 
 	private String candidateCode;
 

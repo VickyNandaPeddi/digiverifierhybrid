@@ -26,8 +26,7 @@ public class AesUtil {
 		this.keySize = keySize;
 		this.iterationCount = iterationCount;
 		try {
-			String cipherData="AES/GCM/NoPadding";
-			cipher = Cipher.getInstance(cipherData);
+			cipher = Cipher.getInstance("AES/GCM/NoPadding");
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			throw fail(e);
 		}
@@ -55,14 +54,26 @@ public class AesUtil {
 		}
 	}
 
+	private final SecureRandom random = new SecureRandom();
 	private byte[] doFinal(int encryptMode, SecretKey key, String iv, byte[] bytes) {
+
 		try {
-			cipher.init(encryptMode, key, new IvParameterSpec(hex(iv)));
+			byte[] bytesIV = new byte[16];
+
+			random.nextBytes(bytesIV);
+
+			cipher.init(encryptMode, key, new IvParameterSpec(bytesIV));
+
 			return cipher.doFinal(bytes);
+
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException
-				| BadPaddingException e) {
+
+					| BadPaddingException e) {
+
 			return null;
+
 		}
+
 	}
 
 	private SecretKey generateKey(String salt, String passphrase) {
@@ -123,8 +134,7 @@ public class AesUtil {
 	public static String encrypt(final String strToEncrypt, final String secret) {
 		try {
 			setKey(secret);
-			String cipherData="AES/GCM/NoPadding";
-			Cipher cipher = Cipher.getInstance(cipherData);
+			Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 			return java.util.Base64.getEncoder()
 				.encodeToString(cipher.doFinal(strToEncrypt.getBytes("UTF-8")));
@@ -137,8 +147,7 @@ public class AesUtil {
 	public static String decrypt(final String strToDecrypt, final String secret) {
 		try {
 			setKey(secret);
-			String cipherData="AES/GCM/NoPadding";
-			Cipher cipher = Cipher.getInstance(cipherData);
+			Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 			cipher.init(Cipher.DECRYPT_MODE, secretKey);
 			return new String(cipher.doFinal(java.util.Base64.getDecoder()
 				.decode(strToDecrypt)));

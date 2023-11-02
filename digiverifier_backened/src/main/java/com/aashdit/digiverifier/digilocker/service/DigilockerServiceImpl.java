@@ -148,8 +148,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 	private EnvironmentVal environmentVal;
 	
 	@Override
-	public ServiceOutcome<String> getDigilockerDetails(String code, String candidateCode, HttpServletResponse response, String action) {
-		ServiceOutcome<String> outcome = new ServiceOutcome<>();
+	public String getDigilockerDetails(String code, String candidateCode, HttpServletResponse response, String action) {
 		String  tokenString="";
 		String message = "";
 		try {
@@ -184,23 +183,14 @@ public class DigilockerServiceImpl implements DigilockerService {
 						tokenString = digilockerTokenResponse.getAccess_token();
 						if(!tokenString.isEmpty()) {
 							message = getUserDetails(tokenString,code,candidateCode,response,action);
-							outcome.setOutcome(true);
-							outcome.setMessage(tokenString);
-							outcome.setData(message);
-							outcome.setStatus(code);
 						}
 					}
 			}
 			System.out.println(message+"getDigilockerDetails");
 		} catch (Exception e) {
 			  log.error("Exception occured in DigilockerServiceImpl in getDigilockerDetails method-->",e);
-			 outcome.setData("");
-			 outcome.setOutcome(false);
-			 outcome.setMessage("Unable to get DIgi details.");
 		} 
-		//return message;
-		System.out.println(outcome+"=====================END OF getDigilockerDetails===============");
-		return outcome;
+		return message;
 	}
 	
 	/**
@@ -250,9 +240,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 	@SuppressWarnings({ "rawtypes", "unchecked"})
 	private String getIssuedDocuments(String accessToken,String code, String candidateCode,HttpServletResponse res, String action){
 		String result="";
-		String[] parts = candidateCode.split("_");
-		String onlyCandidateCode=parts[1];
-		 System.out.println("---inside getIssuedDocuments---"+"candidateCode:"+candidateCode+"--onlyCandidateCode:"+onlyCandidateCode);
+		// System.out.println("--------------------inside getIssuedDocuments-------------------");
 		try {
 			if(StringUtils.isNoneBlank(accessToken)) {
 				ResponseEntity<String> response = null;
@@ -262,9 +250,8 @@ public class DigilockerServiceImpl implements DigilockerService {
 				  	response = (new RestTemplate()).exchange(clientSecurityDetails.getUserFilesIssued(), HttpMethod.GET, request, String.class);
 					// System.out.println(response+"--------------------inside response-------------------");
 				  	if(response.getStatusCode() == HttpStatus.OK) {
-						
+						// System.out.println("--------------------inside if-------------------");
 				  		String message=response.getBody();
-						System.out.println(message+"--------------------message-------------------");
 						JSONObject obj = new JSONObject(message);
 						JSONArray array = obj.getJSONArray("items");
 						final ObjectMapper objectMapper = new ObjectMapper();
@@ -289,15 +276,15 @@ public class DigilockerServiceImpl implements DigilockerService {
 //						// move to s3
 //						awsUtils.uploadFile("digiverifier-new",candidateCode.concat("/").concat(candidateCode+"_digilocker_issued_files"),mergedFile);
 //
-				        CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(onlyCandidateCode);
-//	        			if(action.equals("SELF")) {
-//							System.out.println("--------------------inside self if-------------------");
+				        CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(candidateCode);
+	        			if(action.equals("SELF")) {
+							System.out.println("--------------------inside self if-------------------");
 	        				candidateStatus.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("DIGILOCKER"));
 		        			candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("DIGILOCKER"));
-//	        			}else {
-//							System.out.println("--------------------inside else-------------------");
-//	        				candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("RELATIVEADDRESS"));
-//	        			}
+	        			}else {
+							System.out.println("--------------------inside else-------------------");
+	        				candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("RELATIVEADDRESS"));
+	        			}
 	        			candidateStatus.setLastUpdatedOn(new Date());
 	        			candidateStatusRepository.save(candidateStatus);
 	        			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
@@ -315,7 +302,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 						
 							System.out.println("--------------------revel-----------if--------");
 							result ="Issued documents Information retrieved successfully, dgree not in Issued documents";
-							res.sendRedirect(environmentVal.getIsFreshPage()+onlyCandidateCode);
+							
 						}
 			    	}else if(response.getStatusCode() == HttpStatus.UNAUTHORIZED){
 			    		result ="User is Unauthorized";
@@ -338,10 +325,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 	@Transactional
 	private ResponseEntity<String> getFIleFromUri(IssuedDocumentsResponse issuedDocument,String accessToken,String candidateCode,Color color, String action){
 		System.out.println("------------------------------inside getFIleFromUri----------------");
-		String[] parts = candidateCode.split("_");
-		String inputAadhar=parts[0];
-		candidateCode=parts[1];
-	    System.out.println("----INPUT ADHAR----"+inputAadhar+"----separated candidate code-----"+candidateCode);
+		// System.out.println(issuedDocument+"--------"+accessToken+"---------"+candidateCode+"-------------"+color+"----------");
 		System.out.println(issuedDocument.getDoctype()+"--------------gettype------------");
 		if(StringUtils.isNoneBlank(accessToken)) {
 			System.out.println("------------------------------inside if----------------");
@@ -371,155 +355,87 @@ public class DigilockerServiceImpl implements DigilockerService {
  						CandidateCafAddress candidateCafAddress = candidateCafAddressRepository.findByCandidateCandidateCodeAndServiceSourceMasterServiceCode(candidateCode,"AADHARADDR");
 				  		
 				  			json = XML.toJSONObject(data);
-				  			JSONObject cer = json.getJSONObject("Certificate");
-							JSONObject cdata = cer.getJSONObject("CertificateData");
-							JSONObject kyc = cdata.getJSONObject("KycRes");
+							// System.out.println(json+"jsonjsonjsonjsonjsonjsonjson");
+				  			JSONObject kyc = json.getJSONObject("KycRes");
 					  		JSONObject uid = kyc.getJSONObject("UidData");
 					  		JSONObject poa = uid.getJSONObject("Poa");
 					  		JSONObject poi = uid.getJSONObject("Poi");
 					  		CandidateCafAddress address = Objects.nonNull(candidateCafAddress) ? candidateCafAddress:new CandidateCafAddress();
 					  		address.setCandidate(candidate);
-					  		if(poa.has("pc"))
-					  			address.setPinCode(Integer.parseInt(poa.get("pc").toString()));
-					  		if(poa.has("state"))
-					  			address.setState(poa.getString("state"));
+					  		address.setPinCode(Integer.parseInt(poa.get("pc").toString()));
+					  		address.setState(poa.getString("state"));
 							String candidateAddress = constructFullAddress(poa);
 							address.setCandidateAddress(candidateAddress);//"+poa.getString("lm")+"
 					  		address.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("AADHARADDR"));
 					  		address.setColor(color);
 					  		address.setCreatedOn(new Date());
-					  		if(poi.has("name"))
-					  			address.setName(poi.getString("name"));
+					  		address.setName(poi.getString("name"));
 					  		candidateCafAddressRepository.save(address);
-					  	//Aadhar validation start 
-					  		String adharFromDL= null;
-					  		if(uid.has("uid"))
-					  			adharFromDL = uid.getString("uid");
-					  		System.out.println("--------------adhar From DIGILOCKER in SELF------------"+adharFromDL);
-					  	if(inputAadhar.substring(8, 12).equalsIgnoreCase(adharFromDL.substring(8, 12))){
-					  			System.out.println("-------AADHAR NUMBER MATCHED-------");
-					  		    candidate.setAadharNumber(inputAadhar);
-					  		if(poi.has("dob"))
-					  			candidate.setAadharDob(poi.getString("dob"));
-					  		if(poi.has("gender"))
-					  			 candidate.setAadharGender(poi.getString("gender"));
-					  		if(poi.has("name"))
-					  			candidate.setAadharName(poi.getString("name"));
-					  		if(poa.has("co"))
-					  			candidate.setAadharFatherName(poa.getString("co"));
+					  		// candidate.setAadharNumber(uid.getString("uid"));
+					  		candidate.setAadharDob(poi.getString("dob"));
+							candidate.setAadharGender(poi.getString("gender"));
+							candidate.setAadharName(poi.getString("name"));
+							candidate.setAadharFatherName(poa.getString("co"));
 							// System.out.println(candidate+"--------------------------------------candidate");
 					  		candidateRepository.save(candidate);
 					  		CandidateIdItems item = new CandidateIdItems();
 					  		item.setCandidate(candidate);
 					  		item.setColor(color);
-					  		if(uid.has("uid"))
-					  			item.setIdNumber(uid.getString("uid"));
-					  		if(poi.has("name"))
-					  			item.setIdHolder(poi.getString("name"));
-					  		if(poi.has("dob"))
-					  			item.setIdHolderDob(poi.getString("dob"));
+					  		item.setIdNumber(uid.getString("uid"));
+					  		item.setIdHolder(poi.getString("name"));
+							item.setIdHolderDob(poi.getString("dob"));
 					  		item.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("AADHARID"));
 					  		item.setCreatedOn(new Date());
 							// System.out.println(item+"--------------------------------------item");
 					  		candidateIdItemsRepository.save(item);
 //							uploadFileToS3(ContentCategory.OTHERS, ContentSubCategory.AADHAR,issuedDocument,candidateCode,candidate.getCandidateId(),accessToken);
-					  	}
+					  		
 		  		
 			  		}else if(action.equals("RELATION")){
-						// System.out.println(action+"--------------------------------------else if");
+						System.out.println(action+"--------------------------------------else if");
 			  			json = XML.toJSONObject(data);
-			  			// System.out.println("Aadhar JSON::"+json);
-						JSONObject cer = json.getJSONObject("Certificate");
-						JSONObject cdata = cer.getJSONObject("CertificateData");
-						JSONObject kyc = cdata.getJSONObject("KycRes");
+			  			JSONObject kyc = json.getJSONObject("KycRes");
 				  		JSONObject uid = kyc.getJSONObject("UidData");
 				  		JSONObject poa = uid.getJSONObject("Poa");
 				  		JSONObject poi = uid.getJSONObject("Poi");
-				  		System.out.println("Aadhar POSTAL ADDRESS::"+poa);
 				  		
 				  		CandidateAdressVerification verification = candidateAdressVerificationRepository.findByCandidateCandidateCode(candidateCode);
 				  		
 				  		CandidateCafAddress address = new CandidateCafAddress();
 				  		address.setCandidate(candidate);
-				  		if(poa.has("pc"))
-				  			address.setPinCode(Integer.parseInt(poa.get("pc").toString()));
-				  		if(poa.has("state"))
-				  			address.setState(poa.getString("state"));
+				  		address.setPinCode(Integer.parseInt(poa.get("pc").toString()));
+				  		address.setState(poa.getString("state"));
 						String candidateAddress = constructFullAddress(poa);
 						
 				  		address.setCandidateAddress(candidateAddress);//"+poa.getString("lm")+"
 				  		address.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("AADHARADDR"));
 				  		address.setColor(color);
 				  		address.setCreatedOn(new Date());
-				  		if(poi.has("name"))
-				  			address.setName(poi.getString("name"));
+				  		address.setName(poi.getString("name"));
 				  		address.setAddressVerification(verification);
 				  		candidateCafAddressRepository.save(address);
-				  		
-				  		//Aadhar validation start 
-				  		String adharFromDL= null;
-				  		if(uid.has("uid"))
-				  			adharFromDL = uid.getString("uid");
-				  		System.out.println("--------------adhar From DIGILOCKER in RELATION------------"+adharFromDL);
-				  		if(inputAadhar.substring(8, 12).equalsIgnoreCase(adharFromDL.substring(8, 12))){
-				  			System.out.println("-------AADHAR NUMBER MATCHED-------");
-				  		    candidate.setAadharNumber(inputAadhar);
-				  		    if(poi.has("dob"))
-				  		    	candidate.setAadharDob(poi.getString("dob"));
-				  		    if(poi.has("gender"))
-				  		    	candidate.setAadharGender(poi.getString("gender"));
-				  		    if(poi.has("name"))
-				  		    	candidate.setAadharName(poi.getString("name"));
-				  		    if(poa.has("co"))
-				  		    	candidate.setAadharFatherName(poa.getString("co"));
-							// System.out.println(candidate+"--------------------------------------candidate");
-					  		candidateRepository.save(candidate);
-					  		CandidateIdItems item = new CandidateIdItems();
-					  		item.setCandidate(candidate);
-					  		item.setColor(color);
-					  		if(uid.has("uid"))
-					  			item.setIdNumber(uid.getString("uid"));
-					  		if(poi.has("name"))
-					  			item.setIdHolder(poi.getString("name"));
-					  		if(poi.has("dob"))
-					  			item.setIdHolderDob(poi.getString("dob"));
-					  		item.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("AADHARID"));
-					  		item.setCreatedOn(new Date());
-							// System.out.println(item+"--------------------------------------item");
-					  		candidateIdItemsRepository.save(item);
-				  		}
 			  		}
 			  	}
-			  	// if(issuedDocument.getDoctype().equals("PANCR") && action.equals("SELF")) {
-				if(issuedDocument.getDoctype().equals("PANCR")) {
-					System.out.println(issuedDocument.getDoctype()+"--------------insidepan------------");
+			  	if(issuedDocument.getDoctype().equals("PANCR") && action.equals("SELF")) {
+					// System.out.println(issuedDocument.getDoctype()+"--------------insidepan------------");
 			  		json = XML.toJSONObject(data);
 			  		JSONObject panData = json.getJSONObject("Certificate");
-			  		Candidate candidateObj = null;
-			  		if(panData.has("number"))
-			  			candidateObj = candidateRepository.findByPanNumberAndCandidateCode(panData.getString("number"),candidateCode);
+			  		Candidate candidateObj = candidateRepository.findByPanNumberAndCandidateCode(panData.getString("number"),candidateCode);
 			  		if(candidateObj==null) {
 			  			JSONObject issuedTo = panData.getJSONObject("IssuedTo");
 				  		JSONObject dob = issuedTo.getJSONObject("Person");
-				  		if(panData.has("number"))
-				  			candidate.setPanNumber(panData.getString("number"));
-				  		if(dob.has("dob"))
-				  			candidate.setDateOfBirth(dob.getString("dob"));
-				  		if(dob.has("dob"))
-				  			candidate.setPanDob(dob.getString("dob"));
-				  		if(dob.has("name"))
-				  			candidate.setPanName(dob.getString("name"));
+				  		candidate.setPanNumber(panData.getString("number"));
+				  		candidate.setDateOfBirth(dob.getString("dob"));
+						candidate.setPanDob(dob.getString("dob"));
+						candidate.setPanName(dob.getString("name"));
 				  		candidateRepository.save(candidate);
 				  		
 				  		CandidateIdItems item = new CandidateIdItems();
 				  		item.setCandidate(candidate);
-				  		if(panData.has("number"))
-				  			item.setIdNumber(panData.getString("number"));
+				  		item.setIdNumber(panData.getString("number"));
 				  		item.setColor(color);
-				  		if(dob.has("name"))
-				  			item.setIdHolder(dob.getString("name"));
-				  		if(dob.has("dob"))
-				  			item.setIdHolderDob(dob.getString("dob"));
+				  		item.setIdHolder(dob.getString("name"));
+						item.setIdHolderDob(dob.getString("dob"));
 				  		item.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("PAN"));
 				  		item.setCreatedOn(new Date());
 				  		candidateIdItemsRepository.save(item);
@@ -555,24 +471,20 @@ public class DigilockerServiceImpl implements DigilockerService {
 				  		JSONObject drvAddress = person.getJSONObject("Address");
 				  		CandidateCafAddress address = new CandidateCafAddress();
 				  		address.setCandidate(candidate);
-				  		if(drvAddress.has("line1"))
-				  			address.setCandidateAddress(drvAddress.getString("line1"));//"+poa.getString("lm")+"
+				  		address.setCandidateAddress(drvAddress.getString("line1"));//"+poa.getString("lm")+"
 				  		address.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("DLADDR"));
 				  		address.setColor(color);
-				  		if(person.has("name"))
-				  			address.setName(person.getString("name"));
+				  		address.setName(person.getString("name"));
 				  		address.setCreatedOn(new Date());
 				  		candidateCafAddressRepository.save(address);
 				  		
 				  		CandidateIdItems item = new CandidateIdItems();
 				  		item.setCandidate(candidate);
 				  		item.setColor(color);
-				  		if(drvlcData.has("number"))
-				  			item.setIdNumber(drvlcData.getString("number"));
+				  		item.setIdNumber(drvlcData.getString("number"));
 				  		item.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("DLID"));
 				  		item.setCreatedOn(new Date());
-				  		if(person.has("name"))
-				  			item.setIdHolder(person.getString("name"));
+				  		item.setIdHolder(person.getString("name"));
 				  		candidateIdItemsRepository.save(item);
 					    uploadFileToS3(ContentCategory.OTHERS, ContentSubCategory.DRIVING_LICENSE,issuedDocument,candidateCode,candidate.getCandidateId(),accessToken);
 				  
@@ -653,7 +565,8 @@ public class DigilockerServiceImpl implements DigilockerService {
 	
 	private String constructFullAddress(JSONObject poa) {
 
-		Object aObj = new Object();
+		Object aObj = poa.get("house");
+		String cgpach=String.valueOf(aObj);
 		
 		StringBuilder fullAddress = new
 			StringBuilder("");
@@ -663,8 +576,6 @@ public class DigilockerServiceImpl implements DigilockerService {
 			fullAddress.append(poa.getString("co")+", ");
 		}
 		if(poa.has("house"))
-			aObj = poa.get("house");
-		    String cgpach=String.valueOf(aObj);
 			fullAddress.append(cgpach+", ");
 		if(poa.has("street"))
 			fullAddress.append(poa.getString("street")+", ");
