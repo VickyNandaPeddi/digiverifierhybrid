@@ -1,0 +1,51 @@
+<div class="pageHeader">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="pageTitle"></h2>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3 style="font-weight: 600; color: #ff9900; text-align: center;">Letter of Authorization</h3>
+                            <p style="color: #333;
+                            text-align: justify;
+                            line-height: 28px;" *ngIf="this.loaContent == null">
+                                I have no objection in authenticating myself and fully understand that information provided by me shall be used for authenticating my identity through Aadhaar Authentication(DigiLocker) System for the purpose stated above and below purpose.
+
+                                I have no objection and understand that the information provided by me may be used by the organization or its partner agency to verify and validate the information. I understand that the organization or its partner agency shall receive my electronic EPFO service history and 26AS for employment verification purpose only.
+                                
+                                I authorize, without reservation, any individual, corporation or other private or public entity to furnish the organization or its partner agency the above mentioned information about me.
+                                
+                                I unconditionally release and hold harmless any individual, corporation, or private or public entity from any and all causes of action that might arise from furnishing to the organization or its partner agency that they may request pursuant to this release.
+                                
+                                This authorization and release, in original, electronic form, faxed or photocopied form, shall be valid for this and any future reports and updates that may be requested. This is digitally generated document and signature wont be required.
+                            </p>
+                            <p style="color: #333;
+                            text-align: justify;
+                            line-height: 28px;" *ngIf="this.loaContent != null">{{loaContent}}
+                            </p>
+                        </div>
+                        <div class="col-md-12 text-center">
+                          <form [formGroup]="formLetterAccept">
+                              <input type="hidden" formControlName="candidateCode">
+                              <button type="submit" class="btn btn-success" (click)="btnLtrAccept()">Accept</button>
+                              <!-- <button type="submit" class="btn btn-danger" (click)="btnLtrDecline()">Decline</button> -->
+                          </form>  
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+

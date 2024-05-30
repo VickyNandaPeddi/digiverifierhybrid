@@ -37,4 +37,7 @@ public class ServiceConfigurationDto {
 	
 	private Integer colorId;
 	
+	// added for organization config
+	private Integer inviteExpiryDays;
+	
 }

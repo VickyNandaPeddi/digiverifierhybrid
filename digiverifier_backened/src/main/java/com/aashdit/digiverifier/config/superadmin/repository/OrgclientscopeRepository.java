@@ -7,5 +7,7 @@ import com.aashdit.digiverifier.config.superadmin.model.Orgclientscope;
 
 @Repository
 public interface OrgclientscopeRepository extends JpaRepository<Orgclientscope, Long> {
+	
+	Orgclientscope findByAccountName(String accountName);
 
 }

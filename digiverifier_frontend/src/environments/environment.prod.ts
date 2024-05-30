@@ -1,5 +1,7 @@
 export const environment = {
-  //apiUrl: 'http://165.232.184.105:9090',
-  apiUrl: 'http://ec2-3-7-78-21.ap-south-1.compute.amazonaws.com:3000',
-  production: false
+  apiUrl: 'https://demoserverbkend.digiverifier.com',
+  epfoUrl: 'https://api-oauth2.digiverifier.com',
+  flaskurl:'https://api-oauth2.digiverifier.com',//dummy urls, not in used
+  digiurl:'https://api-oauth2.digiverifier.com',//dummy urls, not in used
+  production: true
 };

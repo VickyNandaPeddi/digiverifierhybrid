@@ -3,147 +3,216 @@ package com.aashdit.digiverifier.config.candidate.service;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
-import com.aashdit.digiverifier.config.candidate.dto.*;
 import com.aashdit.digiverifier.config.candidate.model.*;
-import com.aashdit.digiverifier.vendorcheck.dto.FetchVendorConventionalCandidateDto;
 import org.json.JSONArray;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import com.aashdit.digiverifier.config.admin.dto.UserDto;
 
 import com.aashdit.digiverifier.common.model.ServiceOutcome;
+import com.aashdit.digiverifier.config.candidate.dto.DigidocDetailsDto;
+import com.aashdit.digiverifier.config.candidate.dto.EmploymentResultUpdateReqDto;
+import com.aashdit.digiverifier.config.candidate.dto.SearchAllCandidateDTO;
+import com.aashdit.digiverifier.config.candidate.dto.ApprovalStatusRemarkDto;
+import com.aashdit.digiverifier.config.candidate.dto.BulkUanDTO;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateCafAddressDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateCafEducationDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateCafExperienceDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateDetailsDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateDetailsDtoForPanToUan;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateInvitationSentDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidationApplicationFormDto;
 import com.aashdit.digiverifier.config.superadmin.dto.DashboardDto;
+import com.aashdit.digiverifier.config.superadmin.model.Color;
+import com.aashdit.digiverifier.config.superadmin.model.Organization;
+import com.aashdit.digiverifier.epfo.dto.EpfoDataFromDetailsDto;
 import com.aashdit.digiverifier.config.admin.dto.VendorUploadChecksDto;
 import com.aashdit.digiverifier.common.model.Content;
-
+import com.aashdit.digiverifier.config.candidate.dto.CandidateCaseDetailsDTO;
+import com.aashdit.digiverifier.config.candidate.dto.SuspectEmpMasterDto;
+import com.aashdit.digiverifier.config.candidate.dto.UanSearchDashboardFilterDTO;
+import com.aashdit.digiverifier.config.candidate.dto.UanSearchDataDTO;
+import com.aashdit.digiverifier.config.candidate.dto.UanSearchEpfoDTO;
 public interface CandidateService {
 
-    ServiceOutcome<List> saveCandidateInformation(MultipartFile file);
+	ServiceOutcome<List> saveCandidateInformation(MultipartFile file);
 
-    ServiceOutcome<List> saveConventionalCandidateInformation(FetchVendorConventionalCandidateDto fetchVendorConventionalCandidateDto);
+	ServiceOutcome<DashboardDto> getAllCandidateList(DashboardDto dashboardDto);
 
-    ServiceOutcome<DashboardDto> getUploadDetailsStatusAndCountConventional(DashboardDto dashboardDto);
+	ServiceOutcome<Boolean> invitationSent(CandidateInvitationSentDto candidateInvitationSentDto);
 
-    ServiceOutcome<DashboardDto> findConvCandidateForInterimAndFinal(DashboardDto dashboardDto);
+	ServiceOutcome<CandidateDetailsDto> updateCandidate(CandidateDetailsDto candidateDetails);
 
-    ServiceOutcome<List> saveConventionalCandidateDrugInformation(FetchVendorConventionalCandidateDto fetchVendorConventionalCandidateDto);
+	ServiceOutcome<DashboardDto> getCandidateStatusAndCount(DashboardDto dashboardDto);
 
-    ServiceOutcome<List> saveConventionalCandidateReferenceInformation(FetchVendorConventionalCandidateDto fetchVendorConventionalCandidateDto);
+	ServiceOutcome<Boolean> cancelCandidate(String referenceNo);
 
-    ServiceOutcome<List> saveConventionalCandidateExperienceInformation(FetchVendorConventionalCandidateDto fetchVendorConventionalCandidateDto);
+	List<CandidateStatus> expireInvitationForCandidate();
 
-    ServiceOutcome<List> saveConventionalCandidateEducationalInformation(FetchVendorConventionalCandidateDto fetchVendorConventionalCandidateDto);
+	ServiceOutcome<CandidateStatus> getCandidateStatusByCandidateCode(String code);
 
-    ServiceOutcome<List> saveConventionalCandidateAddressInformation(FetchVendorConventionalCandidateDto fetchVendorConventionalCandidateDto);
+	ServiceOutcome<DashboardDto> getReportDeliveryDetailsStatusAndCount(DashboardDto dashboardDto);
 
-    ServiceOutcome<DashboardDto> getAllCandidateList(DashboardDto dashboardDto);
+	ServiceOutcome<List<RemarkMaster>> getAllRemark(String remarkType);
 
-    ServiceOutcome<Boolean> invitationSent(CandidateInvitationSentDto candidateInvitationSentDto);
+	List<CandidateStatus> processDeclined();
 
-    ServiceOutcome<CandidateDetailsDto> updateCandidate(CandidateDetailsDto candidateDetails);
+	ServiceOutcome<CandidateDetailsDto> getCandidateByCandidateCode(String referenceNo);
+	
+	Candidate findCandidateByCandidateCode(String candidateCode);
 
-    ServiceOutcome<DashboardDto> getCandidateStatusAndCount(DashboardDto dashboardDto);
+	ServiceOutcome<Boolean> declineAuthLetter(String candidateCode);
 
-    ServiceOutcome<Boolean> cancelCandidate(String referenceNo);
+	ServiceOutcome<Boolean> saveFakeCompanyDetails(MultipartFile file,Long organizationId,String status);
 
-    List<CandidateStatus> expireInvitationForCandidate();
+	ServiceOutcome<Boolean> saveFakeCollegeDetails(MultipartFile file);
+	
+	ServiceOutcome<List<QualificationMaster>> getQualificationList();
 
-    ServiceOutcome<CandidateStatus> getCandidateStatusByCandidateCode(String code);
+	ServiceOutcome<Boolean> saveNUpdateCandidateEducation(String candidateCafEducation, MultipartFile certificate);
 
-    ServiceOutcome<DashboardDto> getReportDeliveryDetailsStatusAndCount(DashboardDto dashboardDto);
+	ServiceOutcome<CandidateCafEducationDto> getCandidateEducationById(Long candidateCafEducationId);
 
-    ServiceOutcome<List<RemarkMaster>> getAllRemark(String remarkType);
+	ServiceOutcome<Boolean> saveNUpdateCandidateExperience(String candidateCafExperience, MultipartFile certificate);
 
-    List<CandidateStatus> processDeclined();
+	ServiceOutcome<CandidateCafExperienceDto> getCandidateExperienceById(Long candidateCafExperienceId);
 
-    ServiceOutcome<CandidateDetailsDto> getCandidateByCandidateCode(String referenceNo);
+	ServiceOutcome<CandidationApplicationFormDto> candidateApplicationFormDetails(String candidateCode);
 
-    Candidate findCandidateByCandidateCode(String candidateCode);
+	ServiceOutcome<Boolean> saveCandidateApplicationForm(String candidateCafEducation,
+			JSONArray candidateCafAddress, MultipartFile resume, String candidateCode);
 
-    ServiceOutcome<Boolean> declineAuthLetter(String candidateCode);
+	ServiceOutcome<Boolean> updateCandidateEducationStatusAndRemark(ApprovalStatusRemarkDto approvalStatusRemarkDto);
 
-    ServiceOutcome<Boolean> saveFakeCompanyDetails(MultipartFile file);
+	ServiceOutcome<Boolean> updateCandidateExperienceStatusAndRemark(ApprovalStatusRemarkDto approvalStatusRemarkDto);
 
-    ServiceOutcome<Boolean> saveFakeCollegeDetails(MultipartFile file);
+	ServiceOutcome<Boolean> updateCandidateAddressStatusAndRemark(ApprovalStatusRemarkDto approvalStatusRemarkDto);
 
-    ServiceOutcome<List<QualificationMaster>> getQualificationList();
+	ServiceOutcome<Boolean> candidateApplicationFormApproved(String candidateCode, MultipartFile criminalVerificationDocument,Long criminalVerificationColorId, MultipartFile globalDatabseCaseDetailsDocument, Long globalDatabseCaseDetailsColorId, String reportType);
 
-    ServiceOutcome<Boolean> saveNUpdateCandidateEducation(String candidateCafEducation, MultipartFile certificate);
+	ServiceOutcome<List<SuspectClgMaster>> getAllSuspectClgList();
 
-    ServiceOutcome<CandidateCafEducationDto> getCandidateEducationById(Long candidateCafEducationId);
+	ServiceOutcome<List<SuspectEmpMaster>> getAllSuspectEmpList(Long organizationId, int pageNumber, int pageSize);
 
-    ServiceOutcome<Boolean> saveNUpdateCandidateExperience(String candidateCafExperience, MultipartFile certificate);
+	ServiceOutcome<Boolean> relationshipAddressVerification(String candidateCafRealation, MultipartFile document);
 
-    ServiceOutcome<CandidateCafExperienceDto> getCandidateExperienceById(Long candidateCafExperienceId);
+	ServiceOutcome<DashboardDto> getPendingDetailsStatusAndCount(DashboardDto dashboardDto);
 
-    ServiceOutcome<CandidationApplicationFormDto> candidateApplicationFormDetails(String candidateCode);
+	ServiceOutcome<Candidate> saveIsFresher(String candidateCode, Boolean isFresher);
 
-    ServiceOutcome<Boolean> saveCandidateApplicationForm(String candidateCafEducation,
-                                                         JSONArray candidateCafAddress, MultipartFile resume, String candidateCode);
+	ServiceOutcome<CandidationApplicationFormDto> candidateApplicationFormDetailsExceptCandidate(String candidateCode);
 
-    ServiceOutcome<Boolean> updateCandidateEducationStatusAndRemark(ApprovalStatusRemarkDto approvalStatusRemarkDto);
+	ServiceOutcome<CandidateCafExperience> updateCandidateExperience(CandidateCafExperienceDto candidateCafExperienceDto);
 
-    ServiceOutcome<Boolean> updateCandidateExperienceStatusAndRemark(ApprovalStatusRemarkDto approvalStatusRemarkDto);
+	ServiceOutcome<CandidateCafAddress> saveCandidateAddress(CandidateCafAddressDto candidateCafAddressDto);
 
-    ServiceOutcome<Boolean> updateCandidateAddressStatusAndRemark(ApprovalStatusRemarkDto approvalStatusRemarkDto);
+	ServiceOutcome<List<String>> getServiceConfigCodes(String candidateCode, Long orgId);
 
-    ServiceOutcome<Boolean> candidateApplicationFormApproved(String candidateCode, MultipartFile criminalVerificationDocument, Long criminalVerificationColorId, MultipartFile globalDatabseCaseDetailsDocument, Long globalDatabseCaseDetailsColorId);
+	ServiceOutcome<Candidate> setIsLoaAccepted(String candidateCode);
+	
+	CandidateStatusHistory createCandidateStatusHistory(CandidateStatus candidateStatus,String who);
 
-    ServiceOutcome<List<SuspectClgMaster>> getAllSuspectClgList();
+	ServiceOutcome<List<StatusMaster>> getAllStatus();
 
-    ServiceOutcome<List<SuspectEmpMaster>> getAllSuspectEmpList();
+	ServiceOutcome<String> generateInterimReport(String candidateCode) throws FileNotFoundException, IOException;
 
-    ServiceOutcome<Boolean> relationshipAddressVerification(String candidateCafRealation, MultipartFile document);
+	ServiceOutcome<Candidate> saveIsUanSkipped(String candidateCode, String isUanSkipped);
+	
+	List<CandidateCafExperience> getCandidateExperienceFromItrAndEpfoByCandidateId(Long candidateId, Boolean formatEpfoDate);
 
-    ServiceOutcome<DashboardDto> getPendingDetailsStatusAndCount(DashboardDto dashboardDto);
+	List<CandidateCafExperience> getCandidateExperienceFromItrAndEpfoByCandidateId_old(Long candidateId, Boolean formatEpfoDate);
+	
+	List<CandidateCafExperience> getCandidateExperienceByCandidateId(Long candidateId);
+	
+	CandidateVerificationState getCandidateVerificationStateByCandidateId(Long candidateId);
+	
+	CandidateVerificationState addOrUpdateCandidateVerificationStateByCandidateId(Long candidateId,CandidateVerificationState candidateVerificationState);
+	
+	List<CandidateCafEducationDto> getAllCandidateEducationByCandidateId(Long candidateId);
+	
+	List<CandidateCafAddressDto> getCandidateAddress(Candidate candidate);
 
-    ServiceOutcome<Candidate> saveIsFresher(String candidateCode, Boolean isFresher);
+	ServiceOutcome<Boolean> qcPendingstatus(String candidateCode);
 
-    ServiceOutcome<CandidationApplicationFormDto> candidateApplicationFormDetailsExceptCandidate(String candidateCode);
+	ServiceOutcome<CandidateCafExperience> deletecandidateExpById(Long id);
 
-    ServiceOutcome<CandidateCafExperience> updateCandidateExperience(CandidateCafExperienceDto candidateCafExperienceDto);
+	ServiceOutcome<CandidateCafEducation> deletecandidateEducationById(Long id);
 
-    ServiceOutcome<CandidateCafAddress> saveCandidateAddress(CandidateCafAddressDto candidateCafAddressDto);
+	ServiceOutcome<CandidateDetailsDto> candidateDLdata(String candidateCode);
 
-    ServiceOutcome<List<String>> getServiceConfigCodes(String candidateCode, Long orgId);
+	ServiceOutcome<Boolean> updateCandidateVendorProofColor(VendorUploadChecksDto vendorUploadChecksDto);
+	
+	ServiceOutcome<Boolean> updateCandidateOrganisationScope(OrganisationScope organisationScope);
 
-    ServiceOutcome<Candidate> setIsLoaAccepted(String candidateCode);
+	ServiceOutcome<Long> getContentById(String CandidateCode);
 
-    CandidateStatusHistory createCandidateStatusHistory(CandidateStatus candidateStatus, String who);
+	ServiceOutcome<Boolean> AddCommentsReports(CandidateCaseDetailsDTO candidateCaseDetailsDTO);
 
-    ServiceOutcome<List<StatusMaster>> getAllStatus();
+	ServiceOutcome<SuspectEmpMaster> deleteSuspectExpById(Long id);
 
-    ServiceOutcome<String> generateInterimReport(String candidateCode) throws FileNotFoundException, IOException;
+	ServiceOutcome<Boolean> updateSpectEMPloyee(SuspectEmpMasterDto suspectEmpMasterDto);
 
-    ServiceOutcome<Candidate> saveIsUanSkipped(String candidateCode, String isUanSkipped);
 
-    List<CandidateCafExperience> getCandidateExperienceFromItrAndEpfoByCandidateId(Long candidateId, Boolean formatEpfoDate);
+	ServiceOutcome<UserDto> agentCreatepasswrd(UserDto user);
+	
+	
+	
+	ServiceOutcome<UanSearchData> saveUan(UanSearchDataDTO uanSave);
+	//ServiceOutcome<List<UanSearchData>> bulkUan(List<BulkUanDTO> bulkUan);
+	ServiceOutcome<List<UanSearchData>> retriveBulkUanData(String bulkUanId);
 
-    List<CandidateCafExperience> getCandidateExperienceByCandidateId(Long candidateId);
+	ServiceOutcome<List<UanSearchEpfoDTO>> getEpfoData(Map<String, String> data);
 
-    CandidateVerificationState getCandidateVerificationStateByCandidateId(Long candidateId);
+	ServiceOutcome<String> suspectEmpMasterCheck(String companyName, Long oganizationId);
 
-    CandidateVerificationState addOrUpdateCandidateVerificationStateByCandidateId(Long candidateId, CandidateVerificationState candidateVerificationState);
+	void updateCandidateExperienceDetails(String candidateCode);
+	
+	ServiceOutcome<DashboardDto> searchAllCandidate(SearchAllCandidateDTO searchAllcandidate);
+	
+	ServiceOutcome<SuspectEmpMaster> deleteAllSuspectById(List<Long> id);
+	ServiceOutcome<Organization> findOrganization(String candidateCode);
+	ServiceOutcome<List<SuspectEmpMaster>> searchDnh(String searchData);
+	
+	ServiceOutcome<List<Long>> oldCandidatesPurge(Long orgId);
+	ServiceOutcome<List<UanSearchData>> uanSearchDashboardFilter(UanSearchDashboardFilterDTO uanSearchDashboardFilter);
+	
+	ServiceOutcome<Color> getCandidateReportStatus(String candidateCode);
+	ServiceOutcome<String> updateCandidateReportStatus(String candidateCode, Long colorId);
+	
+	ServiceOutcome<DashboardDto> getAllPendingCandidateList(DashboardDto dashboardDto);
+	
+	ServiceOutcome<List> bulkUanNew(MultipartFile file);
+	
+	ServiceOutcome<SuspectEmpMaster> removeAllSuspectEmployerByOrgId(Long orgId);
 
-    List<CandidateCafEducationDto> getAllCandidateEducationByCandidateId(Long candidateId);
+	ServiceOutcome<Boolean> updateCandidateExperienceInCForm(String candidateCafExperience, MultipartFile certificate);
 
-    List<CandidateCafAddressDto> getCandidateAddress(Candidate candidate);
+	ServiceOutcome<String> getAuthLetterContent(String candidateCode);
 
-    ServiceOutcome<Boolean> qcPendingstatus(String candidateCode);
+	void postStatusToOrganization(String candidateCode);
 
-    ServiceOutcome<CandidateCafExperience> deletecandidateExpById(Long id);
+	ServiceOutcome<String> getCandidateLOAFile(String candidateCode,String dashboardStatus);
 
-    ServiceOutcome<CandidateCafEducation> deletecandidateEducationById(Long id);
+	ServiceOutcome<String> candidateApplicationFormSubmit(String candidateCode);
 
-    ServiceOutcome<CandidateDetailsDto> candidateDLdata(String candidateCode);
+	ServiceOutcome<String> updateCandidateExperienceResult(EmploymentResultUpdateReqDto employmentResultUpdateReqDto);
 
-    ServiceOutcome<Boolean> updateCandidateVendorProofColor(VendorUploadChecksDto vendorUploadChecksDto);
+	ServiceOutcome<String> saveCaseReinitDetails(String candidateCode, String caseReinitDate);
 
-    ServiceOutcome<Long> getContentById(String CandidateCode);
+	ServiceOutcome<Boolean> reFetchUANData(CandidateInvitationSentDto candidateInvitationSentDto);
 
-    ServiceOutcome<Long> getCandidateIdByConventionalCandidateId(Long canidateId);
+	ServiceOutcome<String> experienceFromResume(MultipartFile base64, String candidateCode);
 
-    ServiceOutcome<Boolean> AddCommentsReports(CandidateCaseDetailsDTO candidateCaseDetailsDTO);
+	ServiceOutcome<List> bulkPanToUan(MultipartFile file);
 
+	ServiceOutcome<Boolean> reFetchPanToUANData(CandidateInvitationSentDto candidateInvitationSentDto);
 
-    ServiceOutcome<ConventionalCReportApprovalDto> getVendorUploadChecksByCandidateId(String candidateCode);
+	ServiceOutcome<String> forwardReport(List<Long> candidateIds, String emailIds);
+
+	ServiceOutcome<List<CandidateDetailsDtoForPanToUan>> getFailedPanToUanCandidateList(DashboardDto dashboardDto);
+
+	ServiceOutcome<String> setPanToUanResponse(CandidateDetailsDtoForPanToUan candidateDetails);
 }

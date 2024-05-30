@@ -2,6 +2,8 @@ package com.aashdit.digiverifier.utils;
 
 import java.io.IOException;
 
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 public class GenerateAccessToken {
 
 	public static String getDigilockerToken() throws IOException{
@@ -9,7 +11,7 @@ public class GenerateAccessToken {
 		try {
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("error in GenerateAccessToken occured....", e);
 		}
 		return token;
 	}

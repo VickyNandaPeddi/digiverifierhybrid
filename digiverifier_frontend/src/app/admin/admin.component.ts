@@ -11,7 +11,8 @@ export class AdminComponent implements OnInit {
   constructor(private authService: AuthenticationService) { 
     var timeoutInMiliseconds = 25200000;
     var timeoutId; 
-    this.clearStat = localStorage.getItem("jwtToken");
+    //this.clearStat = localStorage.getItem("jwtToken");
+    this.clearStat = authService.getToken();
     if(this.clearStat){
       timeoutId = window.setTimeout(doInactive, timeoutInMiliseconds);
     }

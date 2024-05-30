@@ -1,1 +1,22 @@
 @import  "../../../assets/scss/admin.scss";
+.ms-button {
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease-in-out;
+    margin-right: 8px;
+}
+.btn-primary {
+    background-color: #0078d4;
+    color: white;
+}
+.btn-cancel {
+    background-color: #179ba7;
+    color: white;
+}

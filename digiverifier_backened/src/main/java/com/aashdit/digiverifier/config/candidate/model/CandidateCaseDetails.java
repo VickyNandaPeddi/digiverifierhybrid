@@ -1,19 +1,21 @@
 package com.aashdit.digiverifier.config.candidate.model;
 
 import java.io.Serializable;
+import java.sql.Types;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
 
 import com.aashdit.digiverifier.config.admin.model.User;
@@ -43,7 +45,8 @@ public class CandidateCaseDetails implements Serializable {
 	@JoinColumn(name = "candidate_id")
 	private Candidate candidate;
 	
-	@Type(type="org.hibernate.type.BinaryType")
+	//@Type(type="org.hibernate.type.BinaryType")
+	@JdbcTypeCode(Types.BINARY)
     @Column(name = "criminal_verification_document", columnDefinition="BLOB")
     private byte[] criminalVerificationDocument;
 	
@@ -51,13 +54,20 @@ public class CandidateCaseDetails implements Serializable {
 	@JoinColumn(name = "criminal_verification_is_exist")
 	private Color criminalVerificationisExist;
 	
-	@Type(type="org.hibernate.type.BinaryType")
+	@JoinColumn(name = "criminal_doc_content_id")
+	private Long criminalDocContentId;
+	
+	//@Type(type="org.hibernate.type.BinaryType")
+	@JdbcTypeCode(Types.BINARY)
     @Column(name = "global_database_case_details_document", columnDefinition="BLOB")
     private byte[] globalDatabaseCaseDetailsDocument;
 	
 	@OneToOne
 	@JoinColumn(name = "global_database_case_details_is_exist")
 	private Color globalDatabaseCaseDetailsIsExist;
+	
+	@JoinColumn(name = "global_db_doc_content_id")
+	private Long globalDBDocContentId;
 	
 	@ManyToOne
 	@JoinColumn(name = "created_by")

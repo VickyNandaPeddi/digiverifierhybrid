@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS, HttpClientXsrfModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
 import { FormsModule ,ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -15,7 +15,6 @@ import { LoaderService } from './services/loader.service';
 import { LoaderInterceptor } from './services/loader.interceptor';
 import { NgbDateCustomParserFormatter } from './services/ngb-date-parser-formatter.service';
 import * as $ from 'jquery';
-
 //import $ from 'jquery';
 @NgModule({
   declarations: [
@@ -34,18 +33,15 @@ import * as $ from 'jquery';
     NgbDatepickerModule
   ],
   providers: [
-    AdminGuard, LoaderService,
+    AdminGuard,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true
-    }, AuthenticationService,
+    },AuthenticationService,
     LoaderService,
-    {provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptor, multi: true},
-    {provide: NgbDateParserFormatter, useClass: NgbDateCustomParserFormatter}
-  ],
-  exports: [
-    LoaderComponent
+    { provide: HTTP_INTERCEPTORS, useClass: LoaderInterceptor, multi: true }, 
+    { provide: NgbDateParserFormatter, useClass: NgbDateCustomParserFormatter } 
   ],
   bootstrap: [AppComponent]
 })

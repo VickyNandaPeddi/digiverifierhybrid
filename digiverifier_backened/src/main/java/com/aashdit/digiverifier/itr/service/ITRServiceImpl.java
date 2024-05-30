@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import com.aashdit.digiverifier.globalConfig.EnvironmentVal;
 import com.aashdit.digiverifier.itr.model.CanditateItrResponse;
@@ -46,6 +46,10 @@ import com.aashdit.digiverifier.itr.model.ITRData;
 import com.aashdit.digiverifier.itr.repository.ITRDataRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.aashdit.digiverifier.config.candidate.model.CandidateCafAddress;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateCafAddressRepository;
+import com.aashdit.digiverifier.config.superadmin.repository.ServiceTypeConfigRepository;
+
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -91,6 +95,12 @@ public class ITRServiceImpl implements ITRService {
 	
 	@Autowired
 	private EnvironmentVal environmentVal;
+
+  	@Autowired
+	private ServiceTypeConfigRepository serviceTypeConfigRepository;
+	
+	@Autowired
+	private CandidateCafAddressRepository candidateCafAddressRepository;
 	
 	/**
 	 * 
@@ -124,27 +134,27 @@ public class ITRServiceImpl implements ITRService {
 				token = obj.getJSONObject("message").getString("access_token");
 			}
       	if(itrTokenResponse.getStatusCode() == HttpStatus.OK) {
-      		log.info("Token Created Successfully. Calling ITR Transaction Id API");
+      		log.info("Token Created Successfully. Calling ITR Transaction Id API"+iTRDetails.getCandidateCode());
       		result = getTransactionId(token, iTRDetails);
       		
       	}else if(itrTokenResponse.getStatusCode() == HttpStatus.UNAUTHORIZED){
       		result.setData("User is Unauthorized to access the ITR");
       		result.setOutcome(false);
       		result.setMessage("User is Unauthorized to access the ITR.");
-      		log.error("User is Unauthorized to access the ITR");
+      		log.error("User is Unauthorized to access the ITR"+iTRDetails.getCandidateCode());
       	}else if(itrTokenResponse.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT){
       		result.setData("Server response is slow, getting timeout.");
       		result.setOutcome(false);
       		result.setMessage("Server response is slow, getting timeout.");
-      		log.error("Server response is slow, getting timeout");
+      		log.error("Server response is slow, getting timeout"+iTRDetails.getCandidateCode());
       	}else if(itrTokenResponse.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR){
       		result.setData("Server is down or Not responding at this Moment.");
       		result.setOutcome(false);
       		result.setMessage("Server is down or Not responding at this Moment.");
-      		log.error("Server is down or Not responding at this Moment");
+      		log.error("Server is down or Not responding at this Moment"+iTRDetails.getCandidateCode());
       	}
       }catch (Exception jsn) {
-      	log.error("Exception occured: ",jsn); // Add the Proper logging Message here
+      	log.error("Exception occured: "+iTRDetails.getCandidateCode(),jsn); // Add the Proper logging Message here
       	result.setData("Something went wrong.");
   		result.setOutcome(false);
   		result.setMessage("Something went wrong.");
@@ -165,6 +175,11 @@ public class ITRServiceImpl implements ITRService {
 		ServiceOutcome<String> result = new ServiceOutcome<String>();
 		if(StringUtils.isNoneBlank(accessToken) || StringUtils.isNoneBlank(iTRDetails.getCandidateCode())
 				|| StringUtils.isNoneBlank(iTRDetails.getUserName()) || StringUtils.isNoneBlank(iTRDetails.getPassword())) {
+			
+			Candidate candidate = candidateRepository.findByCandidateCode(iTRDetails.getCandidateCode());
+			candidate.setItrPanNumber(iTRDetails.getUserName());
+			candidateRepository.save(candidate);
+			
 			ResponseEntity<String> response = null;
 			HttpHeaders headers = new HttpHeaders();
 			setHeaderDetails(headers);
@@ -178,43 +193,43 @@ public class ITRServiceImpl implements ITRService {
 			  		JSONObject obj = new JSONObject(message);
 			  		String transactionId = obj.getString("message");
 			  		if(response.getStatusCode() == HttpStatus.OK) {
-			  			log.info("Transaction Id Created Successfully. Response returned");
+			  			log.info("Transaction Id Created Successfully. Response returned"+iTRDetails.getCandidateCode());
 			  			result = getPostLogInInfo(accessToken,iTRDetails.getCandidateCode(), transactionId, iTRDetails.getUserName(), iTRDetails.getPassword());
 			  		}else if(response.getStatusCode() == HttpStatus.UNAUTHORIZED){
 			      		result.setData("User is Unauthorized to access the ITR");
 			      		result.setOutcome(false);
 			      		result.setMessage("User is Unauthorized to access the ITR.");
-			      		log.error("User is Unauthorized to access the ITR");
+			      		log.error("User is Unauthorized to access the ITR"+iTRDetails.getCandidateCode());
 			      	}else if(response.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT){
 			      		result.setData("Server response is slow, getting timeout.");
 			      		result.setOutcome(false);
 			      		result.setMessage("Server response is slow, getting timeout.");
-			      		log.error("Server response is slow, getting timeout");
+			      		log.error("Server response is slow, getting timeout"+iTRDetails.getCandidateCode());
 			      	}else if(response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR){
 			      		result.setData("Server is down or Not responding at this Moment.");
 			      		result.setOutcome(false);
 			      		result.setMessage("Server is down or Not responding at this Moment.");
-			      		log.error("Server is down or Not responding at this Moment");
+			      		log.error("Server is down or Not responding at this Moment"+iTRDetails.getCandidateCode());
 			      	}
 		  		}catch(JSONException jsn) {
 		  			result.setData("Something went wrong.");
 		      		result.setOutcome(false);
 		      		result.setMessage("Something went wrong.");
-		  			log.error("JSON Exception occured",jsn);
+		  			log.error("JSON Exception occured"+iTRDetails.getCandidateCode(),jsn);
 		  		}
 			}catch(HttpClientErrorException e) {
 				result.setData("Something went wrong.");
 	      		result.setOutcome(false);
 	      		result.setMessage("Something went wrong.");
-	  			log.error("HttpClientErrorException occured in getTransactionId in ITRServiceImpl-->",e);
+	  			log.error("HttpClientErrorException occured in getTransactionId in ITRServiceImpl-->"+iTRDetails.getCandidateCode(),e);
 			} catch(HttpServerErrorException ex) {
 				result.setData("Something went wrong.");
 	      		result.setOutcome(false);
 	      		result.setMessage("Something went wrong.");
-	  			log.error("HttpServerErrorException occured in getTransactionId in ITRServiceImpl-->",ex);
+	  			log.error("HttpServerErrorException occured in getTransactionId in ITRServiceImpl-->"+iTRDetails.getCandidateCode(),ex);
 			}
 		}else {
-			log.error("Invalid ITR Token generated Or Token is null, Please Check the ITR server might be down Or Not Responding");
+			log.error("Invalid ITR Token generated Or Token is null, Please Check the ITR server might be down Or Not Responding"+iTRDetails.getCandidateCode());
 		}
 		return result;
   }
@@ -235,6 +250,8 @@ public class ITRServiceImpl implements ITRService {
 		 ServiceOutcome<String> outcome = new ServiceOutcome<String>();	
 		if(StringUtils.isNotEmpty(transactionId) && StringUtils.isNotEmpty(access_token) && StringUtils.isNotEmpty(candidateId)) {
 			Candidate candidate= candidateRepository.findByCandidateCode(candidateId);
+      List<String> orgServices = serviceTypeConfigRepository.getServiceSourceMasterByOrgId(candidate.getOrganization().getOrganizationId());
+
 				ResponseEntity<String> response = null;
 				HttpHeaders headers = new HttpHeaders();
 		        headers.add("Bearer", access_token); 
@@ -257,11 +274,13 @@ public class ITRServiceImpl implements ITRService {
 						outcome.setMessage(obj.getString("message"));
 					}else {
 						String itrDetails = obj.getString("message");
-						if(response.getStatusCode() == HttpStatus.OK && !itrDetails.equals("")) {
-			        		log.info("Post Login Information retrieved successfully");
+						System.out.println(itrDetails+"itrDetails "+candidateId);
+						if(response.getStatusCode() == HttpStatus.OK && !itrDetails.equals("") && itrDetails.contains("Form26ASInfo")) {
+			        		log.info("Post Login Information retrieved successfully "+candidateId);
 			        		JSONObject form26ASInfo = new JSONObject(itrDetails).getJSONObject("Form26ASInfo");
 							resMsg = form26ASInfo.toString();
-			        		JSONArray tDSDetails = form26ASInfo.getJSONArray("TDSDetails");		
+			        		JSONArray tDSDetails = form26ASInfo.getJSONArray("TDSDetails");	
+							System.out.println(tDSDetails+"tDSDetailsssss "+candidateId);
 			        		List<ITRDataFromApiDto> finalItrList = new ArrayList<ITRDataFromApiDto>();
 			        		for(int i=0; i<tDSDetails.length();i++) {
 			        			JSONObject object = tDSDetails.getJSONObject(i);
@@ -292,7 +311,9 @@ public class ITRServiceImpl implements ITRService {
 			        			itrData.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("ITR"));
 			        			itrDataList.add(itrData);
 			        		}
-			        		if(itrDataList!=null && itrDataList.size()>0) {
+			        		
+			        		List<ITRData> alreadyExistingData = itrDataRepository.findAllByCandidateCandidateCodeOrderByFiledDateDesc(candidate.getCandidateCode());
+			        		if(itrDataList!=null && itrDataList.size()>0 && alreadyExistingData.size() == 0) {
 			        			itrDataRepository.saveAll(itrDataList);
 			        			
 //			        			StringBuilder query = new StringBuilder();
@@ -321,44 +342,57 @@ public class ITRServiceImpl implements ITRService {
 //								if(experiencesList!=null && experiencesList.size()>0) {
 //				        			candidateCafExperienceRepository.saveAll(experiencesList);
 //
-				        			CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(candidateId);
-				        			candidateStatus.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("ITR"));
-				        			candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("ITR"));
-				        			candidateStatus.setLastUpdatedOn(new Date());
-				        			candidateStatusRepository.save(candidateStatus);
-				        			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
+
+			        			//updating status in last
+//				        			CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(candidateId);
+//				        			candidateStatus.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("ITR"));
+//				        			candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("ITR"));
+//				        			candidateStatus.setLastUpdatedOn(new Date());
+//				        			candidateStatusRepository.save(candidateStatus);
+//				        			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
+
+				        			
 //				        		}
 			        			
 
 			        			outcome.setData("ITR data recieved successfully.");
 					      		outcome.setOutcome(true);
 					      		outcome.setMessage("ITR data recieved successfully.");
-					      		log.info("ITR data recieved successfully");
+					      		log.info("ITR data recieved successfully "+candidateId);
 			        		}else {
 			        			CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(candidateId);
 			        			candidateStatus.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("ITR"));
 			        			candidateStatus.setLastUpdatedOn(new Date());
 			        			candidateStatusRepository.save(candidateStatus);
+								if(candidateStatus.getCandidate().getOrganization().getCallBackUrl() != null)
+									candidateService.postStatusToOrganization(candidateStatus.getCandidate().getCandidateCode());
 			        			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
+			        			log.info("ITR else "+candidateId);
 			        			outcome.setData("No Data Found.");
 					      		outcome.setOutcome(true);
 					      		outcome.setMessage("No Data Found.");
 			        		}
-			        	}else if(response.getStatusCode() == HttpStatus.UNAUTHORIZED){
+			        	}else if(response.getStatusCode() == HttpStatus.OK && !itrDetails.equals("") && !itrDetails.contains("Form26ASInfo")) {
+			        		log.error("Invalid credentials"+candidateId);
+			        		outcome.setData("Something Went Wrong, Please Check The Credentials..!");
+				      		outcome.setOutcome(false);
+				      		outcome.setMessage("Something Went Wrong, Please Check The Credentials..!");
+				  			
+					    }else if(response.getStatusCode() == HttpStatus.UNAUTHORIZED){
 				      		outcome.setData("User is Unauthorized to access the ITR");
 				      		outcome.setOutcome(false);
 				      		outcome.setMessage("User is Unauthorized to access the ITR.");
-				      		log.error("User is Unauthorized to access the ITR");
+				      		log.error("User is Unauthorized to access the ITR "+candidateId);
 				      	}else if(response.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT){
 				      		outcome.setData("Server response is slow, getting timeout.");
 				      		outcome.setOutcome(false);
 				      		outcome.setMessage("Server response is slow, getting timeout.");
-				      		log.error("Server response is slow, getting timeout");
+				      		log.error("Server response is slow, getting timeout "+candidateId);
 				      	}else if(response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR){
 				      		outcome.setData("Server is down or Not responding at this Moment.");
 				      		outcome.setOutcome(false);
 				      		outcome.setMessage("Server is down or Not responding at this Moment.");
-				      		log.error("Server is down or Not responding at this Moment");
+				      		log.error("Server is down or Not responding at this Moment"+candidateId);
 				      	}
 					}
 					CanditateItrResponse canditateItrEpfoResponse = canditateItrEpfoResponseRepository
@@ -369,18 +403,75 @@ public class ITRServiceImpl implements ITRService {
 					canditateItrEpfoResponse.setCreatedOn(new Date());
 					canditateItrEpfoResponse.setLastUpdatedOn(new Date());
 					canditateItrEpfoResponseRepository.save(canditateItrEpfoResponse);
+					String itrDetails = obj.getString("message");
+					if(itrDetails.contains("Form26ASInfo")){
+						JSONObject itrDetailsObj = new JSONObject(itrDetails); 
+
+						JSONObject form26ASInfo = itrDetailsObj.getJSONObject("Form26ASInfo");
+						JSONArray personalDetails = form26ASInfo.getJSONArray("PersonalDetails"); 
+						for(int i=0; i<personalDetails.length();i++) {
+							JSONObject object = personalDetails.getJSONObject(i);
+							if(object.length()!=0) {
+								JSONObject name = object.getJSONObject("$");
+								candidate.setItrPanNumber(name.getString("pan"));
+								candidate.setPanDob(name.getString("dob")); 
+								candidate.setPanName(name.getString("name")); 
+                								
+								if(!orgServices.contains("DIGILOCKER")) {
+									if(name.has("gender"))
+										candidate.setAadharGender(name.getString("gender"));
+									if(name.has("address")) {
+								  		CandidateCafAddress address = new CandidateCafAddress();
+								  		address.setCandidate(candidate);
+										address.setCandidateAddress(name.getString("address"));
+								  		address.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("PAN"));
+								  		address.setColor(colorRepository.findByColorCode("GREEN"));
+								  		address.setCreatedOn(new Date());
+								  		if(name.has("name"))
+								  			address.setName(name.getString("name"));
+								  		
+								  		CandidateCafAddress candidateCafAddress = candidateCafAddressRepository.findByCandidateCandidateCodeAndServiceSourceMasterServiceCode(candidate.getCandidateCode(),"PAN");
+				 						if(candidateCafAddress != null)
+				 							address.setCandidateCafAddressId(candidateCafAddress.getCandidateCafAddressId());
+				 						
+								  		candidateCafAddressRepository.save(address);
+									}	
+								}
+
+								candidateRepository.save(candidate);
+							}
+						}
+						
+						//updating status in last of the ITR flow
+						CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(candidateId);
+	        			candidateStatus.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("ITR"));
+	        			candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("ITR"));
+	        			candidateStatus.setLastUpdatedOn(new Date());
+	        			candidateStatusRepository.save(candidateStatus);
+	        			if(candidateStatus.getCandidate().getOrganization().getCallBackUrl() != null) {
+							candidateService.postStatusToOrganization(candidateStatus.getCandidate().getCandidateCode());
+	        			}
+	        			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
+					}
+					
+					
+					// String name = personalDetails.getString("$");
+					// candidate.setPanDob(name.getString("dob"));
+					// candidate.setPanName(name.getString("name"));
+					// System.out.println(name.getString("dob")+"****"+name.getString("name")+"personal data");
+					// candidateRepository.save(candidate);
 					return outcome;
 		        }catch (Exception jsn) {
-		        	log.error("Exception occured in itr: ",jsn); 
+		        	log.error("Exception occured in itr: "+candidateId,jsn); 
 		        	outcome.setData("Something went wrong.");
 		      		outcome.setOutcome(false);
 		      		outcome.setMessage("Something went wrong.");
-		  			log.error("JSON Exception occured",jsn);
+		  			log.error("JSON Exception occured"+candidateId,jsn);
 		  			return outcome;
 				}
 				
 			}else {
-				log.error("Either ITR Token Or TransactionId Or candidateId Or UserName Or Password is not provided / Missing");
+				log.error("Either ITR Token Or TransactionId Or candidateId Or UserName Or Password is not provided / Missing"+candidateId);
 				outcome.setData("Either ITR Token Or TransactionId Or candidateId Or UserName Or Password is not provided / Missing");
 	      		outcome.setOutcome(false);
 	      		outcome.setMessage("Something went wrong.");

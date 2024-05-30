@@ -9,6 +9,8 @@ import { AuthenticationService } from 'src/app/services/authentication.service';
 import { OrgadminDashboardService } from 'src/app/services/orgadmin-dashboard.service';
 import { LoaderService } from 'src/app/services/loader.service';
 import { CustomerService } from 'src/app/services/customer.service';
+import { ReportDeliveryDetailsComponent } from 'src/app/charts/report-delivery-details/report-delivery-details.component';
+import { OrgadminUploaddetailsComponent } from 'src/app/charts/orgadmin-uploaddetails/orgadmin-uploaddetails.component';
 @Component({
   selector: 'app-orgadmin-dashboard',
   templateUrl: './orgadmin-dashboard.component.html',
@@ -23,8 +25,14 @@ export class OrgadminDashboardComponent implements OnInit {
   fileInfos: any;
   getReportDeliveryStatCodes: any;
   getPendingDetailsStatCode: any;
+  getConventionalReportDeliveryStatCodes:any;
   getStatCodes:any;
+  getConventionalStatusCodes:any;
   isShowDiv:boolean=false;
+  isShowConventionalDiv:boolean=false;
+  isShowConventionalUploadDiv:boolean=false;
+  isShowDigitalUploadDiv:boolean=true;
+  isShow:boolean=false;
   isCBadmin:boolean = false;
   getUserByOrganizationIdAndUserId:any=[];
   getRolePerMissionCodes:any=[];
@@ -37,27 +45,41 @@ export class OrgadminDashboardComponent implements OnInit {
   setfromDate:any;
   settoDate:any;
   initToday:any;
+  getStatus:any=[];
+  getServiceConfigCodes: any = [];
   dashboardFilter = new FormGroup({
     fromDate: new FormControl('', Validators.required),
     toDate: new FormControl('', Validators.required)
   });
-  constructor(private orgadmin:OrgadminService, private modalService: NgbModal,
+  SAactivityFilter:any=['NEWUPLOAD'];
+  constructor(private orgadmin:OrgadminService, private modalService: NgbModal, private customers:CustomerService,
     public authService: AuthenticationService,  private dashboardservice:OrgadminDashboardService,
     public loaderService: LoaderService, public calendar: NgbCalendar, private customer: CustomerService) { 
       this.getReportDeliveryStatCodes = this.dashboardservice.getReportDeliveryStatCode();
       this.getPendingDetailsStatCode = this.dashboardservice.getPendingDetailsStatCode();
+      this.getConventionalReportDeliveryStatCodes = this.dashboardservice.getConventionalReportDeliveryStatCode();
+      this.getConventionalStatusCodes = this.dashboardservice.getConventionalStatusCode();
+      console.warn("getConventionalReportDeliveryStatCodes>>",this.getConventionalReportDeliveryStatCodes)
+      console.warn("getConventionalStatusCodes>>",this.getConventionalStatusCodes)
+
       this.getStatCodes = this.dashboardservice.getStatusCode();
-      this.dashboardservice.getUsersByRoleCode(localStorage.getItem('roles')).subscribe((data: any)=>{
+      this.dashboardservice.getUsersByRoleCode(this.authService.getRoles()).subscribe((data: any)=>{
         this.getUserByOrganizationIdAndUserId=data.data;
         //console.log(this.getUserByOrganizationIdAndUserId)
       });
+
+      this.customers.getAllStatus().subscribe((data: any)=>{
+        this.getStatus=data.data;
+        //console.log(this.getStatus);
+      })
+
       this.getToday = calendar.getToday(); 
-      if(localStorage.getItem('dbFromDate')==null && localStorage.getItem('dbToDate')==null){
         let inityear = this.getToday.year;
         let initmonth = this.getToday.month <= 9 ? '0' + this.getToday.month : this.getToday.month;;
         let initday = this.getToday.day <= 9 ? '0' + this.getToday.day : this.getToday.day;
         let initfinalDate = initday + "/" + initmonth + "/" + inityear;
         this.initToday = initfinalDate;
+        if(localStorage.getItem('dbFromDate')==null && localStorage.getItem('dbToDate')==null){
         this.customer.setFromDate(this.initToday);
         this.customer.setToDate(this.initToday);
         this.fromDate = this.initToday;
@@ -78,6 +100,13 @@ export class OrgadminDashboardComponent implements OnInit {
         toDate: this.settoDate
        });
 
+       this.orgadmin
+      .getServiceConfigForOrg(authService.getOrgID())
+      .subscribe((result: any) => {
+        this.getServiceConfigCodes = result.data;
+        console.log("ORG SERVICES::{}",this.getServiceConfigCodes);
+      });
+
        
     }
   uploadAgent = new FormGroup({
@@ -97,36 +126,74 @@ export class OrgadminDashboardComponent implements OnInit {
     }
 
   }
+
   uploadAgents() {
     this.currentFile = this.selectedFiles.item(0);
+    console.log(this.currentFile)
     this.orgadmin.uploadAgent(this.currentFile).subscribe(
       (event:any) => {
-        //console.log(event);
+        console.log(event);
         if(event instanceof HttpResponse){
+          console.log(event.body)
           Swal.fire({
             title: event.body.message,
             icon: 'success'
           }).then(function() {
             window.location.reload();
-        });
+          });
+
+          if(event.body.outcome == false) {
+            Swal.fire({
+              title: event.body.message,
+              icon: 'warning'
+            }).then(function() {
+              window.location.reload();
+            });
+          }
         }
-       });
+
+    }, (err: any) => {
+      if(err.error){
+        Swal.fire({
+          title: err.error.message,
+          icon: 'warning'
+        }).then(function() {
+          window.location.reload();
+        });
+      }
+    });
   }
 
   uploadCandidate() {
     this.currentFile = this.selectedFiles.item(0);
     this.orgadmin.uploadCandidate(this.currentFile).subscribe(
       (event:any) => {
-        //console.log(event);
+       // console.log(event);
         if(event instanceof HttpResponse){
-          Swal.fire({
-            title: event.body.message,
-            icon: 'success'
-          }).then(function() {
-            window.location.reload();
-        });
+          if(event.body.outcome == true){
+            Swal.fire({
+              title: event.body.message,
+              icon: 'success'
+            }).then(function() {
+              window.location.reload();
+          });
+          } 
+          else{
+            Swal.fire({
+              title: event.body.message,
+              icon: 'error'
+            }).then(function() {
+              window.location.reload();
+          });
+          } 
         }
+        
        });
+  }
+
+  activityFilter(activity:any){
+    this.SAactivityFilter = [];
+    this.SAactivityFilter.push(activity);
   }
 
   uploadClientscope() {
@@ -150,23 +217,34 @@ export class OrgadminDashboardComponent implements OnInit {
       this.isShowDiv = true;
     }else if(this.getReportDeliveryStatCodes){
       this.isShowDiv = false;
+    }else if(this.getConventionalReportDeliveryStatCodes){
+      this.isShowConventionalDiv = true;
+      this.isShowDigitalUploadDiv = false;
+      this.isShowConventionalUploadDiv = true;
+    }
+    else if(this.getConventionalStatusCodes){
+      // this.isShowDigitalUploadDiv = false;
+      // this.isShowConventionalUploadDiv = true;'
+      this.isShowConventionalDiv = true;
+      this.isShowDigitalUploadDiv = false;
+      this.isShowConventionalUploadDiv = true;
     }
 
-    if(this.getStatCodes || this.getPendingDetailsStatCode || this.getReportDeliveryStatCodes){
+    if(this.getStatCodes || this.getPendingDetailsStatCode || this.getReportDeliveryStatCodes || this.getConventionalReportDeliveryStatCodes || this.getConventionalStatusCodes){
       this.containerStat = true;
     }
     setTimeout(() =>{
       this.loaderService.hide();
     },7000);
     //isCBadmin required for drilldown dashboard at Superadmin
-    const isCBadminVal = localStorage.getItem('roles');
+    const isCBadminVal = this.authService.getRoles();
     if(isCBadminVal == '"ROLE_CBADMIN"'){
       this.isCBadmin = true;
     }else{
       this.isCBadmin = false;
     }
     
-    this.orgadmin.getRolePerMissionCodes(localStorage.getItem('roles')).subscribe(
+    this.orgadmin.getRolePerMissionCodes(this.authService.getRoles()).subscribe(
       (result:any) => {
       this.getRolePerMissionCodes = result.data;
         //console.log(this.getRolePerMissionCodes);
@@ -181,8 +259,34 @@ export class OrgadminDashboardComponent implements OnInit {
 
         }
     });
-
     
+  }
+
+  uploadConventionalCandidate() {
+    this.currentFile = this.selectedFiles.item(0);
+    this.orgadmin.uploadConventionalCandidate(this.currentFile).subscribe(
+      (event:any) => {
+       // console.log(event);
+        if(event instanceof HttpResponse){
+          if(event.body.outcome == true){
+            Swal.fire({
+              title: event.body.message,
+              icon: 'success'
+            }).then(function() {
+              window.location.reload();
+          });
+          }
+          else{
+            Swal.fire({
+              title: event.body.message,
+              icon: 'error'
+            }).then(function() {
+              window.location.reload();
+          });
+          }
+        }
+       
+       });
   }
 
 
@@ -205,8 +309,31 @@ export class OrgadminDashboardComponent implements OnInit {
   }
 
   toggleDisplayDiv() {  
-    this.isShowDiv = !this.isShowDiv;  
+    this.isShowDiv = !this.isShowDiv; 
   } 
+  toggleConventionalDisplayDiv(){
+    // this.isShowConventionalDiv = true
+    // this.isShowConventionalUploadDiv = !this.isShowConventionalUploadDiv;
+    // this.isShowDigitalUploadDiv = false
+    // this.isShow = true
+
+    this.isShowConventionalDiv = !this.isShowConventionalDiv
+    console.warn("conventional",this.isShowConventionalDiv)
+    this.isShowConventionalUploadDiv = !this.isShowConventionalUploadDiv;
+    this.isShowDigitalUploadDiv = !this.isShowDigitalUploadDiv
+    this.isShow = true
+    
+  }
+
+  toggleDigitalDisplayDiv(){
+    this.isShowConventionalDiv = false;
+    this.isShowDigitalUploadDiv = true;
+    this.isShowConventionalUploadDiv = false;
+    this.isShow = false
+    // this.isShowDiv = false;
+    // this.conReportdel.loadCharts();
+    // window.location.reload()
+  }
   
   getuserId(userId:any){
     if(userId != 'null'){
@@ -261,5 +388,110 @@ export class OrgadminDashboardComponent implements OnInit {
       });
     }
    }
+
+   filterToday(){
+    this.customer.setFromDate(this.initToday);
+    this.customer.setToDate(this.initToday);
+    window.location.reload();
+  }
+  
+  filterLast7days(){
+      var date = new Date();
+      date.setDate(date.getDate() - 7);
+      var dateString = date.toISOString().split('T')[0];
+      let getInputFromDate:any = dateString.split('-');
+      let finalInputFromDate = getInputFromDate[2] + "/" + getInputFromDate[1] + "/" + getInputFromDate[0];
+      this.customer.setFromDate(finalInputFromDate);
+      this.customer.setToDate(this.initToday);
+      window.location.reload();
+  }
+
+  filterLast30days(){
+    var date = new Date();
+    date.setDate(date.getDate() - 30);
+    var dateString = date.toISOString().split('T')[0];
+    let getInputFromDate:any = dateString.split('-');
+    let finalInputFromDate = getInputFromDate[2] + "/" + getInputFromDate[1] + "/" + getInputFromDate[0];
+    this.customer.setFromDate(finalInputFromDate);
+    this.customer.setToDate(this.initToday);
+    window.location.reload();
+}
+
+filterByYear() {
+  var date = new Date();
+  date.setFullYear(date.getFullYear() - 1);  // subtract one year instead of 30 days
+  var dateString = date.toISOString().split('T')[0];
+  let getInputFromDate: any = dateString.split('-');
+  let finalInputFromDate = getInputFromDate[2] + "/" + getInputFromDate[1] + "/" + getInputFromDate[0];
+  this.customer.setFromDate(finalInputFromDate);
+  this.customer.setToDate(this.initToday);
+  window.location.reload();
+}
+
+filterLastMonth() {
+  let date = new Date();
+  date.setMonth(date.getMonth() - 1);
+  let firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 2);
+  let lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+  let fromDateString = firstDayOfMonth.toISOString().split('T')[0];
+  let toDateString = lastDayOfMonth.toISOString().split('T')[0];
+
+  let getInputFromDate: any = fromDateString.split('-');
+  let finalInputFromDate =
+    getInputFromDate[2] +
+    '/' +
+    getInputFromDate[1] +
+    '/' +
+    getInputFromDate[0];
+
+    let getInputToDate: any = toDateString.split('-');
+    let finalInputToDate =
+      getInputToDate[2] +
+      '/' +
+      getInputToDate[1] +
+      '/' +
+      getInputToDate[0];
+  this.customer.setFromDate(finalInputFromDate);
+  this.customer.setToDate(finalInputToDate);
+  window.location.reload();
+}
+
+filterMonthToDate() {
+  let currentDate = new Date();
+  let firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 2);
+  let fromDateString = firstDayOfMonth.toISOString().split('T')[0];
+  let toDateString = currentDate.toISOString().split('T')[0];
+
+  let getInputFromDate: any = fromDateString.split('-');
+  let finalInputFromDate =
+    getInputFromDate[2] +
+    '/' +
+    getInputFromDate[1] +
+    '/' +
+    getInputFromDate[0];
+
+    this.customer.setFromDate(finalInputFromDate);
+    this.customer.setToDate(this.initToday);
+    window.location.reload();
+}
+
+downloadUploadResourceFile(uploadFor: any,uploadType: any): void {
+  this.dashboardservice.downloadUploadResourceFile(uploadFor,uploadType).subscribe((data: Blob) => {
+    const blob = new Blob([data], { type: 'application/octet-stream' });
+      const url = window.URL.createObjectURL(blob);
+
+      // Create a temporary anchor element
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = uploadFor+"."+uploadType; // Set the filename
+      document.body.appendChild(a);
+
+      // Trigger the click event on the anchor element
+      a.click();
+
+      // Remove the temporary anchor element
+      document.body.removeChild(a);
+  });
+}
 
 }

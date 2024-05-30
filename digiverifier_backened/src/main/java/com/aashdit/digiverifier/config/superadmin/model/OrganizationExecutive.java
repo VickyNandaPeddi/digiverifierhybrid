@@ -2,7 +2,7 @@ package com.aashdit.digiverifier.config.superadmin.model;
 
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Data
 @Entity

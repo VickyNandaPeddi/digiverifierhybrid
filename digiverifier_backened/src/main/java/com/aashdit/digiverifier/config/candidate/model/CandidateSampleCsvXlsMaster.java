@@ -1,18 +1,20 @@
 package com.aashdit.digiverifier.config.candidate.model;
 
 import java.io.Serializable;
+import java.sql.Types;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
 
 import com.aashdit.digiverifier.config.admin.model.User;
@@ -40,11 +42,13 @@ public class CandidateSampleCsvXlsMaster implements Serializable {
 	@JoinColumn(name = "organization_id")
 	private Organization organization;
 	
-	@Type(type="org.hibernate.type.BinaryType")
+	//@Type(type="org.hibernate.type.BinaryType")
+	@JdbcTypeCode(Types.BINARY)
     @Column(name = "candidate_sample_csv", columnDefinition="BLOB")
     private byte[] candidateSampleCsv;
 	
-	@Type(type="org.hibernate.type.BinaryType")
+	//@Type(type="org.hibernate.type.BinaryType")
+	@JdbcTypeCode(Types.BINARY)
     @Column(name = "candidate_sample_xls", columnDefinition="BLOB")
     private byte[] candidateSampleXls;
 	

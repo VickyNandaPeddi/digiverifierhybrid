@@ -1,0 +1,132 @@
+<div class="pageHeader">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="pageTitle">{{ pageTitle }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row mt-1 justify-content-between">
+                        <div class="col-md-2 text-center">
+                            <div class="icon-container">
+                                <button (click)="onEditCustInfo()" class="ms-btn ms-btn-primary">
+                                    <span class="fas fa-pencil-alt"></span>
+                                </button>
+                                <p class="icon-label" type="button" (click)="onEditCustInfo()">Edit Customer Information
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-1 line-container">
+                            <div class="line"></div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="icon-container">
+                                <button (click)="onEditCustBill()" class="ms-btn ms-btn-primary">
+                                    <span class="fas fa-file-invoice-dollar"></span>
+                                </button>
+                                <p class="icon-label" type="button" (click)="onEditCustBill()">Edit Billing Information
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-1 line-container">
+                            <div class="line"></div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="icon-container">
+                                <button (click)="onEditCustEmailTemp()" class="ms-btn ms-btn-primary">
+                                    <span class="fas fa-envelope"></span>
+                                </button>
+                                <p class="icon-label" type="button" (click)="onEditCustEmailTemp()">Edit Customer Email
+                                    Templates</p>
+                            </div>
+                        </div>
+                        <div class="col-md-1 line-container">
+                            <div class="line"></div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="icon-container">
+                                <button (click)="onEditCustScope()" class="ms-btn ms-btn-primary">
+                                    <span class="fas fa-envelope"></span>
+                                </button>
+                                <p class="icon-label" type="button" (click)="onEditCustScope()">Edit Organisation Scope</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<span class="line-break"></span>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card ms-Card">
+                <div class="card-header ms-Card-header d-flex align-items-center">
+                    <h4 class="card-title ms-Card-title">Add Email templates</h4>
+                    <div class="email-animation">✉</div>
+                </div>
+                <div class="card-body ms-Card-body">
+                    <form [formGroup]="addEmailTemplate">
+                        <div class="form-group row">
+                            <label for="inviteMailSub" class="col-sm-2 col-form-label ms-Label">Invitation Mail
+                                Subject:</label>
+                            <div class="col-sm-10">
+                                <input type="text"
+                                    class="form-control form-control-sm ms-TextField ms-TextField--underlined"
+                                    id="inviteMailSub" formControlName="inviteMailSub" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inviteMailContent" class="col-sm-2 col-form-label ms-Label">Invitation Mail
+                                Content:</label>
+                            <div class="col-sm-10">
+                                <textarea type="text"
+                                    class="form-control form-control-sm ms-TextField ms-TextField--underlined"
+                                    id="inviteMailContent" formControlName="inviteMailContent" rows="3">
+                          </textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="loaMailSub" class="col-sm-2 col-form-label ms-Label">LOA Mail Subject:</label>
+                            <div class="col-sm-10">
+                                <input type="text"
+                                    class="form-control form-control-sm ms-TextField ms-TextField--underlined"
+                                    id="loaMailSub" formControlName="loaMailSub" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="loaMailContent" class="col-sm-2 col-form-label ms-Label">LOA Mail
+                                Content:</label>
+                            <div class="col-sm-10">
+                                <textarea type="text"
+                                    class="form-control form-control-sm ms-TextField ms-TextField--underlined"
+                                    id="loaMailContent" formControlName="loaMailContent" rows="3">
+                          </textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center mt-3 pb-3">
+                                <button type="button" [disabled]="isSubmitDisabled()"
+                                    [ngClass]="{'ms-secondary-button': !isSubmitDisabled(), 'btn btn-primary': isSubmitDisabled()}"
+                                    (click)="submit(addEmailTemplate)"
+                                    *ngIf="this.CustomerEmailTemplateData.emailTemplateId == null"
+                                    class="ms-button">Submit</button>
+                                <button type="button" (click)="Update(addEmailTemplate)"
+                                    *ngIf="this.CustomerEmailTemplateData.emailTemplateId != null"
+                                    class="ms-button ms-primary-button">Update</button>
+                                <a routerLink="../../admindashboard" class="ms-button ms-skip-button">Skip</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,14 +1,14 @@
-<div class="pageHeader">
+<!-- <div class="pageHeader">
   <div class="container">
     <div class="row">
       <div class="col-md-12">
-        <!-- <h2 class="pageTitle">{{ pageTitle }}</h2> -->
+        <h2 class="pageTitle">{{ pageTitle }}</h2>
       </div>
     </div>
   </div>
-</div>
+</div> -->
 <div class="col-md-12">
-  <form [formGroup]="utilizationReportFilter">
+  <!-- <form [formGroup]="utilizationReportFilter">
     <div class="row">
       <div class="col-md-12">
         <div class="card" style="z-index: 1;">
@@ -16,15 +16,18 @@
             <div class="row">
               <div class="col-md-2 offset-2">
                 <button type="button" (click)="filterToday()"
-                class="btn btn-sm btn-primary btn-block">Today</button>
+                        class="btn btn-sm btn-primary btn-block">Today
+                </button>
               </div>
               <div class="col-md-2">
                 <button type="button" (click)="filterMonthToDate()"
-                class="btn btn-sm btn-primary btn-block">MTD</button>
+                        class="btn btn-sm btn-primary btn-block">MTD
+                </button>
               </div>
               <div class="col-md-2">
                 <button type="button" (click)="filterLastMonth()"
-                class="btn btn-sm btn-primary btn-block">Last Month</button>
+                        class="btn btn-sm btn-primary btn-block">Last Month
+                </button>
               </div>
             </div>
           </div>
@@ -35,7 +38,7 @@
                   <label for="" class="required">From Date</label>
                   <div class="input-group">
                     <input #rangeFrom="ngbDatepicker" formControlName="fromDate" (dateSelect)="onfromDate($event)"
-                           id="inputFromDateVendor" [minDate]="createdOnDate"
+                           id="inputFromDateVendor" 
                            [maxDate]="getToday" class="form-control form-control-sm" ngbDatepicker readonly/>
                     <div class="input-group-append">
                       <button class="btn btn-sm btn-outline-secondary" (click)="rangeFrom.toggle()" type="button"><img
@@ -70,95 +73,249 @@
         </div>
       </div>
     </div>
-  </form>
-</div>
-<br>
-<div class="col-md-12">
-  <div class="card">
-    <div class="card-header">
-      <div class="col-md-3">
-        <input type="text" id="candidateNameFilter" class="form-control" [(ngModel)]="candidateNameFilter"
-               placeholder="Search here" (keyup.enter)="performSearch()" (keyup.backspace)="performSearch()">
-      </div>
-      <div class="table-responsive">
-        <table class="table table-bordered mt-2">
-          <thead class="thead-light">
-          <tr>
-            <th>S.No</th>
-            <th>Check Unique Id</th>
-            <th>Check Status</th>
-            <th>Candidate Request Id</th>
-            <th>Candidadate Name</th>
-            <th>Agent Name</th>
-            <th>Source Name</th>
-            <th>Document Name</th>
-            <th>Date To Complete</th>
-            <th>Reference Data</th>
-            <th>Document Download</th>
-            <th>Mode Of Verification To Perform</th>
-            <th>Case Received On</th>
-            <th>Proofs</th>
-            <!--            <th>Verification Status</th>-->
-          </tr>
-          </thead>
-          <tbody>
+  </form> -->
 
-          <tr *ngFor="let item of filteredDatapagination();let i = index;"
-              [ngClass]="{'disabled-row': item.stopCheckStatus !== null || item.disableStatus === 'DISABLE'}">
-            <td>{{i + 1}}</td>
-            <td>{{item.checkUniqueId}}</td>
-            <td>{{item.vendorCheckStatusMaster?.checkStatusCode}}</td>
-            <td>{{item.candidate?.conventionalRequestId}}</td>
-            <td>{{item.candidate?.candidateName}}</td>
-            <td>{{item.createdBy?.userFirstName}}</td>
-            <td>{{item.source?.sourceName}}</td>
-            <td>{{item?.documentname}}</td>
-            <td>{{ (item.fastTrackDateTime !== undefined && item.fastTrackDateTime !== null) ? item.fastTrackDateTime : 'NA'}}</td>
-            <td>
-              <!--                        pathKey-->
-              <button type="button" class="btn btn-sm btn-primary" title="Download Document"
-                      (click)="downloadReferenceExcelData(item.candidate.candidateName,item.source.sourceName,item.candidate.candidateId,item.source.sourceId)">
-                <i class="fa fa-download"></i></button>
-            </td>
-            <td>
-              <!--                        pathKey-->
-              <button type="button" class="btn btn-sm btn-primary" title="Download Document"
-                      (click)="downloadPdf(item.pathKey)">
-                <i class="fa fa-download"></i></button>
-            </td>
-            <td>{{item?.modeOfVerificationPerformed}}</td>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="col-md-3" style="padding: 5px;" class="float-right">
+          <input type="text" placeholder="search" class="float-right" [(ngModel)]="searchText"  (keyup.enter)="performSearch()">
+      </div>  
+        <div class="table-responsive">
+          <table class="table table-bordered tbl-drilldown">
+            <thead>
+              <tr>
+                <th>SI#</th>
+                <th>Applicant ID</th>
+                <th>Candidate Name</th>
+                <th>Agent Name</th>
+                <th>Check Name</th>
+                <th>Case Received Date</th>
+                <!-- <th>View Document</th> -->
+                <!-- <th>Document Name</th> -->
+                <th>document download</th>
+                <th>Reference Data</th>
+                <th>Proofs</th>
+                <th *ngIf="vendorDashboardStatus !== 'INPROGRESS'">Verified Document</th>
+                <th>Check Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="!vendorchecksupload || vendorchecksupload.length === 0">
+                <td colspan="11" class="text-center" style="font-size: large;">No records</td>
+              </tr>
+              <tr *ngFor="let item of vendorchecksupload; let i = index" [class.stop-check]="item.stopCheck" [style.background-color]="item.stopCheck ? '#D3D3D3' : 'white'">
+                <td>{{ i + 1 }}</td>
+                <td>{{item.candidate?.applicantId
+                      ? item.candidate.applicantId
+                      : ""}}</td>
+                <td>
+                  {{
+                    item.candidate?.candidateName
+                      ? item.candidate.candidateName
+                      : ""
+                  }}
+                </td>
 
-            <td>{{item?.createdOn | date: 'dd-MMM-yyyy'}}</td>
-            <td>
+                <td>
+                  {{
+                    item.candidate?.createdBy?.userName
+                      ? item.candidate?.createdBy?.userName
+                      : ""
+                  }}
+                </td>
+                <td>
+                  {{ item.source?.sourceName ? item.source?.sourceName : "" }}
+                </td>
+                <td>
+                  {{ item.createdOn | date:'dd-MMM-yyyy' }}
 
-              <button class="btn btn-sm btn-info" data-toggle="tooltip" [disabled]="isUploadButtonDisabled(item)"
-                      (click)="item.vendorCheckStatusMaster?.checkStatusCode === 'INSUFFICIENCY'?getCurrentStatusOfCheck(item): triggerModal(modalCandidate, item.documentname, item.vendorcheckId)">
-                Upload
-              </button>
-              <!--              item.vendorCheckStatusMaster?.checkStatusCode === 'INSUFFICIENCY' ? triggerInsufficiencySecoundRemarksModal(insuffmodalsecoundremarks,item) : triggerModal(modalCandidate, item.documentname, item.vendorcheckId)-->
-              <button [disabled]="!item.isproofuploaded" type="button" class="btn btn-sm btn-primary"
-                      title="View Document"
-                      (click)="openCertificate(modalCertificate, item.vendorUplodedDocument)">
-                <i class="fa fa-eye"></i>
-                <input type="hidden" name="maxFileSize" value="1000000">
-              </button>
-            </td>
-
-            <!--            <td *ngIf="item.isproofuploaded">Completed</td>-->
-            <!--            <td *ngIf="!item.isproofuploaded">Pending</td>-->
-
-          </tr>
-          </tbody>
-        </table>
-        <div class="pagination">
-          <button [disabled]="currentPageIndex == 0" (click)="goToPrevPage()">Previous</button>
-          <span>Page {{currentPageIndex}} of {{totalPages}}</span>
-          <button [disabled]="currentPageIndex == totalPages - 1" (click)="goToNextPage()">Next</button>
+                </td>
+                <!-- <td>
+                  <button type="button" class="btn btn-sm btn-primary" title="View Document"
+                  (click)="openCertificate(modalCertificate, item.agentUploadedDocument)">
+                  <i class="fa fa-eye"></i>
+                 </button>
+              </td> -->
+                <td style="cursor: pointer;"
+                 title="Download Document"
+                    (click)="item.stopCheck ? $event.stopPropagation() : downloadPdf(item.agentUploadDocumentPathKey
+                    , item.documentname,item.source?.sourceName)"
+                >{{ item.documentname }}</td>
+                <!-- <td>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-primary"
+                    title="Download Document"
+                    (click)="downloadPdf(item.agentUploadedDocument)"
+                  >
+                    <i class="fa fa-download"></i>
+                  </button>
+                </td> -->
+                <td>
+                  <button [disabled]="item.stopCheck === true"
+                  type="button" class="btn btn-sm btn-primary" title="Download Document"
+                          (click)="downloadReferenceExcelData(item.vendorcheckId)">
+                    <i class="fa fa-download"></i></button>
+                </td>
+                <td>
+                  <button
+                    class="btn btn-sm btn-info"
+                    data-toggle="tooltip"
+                    [disabled]="item.stopCheck === true"
+                    (click)="
+                      triggerModal(
+                        modalCandidate,
+                        item.documentname,
+                        item.vendorcheckId,
+                        item.source.sourceName,
+                        i
+                      )
+                    "
+                  >
+                    Upload
+                  </button>
+                </td>
+                <td *ngIf="vendorDashboardStatus !== 'INPROGRESS'">
+                  <button type="button" class="btn btn-sm btn-primary" title="View Document"  [disabled]="!item.vendorUploadCheck || item.stopCheck === true"
+                  (click)="viewDocFromS3(modalCertificate, item.vendorUploadCheck.vendorUploadDocumentPathKey)">
+                  <i class="fa fa-eye"></i>
+                 </button>
+                </td>
+               <!-- <td>{{ item.vendorCheckStatusMaster?.checkStatusName || '' }}</td> -->
+                 <td>{{ (item.vendorCheckStatusMaster?.checkStatusName === 'In Progress') ? 'New Upload' : (item.vendorCheckStatusMaster?.checkStatusName || '') }}</td>
+                <!-- <td *ngIf="!item && item.vendorCheckStatusMaster"></td> -->
+                <!-- <ng-container *ngIf="item && item.vendorCheckStatusMaster">
+                  <td>{{ item.vendorCheckStatusMaster.checkStatusName }}</td>
+                </ng-container> -->
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
+    <div class="pagination-container">
+      <button class="pagination-button prev-button" [disabled]="pageNumber === 0" (click)="onPageChange(pageNumber - 1)">
+          <em class="fas fa-chevron-left"></em> Previous
+      </button>
+      <span class="page-number">Page {{ pageNumber + 1 }}<span [ngClass]="{'disabled-span': totalPages === 0}"> of {{totalPages}}</span></span>
+      <button class="pagination-button next-button btn-primary" [disabled]="pageNumber >= totalPages - 1 || vendorchecksupload.length < pageSize" (click)="onPageChange(pageNumber + 1)">
+          Next <em class="fas fa-chevron-right"></em>
+      </button>
   </div>
-</div>
+  </div>
+  
+<ng-template #modalCandidate let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Upload Proof</h4>
+    <button
+      type="button"
+      class="close"
+      aria-label="Close"
+      (click)="modal.dismiss('Cross click')"
+    >
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="vendorlist">
+      <div class="form-group">
+        <!-- <div class="col-md-7">
+                        <label> Does Source Exist ?</label>
+                        <label *ngFor="let item of getColors">
+                            <span class="colorId{{item.colorId}}">
+                                <input type="radio" name="sourceVerificationColorId" (change)="getcolor($event)" [value]="item.colorId">
+                                {{ item.colorName }}
+                            </span>
+                        </label>
+                    </div> -->
+        <div class="col-md-12">
+          <div class="form-group">
+            <label for="" class="">Document Name</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              formControlName="documentname"
+            />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-8">
+            <input
+              type="file"
+              class="form-control-file form-control"
+              (change)="uploadGlobalCaseDetails($event)"
+              accept=".pdf, image/*"
+            />
+          </div>
+          <div id="preview-container" class="col-md-2">
+            <button id="preview-button" class="btn btn-primary" disabled>Preview</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div *ngFor="let attribute of venderAttributeValue" class="col-md-12">
+        <div class="form-group">
+          <label for="" class="required">{{ attribute.label }}</label>
+
+          <input
+            type="text"
+            formControlName="value"
+            [(ngModel)]="attribute.value"
+            class="form-control form-control-sm"
+          />
+          <span *ngIf="attribute.value === null" style="color: red;">{{showMessage}}</span>
+        </div>
+      </div> -->
+
+      <div class="col-md-12">
+        <div class="form-group">
+          <label for="" class="required">Vendor Checks Status</label>
+          <select
+            class="form-control"
+            formControlName="vendorCheckStatusMasterId"
+          >
+            <!-- <option [ngValue]="null" disabled>--Select--</option> -->
+            <option
+              *ngFor="let item of getVenorcheckStatus"
+              (change)="getvendorcheckstatuss($event)"
+              [value]="item.vendorCheckStatusMasterId"
+            >
+              <div>{{ item.checkStatusName }}</div>
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col-md-12">
+        <div class="form-group">
+          <label for="" class="">Remarks</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            formControlName="remarks"
+          />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12 text-center mt-3 pb-3">
+          <button
+            type="button"
+            [disabled]="!proofDocumentNew"
+            (click)="onSubmit(vendorlist)"
+            class="btn btn-success btn-sm"
+          >
+            Submit
+          </button>
+          <button type="button" class="btn btn-danger btn-sm">Close</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+
 <ng-template #modalCertificate let-modal>
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">View Certificate</h4>
@@ -167,136 +324,10 @@
     </button>
   </div>
   <div class="modal-body">
-    <div class="row">
-      <div class="col-md-12">
-        <iframe id="viewcandidateCertificate" max-file-size="5000000" style="width: 100%; height: 600px"></iframe>
-      </div>
-    </div>
-  </div>
-</ng-template>
-
-<ng-template #modalCandidate let-modal>
-  <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">Upload Proof</h4>
-    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-      <span aria-hidden="true">×</span>
-    </button>
-  </div>
-  <div class="modal-body">
-    <form [formGroup]="vendorlist">
-      <div class="form-group">
-        <div class="row">
-          <div class="col-md-6">
-            <div class="form-group" *ngIf="selectedStatus !== '3'">
-              <label for="" class="">Document Name</label>
-              <input type="text" class="form-control form-control-sm" formControlName="documentname">
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-group">
-              <label class="">Status</label>
-              <select class="form-control form-control-sm" #b (change)=getVendorStatusID(selectedStatus)
-                      [(ngModel)]="selectedStatus"
-                      formControlName="status">
-                <option [value]="null">--Select--</option>
-                <option *ngFor="let item of vendorCheckStatus;" [value]="item.vendorCheckStatusMasterId">{{
-                  item.checkStatusCode }}
-                </option>
-              </select>
-            </div>
-          </div>
-          <div class="col-md-12">
-            <div class="form-group">
-              <label class="">Vendor Remarks</label>
-              <input type="text" class="form-control form-control-sm" formControlName="remarks" required
-                     minlength="15">
-              <div *ngIf="getRemarks().touched && getRemarks().errors?.required" class="d-block invalid-feedback">
-                please provide Remarks
-              </div>
-              <div *ngIf="getRemarks().touched && getRemarks().dirty && getRemarks().hasError('minlength')"
-                   class="d-block invalid-feedback">
-                please provide at least 15 characters
-              </div>
-            </div>
-          </div>
-          <div class="col-md-12" *ngIf="selectedStatus !== '3'">
-            <label class="">Upload Document</label>
-            <div class="upload-container">
-              <input type="file" class="form-control form-control-sm" #fileInput (change)="uploadGlobalCaseDetails(fileInput.files)"
-                     accept=".pdf" [disabled]="selectedStatus === '3'"
-                     [required]="selectedStatus !== '3'">
-              <div id="preview-container">
-                <button id="preview-button" class="btn btn-primary" disabled>Preview</button>
-              </div>
-            </div>
-          </div>
-          <!-- ------------------------------------------------venderAttributeCheck------------------------------------------------------- -->
-          <div *ngFor="let attribute of  venderAttributeValue; let i = index" class="col-md-12">
-            <div class="form-group" *ngIf="selectedStatus !== '3'">
-              <label class="required">{{attribute.label}}</label>
-              <input type="text" formControlName="value" [(ngModel)]="attribute.value" required
-                     class="form-control form-control-sm" (blur)="markControlAsTouched(i)">
-              <div *ngIf="isControlTouched(i) && !attribute.value" class="d-block invalid-feedback">
-                Please provide Remarks for {{ attribute.label }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="row">
-        <div class="col-md-12 text-center mt-3 pb-3">
-          <button type="button" *ngIf="selectedStatus !== '3'"
-                  [disabled]="isButtonDisabled || (!vendorlist.valid|| (selectedStatus !== '3' && !proofDocumentNew))"
-                  (click)="onSubmit(vendorlist)"
-                  class="btn btn-success btn-sm">Submit
-          </button>
-          <button type="button" *ngIf="selectedStatus == '3'"
-                  [disabled]="isButtonDisabled || (getRemarks().invalid)"
-                  (click)="onSubmit(vendorlist)"
-                  class="btn btn-primary btn-sm">Submit
-          </button>
-          <button type="button" class="btn btn-danger btn-sm" (click)="modal.dismiss('Cross click')">Close</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</ng-template>
-<ng-template #insuffmodalsecoundremarks let-modal>
-  <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">Edit Remarks</h4>
-    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-      <span aria-hidden="true">×</span>
-    </button>
-  </div>
-  <div class="modal-body">
-    <form>
-      <div class="form-group">
-        <div class="row">
           <div class="col-md-12">
-            <div class="form-group">
-              <label class="">Vendor Remarks</label>
-              <input type="text" class="form-control form-control-sm" [(ngModel)]="secoundaryRemarks"
-                     (input)="onSecoundaryRemarksChange()" name="secoundaryRemarks" required  minlength="15"  #remarksInput="ngModel">
-              <div *ngIf="!remarksInput.touched && remarksModified==false" class="d-block invalid-feedback">
-                Please Update the Remarks
-              </div>
-              <div *ngIf="!remarksInput.touched && secoundaryRemarks.length < 15" class="d-block invalid-feedback">
-                Remarks must be at least 15 characters long.
-              </div>
-            </div>
+              <iframe id="viewcandidateCertificate" style="width: 100%;height: 600px;"></iframe>
           </div>
-        </div>
       </div>
-      <!--                  [disabled]="isButtonDisabled || (!vendorlist.valid|| (selectedStatus !== '3' && !proofDocumentNew))"-->
-      <!--      (click)="onSubmit(vendorlist) "-->
-      <div class="row">
-        <div class="col-md-12 text-center mt-3 pb-3">
-          <button type="button" [disabled]="!remarksModified || secoundaryRemarks.length < 15" (click)="saveRemarks()" class="btn btn-success btn-sm">
-            Submit
-          </button>
-          <button type="button" class="btn btn-danger btn-sm" (click)="modal.dismiss('Cross click')">Close</button>
-        </div>
-      </div>
-    </form>
   </div>
 </ng-template>

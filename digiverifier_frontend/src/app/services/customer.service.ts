@@ -1,150 +1,125 @@
-import {EventEmitter, Injectable} from '@angular/core';
-import {HttpClient,HttpHeaders} from '@angular/common/http';
-import {environment} from 'src/environments/environment';
-import {data} from 'jquery';
-import {BehaviorSubject} from "rxjs";
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
+import { Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CustomerService {
 
-
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient) {}
+  getVendorUtilizationReport() {
+    return this.http.get(
+      `${environment.apiUrl}/api/report/getVendorUtilizationReport`
+    );
   }
-
-  public sharedData: any;
-
-  setSharedData(data: any) {
-    this.sharedData = data;
+  postVendorUtilizationReport(data: any) {
+    return this.http.post(
+      `${environment.apiUrl}/api/report/getVendorUtilizationReport`,
+      data
+    );
   }
-
-  getSharedData() {
-    return this.sharedData;
+  getVendorDetailsByStatus(data: any) {
+    return this.http.post(
+      `${environment.apiUrl}/api/report/getVendorDetailsByStatus`,
+      data
+    );
   }
-
-  getVendorReportAttributes(vendorCheckID: any) {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/getConventionalAttributesMaster/${vendorCheckID}`);
-  }
-
-  addAndUpdateLicheckByCandidateID({candidateId}: any) {
-    return this.http.post(`${environment.apiUrl}/api/vendorCheck/liCheck`, candidateId);
-  }
-
-  getConventionalCandidateByCandidateId(requestID: any) {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/findConventionalCandidate/${requestID}`);
-  }
-
-
-  getAllModeOfVerificationPerformed() {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/findAllModeOfVerificationPerformed`);
-  }
-
-  addAndUpdateCandidateData(VendorID: any) {
-    return this.http.post(`${environment.apiUrl}/api/vendorCheck/saveSubmittedCandidates`, VendorID);
-  }
-  saveSubmittedCandidatesForTriggerCheckStatus(VendorID: any,triggerRequestId:any) {
-    return this.http.post(`${environment.apiUrl}/api/vendorCheck/saveSubmittedCandidatesForTriggerCheckStatus/${triggerRequestId}`, VendorID);
-  }
-
-  reAssignToAnotherVendor(checkUniqueId: any,vendorId:any) {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/reassignVendor/${checkUniqueId}/${vendorId}`);
-  }
-  updateCandidateStatusBasedOnLiCheckStatus() {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/updateCandidateStatus`);
-  }
-
-  getAllVendorCheckStatus() {
-    return this.http.get(`${environment.apiUrl}/api/organization/getAllVenorcheckStatusForVendor`);
-  }
-
-  getAllVendorCheckMasterStatus() {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/findAllVendorCheckStatus`);
-  }
-
-
-  updateLiCheckStatusByVendorID(vendorCheckStatusMasterId: any, vendorCheckId: any, remarks: any, modeOfVerificationStatus: any) {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/updateLicheckStatusByVendor/${vendorCheckStatusMasterId}/${vendorCheckId}/${remarks}/${modeOfVerificationStatus}`);
-  }
-
   getCustomers() {
-    return this.http.get(`${environment.apiUrl}/api/organization/getAllOrganization`);
+    return this.http.get(
+      `${environment.apiUrl}/api/organization/getAllOrganization`
+    );
   }
-
   saveCustomers(data: any) {
-    return this.http.post(`${environment.apiUrl}/api/organization/saveOrganization`, data);
+    return this.http.post(
+      `${environment.apiUrl}/api/organization/saveOrganization`,
+      data
+    );
   }
-
   getCustomersData(organizationId: any) {
-    return this.http.get(`${environment.apiUrl}/api/organization/getOrganizationById/${organizationId}`, organizationId);
+    return this.http.get(
+      `${environment.apiUrl}/api/organization/getOrganizationById/${organizationId}`,
+      organizationId
+    );
   }
-
   customerStat(organizationId: any, isActive: any) {
-    return this.http.put(`${environment.apiUrl}/api/organization/activeNInAtiveOrganization/${organizationId}/${isActive}`, organizationId);
+    return this.http.put(
+      `${environment.apiUrl}/api/organization/activeNInAtiveOrganization/${organizationId}/${isActive}`,
+      organizationId
+    );
   }
-
   getSources() {
     return this.http.get(`${environment.apiUrl}/api/organization/getAllSource`);
   }
-
   saveCustomersBill(data: any, organizationId: any) {
-    return this.http.post(`${environment.apiUrl}/api/organization/saveOrganizationBilling/` + organizationId, data);
+    return this.http.post(
+      `${environment.apiUrl}/api/organization/saveOrganizationBilling/` +
+        organizationId,
+      data
+    );
   }
-
   saveVendorChecks(data: any, userId: any) {
-    return this.http.post(`${environment.apiUrl}/api/organization/saveVendorChecks/` + userId, data);
+    return this.http.post(
+      `${environment.apiUrl}/api/organization/saveVendorChecks/` + userId,
+      data
+    );
   }
-
-  generatePrecisedUrl(docuementName: any) {
-
-    return this.http.post
-    (`${environment.apiUrl}/api/vendorCheck/generatePrecisedUrl`, docuementName);
-
-  }
-
   getAllVendorServices(userId: any) {
-    return this.http.get(`${environment.apiUrl}/api/organization/getAllVendorServices /${userId}`, userId);
+    return this.http.get(
+      `${environment.apiUrl}/api/organization/getAllVendorServices/${userId}`,
+      userId
+    );
   }
-
-  updateLiCheckIdWithVendorCheckId(vendorCheckId: any, liCheckId: any) {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/updateLicheckWithVendorcheck/${vendorCheckId}/${liCheckId}`);
-  }
-
-
   saveInitiateVendorChecks(data: any) {
-    return this.http.post(`${environment.apiUrl}/api/user/saveInitiateVendorChecks/`, data);
+    return this.http.post(
+      `${environment.apiUrl}/api/user/saveInitiateVendorChecks`,
+      data
+    );
   }
-
   getCustomersBill() {
-    return this.http.get(`${environment.apiUrl}/api/organization/getOrganizationListAfterBilling/`);
+    return this.http.get(
+      `${environment.apiUrl}/api/organization/getOrganizationListAfterBilling`
+    );
   }
-
   getCustAdminDetails(organizationId: number) {
-    return this.http.get(`${environment.apiUrl}/api/user/getAdminDetailsForOrganization/` + organizationId);
+    return this.http.get(
+      `${environment.apiUrl}/api/user/getAdminDetailsForOrganization/` +
+        organizationId
+    );
   }
-
   saveAdminSetup(data: any) {
-    return this.http.post(`${environment.apiUrl}/api/user/saveNUpdateUser`, data);
+    return this.http.post(
+      `${environment.apiUrl}/api/user/saveNUpdateUser`,
+      data
+    );
   }
-
   getColors() {
     return this.http.get(`${environment.apiUrl}/api/organization/getAllColor`);
   }
-
   getCustConfigs(organizationId: number) {
-    return this.http.get(`${environment.apiUrl}/api/organization/getAllServicesForConfiguration/` + organizationId);
+    return this.http.get(
+      `${environment.apiUrl}/api/organization/getAllServicesForConfiguration/` +
+        organizationId
+    );
   }
-
   saveCustServiceConfig(data: any) {
-    return this.http.post(`${environment.apiUrl}/api/organization/saveOrganizationServiceConfiguration`, data);
+    return this.http.post(
+      `${environment.apiUrl}/api/organization/saveOrganizationServiceConfiguration`,
+      data
+    );
   }
-
   getCustconfigDetails(organizationId: number) {
-    return this.http.get(`${environment.apiUrl}/api/organization/getServiceTypeConfigByOrgId/` + organizationId);
+    return this.http.get(
+      `${environment.apiUrl}/api/organization/getServiceTypeConfigByOrgId/` +
+        organizationId
+    );
   }
-
   getAllServices(organizationId: any) {
-    return this.http.get(`${environment.apiUrl}/api/organization/getAllServices/${organizationId}`, organizationId);
+    return this.http.get(
+      `${environment.apiUrl}/api/organization/getAllServices/${organizationId}`,
+      organizationId
+    );
   }
 
   getUserById() {
@@ -152,91 +127,97 @@ export class CustomerService {
   }
 
   getCustomerUtilizationReport() {
-    return this.http.get(`${environment.apiUrl}/api/report/getCustomerUtilizationReport`);
+    return this.http.get(
+      `${environment.apiUrl}/api/report/getCustomerUtilizationReport`
+    );
   }
 
   postCustomerUtilizationReport(data: any) {
-    return this.http.post(`${environment.apiUrl}/api/report/getCustomerUtilizationReport`, data);
+    return this.http.post(
+      `${environment.apiUrl}/api/report/getCustomerUtilizationReport`,
+      data
+    );
   }
 
   getCustomerUtilizationReportByAgent(data: any) {
-    return this.http.post(`${environment.apiUrl}/api/report/getCustomerUtilizationReportByAgent`, data);
+    return this.http.post(
+      `${environment.apiUrl}/api/report/getCustomerUtilizationReportByAgent`,
+      data
+    );
   }
 
   getCanididateDetailsByStatus(data: any) {
-    return this.http.post(`${environment.apiUrl}/api/report/getCanididateDetailsByStatus`, data);
+    return this.http.post(
+      `${environment.apiUrl}/api/report/getCanididateDetailsByStatus`,
+      data
+    );
   }
 
   getAgentList(organizationId: any) {
-    return this.http.get(`${environment.apiUrl}/api/user/getAgentList/${organizationId}`);
+    return this.http.get(
+      `${environment.apiUrl}/api/user/getAgentList/${organizationId}`
+    );
   }
-
   getVendorList(organizationId: any) {
-    return this.http.get(`${environment.apiUrl}/api/user/getVendorList/${organizationId}`);
+    return this.http.get(
+      `${environment.apiUrl}/api/user/getVendorList/${organizationId}`
+    );
   }
-
   eKycReport(data: any) {
-    return this.http.get(`${environment.apiUrl}/api/report/eKycReport/`, data);
+    return this.http.get(`${environment.apiUrl}/api/report/eKycReport`, data);
   }
 
   posteKycReport(data: any) {
-    return this.http.post(`${environment.apiUrl}/api/report/eKycReport/`, data);
+    return this.http.post(`${environment.apiUrl}/api/report/eKycReport`, data);
   }
 
   getAllStatus() {
     return this.http.get(`${environment.apiUrl}/api/candidate/getAllStatus`);
   }
-
   getShowvalidation(organizationId: any) {
-    console.log("---------------calling api-------------", organizationId)
-    return this.http.get(`${environment.apiUrl}/api/organization/getShowvalid/${organizationId}`);
-
+    console.log('---------------calling api-------------', organizationId);
+    return this.http.get(
+      `${environment.apiUrl}/api/organization/getShowvalid/${organizationId}`
+    );
   }
-
   getVendorCheckDetails(candidateId: any) {
-    return this.http.get(`${environment.apiUrl}/api/user/getVendorCheckDetails/${candidateId}`);
-  }
-
-  getCandidateIdByConventionalId(candidateId: any) {
-    return this.http.get(`${environment.apiUrl}/api/candidate/conventionalCandidateId/${candidateId}`);
-  }
-
-  getDocumentNameAndUrl(candidateId: any,checkName:any) {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/findPrecisedUrl/${candidateId}/${checkName}`);
-  }
-
-  saveConventionalVendorCheckWithVendorData(data: any) {
-    return this.http.post(`${environment.apiUrl}/api/vendorCheck/liCheck`, data);
-  }
-  updateBgvCheckStatusRowWise(data: any) {
-    return this.http.post(`${environment.apiUrl}/api/vendorCheck/updateBgvCheckStatusRowwise/`, data);
-  }
-
-  getAllLiChecks(requestId: any) {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/findAllLiChecks/${requestId}`);
-  }
-  getAllStopLiChecks(requestId: any) {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/findAllStopLiChecks/${requestId}`);
-  }
-  getAllNewUploadLiChecks(requestId: any) {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/findAllNewUploadLiChecks/${requestId}`);
-  }
-  updateIdentityCheckStatus(checkUniqueId: any,enableStatus:any) {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/updateIdentityCheckDisableStatus/${checkUniqueId}/${enableStatus}`);
-  }
-  getAllLiChecksAll() {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/findAllLiChecks`);
+    return this.http.get(
+      `${environment.apiUrl}/api/user/getVendorCheckDetails/${candidateId}`
+    );
   }
 
   saveproofuploadVendorChecks(data: any) {
-    return this.http.post(`${environment.apiUrl}/api/user/saveproofuploadVendorChecks/`, data);
+    console.warn('Save Proof:::', data);
+    return this.http.post(
+      `${environment.apiUrl}/api/user/saveproofuploadVendorChecks`,
+      data
+    );
   }
 
+  getallVendorCheckDetails(vendorId: any,dateSearchFilter:any,pageNumber:any,pageSize:any,vendorCheckDashboardStatusCode:any) {
+    console.log(vendorId, 'vendorId');
+
+    const requestBody = { dateSearchFilter, pageNumber, pageSize,vendorCheckDashboardStatusCode };
+    return this.http.post(
+      `${environment.apiUrl}/api/user/getVendorCheck/${vendorId}`,requestBody);
+  }
+
+  postallVendorCheckDetails(data: any) {
+    return this.http.post(
+      `${environment.apiUrl}/api/user/getallVendorCheckDetails`,
+      data
+    );
+  }
+
+  getAgentAttributes(checkId: any) {
+    return this.http.get(
+      `${environment.apiUrl}/api/user/getConventionalAttributesMaster/${checkId}`
+    );
+  }
 
   public setFromDate(statCode: string) {
     localStorage.setItem('dbFromDate', statCode);
   }
-
   public getFromDate() {
     return localStorage.getItem('dbFromDate');
   }
@@ -244,42 +225,99 @@ export class CustomerService {
   public setToDate(statCode: string) {
     localStorage.setItem('dbToDate', statCode);
   }
-
   public getToDate() {
     return localStorage.getItem('dbToDate');
   }
 
-
-  getallVendorCheckDetails(vendorId: any) {
-    return this.http.get(`${environment.apiUrl}/api/user/getVendorCheck/${vendorId}`);
+  getVenorcheckStatus() {
+    return this.http.get(
+      `${environment.apiUrl}/api/organization/getAllVenorcheckStatus`
+    );
   }
 
-  getallVendorCheckDetailsByDateRange(data: any) {
-    return this.http.post(`${environment.apiUrl}/api/user/getVendorCheck`, data);
-  }
-  getAllVendorSearch( userSearchInput: string) {
-    const queryParams = { searchText: userSearchInput };
-    return this.http.get(`${environment.apiUrl}/api/user/searchAllVendorData`,{ params: queryParams });
+  deleteCust(custId: number) {
+    return this.http.get(
+      `${environment.apiUrl}/api/organization/deleteOrg/${custId}`
+    );  }
 
-  }
+    saveCustomersEmailTemplates(data: any, custId: any, emailTemplateId:any) {
+      return this.http.post(
+        `${environment.apiUrl}/api/organization/saveAndUpdateOrgEmailTemplates/${custId}/${emailTemplateId}`,
+        data
+      );
+    }
+   
+    getCustomerEmailTemplates(custId: any) {
+      return this.http.get(
+        `${environment.apiUrl}/api/organization/getOrgEmailTemplates/${custId}`
+      );
+    }
 
-  getAllSearchData( userSearchInput: string) {
-    const queryParams = { searchText: userSearchInput };
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/searchAllCandidate`,{ params: queryParams });
+    getCustmerEmailTemplatesForReview(custId:any,loaMail:any,invitationMail:any){
 
-  }
+      const data = {
+        orgId:custId,
+        invitationMail: invitationMail,
+        loaMail:loaMail
+      }
 
+      console.warn("DATA::::",data)
 
-  getRemarksByCheckUniqueId(checkUniqueId:any){
-    const queryParams = { checkUniqueId: checkUniqueId };
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/getCheckUniqueIdForRemarks`,{ params: queryParams });
+      return this.http.get(
+        `${environment.apiUrl}/api/organization/getOrgEmailTemplateReview/${custId}/${invitationMail}/${loaMail}`
+      );
+    }
 
-  }
- getAllDocuementPrecisedUrls(requestID: any) {
-    return this.http.get(`${environment.apiUrl}/api/vendorCheck/downloadAllUploadDocuments/${requestID}`, {
-      responseType: 'arraybuffer',  // Specify the response type as arraybuffer
-      headers: new HttpHeaders({'Accept': 'application/zip'}) // Request the ZIP file
-    });
-  }
+    updateVendor(data:any){
+      return this.http.post(`${environment.apiUrl}/api/user/updateVendor`,data)
+    }
 
+    stopCheck(data:any){
+      return this.http.post(`${environment.apiUrl}/api/user/stopCheck`,data)
+    }
+
+    addCheckByAdmin(data:any){
+      return this.http.post(`${environment.apiUrl}/api/user/addChecks`,data)
+
+    }
+
+    getAllSources(){
+      return this.http.get(`${environment.apiUrl}/api/user/getAllSource`)
+
+    }
+
+    deleteCheckBySourceId(sourceId:any){
+      return this.http.post(`${environment.apiUrl}/api/user/deleteCheckBySourceId`,sourceId)
+    }
+
+    getCustomerStatusTrackerReport(data: any): Observable<any> {
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      return this.http.post(`${environment.apiUrl}/api/report/download/candidateStatusTrackerReport`,data, {
+        headers: headers,
+        responseType: 'blob' as 'json'
+      });
+    }
+
+    getCandidateEmployentReport(data: any): Observable<any> {
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      return this.http.post(`${environment.apiUrl}/api/report/download/downloadCandidateEmploymentReport`,data, {
+        headers: headers,
+        responseType: 'blob' as 'json'
+      });
+    }
+
+    inSuffRemarks(data:any){
+      return this.http.post(`${environment.apiUrl}/api/user/raiseInsufficiency`,data)
+
+    }
+
+    getVendorReportAttributes(sourceID: any,type:any) {
+      return this.http.get(`${environment.apiUrl}/api/user/getConventionalAttributesMaster/${sourceID}?type=${type}`);
+      }
 }

@@ -45,6 +45,12 @@ export class AddVendorComponent implements OnInit {
 			organizationId: this.orgID
 		});
 	}
+
+  addChecksForm  = new FormGroup({
+    sourceName : new FormControl('',Validators.required),
+    sourceCode : new FormControl('',Validators.required)
+  })
+
   constructor(private orgadmin:OrgadminService, public authService: AuthenticationService, private modalService: NgbModal,private router: Router) {
     this.orgID = this.authService.getOrgID();
     this.orgadmin.getOrgVendor(this.orgID).subscribe((data: any)=>{
@@ -64,7 +70,7 @@ export class AddVendorComponent implements OnInit {
    }
 
   ngOnInit(): void {
-    this.orgadmin.getRolePerMissionCodes(localStorage.getItem('roles')).subscribe(
+    this.orgadmin.getRolePerMissionCodes(this.authService.getRoles()).subscribe(
       (result:any) => {
       this.getRolePerMissionCodes = result.data;
         if(this.getRolePerMissionCodes){
@@ -180,5 +186,25 @@ addvendor() {
     this.router.navigate([billUrl]);
     
   }
+
+  triggerModal(content: any) {
+    this.modalService.open(content).result.then((res) => {
+      this.closeModal = `Closed with: ${res}`;
+    }, (res) => {
+      this.closeModal = `Dismissed ${this.getDismissReason(res)}`;
+    });
+  }
+
+
+  submitAddCheck(){
+
+  }
+
+  addChecks() {
+    console.log("---------------inside-----btn")
+    const billUrl = 'admin/addCheck';
+    this.router.navigate([billUrl]);
+      
+    }
 
 }

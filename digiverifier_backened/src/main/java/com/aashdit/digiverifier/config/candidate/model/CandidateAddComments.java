@@ -1,22 +1,24 @@
 package com.aashdit.digiverifier.config.candidate.model;
 
-import java.beans.Transient;
 import java.io.Serializable;
+import java.sql.Types;
 import java.util.Date;
 
-import javax.mail.Multipart;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
 
 import com.aashdit.digiverifier.config.admin.model.User;
+
 import lombok.Data;
 
 @Data
@@ -38,10 +40,12 @@ public class CandidateAddComments implements Serializable {
 	@JoinColumn(name = "candidate_id")
 	private Candidate candidate;
 	
-	@Column(name = "Comments")
+	@Lob
+	@Column(name = "Comments", length=2000)
 	private String comments;
 
-	@Type(type="org.hibernate.type.BinaryType")
+	//@Type(type="org.hibernate.type.BinaryType")
+	@JdbcTypeCode(Types.BINARY)
     @Column(name = "attachments_documents", columnDefinition="LONGBLOB")
     private byte[] attachments;
 	

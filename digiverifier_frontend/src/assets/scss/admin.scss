@@ -9,19 +9,21 @@
     padding: 0 15px;
     .navbar-nav {
         height: 65px;
+        padding-top: 10px;
         li {
             a{
                 color: #fff;
-                font-weight: 500;
+                font-weight: normal;
                 letter-spacing: 0.1px;
                 padding: 0 11px;
                 border-left: 2px solid #ffffff1f;
-                height: 100%;
-                line-height: 60px;
-                font-size: 10px;
+                 height: 100%;
+                line-height: 50px;
+                font-size: 9px;
                 text-transform: uppercase;
+                white-space: nowrap; 
                 i{
-                    width: 30px;
+                    width: 20px;
                     height: 30px;
                     line-height: 30px;
                     background: #ffffffe6;
@@ -62,6 +64,7 @@
         } 
     }
 }
+
 .navbar.admin_header .navbar-collapse {
     padding-right: 195px;
 }
@@ -408,6 +411,7 @@ margin-bottom: 10px;
             border-bottom: 1px solid #00000012;
         }
     }
+    
     .user_con{
         position: fixed;
         top: 0px;
@@ -451,3 +455,33 @@ margin-bottom: 10px;
         margin: 0;
     }
 }
+
+
+// PASSWORD VALIDATIONS
+.error {
+    outline: 2px solid red;
+  }
+  
+  .success {
+    outline: 2px solid green;
+  }
+
+
+  .input-container {
+    position: relative;
+  }
+  
+  .warning-icon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    color: #ff0000;
+    font-size: 18px;
+    padding: 5px;
+    transition: color 0.3s;
+  }
+  
+  .warning-icon:hover {
+    color: #ff9900;
+  }

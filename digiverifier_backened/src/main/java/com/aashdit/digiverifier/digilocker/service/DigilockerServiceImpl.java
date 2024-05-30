@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpHeaders;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import com.aashdit.digiverifier.client.securityDetails.EPFOSecurityConfig;
 import com.aashdit.digiverifier.common.ContentRepository;
 import com.aashdit.digiverifier.common.enums.ContentCategory;
@@ -23,6 +23,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpEntity;
@@ -37,6 +39,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import com.aashdit.digiverifier.client.securityDetails.DigilockerClient;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.repository.query.Param;
 
 import com.aashdit.digiverifier.client.securityDetails.DigilockerClient;
 import com.aashdit.digiverifier.config.candidate.model.Candidate;
@@ -58,6 +61,7 @@ import com.aashdit.digiverifier.config.candidate.service.CandidateService;
 import com.aashdit.digiverifier.config.superadmin.model.Color;
 import com.aashdit.digiverifier.config.superadmin.repository.ColorRepository;
 import com.aashdit.digiverifier.config.superadmin.repository.ServiceSourceMasterRepository;
+import com.aashdit.digiverifier.config.superadmin.repository.ServiceTypeConfigRepository;
 import com.aashdit.digiverifier.constants.DigilockerConstants;
 import com.aashdit.digiverifier.digilocker.dto.DigilockerTokenResponse;
 import com.aashdit.digiverifier.digilocker.dto.IssuedDocumentsResponse;
@@ -77,7 +81,12 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class DigilockerServiceImpl implements DigilockerService {
 	
+    private static final Logger logger = LoggerFactory.getLogger(DigilockerServiceImpl.class);
+	
 	public static final String DIGIVERIFIER_DOC_BUCKET_NAME = "digiverifier-new";
+	public static final String HOUSE = "house";
+	public static final String UNABLE_TO_GET_DIGI_DETAILS = "Unable to get DIgi details.";
+	public static final String ADDRESS = "Address";
 	
 	@Autowired
 	private RestTemplate restTemplate;
@@ -147,8 +156,12 @@ public class DigilockerServiceImpl implements DigilockerService {
 	@Autowired
 	private EnvironmentVal environmentVal;
 	
+	@Autowired
+	private ServiceTypeConfigRepository serviceTypeConfigRepository;
+	
 	@Override
-	public String getDigilockerDetails(String code, String candidateCode, HttpServletResponse response, String action) {
+	public ServiceOutcome<String> getDigilockerDetails(String code, String candidateCode, HttpServletResponse response, String action) {
+		ServiceOutcome<String> outcome = new ServiceOutcome<>();
 		String  tokenString="";
 		String message = "";
 		try {
@@ -165,7 +178,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 				HttpHeaders headers = new HttpHeaders();
 				setHeaderDetails(headers,encodedCredentials);
 				LinkedMultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
-				System.out.println("grant type "+clientSecurityDetails.getGrantType());
+				logger.info("grant type : {} ", clientSecurityDetails.getGrantType());
 			    params.add(DigilockerConstants._CODE,clientSecurityDetails.getCode());
 			    params.add(DigilockerConstants._GRANT_TYPE,clientSecurityDetails.getGrantType());
 			    params.add(DigilockerConstants._CLIENT_ID,action.equals("SELF")?clientSecurityDetails.getUsername():clientSecurityDetails.getRelationUsername());
@@ -174,23 +187,31 @@ public class DigilockerServiceImpl implements DigilockerService {
 			    
 			    HttpEntity<LinkedMultiValueMap<String, Object>> request = new HttpEntity<>(params, headers);
 					Gson gson=new Gson();
-				System.out.println("request url : "+ clientSecurityDetails.getAccessTokenUrl());
-				System.out.println(request.getBody().toString());
+					logger.info("request url : {}", clientSecurityDetails.getAccessTokenUrl());
+					logger.info(request.getBody().toString());
 					res = restTemplate.postForObject(clientSecurityDetails.getAccessTokenUrl(),request, String.class);
 					if(StringUtils.isNotBlank(res)) {
 						digilockerTokenResponse =gson.fromJson(res, DigilockerTokenResponse.class);
-						System.out.println("DigilockerTokenResponse : "+digilockerTokenResponse.toString());
+						logger.info("DigilockerTokenResponse : {}", digilockerTokenResponse);
 						tokenString = digilockerTokenResponse.getAccess_token();
 						if(!tokenString.isEmpty()) {
 							message = getUserDetails(tokenString,code,candidateCode,response,action);
+							outcome.setOutcome(true);
+							outcome.setMessage(tokenString);
+							outcome.setData(message);
+							outcome.setStatus(code);
 						}
 					}
 			}
-			System.out.println(message+"getDigilockerDetails");
+			logger.info("getDigilockerDetails :{}", message);
 		} catch (Exception e) {
 			  log.error("Exception occured in DigilockerServiceImpl in getDigilockerDetails method-->",e);
+			 outcome.setData("FAILED");
+			 outcome.setOutcome(false);
+			 outcome.setMessage(UNABLE_TO_GET_DIGI_DETAILS);
 		} 
-		return message;
+		logger.info("=====================END OF getDigilockerDetails===============:{}", outcome);
+		return outcome;
 	}
 	
 	/**
@@ -212,23 +233,23 @@ public class DigilockerServiceImpl implements DigilockerService {
 		String result = "Access token is empty.";
 		try {
 			if(StringUtils.isNoneBlank(accessToken)) {
-				ResponseEntity<String> response = null;
-			    HttpHeaders headers = new HttpHeaders();
-			    headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
-			    headers.setBearerAuth(accessToken);
-			    HttpEntity<String> request = new HttpEntity<String>(headers);
-				  	response = (new RestTemplate()).exchange(clientSecurityDetails.getUserDetailsApi(), HttpMethod.GET, request, String.class);
+//				ResponseEntity<String> response = null;
+//			    HttpHeaders headers = new HttpHeaders();
+//			    headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+//			    headers.setBearerAuth(accessToken);
+//			    HttpEntity<String> request = new HttpEntity<String>(headers);
+//				  	response = (new RestTemplate()).exchange(clientSecurityDetails.getUserDetailsApi(), HttpMethod.GET, request, String.class);
 				  	// System.out.println(response+"-------------------------------------response");
-					if(response.getStatusCode() == HttpStatus.OK) {
+//					if(response.getStatusCode() == HttpStatus.OK) {
 				  		result = getIssuedDocuments(accessToken,code, candidateCode,res,action);
 						System.out.println(result+"============misnnsdn");
-			    	}else if(response.getStatusCode() == HttpStatus.UNAUTHORIZED){
-			    		result = "User is Unauthorized";
-			    	}else if(response.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT){
-			    		result = "Server response is slow, getting timeout";
-			    	}else if(response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR){
-			    		result = "Server is down or Not responding at this Moment";
-			    	}
+//			    	}else if(response.getStatusCode() == HttpStatus.UNAUTHORIZED){
+//			    		result = "User is Unauthorized";
+//			    	}else if(response.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT){
+//			    		result = "Server response is slow, getting timeout";
+//			    	}else if(response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR){
+//			    		result = "Server is down or Not responding at this Moment";
+//			    	}
 			}
 			// System.out.println(result+"getUserDetails");
 		} catch (Exception e) {
@@ -240,7 +261,9 @@ public class DigilockerServiceImpl implements DigilockerService {
 	@SuppressWarnings({ "rawtypes", "unchecked"})
 	private String getIssuedDocuments(String accessToken,String code, String candidateCode,HttpServletResponse res, String action){
 		String result="";
-		// System.out.println("--------------------inside getIssuedDocuments-------------------");
+		String[] parts = candidateCode.split("_");
+		String onlyCandidateCode=parts[1];
+		 System.out.println("---inside getIssuedDocuments---"+"candidateCode:"+candidateCode+"--onlyCandidateCode:"+onlyCandidateCode);
 		try {
 			if(StringUtils.isNoneBlank(accessToken)) {
 				ResponseEntity<String> response = null;
@@ -250,8 +273,9 @@ public class DigilockerServiceImpl implements DigilockerService {
 				  	response = (new RestTemplate()).exchange(clientSecurityDetails.getUserFilesIssued(), HttpMethod.GET, request, String.class);
 					// System.out.println(response+"--------------------inside response-------------------");
 				  	if(response.getStatusCode() == HttpStatus.OK) {
-						// System.out.println("--------------------inside if-------------------");
+						
 				  		String message=response.getBody();
+						System.out.println(message+"--------------------message-------------------");
 						JSONObject obj = new JSONObject(message);
 						JSONArray array = obj.getJSONArray("items");
 						final ObjectMapper objectMapper = new ObjectMapper();
@@ -263,12 +287,20 @@ public class DigilockerServiceImpl implements DigilockerService {
 						
 						Color color=colorRepository.findByColorCode("GREEN");
 						List<File> issuedDocumentFiles =  new ArrayList<>();
-				        for(IssuedDocumentsResponse issuedDocument : issuedDocumentsList) {
-						
-							System.out.println("--------------------inside for-----------if--------");
-							getFIleFromUri(issuedDocument,accessToken,candidateCode,color,action);
-						
-				        }
+						boolean isAdharavailable=false;
+                        for(IssuedDocumentsResponse issuedDocument : issuedDocumentsList) {
+                            String docType=issuedDocument.getDoctype();              
+                            System.out.println("--------------------inside for-----------if--------");
+                            String getFIleFromUriRes=getFIleFromUri(issuedDocument,accessToken,candidateCode,color,action);               
+                            if(!getFIleFromUriRes.equalsIgnoreCase("FAILED") && docType.equalsIgnoreCase("ADHAR")) {
+                                isAdharavailable=true;
+                            }
+                        }
+                       log.info("Digilocker Contains ADHAR ::{}",isAdharavailable);
+                       if(Boolean.FALSE.equals(isAdharavailable)){
+                           log.info("Digilocker Does not Contains ISSUED DOCS.. ");
+                           return "FAILED";
+                       }
 //						System.out.println(issuedDocumentFiles.size());
 //						List<InputStream> collect = issuedDocumentFiles.stream().map(FileUtils::convertToInputStream).collect(Collectors.toList());
 //						File mergedFile = FileUtils.createUniqueTempFile(candidateCode, ".pdf");
@@ -276,17 +308,19 @@ public class DigilockerServiceImpl implements DigilockerService {
 //						// move to s3
 //						awsUtils.uploadFile("digiverifier-new",candidateCode.concat("/").concat(candidateCode+"_digilocker_issued_files"),mergedFile);
 //
-				        CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(candidateCode);
-	        			if(action.equals("SELF")) {
-							System.out.println("--------------------inside self if-------------------");
+				        CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(onlyCandidateCode);
+//	        			if(action.equals("SELF")) {
+//							System.out.println("--------------------inside self if-------------------");
 	        				candidateStatus.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("DIGILOCKER"));
 		        			candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("DIGILOCKER"));
-	        			}else {
-							System.out.println("--------------------inside else-------------------");
-	        				candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("RELATIVEADDRESS"));
-	        			}
+//	        			}else {
+//							System.out.println("--------------------inside else-------------------");
+//	        				candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("RELATIVEADDRESS"));
+//	        			}
 	        			candidateStatus.setLastUpdatedOn(new Date());
 	        			candidateStatusRepository.save(candidateStatus);
+						if(candidateStatus.getCandidate().getOrganization().getCallBackUrl() != null)
+							candidateService.postStatusToOrganization(candidateStatus.getCandidate().getCandidateCode());
 	        			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
 	        			// if(action.equals("SELF")) {
 						// 	System.out.println("inside restirect--------");
@@ -298,10 +332,20 @@ public class DigilockerServiceImpl implements DigilockerService {
 						boolean retval = issuedDocumentsList.contains("DGCER"); 
 	                    System.out.println(retval+"retvalretvalretvalretvalretval");
    						if (retval == false) {
-
-						
-							System.out.println("--------------------revel-----------if--------");
-							result ="Issued documents Information retrieved successfully, dgree not in Issued documents";
+   							Candidate candidate = candidateStatus.getCandidate();
+   			                List<String> orgServices = serviceTypeConfigRepository.getServiceSourceMasterByOrgId(candidate.getOrganization().getOrganizationId());
+	   			             if(orgServices!=null && orgServices.contains("DIGILOCKER")
+	   					 			&& !orgServices.contains("EPFO") && !orgServices.contains("ITR")) {
+	   			            	System.out.println("--------------------revel-----------if--------");
+	   			            	candidate.setIsFresher(false);
+	   			            	candidateRepository.save(candidate);
+	   			            	result ="Issued documents Information retrieved successfully, dgree not in Issued documents";
+	   			            	res.sendRedirect(environmentVal.getRedirectAngularToCandAppl()+"/"+onlyCandidateCode);
+	   			             }else {
+	   			            	System.out.println("--------------------revel-----------else--------");
+								result ="Issued documents Information retrieved successfully, dgree not in Issued documents";
+								res.sendRedirect(environmentVal.getIsFreshPage()+onlyCandidateCode);
+	   			             }
 							
 						}
 			    	}else if(response.getStatusCode() == HttpStatus.UNAUTHORIZED){
@@ -317,16 +361,21 @@ public class DigilockerServiceImpl implements DigilockerService {
 			// System.out.println(result+"getIssuedDocuments---------------------------");
 		} catch (Exception e) {
 			  log.error("Exception occured in DigilockerServiceImpl in getIssuedDocuments method-->",e);
+			  return "FAILED";
 		}
 		// System.out.println(result+"getIssuedDocuments");
 		return result;
     }
 	
 	@Transactional
-	private ResponseEntity<String> getFIleFromUri(IssuedDocumentsResponse issuedDocument,String accessToken,String candidateCode,Color color, String action){
+	private String getFIleFromUri(IssuedDocumentsResponse issuedDocument,String accessToken,String candidateCode,Color color, String action){
 		System.out.println("------------------------------inside getFIleFromUri----------------");
-		// System.out.println(issuedDocument+"--------"+accessToken+"---------"+candidateCode+"-------------"+color+"----------");
+		String[] parts = candidateCode.split("_");
+		String inputAadhar=parts[0];
+		candidateCode=parts[1];
+	    System.out.println("----INPUT ADHAR----"+inputAadhar+"----separated candidate code-----"+candidateCode);
 		System.out.println(issuedDocument.getDoctype()+"--------------gettype------------");
+		log.info("DOC URI ::{}",issuedDocument.getUri());		
 		if(StringUtils.isNoneBlank(accessToken)) {
 			System.out.println("------------------------------inside if----------------");
 			//DigilockerTokenResponse digilockerTokenResponse = new DigilockerTokenResponse();
@@ -349,93 +398,194 @@ public class DigilockerServiceImpl implements DigilockerService {
 			  	String data = response.getBody();
 			  	JSONObject json = new JSONObject();
 			  	if(issuedDocument.getDoctype().equals("ADHAR")) {
-					System.out.println("-------------------ifaadhar-------------------response");
+//					System.out.println("-------------------ifaadhar-------------------response");
 			  		if(action.equals("SELF")) {
-						System.out.println("-------------------ifself-------------------response");
+//						System.out.println("-------------------ifself-------------------response");
  						CandidateCafAddress candidateCafAddress = candidateCafAddressRepository.findByCandidateCandidateCodeAndServiceSourceMasterServiceCode(candidateCode,"AADHARADDR");
 				  		
 				  			json = XML.toJSONObject(data);
-							// System.out.println(json+"jsonjsonjsonjsonjsonjsonjson");
-				  			JSONObject kyc = json.getJSONObject("KycRes");
+				  			JSONObject cer = json.getJSONObject("Certificate");
+							JSONObject cdata = cer.getJSONObject("CertificateData");
+							JSONObject kyc = cdata.getJSONObject("KycRes");
 					  		JSONObject uid = kyc.getJSONObject("UidData");
 					  		JSONObject poa = uid.getJSONObject("Poa");
 					  		JSONObject poi = uid.getJSONObject("Poi");
 					  		CandidateCafAddress address = Objects.nonNull(candidateCafAddress) ? candidateCafAddress:new CandidateCafAddress();
 					  		address.setCandidate(candidate);
-					  		address.setPinCode(Integer.parseInt(poa.get("pc").toString()));
-					  		address.setState(poa.getString("state"));
+					  		if(poa.has("pc"))
+					  			address.setPinCode(Integer.parseInt(poa.get("pc").toString()));
+					  		if(poa.has("state"))
+					  			address.setState(poa.getString("state"));
 							String candidateAddress = constructFullAddress(poa);
 							address.setCandidateAddress(candidateAddress);//"+poa.getString("lm")+"
 					  		address.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("AADHARADDR"));
 					  		address.setColor(color);
 					  		address.setCreatedOn(new Date());
-					  		address.setName(poi.getString("name"));
+					  		if(poi.has("name"))
+					  			address.setName(poi.getString("name"));
 					  		candidateCafAddressRepository.save(address);
-					  		// candidate.setAadharNumber(uid.getString("uid"));
-					  		candidate.setAadharDob(poi.getString("dob"));
-							candidate.setAadharGender(poi.getString("gender"));
-							candidate.setAadharName(poi.getString("name"));
-							candidate.setAadharFatherName(poa.getString("co"));
+					  	//Aadhar validation start 
+					  		String adharFromDL= null;
+					  		if(uid.has("uid"))
+					  			adharFromDL = uid.getString("uid");
+//					  		System.out.println("--------------adhar From DIGILOCKER in SELF------------"+adharFromDL);
+					  	if(inputAadhar.substring(8, 12).equalsIgnoreCase(adharFromDL.substring(8, 12))){
+//					  			System.out.println("-------AADHAR NUMBER MATCHED-------");
+					  		    candidate.setAadharNumber(inputAadhar);
+					  		if(poi.has("dob"))
+					  			candidate.setAadharDob(poi.getString("dob"));
+					  		if(poi.has("gender"))
+					  			 candidate.setAadharGender(poi.getString("gender"));
+					  		if(poi.has("name"))
+					  			candidate.setAadharName(poi.getString("name"));
+					  		if(poa.has("co"))
+					  			candidate.setAadharFatherName(poa.getString("co"));
 							// System.out.println(candidate+"--------------------------------------candidate");
 					  		candidateRepository.save(candidate);
 					  		CandidateIdItems item = new CandidateIdItems();
 					  		item.setCandidate(candidate);
 					  		item.setColor(color);
-					  		item.setIdNumber(uid.getString("uid"));
-					  		item.setIdHolder(poi.getString("name"));
-							item.setIdHolderDob(poi.getString("dob"));
+					  		if(uid.has("uid"))
+					  			item.setIdNumber(uid.getString("uid"));
+					  		if(poi.has("name"))
+					  			item.setIdHolder(poi.getString("name"));
+					  		if(poi.has("dob"))
+					  			item.setIdHolderDob(poi.getString("dob"));
 					  		item.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("AADHARID"));
 					  		item.setCreatedOn(new Date());
 							// System.out.println(item+"--------------------------------------item");
 					  		candidateIdItemsRepository.save(item);
 //							uploadFileToS3(ContentCategory.OTHERS, ContentSubCategory.AADHAR,issuedDocument,candidateCode,candidate.getCandidateId(),accessToken);
-					  		
+					  	}
 		  		
 			  		}else if(action.equals("RELATION")){
-						System.out.println(action+"--------------------------------------else if");
+						// System.out.println(action+"--------------------------------------else if");
 			  			json = XML.toJSONObject(data);
-			  			JSONObject kyc = json.getJSONObject("KycRes");
-				  		JSONObject uid = kyc.getJSONObject("UidData");
-				  		JSONObject poa = uid.getJSONObject("Poa");
-				  		JSONObject poi = uid.getJSONObject("Poi");
+//			  			 log.info("Aadhar JSON::{}",json);
+			  			JSONObject cer = null;
+						JSONObject cdata = null;
+						JSONObject kyc = null;
+				  		JSONObject uid = null;
+				  		JSONObject poa = null;
+				  		JSONObject poi = null;
+			  			 if(json.getJSONObject("Certificate")!=null &&
+			  					json.getJSONObject("Certificate").getJSONObject("CertificateData")!=null &&
+			  					json.getJSONObject("Certificate").getJSONObject("CertificateData").getJSONObject("KycRes")!=null &&
+			  					json.getJSONObject("Certificate").getJSONObject("CertificateData").getJSONObject("KycRes").getJSONObject("UidData")!=null &&
+			  					json.getJSONObject("Certificate").getJSONObject("CertificateData").getJSONObject("KycRes").getJSONObject("UidData").getJSONObject("Poa")!=null &&
+			  					json.getJSONObject("Certificate").getJSONObject("CertificateData").getJSONObject("KycRes").getJSONObject("UidData").getJSONObject("Poi") !=null &&
+			  							json.getJSONObject("Certificate").getJSONObject("CertificateData").getJSONObject("KycRes").getJSONObject("UidData").getJSONObject("Poi").has("name")) {
+
+			  				 log.info("--------CANDIDATE HAVING ADHAR DATA RECORDS--------");
+								 cer = json.getJSONObject("Certificate");
+								 cdata = cer.getJSONObject("CertificateData");
+								 kyc = cdata.getJSONObject("KycRes");
+						  		 uid = kyc.getJSONObject("UidData");
+						  		 poa = uid.getJSONObject("Poa");
+						  		 poi = uid.getJSONObject("Poi");
+			  			 }else {
+			  				log.info("--------CANDIDATE NOT HAVING ADHAR DATA RECORDS--------");
+			  				 return "FAILED";
+			  			 }
+//						JSONObject cer = json.getJSONObject("Certificate");
+//						JSONObject cdata = cer.getJSONObject("CertificateData");
+//						JSONObject kyc = cdata.getJSONObject("KycRes");
+//				  		JSONObject uid = kyc.getJSONObject("UidData");
+//				  		JSONObject poa = uid.getJSONObject("Poa");
+//				  		JSONObject poi = uid.getJSONObject("Poi");
+//				  		log.info("Aadhar POSTAL ADDRESS::{}",poa);
 				  		
 				  		CandidateAdressVerification verification = candidateAdressVerificationRepository.findByCandidateCandidateCode(candidateCode);
-				  		
-				  		CandidateCafAddress address = new CandidateCafAddress();
+				  		CandidateCafAddress candidateCafAddress = candidateCafAddressRepository.findByCandidateCandidateCodeAndServiceSourceMasterServiceCode(candidateCode,"AADHARADDR");
+				  		CandidateCafAddress address = Objects.nonNull(candidateCafAddress) ? candidateCafAddress:new CandidateCafAddress();
+				  		//CandidateCafAddress address = new CandidateCafAddress();
 				  		address.setCandidate(candidate);
-				  		address.setPinCode(Integer.parseInt(poa.get("pc").toString()));
-				  		address.setState(poa.getString("state"));
+				  		if(poa.has("pc"))
+				  			address.setPinCode(Integer.parseInt(poa.get("pc").toString()));
+				  		if(poa.has("state"))
+				  			address.setState(poa.getString("state"));
 						String candidateAddress = constructFullAddress(poa);
 						
 				  		address.setCandidateAddress(candidateAddress);//"+poa.getString("lm")+"
 				  		address.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("AADHARADDR"));
 				  		address.setColor(color);
 				  		address.setCreatedOn(new Date());
-				  		address.setName(poi.getString("name"));
+				  		if(poi.has("name"))
+				  			address.setName(poi.getString("name"));
 				  		address.setAddressVerification(verification);
 				  		candidateCafAddressRepository.save(address);
+				  		
+				  		//Aadhar validation start 
+				  		String adharFromDL= null;
+				  		if(uid.has("uid"))
+				  			adharFromDL = uid.getString("uid");
+//				  		System.out.println("--------------adhar From DIGILOCKER in RELATION------------"+adharFromDL);
+				  		if(inputAadhar.substring(8, 12).equalsIgnoreCase(adharFromDL.substring(8, 12))){
+//				  			System.out.println("-------AADHAR NUMBER MATCHED-------");
+				  		    candidate.setAadharNumber(inputAadhar);
+				  		    if(poi.has("dob"))
+				  		    	candidate.setAadharDob(poi.getString("dob"));
+				  		    if(poi.has("gender"))
+				  		    	candidate.setAadharGender(poi.getString("gender"));
+				  		    if(poi.has("name"))
+				  		    	candidate.setAadharName(poi.getString("name"));
+				  		    if(poa.has("co"))
+				  		    	candidate.setAadharFatherName(poa.getString("co"));
+							// System.out.println(candidate+"--------------------------------------candidate");
+					  		candidateRepository.save(candidate);
+					  		CandidateIdItems item = new CandidateIdItems();
+					  		item.setCandidate(candidate);
+					  		item.setColor(color);
+					  		if(uid.has("uid"))
+					  			item.setIdNumber(uid.getString("uid"));
+					  		if(poi.has("name"))
+					  			item.setIdHolder(poi.getString("name"));
+					  		if(poi.has("dob"))
+					  			item.setIdHolderDob(poi.getString("dob"));
+					  		item.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("AADHARID"));
+					  		item.setCreatedOn(new Date());
+							// System.out.println(item+"--------------------------------------item");
+					  		candidateIdItemsRepository.save(item);
+
+				  		}else {
+				  			log.info("INPUT ADHAR AND DIGILOCKER ADHAR IS NOT MATCHED..!");
+				  			return "FAILED";
+				  		}
 			  		}
+			  		log.info("START ADHAR uploadFileToS3 ");
+			  		uploadFileToS3(ContentCategory.OTHERS, ContentSubCategory.AADHAR,issuedDocument,candidateCode,candidate.getCandidateId(),accessToken);
+
 			  	}
-			  	if(issuedDocument.getDoctype().equals("PANCR") && action.equals("SELF")) {
-					// System.out.println(issuedDocument.getDoctype()+"--------------insidepan------------");
+			  	// if(issuedDocument.getDoctype().equals("PANCR") && action.equals("SELF")) {
+				if(issuedDocument.getDoctype().equals("PANCR")) {
+//					System.out.println(issuedDocument.getDoctype()+"--------------insidepan------------");
 			  		json = XML.toJSONObject(data);
 			  		JSONObject panData = json.getJSONObject("Certificate");
-			  		Candidate candidateObj = candidateRepository.findByPanNumberAndCandidateCode(panData.getString("number"),candidateCode);
+			  		Candidate candidateObj = null;
+			  		if(panData.has("number"))
+			  			candidateObj = candidateRepository.findByPanNumberAndCandidateCode(panData.getString("number"),candidateCode);
 			  		if(candidateObj==null) {
 			  			JSONObject issuedTo = panData.getJSONObject("IssuedTo");
 				  		JSONObject dob = issuedTo.getJSONObject("Person");
-				  		candidate.setPanNumber(panData.getString("number"));
-				  		candidate.setDateOfBirth(dob.getString("dob"));
-						candidate.setPanDob(dob.getString("dob"));
-						candidate.setPanName(dob.getString("name"));
+				  		if(panData.has("number"))
+				  			candidate.setPanNumber(panData.getString("number"));
+				  		if(dob.has("dob"))
+				  			candidate.setDateOfBirth(dob.getString("dob"));
+				  		if(dob.has("dob"))
+				  			candidate.setPanDob(dob.getString("dob"));
+				  		if(dob.has("name"))
+				  			candidate.setPanName(dob.getString("name"));
 				  		candidateRepository.save(candidate);
 				  		
 				  		CandidateIdItems item = new CandidateIdItems();
 				  		item.setCandidate(candidate);
-				  		item.setIdNumber(panData.getString("number"));
+				  		if(panData.has("number"))
+				  			item.setIdNumber(panData.getString("number"));
 				  		item.setColor(color);
-				  		item.setIdHolder(dob.getString("name"));
-						item.setIdHolderDob(dob.getString("dob"));
+				  		if(dob.has("name"))
+				  			item.setIdHolder(dob.getString("name"));
+				  		if(dob.has("dob"))
+				  			item.setIdHolderDob(dob.getString("dob"));
 				  		item.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("PAN"));
 				  		item.setCreatedOn(new Date());
 				  		candidateIdItemsRepository.save(item);
@@ -466,25 +616,41 @@ public class DigilockerServiceImpl implements DigilockerService {
 			  		//if(action.equals("SELF")) {
 			  			json = XML.toJSONObject(data);
 				  		JSONObject drvlcData = json.getJSONObject("Certificate");
+				  		log.info("DRIVIG LICENCE CERTIFICATE FOR ::{}{}",candidateCode,drvlcData);
 				  		JSONObject issuedTo = drvlcData.getJSONObject("IssuedTo");
 			  			JSONObject person = issuedTo.getJSONObject("Person");
-				  		JSONObject drvAddress = person.getJSONObject("Address");
-				  		CandidateCafAddress address = new CandidateCafAddress();
+//			  			log.info("drivinng license person::{}",person);
+			  			JSONObject drvAddress =null;
+			  			if (person.has(ADDRESS) && person.get(ADDRESS) instanceof JSONObject) {
+			  				drvAddress = person.getJSONObject(ADDRESS);
+			  			}else {
+			  				JSONArray drvAddressArray =person.getJSONArray(ADDRESS);
+			  				drvAddress =(JSONObject) drvAddressArray.get(0);
+			  			}
+			  			
+			  			CandidateCafAddress candidateCafAddress = candidateCafAddressRepository.findByCandidateCandidateCodeAndServiceSourceMasterServiceCode(candidateCode,"DLADDR");
+				  		CandidateCafAddress address = Objects.nonNull(candidateCafAddress) ? candidateCafAddress:new CandidateCafAddress();
+				  
+				  	//	CandidateCafAddress address = new CandidateCafAddress();
 				  		address.setCandidate(candidate);
-				  		address.setCandidateAddress(drvAddress.getString("line1"));//"+poa.getString("lm")+"
+				  		if(drvAddress.has("line1"))
+				  			address.setCandidateAddress(drvAddress.getString("line1"));//"+poa.getString("lm")+"
 				  		address.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("DLADDR"));
 				  		address.setColor(color);
-				  		address.setName(person.getString("name"));
+				  		if(person.has("name"))
+				  			address.setName(person.getString("name"));
 				  		address.setCreatedOn(new Date());
 				  		candidateCafAddressRepository.save(address);
 				  		
 				  		CandidateIdItems item = new CandidateIdItems();
 				  		item.setCandidate(candidate);
 				  		item.setColor(color);
-				  		item.setIdNumber(drvlcData.getString("number"));
+				  		if(drvlcData.has("number"))
+				  			item.setIdNumber(drvlcData.getString("number"));
 				  		item.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("DLID"));
 				  		item.setCreatedOn(new Date());
-				  		item.setIdHolder(person.getString("name"));
+				  		if(person.has("name"))
+				  			item.setIdHolder(person.getString("name"));
 				  		candidateIdItemsRepository.save(item);
 					    uploadFileToS3(ContentCategory.OTHERS, ContentSubCategory.DRIVING_LICENSE,issuedDocument,candidateCode,candidate.getCandidateId(),accessToken);
 				  
@@ -511,92 +677,317 @@ public class DigilockerServiceImpl implements DigilockerService {
 			  		
 			  	}
 			  	
-			  	if(issuedDocument.getDoctype().equals("DGCER") && action.equals("SELF")) {
-					System.out.println(issuedDocument.getDoctype()+"--------------insidedegree------------");
+			  	if(issuedDocument.getDoctype().equals("DGCER")){ //&& action.equals("SELF")) {
+//					System.out.println(issuedDocument.getDoctype()+"--------------insidedegree------------");
 			  		json = XML.toJSONObject(data);
-					System.out.println(json+"--------------json------------");
-			  		CandidateCafEducation candidateCafEducation = new CandidateCafEducation();
-			  		JSONObject cerificate = json.getJSONObject("Certificate");
-			  		JSONObject cerificateData = cerificate.getJSONObject("CertificateData");
-					JSONObject examination = cerificateData.getJSONObject("Examination");
-					Integer year = examination.has("year") ? examination.getInt("year") : null;
-					String yearOfPassing =  Objects.nonNull(year) ? year.toString() : "";
-			  		String course = cerificateData.getJSONObject("Course").getString("name");
-			  		String courseName = cerificateData.getJSONObject("Course").getJSONObject("Streams").getJSONObject("Stream").getString("name");
-			  		String boardOrUniversityName = cerificate.getJSONObject("IssuedBy").getJSONObject("Organization").getString("name");
-			  		String percentage= cerificateData.getJSONObject("Performance").getString("percentage");
-					Object aObj = cerificateData.getJSONObject("Performance").get("cgpa");
-					String cgpa=String.valueOf(aObj);
-					Content content = uploadFileToS3(ContentCategory.EDUCATIONAL, ContentSubCategory.DEGREE_CERTIFICATE,
-						issuedDocument, candidateCode,candidate.getCandidateId(), accessToken);
-					if(Objects.nonNull(content)){
-						candidateCafEducation.setContentId(content.getContentId());
-					}
-					candidateCafEducation.setCandidate(candidate);
-			  		candidateCafEducation.setCandidateStatus(candidateStatusRepository.findByCandidateCandidateCode(candidate.getCandidateCode()));
-					candidateCafEducation.setCreatedOn(new Date());
-					candidateCafEducation.setIsHighestQualification(false);
-					candidateCafEducation.setPercentage(cgpa.equals("")?percentage:cgpa);
-					candidateCafEducation.setColor(colorRepository.findByColorCode("GREEN"));
-					candidateCafEducation.setYearOfPassing(yearOfPassing);
-					candidateCafEducation.setCourseName(courseName);
-					candidateCafEducation.setBoardOrUniversityName(boardOrUniversityName);
-					candidateCafEducation.setQualificationMaster(qualificationMasterRepository.findByQualificationCode("BEBTECH"));
-					candidateCafEducation.setSuspectClgMaster(suspectClgMasterRepository.findById(0L).get());
-					
-					candidateCafEducationRepository.save(candidateCafEducation);
-					
+//					System.out.println(json+"--------------json------------");
+			  		CandidateCafEducation candidateCafEducation = candidateCafEducationRepository.findByCandidateAndQualificationCode(candidateCode,"BEBTECH");
+//			  		CandidateCafEducation candidateCafEducation = new CandidateCafEducation();
+			  		if(candidateCafEducation!=null) {
+			  			log.info("candidateCafEducation already present for DEGREE");
+			  		}else {
+			  			candidateCafEducation = new CandidateCafEducation();
+				  		JSONObject cerificate = json.getJSONObject("Certificate");
+				  		log.info("DEGREE CERTIFICATE FOR ::{}{}",candidateCode,cerificate);
+				  		JSONObject cerificateData = cerificate.getJSONObject("CertificateData");
+						JSONObject examination = cerificateData.getJSONObject("Examination");
+						Integer year = examination.has("year") ? examination.getInt("year") : null;
+						String yearOfPassing =  Objects.nonNull(year) ? year.toString() : "";
+				  		String course = cerificateData.getJSONObject("Course").getString("name");
+				  		String courseName = cerificateData.getJSONObject("Course").getJSONObject("Streams").getJSONObject("Stream").getString("name");
+				  		if(courseName.equals("") && cerificateData.getJSONObject("Course").has("name")
+				  				&& !cerificateData.getJSONObject("Course").getString("name").equals("")) {
+				  			courseName=cerificateData.getJSONObject("Course").getString("name");
+				  		}
+				  		String boardOrUniversityName = cerificate.getJSONObject("IssuedBy").getJSONObject("Organization").getString("name");
+				  		String percentage= cerificateData.getJSONObject("Performance").getString("percentage");
+						Object aObj = cerificateData.getJSONObject("Performance").get("cgpa");
+						String cgpa=String.valueOf(aObj);
+						Content content = uploadFileToS3(ContentCategory.EDUCATIONAL, ContentSubCategory.DEGREE_CERTIFICATE,
+							issuedDocument, candidateCode,candidate.getCandidateId(), accessToken);
+						if(Objects.nonNull(content)){
+							candidateCafEducation.setContentId(content.getContentId());
+						}
+						candidateCafEducation.setCandidate(candidate);
+				  		candidateCafEducation.setCandidateStatus(candidateStatusRepository.findByCandidateCandidateCode(candidate.getCandidateCode()));
+						candidateCafEducation.setCreatedOn(new Date());
+						candidateCafEducation.setIsHighestQualification(false);
+						candidateCafEducation.setPercentage(cgpa.equals("")?percentage:cgpa);
+						candidateCafEducation.setColor(colorRepository.findByColorCode("GREEN"));
+						candidateCafEducation.setYearOfPassing(yearOfPassing);
+						candidateCafEducation.setCourseName(courseName);
+						candidateCafEducation.setBoardOrUniversityName(boardOrUniversityName);
+						candidateCafEducation.setQualificationMaster(qualificationMasterRepository.findByQualificationCode("BEBTECH"));
+						candidateCafEducation.setSuspectClgMaster(suspectClgMasterRepository.findById(0L).get());
+						//added below line for setting the source of education
+						candidateCafEducation.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("DIGILOCKER"));
+						
+						candidateCafEducationRepository.save(candidateCafEducation);
+			  		}
 				 
-				}else if(issuedDocument.getDoctype().equals("UNCRD") && action.equals("SELF")) {
+				}else if(issuedDocument.getDoctype().equals("UNCRD")) {// && action.equals("SELF")) {
 					uploadFileToS3(ContentCategory.OTHERS, ContentSubCategory.UAN,issuedDocument,candidateCode,candidate.getCandidateId(),accessToken);
+				}else if(issuedDocument.getDoctype().equals("PRVCR")) {
+					log.info("START FETCHING PROVISIONAL DEGREE");	
+					json = XML.toJSONObject(data);
+					CandidateCafEducation candidateCafEducation = candidateCafEducationRepository.findByCandidateAndQualificationCode(candidateCode,"BEBTECH");
+//					CandidateCafEducation candidateCafEducation = new CandidateCafEducation();
+					if(candidateCafEducation!=null) {
+			  			log.info("candidateCafEducation already present for PROVISIONAL DEGREE");
+			  		}else {
+			  			candidateCafEducation = new CandidateCafEducation();
+				  		JSONObject cerificate = json.getJSONObject("Certificate");
+				  		log.info("PROVISIONAL CERTIFICATE FOR ::{}{}",candidateCode,cerificate);
+				  		JSONObject cerificateData = cerificate.getJSONObject("CertificateData");
+						JSONObject examination = cerificateData.getJSONObject("Examination");
+						Integer year = examination.has("year") ? examination.getInt("year") : null;
+						String yearOfPassing =  Objects.nonNull(year) ? year.toString() : "";
+	//			  		String course = cerificateData.getJSONObject("Course").getString("name");
+				  		String courseName = cerificateData.getJSONObject("Course").getJSONObject("Streams").getJSONObject("Stream").getString("name");
+				  		if(courseName.equals("") && cerificateData.getJSONObject("Course").has("name")
+				  				&& !cerificateData.getJSONObject("Course").getString("name").equals("")) {
+				  			courseName=cerificateData.getJSONObject("Course").getString("name");
+				  		}
+				  		String boardOrUniversityName = cerificate.getJSONObject("IssuedBy").getJSONObject("Organization").getString("name");
+				  		String percentage= cerificateData.getJSONObject("Performance").getString("percentage");
+						Object aObj = cerificateData.getJSONObject("Performance").get("cgpa");
+						String cgpa=String.valueOf(aObj);
+						Content content = uploadFileToS3(ContentCategory.EDUCATIONAL, ContentSubCategory.PROVISIONAL_DEGREE_CERTIFICATE,
+							issuedDocument, candidateCode,candidate.getCandidateId(), accessToken);
+						if(Objects.nonNull(content)){
+							candidateCafEducation.setContentId(content.getContentId());
+						}
+						candidateCafEducation.setCandidate(candidate);
+				  		candidateCafEducation.setCandidateStatus(candidateStatusRepository.findByCandidateCandidateCode(candidate.getCandidateCode()));
+						candidateCafEducation.setCreatedOn(new Date());
+						candidateCafEducation.setIsHighestQualification(false);
+						candidateCafEducation.setPercentage(cgpa.equals("")?percentage:cgpa);
+						candidateCafEducation.setColor(colorRepository.findByColorCode("GREEN"));
+						candidateCafEducation.setYearOfPassing(yearOfPassing);
+						candidateCafEducation.setCourseName(courseName);
+						candidateCafEducation.setBoardOrUniversityName(boardOrUniversityName);
+						candidateCafEducation.setQualificationMaster(qualificationMasterRepository.findByQualificationCode("BEBTECH"));
+						candidateCafEducation.setSuspectClgMaster(suspectClgMasterRepository.findById(0L).get());
+						//added below line for setting the source of education
+						candidateCafEducation.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("DIGILOCKER"));
+						
+						candidateCafEducationRepository.save(candidateCafEducation);
+			  		}
+					log.info("END FETCHING PROVISIONAL DEGREE");
+				}else if(issuedDocument.getDoctype().equals("SSCER")) {
+					log.info("START FETCHING SSC");
+					json = XML.toJSONObject(data);
+					CandidateCafEducation candidateCafEducation = candidateCafEducationRepository.findByCandidateAndQualificationCode(candidateCode,"10TH");
+//					CandidateCafEducation candidateCafEducation = new CandidateCafEducation();
+					if(candidateCafEducation!=null) {
+			  			log.info("candidateCafEducation already present for SSCER");
+			  		}else {
+			  			candidateCafEducation = new CandidateCafEducation();
+				  		JSONObject cerificate = json.getJSONObject("Certificate");
+				  		log.info("SSC CERTIFICATE FOR ::{}{}",candidateCode,cerificate);
+				  		JSONObject cerificateData = cerificate.getJSONObject("CertificateData");
+						JSONObject examination = cerificateData.getJSONObject("Examination");
+						Integer year = examination.has("year") ? examination.getInt("year") : null;
+						String courseName =examination.has("name") ? examination.getString("name") : null;
+						if(courseName==null || courseName.equals("")) {
+							
+							courseName="Secondary Education Board Exam";
+						}
+						String yearOfPassing =  Objects.nonNull(year) ? year.toString() : "";
+						String boardOrUniversityName = cerificate.getJSONObject("IssuedBy").getJSONObject("Organization").getString("name");
+				  		Object percentage= null;
+				  		Object aObj =null;
+				  		if(cerificateData.has("Performance") ) {
+				  			if(cerificateData.getJSONObject("Performance").has("percentage")) {
+				  				percentage =cerificateData.getJSONObject("Performance").get("percentage");
+				  			}else if(cerificateData.getJSONObject("Performance").has("result")) {
+				  				percentage =cerificateData.getJSONObject("Performance").get("result");
+				  			}
+				  			
+				  			if(cerificateData.getJSONObject("Performance").has("cgpa")) {
+				  				aObj =cerificateData.getJSONObject("Performance").get("cgpa");
+				  			}else if(cerificateData.getJSONObject("Performance").has("result")) {
+				  				aObj =cerificateData.getJSONObject("Performance").get("result");
+				  			}
+				  		}else if(cerificateData.has("Result")) {
+				  			percentage=cerificateData.getJSONObject("Result").get("gpaPoints");
+				  			aObj=cerificateData.getJSONObject("Result").get("gpaPoints");
+				  		}
+						String cgpa=String.valueOf(aObj);
+						Content content = uploadFileToS3(ContentCategory.EDUCATIONAL, ContentSubCategory.SSC_MARKSHEET,
+							issuedDocument, candidateCode,candidate.getCandidateId(), accessToken);
+						if(Objects.nonNull(content)){
+							candidateCafEducation.setContentId(content.getContentId());
+						}
+						candidateCafEducation.setCandidate(candidate);
+				  		candidateCafEducation.setCandidateStatus(candidateStatusRepository.findByCandidateCandidateCode(candidate.getCandidateCode()));
+						candidateCafEducation.setCreatedOn(new Date());
+						candidateCafEducation.setIsHighestQualification(false);
+						candidateCafEducation.setPercentage(cgpa.equals("") && percentage !=null ?percentage.toString():cgpa);
+						candidateCafEducation.setColor(colorRepository.findByColorCode("GREEN"));
+						candidateCafEducation.setYearOfPassing(yearOfPassing);
+						candidateCafEducation.setCourseName(courseName);
+						candidateCafEducation.setBoardOrUniversityName(boardOrUniversityName);
+						candidateCafEducation.setQualificationMaster(qualificationMasterRepository.findByQualificationCode("10TH"));
+						candidateCafEducation.setSuspectClgMaster(suspectClgMasterRepository.findById(0L).get());
+						//added below line for setting the source of education
+						candidateCafEducation.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("DIGILOCKER"));
+						
+						candidateCafEducationRepository.save(candidateCafEducation);
+			  		}
+					log.info("END FETCHING SSC");
+				}else if(issuedDocument.getDoctype().equals("HSCER")) {
+					log.info("START FETCHING HSC");
+					json = XML.toJSONObject(data);
+					CandidateCafEducation candidateCafEducation = candidateCafEducationRepository.findByCandidateAndQualificationCode(candidateCode,"12TH");
+//					CandidateCafEducation candidateCafEducation = new CandidateCafEducation();
+					if(candidateCafEducation!=null) {
+			  			log.info("candidateCafEducation already present for HSC::{}",candidateCode);
+			  		}else {
+			  			candidateCafEducation = new CandidateCafEducation();
+				  		JSONObject cerificate = json.getJSONObject("Certificate");
+				  		log.info("HSC CERTIFICATE FOR ::{}{}",candidateCode,cerificate);
+				  		JSONObject cerificateData = cerificate.getJSONObject("CertificateData");
+						JSONObject examination = cerificateData.getJSONObject("Examination");
+						Integer year = examination.has("year") ? examination.getInt("year") : null;
+						String courseName =examination.has("name") ? examination.getString("name") : null;
+						if(courseName==null || courseName.equals("")) {
+							
+							courseName="Higher Secondary Education Board Exam";
+						}
+						String yearOfPassing =  Objects.nonNull(year) ? year.toString() : "";
+						String boardOrUniversityName = cerificate.getJSONObject("IssuedBy").getJSONObject("Organization").getString("name");
+						Object percentage= null;
+				  		Object aObj =null;
+				  		if(cerificateData.has("Performance") ) {
+				  			if(cerificateData.getJSONObject("Performance").has("percentage")) {
+				  				percentage =cerificateData.getJSONObject("Performance").get("percentage");
+				  			}else if(cerificateData.getJSONObject("Performance").has("result")) {
+				  				percentage =cerificateData.getJSONObject("Performance").get("result");
+				  			}
+				  			
+				  			if(cerificateData.getJSONObject("Performance").has("cgpa")) {
+				  				aObj =cerificateData.getJSONObject("Performance").get("cgpa");
+				  			}else if(cerificateData.getJSONObject("Performance").has("result")) {
+				  				aObj =cerificateData.getJSONObject("Performance").get("result");
+				  			}
+				  		}else if(cerificateData.has("Result")) {
+				  			percentage=cerificateData.getJSONObject("Result").get("gpaPoints");
+				  			aObj=cerificateData.getJSONObject("Result").get("gpaPoints");
+				  		}
+						String cgpa=String.valueOf(aObj);
+						Content content = uploadFileToS3(ContentCategory.EDUCATIONAL, ContentSubCategory.HSC_MARKSHEET,
+							issuedDocument, candidateCode,candidate.getCandidateId(), accessToken);
+						if(Objects.nonNull(content)){
+							candidateCafEducation.setContentId(content.getContentId());
+						}
+						candidateCafEducation.setCandidate(candidate);
+				  		candidateCafEducation.setCandidateStatus(candidateStatusRepository.findByCandidateCandidateCode(candidate.getCandidateCode()));
+						candidateCafEducation.setCreatedOn(new Date());
+						candidateCafEducation.setIsHighestQualification(false);
+						candidateCafEducation.setPercentage(cgpa.equals("") && percentage !=null ?percentage.toString():cgpa);
+						candidateCafEducation.setColor(colorRepository.findByColorCode("GREEN"));
+						candidateCafEducation.setYearOfPassing(yearOfPassing);
+						candidateCafEducation.setCourseName(courseName);
+						candidateCafEducation.setBoardOrUniversityName(boardOrUniversityName);
+						candidateCafEducation.setQualificationMaster(qualificationMasterRepository.findByQualificationCode("12TH"));
+						candidateCafEducation.setSuspectClgMaster(suspectClgMasterRepository.findById(0L).get());
+						//added below line for setting the source of education
+						candidateCafEducation.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("DIGILOCKER"));
+						
+						candidateCafEducationRepository.save(candidateCafEducation);
+			  		}
+					log.info("END FETCHING HSC");
 				}
 				// System.out.println(response+"getFIleFromUri");
 			}catch(Exception e) {
 			    log.error("Exception occured in DigilockerServiceImpl in getFIleFromUri method-->",e);
+			    
+			    return "FAILED";
 			} 
 //			if(response != null) {
 //				System.out.println(response);
 //			}
-			return response;
+			return "SUCCESS";
 		}else {
-			return null;
+			return "";
 		}
     }
 	
 	private String constructFullAddress(JSONObject poa) {
 
-		Object aObj = poa.get("house");
-		String cgpach=String.valueOf(aObj);
+		Object aObj ;
 		
 		StringBuilder fullAddress = new
 			StringBuilder("");
-		if(poa.has("name"))
-			fullAddress.append(poa.getString("name")+", ");
-		if(poa.has("co") && StringUtils.isNotEmpty(poa.getString("co"))) {
-			fullAddress.append(poa.getString("co")+", ");
+		if(poa.has("name")) {
+			//fullAddress.append(poa.getString("name")+", ");
+			String name = poa.optString("name", "");
+			fullAddress.append(name+", ");
 		}
-		if(poa.has("house"))
+		if(poa.has("co") && StringUtils.isNotEmpty(poa.getString("co"))) {
+			//fullAddress.append(poa.getString("co")+", ");
+			String co = poa.optString("co", "");
+			fullAddress.append(co+", ");
+		}
+		if(poa.has(HOUSE)) { 
+			aObj = poa.get(HOUSE);
+		    String cgpach=String.valueOf(aObj);
 			fullAddress.append(cgpach+", ");
-		if(poa.has("street"))
-			fullAddress.append(poa.getString("street")+", ");
-		if(poa.has("lm"))
-			fullAddress.append(poa.getString("lm")+", ");
-		if(poa.has("loc"))
-			fullAddress.append(poa.getString("loc")+", ");
-		if(poa.has("vtc"))
-			fullAddress.append(poa.getString("vtc")+", ");
-		if(poa.has("subdist"))
-			fullAddress.append(poa.getString("subdist")+", ");
-		if(poa.has("dist"))
-			fullAddress.append(poa.getString("dist")+", ");
-		if(poa.has("state"))
-			fullAddress.append(poa.getString("state")+", ");
-		if(poa.has("country"))
-			fullAddress.append(poa.getString("country")+", ");
-		if(poa.has("pc"))
-			fullAddress.append(poa.getInt("pc")+", ");
-		if(poa.has("po"))
-			fullAddress.append(poa.getString("po")+", ");
+		}else {
+			fullAddress.append("");
+		}
+		if(poa.has("street")) {
+			//fullAddress.append(poa.getString("street")+", ");
+			String street = poa.optString("street", "");
+			fullAddress.append(street+", ");
+		}
+		if(poa.has("lm")) {
+			//fullAddress.append(poa.getString("lm")+", ");
+			String lm = poa.optString("lm", "");
+			fullAddress.append(lm+", ");
+		}
+		if(poa.has("loc")) {
+			//fullAddress.append(poa.getString("loc")+", ");
+			String loc = poa.optString("loc", "");
+			fullAddress.append(loc+", ");
+		}
+		if(poa.has("vtc")) {
+			//fullAddress.append(poa.getString("vtc")+", ");
+			String vtc = poa.optString("vtc", "");
+			fullAddress.append(vtc+", ");
+		}
+		if(poa.has("subdist")) {
+			//fullAddress.append(poa.getString("subdist")+", ");
+			String subdist = poa.optString("subdist", "");
+			fullAddress.append(subdist+", ");
+		}
+		if(poa.has("dist")) {
+			//fullAddress.append(poa.getString("dist")+", ");
+			String dist = poa.optString("dist", "");
+			fullAddress.append(dist+", ");
+		}
+		if(poa.has("state")) {
+			//fullAddress.append(poa.getString("state")+", ");
+			String state = poa.optString("state", "");
+			fullAddress.append(state+", ");
+		}
+		if(poa.has("country")) {
+			//fullAddress.append(poa.getString("country")+", ");
+			String country = poa.optString("country", "");
+			fullAddress.append(country+", ");
+		}
+		if(poa.has("pc")) {
+			//fullAddress.append(poa.getInt("pc")+", ");
+			String pc = poa.optString("pc", "");
+			fullAddress.append(pc+", ");
+		}
+		if(poa.has("po")) {
+			//fullAddress.append(poa.getString("po")+", ");
+			String po = poa.optString("po", "");
+			fullAddress.append(po+", ");
+		}
+		log.info("FULL ADDRESS AS PER ADHAR:: {} ",fullAddress.substring(0,fullAddress.length()-2));
 		
 		return fullAddress.substring(0,fullAddress.length()-2);
 	}
@@ -606,7 +997,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 		File pdfFile = FileUtil.createUniqueTempFile(candidateCode, ".pdf");
 		pdfFile = getPdfFromURI(issuedDocument, accessToken,
 			pdfFile);
-		// System.out.println("---------------------------inside uploadFileToS3");
+		 System.out.println("---------------------------inside uploadFileToS3");
 		if(Objects.nonNull(pdfFile)){
 			String path = "Candidate/".concat(
 				candidateCode + "/Issued".concat("/").concat(issuedDocument.getName()).concat(".pdf"));
@@ -652,6 +1043,16 @@ public class DigilockerServiceImpl implements DigilockerService {
 				Files.write(Paths.get(tempFile.getPath()), response.getBody());
 				return tempFile;
 			}else {
+//				ResponseEntity<byte[]> response1 = (new RestTemplate()).exchange("https://api.digitallocker.gov.in/public/oauth2/3/xml/eaadhaar", HttpMethod.GET, request, byte[].class);
+//				ResponseEntity<byte[]> response1 = (new RestTemplate()).exchange("https://api.digitallocker.gov.in/public/oauth2/1/xml"+"/"+issuedDocument.getUri(), HttpMethod.GET, request, byte[].class);
+//
+//				if(response1.getStatusCode().equals(HttpStatus.OK)){
+//					System.out.println("----------------response1--------------privateif------------");
+//					Files.write(Paths.get(tempFile.getPath()), response1.getBody());
+//					return tempFile;
+//				}else {
+//					return null;
+//				}
 				return null;
 			}
 		}catch(Exception e){
@@ -680,18 +1081,18 @@ public class DigilockerServiceImpl implements DigilockerService {
 			request.put(DigilockerConstants._DIGI_OTP ,digilockerDetails.getOtp());
 							
 			HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
-			System.out.println("\n------entity--------------"+entity);
-			System.out.println("\n------epfoDetails ------ new "+digilockerDetails.getTransactionid());
-			System.out.println("\n------epfoSecurityConfig ------ new "+clientSecurityDetails.getFinalSubmitPostOtp());
-			System.out.println("\n------epfoDetails ------ new "+digilockerDetails.getTransactionid());
+//			System.out.println("\n------entity--------------"+entity);
+//			System.out.println("\n------epfoDetails ------ new "+digilockerDetails.getTransactionid());
+//			System.out.println("\n------epfoSecurityConfig ------ new "+clientSecurityDetails.getFinalSubmitPostOtp());
+//			System.out.println("\n------epfoDetails ------ new "+digilockerDetails.getTransactionid());
 			response = restTemplate.exchange(clientSecurityDetails.getFinalSubmitPostOtp()+digilockerDetails.getTransactionid(), HttpMethod.POST, entity, String.class);
 			String responseBody=response.getBody();
 			JSONObject obj = new JSONObject(responseBody);
 			System.out.println("\n--------obj --------- new "+obj);
 			String msg=obj.getString("message");
 			Boolean status=obj.getBoolean("success");
-			System.out.println("\n--------obj --------- aadhar "+msg+"--------"+status);
-			System.out.println(responseBody+"--------------------------------digi-----karthika");
+//			System.out.println("\n--------obj --------- aadhar "+msg+"--------"+status);
+//			System.out.println(responseBody+"--------------------------------digi-----karthika");
 			if (responseBody!=null){
 				outcome.setOutcome(status);
 				outcome.setMessage(msg);
@@ -700,9 +1101,9 @@ public class DigilockerServiceImpl implements DigilockerService {
 				System.out.println(responseBody+"--------------------------------karthika");
 				// System.out.println("Aadhaar details"+obj.getString("message")); 
 				JSONObject aadhar=new JSONObject(obj.getString("message"));
-				System.out.println("\n--------obj --------- aadhar "+aadhar);
+//				System.out.println("\n--------obj --------- aadhar "+aadhar);
 				JSONObject aadhardetails=aadhar.getJSONObject("aadhaar_details");
-				System.out.println("-----------------aadhar-------"+aadhardetails); 
+//				System.out.println("-----------------aadhar-------"+aadhardetails); 
 
 				System.out.println("--------------------------------------------------------------------------------------------------------------"); 
 				// System.out.println("digi_code"+aadhar.getString("digi_code")); 
@@ -710,7 +1111,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 				// System.out.println("digi_code"+aadhar.getString("access_token"));
 				tokenString=aadhar.getString("access_token");
 				String input_aadhar=aadhardetails.getString("input_aadhar");
-				System.out.println("-----------------aadhar"+input_aadhar); 
+//				System.out.println("-----------------aadhar"+input_aadhar); 
 				code=aadhar.getString("digi_code");
 				candidateCode=digilockerDetails.getCandidateCode();
 				Candidate candidate = candidateRepository.findByCandidateCode(candidateCode);
@@ -737,7 +1138,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 		}catch (Exception ex) {
 			outcome.setData(response!=null?response.getStatusCode().toString():"");
 			outcome.setOutcome(outcomeBoolean);
-			outcome.setMessage("Unable to get DIgi details.");
+			outcome.setMessage(UNABLE_TO_GET_DIGI_DETAILS);
 			log.error("Exception occured in getEpfodetail:",ex); // Add the Proper logging Message here
 		}
 
@@ -761,20 +1162,20 @@ public class DigilockerServiceImpl implements DigilockerService {
 			String message="";
 			Boolean outcomeBoolean= false;
 			try {
-				System.out.println("____________________epfoDetails.getUanusername() new "+digilockerDetails);
-				System.out.println("____________________epfoDetails.getUanusername() new "+digilockerDetails.getAadhaar());
+//				System.out.println("____________________epfoDetails.getUanusername() new "+digilockerDetails);
+//				System.out.println("____________________epfoDetails.getUanusername() new "+digilockerDetails.getAadhaar());
 				request.put(DigilockerConstants._DIGI_AADHAR ,digilockerDetails.getAadhaar());	
 				request.put(DigilockerConstants._DIGI_SECURITY_PIN ,digilockerDetails.getSecuritypin());			
 				HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
-				System.out.println("\n------entity--------------"+entity);
-				System.out.println("\n------epfoDetails ------ new "+digilockerDetails.getTransactionid());
-				System.out.println("\n------epfoSecurityConfig ------ new "+clientSecurityDetails.getFinalSubmitPostUrl());
-				System.out.println("\n------epfoDetails ------ new "+digilockerDetails.getTransactionid());
+//				System.out.println("\n------entity--------------"+entity);
+//				System.out.println("\n------epfoDetails ------ new "+digilockerDetails.getTransactionid());
+//				System.out.println("\n------epfoSecurityConfig ------ new "+clientSecurityDetails.getFinalSubmitPostUrl());
+//				System.out.println("\n------epfoDetails ------ new "+digilockerDetails.getTransactionid());
 				response = restTemplate.exchange(clientSecurityDetails.getFinalSubmitPostUrl()+digilockerDetails.getTransactionid(), HttpMethod.POST, entity, String.class);
 				String responseBody=response.getBody();
-				System.out.println("\n--------obj responseBody new "+responseBody);
+//				System.out.println("\n--------obj responseBody new "+responseBody);
 				JSONObject obj = new JSONObject(responseBody);
-				System.out.println("\n--------obj --------- new "+obj);
+//				System.out.println("\n--------obj --------- new "+obj);
 				String msg=obj.getString("message");
 				Boolean status=obj.getBoolean("success");
 				System.out.println("\n--------obj --------- aadhar "+msg+"--------"+status);
@@ -791,7 +1192,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 			}catch (Exception ex) {
 				outcome.setData(response!=null?response.getStatusCode().toString():"");
 				outcome.setOutcome(outcomeBoolean);
-				outcome.setMessage("Unable to get DIgi details.");
+				outcome.setMessage(UNABLE_TO_GET_DIGI_DETAILS);
 				log.error("Exception occured in getEpfodetail:",ex); // Add the Proper logging Message here
 			}
 	
@@ -829,11 +1230,11 @@ public class DigilockerServiceImpl implements DigilockerService {
 					String message=response.getBody();
 					log.info("Response from DIGI Transaction API : "+message);
 					JSONObject obj = new JSONObject(message);
-					log.info("Response from DIGI Transaction API - obj: "+obj);
+//					log.info("Response from DIGI Transaction API - obj: "+obj);
 			  		transactionId=obj.getString("message").toString();
 			  		digiDetails.setTransactionid(transactionId);
-					log.info("Generated transactionId Id is "+transactionId);
-					System.out.println("transaction id-->"+transactionId);
+//					log.info("Generated transactionId Id is "+transactionId);
+//					System.out.println("transaction id-->"+transactionId);
 				} catch (JSONException e) {
 					log.error("Json Exception occured..",e);
 				}
@@ -879,7 +1280,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 			String message=digiTokenResponse.getBody(); //.get("message").toString().replaceAll("=", ":")
 			System.out.println("DigiTokenResponse  ************************* "+digiTokenResponse.getBody());
 			JSONObject obj1 = new JSONObject(message);
-			log.info("Response from DIGI TOKEN API - message "+obj1);
+//			log.info("Response from DIGI TOKEN API - message "+obj1);
 			log.info("last message "+obj1.getJSONObject("message"));
 			JSONObject obj = obj1.getJSONObject("message");
 			String access_token = obj.getString("access_token");
@@ -929,7 +1330,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 	@Override
 	public ServiceOutcome<Boolean> getDLEdudocument(String digidetails,HttpServletResponse res) {
 		ServiceOutcome<Boolean> svcSearchResult = new ServiceOutcome<>();
-		System.out.println(digidetails+"digidetails" );
+//		System.out.println(digidetails+"digidetails" );
 		JSONObject digiInputparams = new JSONObject(digidetails);
 		JSONObject finaldigiInputs = new JSONObject();
 		String orgid=digiInputparams.get("orgid").toString();

@@ -1,0 +1,105 @@
+@import  "../../../assets/scss/admin.scss";
+
+// .card-header {
+//     position: relative;
+//     display: flex;
+//     align-items: center; // Center vertically
+//   }
+  
+  .email-animation {
+    margin-left: 20px; // Adjust as needed to create space between the title and animation
+    font-size: 24px; // Adjust the font size as needed
+    animation: emailAnimation 1s infinite alternate;
+  }
+  
+  @keyframes emailAnimation {
+    from {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  .line-break {
+    display: block;
+    height: 15px;
+  } 
+  .ms-btn {
+    background-color: white;
+    border: 2px solid #0078d4;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    padding: 15px; 
+    align-items: center;
+    justify-content: center;
+  }  
+  .ms-btn:hover {
+    background-color: #0078d4;
+  }  
+  .fas {
+    font-size: 20px; 
+    color: #0078d4;
+  }  
+  .ms-btn:hover .fas {
+    color: white; 
+  }  
+  .icon-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }  
+  .icon-label {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+  }  
+  .line-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }  
+  .line {
+    height: 50px;
+    border-left: 1px solid #ccc;
+  }
+  .ms-button {
+    display: inline-block;
+    padding: 6px 12px; 
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 12px; 
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s, color 0.3s;
+    margin-right: 8px;
+  }    
+  .ms-primary-button {
+    background-color: #0078d4;
+    color: #ffffff;
+  }  
+  .ms-primary-button:hover {
+    background-color: #005a9e;
+  }
+  .ms-secondary-button {
+    background-color: #005a9e;
+    color: #ffffff;
+    border: 1px solid #005a9e;
+  }  
+  .ms-secondary-button:hover {
+    background-color: #005a9e;
+  }
+  .ms-skip-button {
+    background-color: #179ba7;
+    color: #ffffff;
+    border: 2px solid #179ba7;
+  }  
+  .ms-skip-button:hover {
+    background-color: #179ba7;
+  }
+  

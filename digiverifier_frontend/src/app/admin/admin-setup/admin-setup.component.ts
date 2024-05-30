@@ -23,7 +23,11 @@ export class AdminSetupComponent implements OnInit {
     userMobileNum: ['', [Validators.minLength(10), Validators.maxLength(10), Validators.pattern('[6-9]\\d{9}')]],
     userEmailId: ['', [Validators.required,Validators.email]],
     location: ['', Validators.required],
-    password: ['', Validators.required],
+    password: ['', [
+      Validators.required,
+      Validators.minLength(8),
+      Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&()_+{}\[\]\-^|=])[A-Za-z\d@$!%*?&()_+{}\[\]\-^|=]+$/)
+    ]],
     isActive: ['']
   });
   
@@ -54,7 +58,11 @@ export class AdminSetupComponent implements OnInit {
           userMobileNum: new FormControl(this.getCustAdmin.data['userMobileNum'], Validators.required),
           userEmailId: new FormControl(this.getCustAdmin.data['userEmailId'], Validators.required),
           location: new FormControl(this.getCustAdmin.data['location'], Validators.required),
-          password: new FormControl(''),
+          password: new FormControl('',[
+            Validators.required,
+            Validators.minLength(8),
+            Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&()_+{}\[\]\-^|=])[A-Za-z\d@$!%*?&()_+{}\[\]\-^|=]+$/)
+          ]),
           isActive: new FormControl(this.getCustAdmin.data.isActive, Validators.required),
         })
       }else{
@@ -85,6 +93,22 @@ export class AdminSetupComponent implements OnInit {
   
   ngOnInit(): void { 
     
+  }
+
+  get password() {
+    return this.adminSetup.get('password');
+  }
+
+  // Check if the password has errors
+  isPasswordInvalid() {
+    const passwordControl = this.adminSetup.get('password');
+    return passwordControl?.invalid && (passwordControl?.touched || passwordControl?.dirty);
+  }
+
+  // Check if the password is valid
+  isPasswordValid() {
+    const passwordControl = this.adminSetup.get('password');
+    return passwordControl?.valid && (passwordControl?.touched || passwordControl?.dirty);
   }
 
   onSubmit() {

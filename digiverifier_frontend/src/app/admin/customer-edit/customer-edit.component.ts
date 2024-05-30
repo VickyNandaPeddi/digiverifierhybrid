@@ -13,6 +13,7 @@ export class CustomerEditComponent implements OnInit {
   pageTitle = 'Edit Customer';
   public logoFile: any = File;
   viewLogo:any;
+  orgId:any;
   CustomersData: any=[];
   public showvalid: any;
   updateCustomers = new FormGroup({
@@ -29,6 +30,7 @@ export class CustomerEditComponent implements OnInit {
     accountsPoc: new FormControl(),
     accountsPocPhoneNumber: new FormControl('', [Validators.minLength(10), Validators.maxLength(10), Validators.pattern('[6-9]\\d{9}')]),
     billingAddress: new FormControl(),
+    callBackUrl: new FormControl(),
     showValidation:new FormControl(),
   });
   constructor( private customers:CustomerService, 
@@ -38,6 +40,7 @@ export class CustomerEditComponent implements OnInit {
   ngOnInit(): void {
     this.customers.getCustomersData(this.router.snapshot.params.organizationId).subscribe((result: any)=>{
       this.CustomersData = result.data;
+      this.orgId=result.data.organizationId;
       console.log(this.CustomersData)
       this.viewLogo = "data:image/png;base64,"+this.CustomersData.organizationLogo;
       this.updateCustomers = new FormGroup({
@@ -53,7 +56,9 @@ export class CustomerEditComponent implements OnInit {
         accountsPoc: new FormControl(result.data['accountsPoc']),
         accountsPocPhoneNumber: new FormControl(result.data['accountsPocPhoneNumber'], [Validators.minLength(10), Validators.maxLength(10), Validators.pattern('[6-9]\\d{9}')]),
         billingAddress: new FormControl(result.data['billingAddress']),
+        callBackUrl: new FormControl(result.data['callBackUrl']),
         // showValidation: new FormControl(result.data['showValidation'], Validators.required),
+        showValidation:new FormControl('',Validators.required),
       })
     });
   }
@@ -68,9 +73,9 @@ export class CustomerEditComponent implements OnInit {
         title: 'Please select .jpeg, .jpg, .png file type only.',
         icon: 'warning'
       });
-    }
-    
+    }  
   }
+
   selectshowValidation(event:any){
     this.showvalid=event.target.value
     console.log( this.showvalid,"-----------------------kkk")
@@ -84,16 +89,25 @@ export class CustomerEditComponent implements OnInit {
     if (this.updateCustomers.valid) {
       this.customers.saveCustomers(formData).subscribe((result:any)=>{
           console.log(result);
+        if(result.outcome){
           const billUrl = 'admin/custbill/'+result.data['organizationId'];
           Swal.fire({
             title: result.message,
             icon: 'success'
           });
           this.routernav.navigate([billUrl]);
+        } else {
+          Swal.fire({
+            title: result.message,
+            icon: 'warning'
+          });
+        }
       });
     }else{
+      const invalidFields = Object.keys(updateCustomers.controls).filter(key => updateCustomers.get(key)?.invalid);
+      const errorMessage = `Please enter the required information: ${invalidFields.join(', ')}`;
       Swal.fire({
-        title: "Please enter the required information",
+        title: errorMessage,
         icon: 'warning'
       })
     }
@@ -105,6 +119,29 @@ export class CustomerEditComponent implements OnInit {
      centered: true,
      backdrop: 'static'
     });
+ }
+
+ onEditCustInfo(){
+  const onEditCustInfoUrl = 'admin/custedit/'+this.orgId;
+  console.log("onEditCustInfo URL::{}",onEditCustInfoUrl)
+  this.routernav.navigate([onEditCustInfoUrl]);
+ }
+
+ onEditCustBill(){
+  const onEditCustBillUrl = 'admin/custbill/'+this.orgId;
+  console.log("onEditCustInfo URL::{}",onEditCustBillUrl)
+  this.routernav.navigate([onEditCustBillUrl]);
+ }
+
+ onEditCustEmailTemp(){
+  const onEditCustEmailTempUrl = 'admin/custemailtemp/'+this.orgId;
+  console.log("onEditCustInfo URL::{}",onEditCustEmailTempUrl)
+  this.routernav.navigate([onEditCustEmailTempUrl]);
+ }
+ onEditCustScope(){
+  const onEditCustScopeUrl = 'admin/custscopeconfig/'+this.orgId;
+  console.log("onEditCustInfo URL::{}",onEditCustScopeUrl)
+  this.routernav.navigate([onEditCustScopeUrl]);
  }
 
 }

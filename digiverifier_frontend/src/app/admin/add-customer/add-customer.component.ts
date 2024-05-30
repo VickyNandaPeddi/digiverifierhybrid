@@ -32,6 +32,7 @@ export class AddCustomerComponent implements OnInit {
     accountPocEmail: new FormControl('', Validators.email),
     organizationWebsite: new FormControl(),
     organizationEmailId: new FormControl('', [Validators.required,Validators.email]),
+    callBackUrl: new FormControl(),
     emailConfig:new FormControl(),
     emailTemplate:new FormControl(),
     daysToPurge:new FormControl(),
@@ -71,6 +72,7 @@ export class AddCustomerComponent implements OnInit {
     formData.append('showValidation',this.showvalid);
    
     return this.customers.saveCustomers(formData).subscribe((result:any)=>{
+      if(result.outcome){
         const billUrl = 'admin/custbill/'+result.data['organizationId'];
         this.addCustomers.reset();
         Swal.fire({
@@ -78,6 +80,13 @@ export class AddCustomerComponent implements OnInit {
           icon: 'success'
         });
         this.router.navigate([billUrl]);
+      } else {
+        Swal.fire({
+          title: result.message,
+          icon: 'warning'
+        });
+      }
+
     });
     
   }

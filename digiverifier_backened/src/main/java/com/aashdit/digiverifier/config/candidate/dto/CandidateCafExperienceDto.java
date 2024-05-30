@@ -21,6 +21,8 @@ public class CandidateCafExperienceDto {
 	private String remarkMasterDescription;
 	private Long suspectEmpMasterId;
 	private String certificate;
-
-
+	private String customRemark;
+	private Boolean undisclosed;
+	
+	private String secondaryServiceName;
 }

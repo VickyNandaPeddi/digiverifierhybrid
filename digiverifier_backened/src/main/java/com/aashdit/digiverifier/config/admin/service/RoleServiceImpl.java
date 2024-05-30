@@ -264,6 +264,10 @@ public class RoleServiceImpl implements RoleService {
 		        	}
 	        	}
 	        }
+			 if (currentUser.getRole().getRoleCode().equals("ROLE_CBADMIN")) {
+		            roleObj = roleRepository.findRoleByRoleCode("ROLE_CBADMIN");
+		            roleList.add(roleObj);
+		        }
 	    	svcSearchResult.setData(roleList);
 			svcSearchResult.setOutcome(true);
 			svcSearchResult.setMessage("Success");

@@ -1,0 +1,66 @@
+@import  "../../../assets/scss/admin.scss";
+
+.Status-Red{
+    display: none;
+}
+.card-header{
+    h6{
+        font-weight: 600 !important;
+        font-size: 14px !important;
+    }
+}
+.line-break {
+	display: block;
+	height: 15px;
+}
+.inputcheckbox {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid #0078d4;
+  margin: 0 5px; 
+  cursor: pointer;
+  position: relative;
+}
+.inputcheckbox:checked::after {
+  content: '';
+  width: 8px;
+  height: 8px; 
+  border-radius: 50%;
+  background-color: #0078d4;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.ms-button {
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease-in-out;
+    margin-right: 8px;
+}
+.btn-primary {
+    background-color: #0078d4;
+    color: white;
+}
+.btn-cancel {
+    background-color: #179ba7;
+    color: white;
+}
+.checkbox {
+    display: flex;
+    align-items: center;
+}
+.space {
+    width: 10px;
+}

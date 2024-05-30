@@ -1,12 +1,13 @@
 package com.aashdit.digiverifier.digilocker.service;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import com.aashdit.digiverifier.digilocker.dto.DigiLockerDetailsDto;
 import com.aashdit.digiverifier.common.model.ServiceOutcome;
 
 public interface DigilockerService {
 
-	String getDigilockerDetails(String code, String state, HttpServletResponse response, String action);
+	//String getDigilockerDetails(String code, String state, HttpServletResponse response, String action);
+	ServiceOutcome<String> getDigilockerDetails(String code, String state, HttpServletResponse response, String action);
 	
 	String getUserDetails(String accessToken,String code, String candidateCode,HttpServletResponse res, String action);
 

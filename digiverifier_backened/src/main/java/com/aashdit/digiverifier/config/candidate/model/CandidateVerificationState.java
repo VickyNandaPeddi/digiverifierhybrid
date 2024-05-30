@@ -2,9 +2,11 @@ package com.aashdit.digiverifier.config.candidate.model;
 
 import lombok.Data;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
+
+import com.aashdit.digiverifier.config.superadmin.model.Color;
 
 @Data
 @Entity
@@ -34,5 +36,24 @@ public class CandidateVerificationState {
 	
 	@Column(name = "pre_approval_report_time")
 	private ZonedDateTime preApprovalTime;
+	
+	
+	@ManyToOne
+	@JoinColumn(name = "pre_approval_color_code_status")
+	private Color preApprovalColorCodeStatus;
+	
+	@ManyToOne
+	@JoinColumn(name = "interim_color_code_status")
+	private Color interimColorCodeStatus;
+	
+	@ManyToOne
+	@JoinColumn(name = "final_color_code_status")
+	private Color finalColorCodeStatus;
+	
+	@Column(name = "case_re_initiation_time")
+	private ZonedDateTime caseReInitiationTime;
+	
+	@Column(name = "interim_report_amended_time")
+	private ZonedDateTime interimReportAmendedTime;
 	
 }

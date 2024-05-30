@@ -2,8 +2,11 @@ package com.aashdit.digiverifier.config.candidate.dto;
 
 
 import com.aashdit.digiverifier.common.dto.ContentDTO;
+import com.aashdit.digiverifier.config.superadmin.model.Color;
+
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -32,4 +35,22 @@ public class CandidateDetailsDto {
 	private List<ContentDTO> contentDTOList;
 	private String aadharDob;
 	private String aadharName;
+	private String itrPanNumber;
+	private Date lastUploadedOn;
+	private Color preOfferVerificationColorCode;
+	private Color interimVerificationColorCode;
+	private Color finalVerificationColorCode;
+	private Boolean showvalidation;
+
+	private String preOfferReportDate;
+    private String interimReportDate;
+	private String finalReportDate;
+	private String caseInitiationDate;
+	private Boolean isLoaAccepted;
+	
+	private String uan;
+	
+	private String accountName;
+	private boolean conventionalCandidate;
+	private String conventionalCandidateCheck;
 }

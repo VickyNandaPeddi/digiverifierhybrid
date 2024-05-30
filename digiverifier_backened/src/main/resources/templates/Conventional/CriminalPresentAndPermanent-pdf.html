@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en-us" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>DigiVerifier Pdf</title>
+<meta charset="UTF-8" />
+<!--    <link  th:href="@{styles/css/Metro.css}"  rel="stylesheet"/>-->
+<link th:href="${cssPath + '/fonts.css'}" rel="stylesheet" />
+<link th:if="${!#strings.equalsIgnoreCase(root.project, 'KPMG')}" th:href="${cssPath + '/common.css'}" rel="stylesheet" />
+<link th:if="${#strings.equalsIgnoreCase(root.project, 'KPMG')}" th:href="${cssPath + '/KPMGcommon.css'}" rel="stylesheet" />
+<link th:href="@{http://fonts.googleapis.com/css?family=Calibri}"
+	rel='stylesheet' type='text/css' />
+<!--<script src='http://localhost:9090/chart.js'></script>-->
+<style>
+span {
+	font-family: 'Calibri', sans-serif;
+}
+
+.table-st {
+	clear: both;
+	width: 100%;
+	border: 1px solid #1C4E80;
+	border-collapse: collapse;
+}
+
+.table-st tr {
+	border: 1px solid #1C4E80;
+	border-collapse: collapse;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.text-left {
+	text-align: left;
+}
+
+.table-st tr td {
+	border: 1px solid #1C4E80;
+	border-collapse: collapse;
+	padding: 5px;
+}
+
+.table-st tr td span {
+	margin-left: 5px;
+}
+
+.blue-bg {
+	background-color: #1C4E80;
+}
+
+.grey-bg {
+	background-color: #DDDDDD;
+}
+
+.black-text {
+	color: black;
+	font-size: 14px;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+}
+
+.grey-text {
+	color: black;
+	font-size: 13px !important;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+}
+
+.white-text {
+	font-weight: bold;
+	color: #1C4E80;
+	font-family: 'Calibri', sans-serif;
+	font-size: 13px;
+}
+
+.td-heading {
+	font-weight: bold;
+	font-size: 15px;
+}
+
+.line-break {
+	display: block;
+	height: 15px;
+}
+
+.sub-heading {
+	text-align: center;
+	font-weight: bold;
+	font-size: 18px;
+}
+
+.green-status {
+	margin: 0px;
+	color: #008000;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.amber-status {
+	margin: 0px;
+	color: #ffA500;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.red-status {
+	margin: 0px;
+	color: #ff0000;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.invalid-status {
+	margin: 0px;
+	color: #000000;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.black-box {
+	border: 1px solid black;
+}
+/* Base styles for the table */
+.table-st {
+            width: 100%;
+            border-collapse: collapse;
+        } 
+
+.table-st td {
+            padding: 7px;
+            border: 1px solid #ccc;
+        } 
+
+/* Media query for small screens */
+        @media screen and (max-width: 480px) {
+            .table-st td {
+                display: block;
+                width: 100%;
+            }
+        } 
+
+        /* Additional styles for specific elements */
+        .text-center {
+            text-align: center;
+        } 
+
+        .text-left {
+            text-align: left;
+        } 
+
+        .sub-heading {
+            font-size: 14px;
+            font-weight: 600;
+            color: whitesmoke;
+        } 
+
+        /* Optional styles for the logo */
+        /* You can modify these styles based on your preference */
+        .table-st img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .profile-width{
+            min-width:160px;
+        }
+        
+        .centered-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%; /* Adjust as needed */
+            height: 100%; /* Adjust as needed */
+            margin-left: 40px
+        }
+</style>
+</head>
+<body
+	style="background-color: #fff; padding: 0px; margin: 0px; position: relative; font-family: 'Calibri', sans-serif; color: #666666;">
+	<section class="wrapper"
+		style="width: 100%; margin: 0 auto; height: 80%;">
+	<!--	<span class="line-break"></span> -->
+    
+	<!-- ADDING THE BELOW SECTION FOR REMITTANCE RECORDS-->	
+
+<!-- New VendorChecks -->
+    
+    
+      
+            <!--  CRIMINAL checks with proofs starts-->
+    <div th:each="vendorUploadChecks,loopCount : ${root.vendorProofDetails}" th:if="${loopCount.count == 1}">
+
+        <div th:each="vendorsourcename:${vendorUploadChecks.vendorAttirbuteValue}">
+            <div th:if="${vendorsourcename.sourceName != null and vendorsourcename.sourceName == 'Criminal Present &amp; Permanent'}">
+		   <!--  <div style="page-break-after:always;"></div>-->
+                <div class="table-container">
+                    <th:block th:each="entry : ${root.criminalCheckList}">
+                        <!-- Check conditions for adding the table -->
+                         <th:block th:if="${entry.key == 'Criminal Present &amp; Permanent'}">
+
+                          <th:block th:if="${entry.value == null}">
+							  <div class="text-center">
+							 <span style="color: black;font-family: 'Roboto'; font-size: 15px; font-weight: bold; text-align: center;">
+                                    <b style="text-align: center;" th:text="${entry.key}"></b>
+                                </span>
+                                </div>
+        <!-- Create your table here -->
+        <div>
+					        <table class="table-st">
+								 <tr>
+					              <td class="" colspan="2" style="background-color: #1C4E80; color: #DDDDDD; text-align: center;font-size: 15px; font-weight: bold; width: 50%; padding: 5px;">
+					                 Criminal Check
+					                </td>
+					            </tr>
+					            <tr>
+					                <td class="grey-text text-center" colspan="2" style="width: 65%; padding: 3px;">Data not found from QCAgent</td>
+					            </tr>
+					        </table>
+					    </div>
+    </th:block>
+    </th:block>
+    
+            <th:block th:unless="${entry.value == null}">
+
+                         
+                        <th:block
+                                th:if="${#strings.equalsIgnoreCase(#strings.trim(vendorsourcename.sourceName), #strings.trim(entry.key)) and (not #lists.isEmpty(entry.value.civilProceedingList) or not #lists.isEmpty(entry.value.criminalProceedingList))}">
+                            <div class="text-center mb-3">
+                                <span style="color: black;font-family: 'Roboto'; font-size: 15px; font-weight: bold;">
+                                    <b th:text="${entry.key}"></b>
+                                </span>
+                            </div>
+                            <span class="line-break"></span>
+                            <table class="table-st" border="0">
+                                <!-- Table for Civil Proceedings -->
+                                <tr>
+                                    <td class="" colspan="5"
+                                        style="font-size: 13px; font-weight: bold; padding: 3px;background-color: #1C4E80; color: #DDDDDD;text-align: center">Civil Proceedings
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="5" style="font-size: 13px; color: black; padding: 3px">Includes
+                                        Original
+                                        Suit,
+                                        Miscellaneous Suit, Execution and Arbitration Case
+                                    </td>
+                                </tr>
+                                <tr class="">
+                                    <td style="font-size: 13px; font-weight: bold; width: 15%;padding: 3px; background-color: #1C4E80; color: #DDDDDD;text-align: center">Date of
+                                        Search
+                                    </td>
+                                    <td style="font-size: 13px; font-weight: bold; width: 15%;padding: 3px;background-color: #1C4E80; color: #DDDDDD;text-align: center">Court</td>
+                                    <td style="font-size: 13px; font-weight: bold; width: 15%;padding: 3px;background-color: #1C4E80; color: #DDDDDD;text-align: center">Jurisdiction
+                                    </td>
+                                    <td style="font-size: 13px; font-weight: bold; width: 25%;padding: 3px;background-color: #1C4E80; color: #DDDDDD;text-align: center">Name of the
+                                        Court
+                                    </td>
+                                    <td style="font-size: 13px; font-weight: bold; width: 20%;padding: 3px;background-color: #1C4E80; color: #DDDDDD;text-align: center">Result</td>
+                                </tr>
+                                <tr class="text-center" th:each="proceeding : ${entry.value.civilProceedingList}">
+                                    <td style="font-size: 13px; color: black; width: 15%;padding: 3px"
+                                        th:text="${proceeding.dateOfSearch}"></td>
+                                    <td style="font-size: 13px; color: black; width: 15%;padding: 3px"
+                                        th:text="${proceeding.court}"></td>
+                                    <td style="font-size: 13px; color: black; width: 15%;padding: 3px"
+                                        th:text="${proceeding.jurisdiction}"></td>
+                                    <td style="font-size: 13px; color: black; width: 25%;padding: 3px"
+                                        th:text="${proceeding.nameOfTheCourt}"></td>
+                                    <td style="font-size: 13px; color: black; width: 20%;padding: 3px"
+                                        th:text="${proceeding.result}"></td>
+                                </tr>
+                            </table>
+                            <span class="line-break"></span>
+                            <table class="table-st" border="0">
+                                <!-- Table for Criminal Proceedings -->
+                                <tr>
+                                    <td class="" colspan="5"
+                                        style="font-size: 13px; font-weight: bold; padding: 3px;background-color: #1C4E80; color: #DDDDDD;text-align: center">Criminal Proceedings
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="5" style="font-size: 13px; color: black; padding: 3px">Includes
+                                        Criminal
+                                        Petitions,
+                                        Criminal Appeal, Sessions Case, Special Sessions Case, Criminal Miscellaneous
+                                        Petition, and Criminal Revision Appeal
+                                    </td>
+                                </tr>
+                                <tr class="">
+                                    <td style="font-size: 13px; font-weight: bold; width: 15%;padding: 3px;background-color: #1C4E80; color: #DDDDDD;text-align: center">Date of
+                                        Search
+                                    </td>
+                                    <td style="font-size: 13px; font-weight: bold; width: 15%;padding: 3px;background-color: #1C4E80; color: #DDDDDD;text-align: center">Court</td>
+                                    <td style="font-size: 13px; font-weight: bold; width: 15%;padding: 3px;background-color: #1C4E80; color: #DDDDDD;text-align: center">
+                                        Jurisdiction
+                                    </td>
+                                    <td style="font-size: 13px; font-weight: bold; width: 25%;padding: 3px;background-color: #1C4E80; color: #DDDDDD;text-align: center">Name of the
+                                        Court
+                                    </td>
+                                    <td style="font-size: 13px; font-weight: bold; width: 20%;padding: 3px;background-color: #1C4E80; color: #DDDDDD;text-align: center">Result</td>
+                                </tr>
+                                <tr class="text-center" th:each="proceeding : ${entry.value.criminalProceedingList}">
+                                    <td style="font-size: 13px; color: black; width: 15%;padding: 3px;"
+                                        th:text="${proceeding.dateOfSearch}"></td>
+                                    <td style="font-size: 13px; color: black; width: 15%;padding: 3px;"
+                                        th:text="${proceeding.court}"></td>
+                                    <td style="font-size: 13px; color: black; width: 15%;padding: 3px;"
+                                        th:text="${proceeding.jurisdiction}"></td>
+                                    <td style="font-size: 13px; color: black; width: 25%;padding: 3px;"
+                                        th:text="${proceeding.nameOfTheCourt}"></td>
+                                    <td style="font-size: 13px; color: black; width: 20%;padding: 3px;"
+                                        th:text="${proceeding.result}"></td>
+                                </tr>
+                            </table>
+                        </th:block>
+                      </th:block>
+                    </th:block>
+                </div>
+            </div>
+            <br>
+                              <!--        start of documents -->
+         <div th:if="${vendorsourcename.sourceName != null and #strings.contains(vendorsourcename.sourceName, 'Criminal')}">
+
+        <div th:each="encodedImageMap : ${root.pdfByes}">
+            <div th:each="entry : ${encodedImageMap}">
+                <span th:if="${#strings.equalsIgnoreCase(#strings.trim(vendorsourcename.sourceName), #strings.trim(entry.key))}">
+                    <!-- Debug: Print the values of sourceName and key -->
+                    <span style="color: black; font-family: 'Arial Black'; font-size: 10px; font-weight: bold;">
+                        <th:block th:each="value : ${entry.value}">
+                            <!-- Display image only if the condition is met -->
+                            <img th:src="'data:image/png;base64,' + ${value}" alt="PDF Image"
+                                 style="width: 600px; height: auto;">
+                        </th:block>
+                    </span>
+                </span>
+            </div>
+        </div>
+        </div>
+        <!--        end  of documents -->
+        </div>
+    </div>
+    <!--  CRIMINAL checks with proofs ends-->
+
+
+    
+    
+   
+
+ 
+
+
+		<!-- <p class ="text-center grey-text" style="font-size:14px"><b>- End of the report -</b></p> -->
+	</section>
+</body>
+</html>

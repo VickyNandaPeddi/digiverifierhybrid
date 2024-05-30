@@ -14,5 +14,8 @@ public interface OrganizationExecutiveRepository extends JpaRepository<Organizat
 	
 	@Query(value = "select * from t_dgv_organization_executive where organization_id = :organizationId order by weight desc",nativeQuery = true)
 	List<OrganizationExecutive> findAllByOrganizationIdAndOrderByWeightDesc(@Param(value = "organizationId") Long organizationId);
+
+	@Query(value = "select organization_id from t_dgv_organization_executive where organization_id = :organizationId order by weight desc",nativeQuery = true)
+	List<Long> findAllByOrganizationId(@Param(value = "organizationId") Long organizationId);
 	
 }

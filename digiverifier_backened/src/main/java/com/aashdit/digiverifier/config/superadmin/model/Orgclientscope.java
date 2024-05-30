@@ -1,15 +1,15 @@
 package com.aashdit.digiverifier.config.superadmin.model;
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import lombok.ToString;
 import org.hibernate.annotations.Type;
 import com.aashdit.digiverifier.config.admin.model.User;
@@ -105,7 +105,12 @@ public class Orgclientscope implements Serializable {
     // @NotBlank
     // @Column(name"Customer_mandate_BV_for_allcoation_ENUM_Mandate")
     // private String CustomermandateBVforallcoationENUMMandate;
+    
+    @Column(name = "account_name")
+    private String accountName;
 
+    @Column(name = "conventional_candidate_check")
+    private String conventionalCandidateCheck;
 }
 
 

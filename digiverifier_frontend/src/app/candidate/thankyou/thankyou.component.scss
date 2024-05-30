@@ -1,0 +1,11 @@
+@import  "../../../assets/scss/candidate";
+h4{
+    color: #03ab00;
+    line-height: 32px;
+}
+@media (max-width: 767px) {
+    h4{
+        line-height: 28px;
+        font-size: 17px;
+    }
+}

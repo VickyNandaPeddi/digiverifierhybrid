@@ -3,6 +3,7 @@ package com.aashdit.digiverifier.config.superadmin.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -14,5 +15,8 @@ public interface ServiceMasterRepository extends JpaRepository<ServiceMaster, Lo
 
 	@Query("FROM ServiceMaster where organization.organizationId=:organizationId and ratePerReport > :value and ratePerItem > :value")
 	List<ServiceMaster> findByOrganizationOrganizationIdAndRatePerReportAndRatePerItem(@Param("organizationId")Long organizationId,@Param("value")Double value);
+
+	@Modifying
+	void deleteByOrganizationOrganizationId(Long orgId);
 
 }

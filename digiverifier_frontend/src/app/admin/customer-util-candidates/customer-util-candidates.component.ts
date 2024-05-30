@@ -68,11 +68,34 @@ export class CustomerUtilCandidatesComponent implements OnInit {
     }
     
 
+    const key = '12345678901234567890123456789012'; // 32-byte key
     this.customers.getCanididateDetailsByStatus(this.utilizationReportClick.value).subscribe((result: any)=>{
-      console.log(result);
+      console.log(JSON.stringify(result.data.candidateDetailsDto));
       this.getCandidateUtilizationReport=result.data.candidateDetailsDto;
+      this.getCandidateUtilizationReport=this.getCandidateUtilizationReport.map((item:any)=>{
+        console.log( item.panNumber);
+        return {
+              ...item,
+              panNumber: this.decryptData(item.panNumber, key),
+              aadharName: this.decryptData(item.aadharName, key),
+              aadharNumber: this.decryptData(item.aadharNumber, key),
+              aadharDob: this.decryptData(item.aadharDob, key),
+              aadharGender:this.decryptData(item.aadharGender, key),
+            };
+      });
     });
 
+  }
+
+  private decryptData(encryptedData: string, key: string): string {
+    const decodedBytes = atob(encryptedData);
+    const keyBytes = key.split('').map(char => char.charCodeAt(0));
+    let decryptedData = '';
+    for (let i = 0; i < decodedBytes.length; i++) {
+      decryptedData += String.fromCharCode(decodedBytes.charCodeAt(i) ^ keyBytes[i % keyBytes.length]);
+    }
+    console.log("decdsafdfas  _"+decryptedData)
+    return decryptedData;
   }
 
 }

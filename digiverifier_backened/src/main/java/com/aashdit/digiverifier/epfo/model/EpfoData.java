@@ -4,8 +4,8 @@ import com.aashdit.digiverifier.config.candidate.model.Candidate;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data
@@ -38,4 +38,10 @@ public class EpfoData {
 	@DateTimeFormat(pattern = "dd/MM/yyyy")
 	@Column(name = "doj")
 	Date doj;
+	
+	@Column(name = "member_id")
+	private String memberId;
+	
+	@Column(name = "remittance_check")
+	private Boolean isRemittanceChecked;
 }

@@ -14,8 +14,11 @@ import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 
+import com.aashdit.digiverifier.config.candidate.dto.BulkUanDTO;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateDetailsDto;
+import com.aashdit.digiverifier.config.candidate.dto.EpfoDto;
 import com.aashdit.digiverifier.config.candidate.model.Candidate;
+import com.aashdit.digiverifier.config.candidate.model.CandidateCafExperience;
 import com.aashdit.digiverifier.epfo.model.CandidateEPFOResponse;
 import com.aashdit.digiverifier.epfo.model.EpfoData;
 import com.aashdit.digiverifier.epfo.repository.CandidateEPFOResponseRepository;
@@ -37,6 +40,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -57,6 +61,8 @@ import com.aashdit.digiverifier.epfo.dto.EpfoDetailsDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
@@ -98,6 +104,8 @@ public class EpfoServiceImpl implements EpfoService {
 	@Autowired
 	private EnvironmentVal environmentVal;
 	
+	@PersistenceContext
+	private EntityManager entityManager;
 	
 	ResourceBundle rb = ResourceBundle.getBundle("application");
 	
@@ -128,12 +136,12 @@ public class EpfoServiceImpl implements EpfoService {
 			ParameterizedTypeReference<Map<String, Object>> typeRef = new ParameterizedTypeReference<Map<String, Object>>() {};
 			System.out.println("epfoSecurityConfig.getAccessTokenUrl() *************************"+epfoSecurityConfig.getAccessTokenUrl());
 			epfoTokenResponse = restTemplate.exchange(epfoSecurityConfig.getAccessTokenUrl(), HttpMethod.POST, entity, String.class);
-			log.info("Response from EPFO TOKEN API "+epfoTokenResponse);
+			log.info("Response from EPFO TOKEN API "+candidateCode+epfoTokenResponse);
 			String message=epfoTokenResponse.getBody(); //.get("message").toString().replaceAll("=", ":")
 			System.out.println("epfoTokenResponse  ************************* "+epfoTokenResponse.getBody());
 			JSONObject obj1 = new JSONObject(message);
-			log.info("Response from EPFO TOKEN API - message "+obj1);
-			log.info("last message "+obj1.getJSONObject("message"));
+			log.info("Response from EPFO TOKEN API - message "+candidateCode+obj1);
+			log.info("last message "+candidateCode+obj1.getJSONObject("message"));
 			JSONObject obj = obj1.getJSONObject("message");
 			String access_token = obj.getString("access_token");
     		System.out.println("access_token = "+access_token);
@@ -184,7 +192,7 @@ public class EpfoServiceImpl implements EpfoService {
 			svcOutcome.setData(null);
     		svcOutcome.setMessage("EPFO site is down, Please try after 7 PM or late night, If you don’t have UAN skip and complete the verification.");
     		svcOutcome.setOutcome(false);
-			log.error("HttpServerErrorException occured....", ex);	// Add the Proper logging Message here
+			log.error("HttpServerErrorException occured...."+candidateCode, ex);	// Add the Proper logging Message here
 		} /*
 			 * catch (JsonProcessingException ex) { svcOutcome.setData(null);
 			 * svcOutcome.setMessage("JsonProcessingException occured...");
@@ -218,34 +226,34 @@ public class EpfoServiceImpl implements EpfoService {
 	        	response = restTemplate.exchange(epfoSecurityConfig.getTransactionIdUrl(), HttpMethod.GET, request, String.class);
 			  	try {
 					String message=response.getBody();
-					log.info("Response from EPFO Transaction API : "+message);
+					log.info("Response from EPFO Transaction API : "+candidateId+message);
 					JSONObject obj = new JSONObject(message);
-					log.info("Response from EPFO Transaction API - obj: "+obj);
+					log.info("Response from EPFO Transaction API - obj: "+candidateId+obj);
 			  		transactionId=obj.getString("message").toString();
 			  		epfoDetails.setTransactionid(transactionId);
-					log.info("Generated transactionId Id is "+transactionId);
+					log.info("Generated transactionId Id is "+candidateId+transactionId);
 					System.out.println("transaction id-->"+transactionId);
 				} catch (JSONException e) {
 					log.error("Json Exception occured..",e);
 				}
 			  	if(response.getStatusCode() == HttpStatus.OK) {
-	        		log.info("Transaction ID Created Successfully. Response returned : ", transactionId);
+	        		log.info("Transaction ID Created Successfully. Response returned : "+candidateId, transactionId);
 	        		epfoDetails = generateCaptchaImageString(transactionId, candidateId,epfoDetails);
-					log.error("---getEPFOTransactionIdString------epfoDetails----------", epfoDetails);
+					log.error("---getEPFOTransactionIdString------epfoDetails----------"+candidateId, epfoDetails);
 	        	}else if(response.getStatusCode() == HttpStatus.UNAUTHORIZED){
-	        		log.error("User is Unauthorized");
+	        		log.error("User is Unauthorized"+candidateId);
 	        	}else if(response.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT){
-	        		log.error("Server response is slow, getting timeout");
+	        		log.error("Server response is slow, getting timeout"+candidateId);
 	        	}else if(response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR){
-	        		log.error("Server is down or Not responding at this Moment");
+	        		log.error("Server is down or Not responding at this Moment"+candidateId);
 	        	}
 			}catch(HttpClientErrorException e) {
-			    log.error("HttpClientErrorException occured...", e);
+			    log.error("HttpClientErrorException occured..."+candidateId, e);
 			} catch(HttpServerErrorException ex) {
-				log.error("HttpServerErrorException occured...", ex);
+				log.error("HttpServerErrorException occured..."+candidateId, ex);
 			}
 		}else {
-			log.error("transactionId could Not be generated.");
+			log.error("transactionId could Not be generated."+candidateId);
 		}
 		return epfoDetails;
     }
@@ -266,7 +274,7 @@ public class EpfoServiceImpl implements EpfoService {
 			JSONObject request = new JSONObject();
 			try {
 				HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
-				System.out.println("epfoSecurityConfig.getLoginPageSessionUrl() **********generateCaptchaImageString**********"+epfoSecurityConfig.getLoginPageSessionUrl()+transactionId);
+				System.out.println("epfoSecurityConfig.getLoginPageSessionUrl() **********generateCaptchaImageString**********"+candidateId+epfoSecurityConfig.getLoginPageSessionUrl()+transactionId);
 				response = restTemplate.exchange(epfoSecurityConfig.getLoginPageSessionUrl()+transactionId, HttpMethod.GET, entity, String.class);
 				
 				String message=response.getBody();
@@ -277,7 +285,7 @@ public class EpfoServiceImpl implements EpfoService {
 					epfoDetails.setErrorMessage(obj.getString("message"));
 				}else {
 					String epfo_im = obj.getJSONObject("message").getString("epfo-im");
-		    		log.info("epfo-im String received : "+epfo_im);
+		    		log.info("epfo-im String received : "+candidateId+epfo_im);
 		    		if(StringUtils.isNotEmpty(epfo_im)) {
 		    			epfoDetails.setCaptcha(epfo_im);
 		    			
@@ -285,10 +293,10 @@ public class EpfoServiceImpl implements EpfoService {
 		    		}
 				}
 			}catch (JSONException e) {
-				e.printStackTrace();
+				log.error("JSONException occured...."+candidateId, e);
 			}
 		}else {
-			log.error("transactionId Id received as Blank Or Null ");
+			log.error("transactionId Id received as Blank Or Null "+candidateId);
 		}
 		return epfoDetails;
 	}
@@ -306,7 +314,7 @@ public class EpfoServiceImpl implements EpfoService {
 			//epfoDetails.setCaptcha(filepath+File.separator+candidateId+".png");
 			
 		} catch (IOException e) {
-			log.error("IOException occured during generating Captcha Image", e);
+			log.error("IOException occured during generating Captcha Image"+candidateId, e);
 		}
 		return epfoDetails;
 	}
@@ -397,7 +405,8 @@ public class EpfoServiceImpl implements EpfoService {
 				response = restTemplate.exchange(epfoSecurityConfig.getFinalSubmitPostUrl()+epfoDetails.getTransactionid(), HttpMethod.POST, entity, String.class);
 				String responseBody=response.getBody();
 				JSONObject obj = new JSONObject(responseBody);
-				System.out.println("\n--------obj --------- "+obj);
+				JSONArray messagee = obj.getBoolean("success") ? obj.getJSONArray("message") : new JSONArray();
+				System.out.println("\n--------obj --------- "+epfoDetails.getCandidateCode()+obj);
 				ServiceOutcome<CandidateDetailsDto> candidateByCandidateCode = candidateService.getCandidateByCandidateCode(
 					epfoDetails.getCandidateCode());
 				System.out.println("\n--------candidateByCandidateCode --------- "+candidateByCandidateCode);
@@ -408,15 +417,21 @@ public class EpfoServiceImpl implements EpfoService {
 				CandidateEPFOResponse candidateEPFOResponse = candidateEPFOResponseRepository
 					.findByCandidateIdAndUan(candidateByCandidateCode.getData().getCandidateId(),epfoDetails.getUanusername())
 					.orElse(new CandidateEPFOResponse());
-				System.out.println("\n--------resMsg --------- "+candidateEPFOResponse);
+				System.out.println("\n--------message --------- "+messagee);
+				for(int i=0; i<messagee.length();i++) {
+					JSONObject object = messagee.getJSONObject(i);
+					if(object.length()!=0) {
+						candidateEPFOResponse.setUanName (object.getString("name"));
+					}
+				}
 				candidateEPFOResponse.setEPFOResponse(resMsg);
 				candidateEPFOResponse.setUan(epfoDetails.getUanusername());
 				candidateEPFOResponse.setCandidateId(candidateByCandidateCode.getData().getCandidateId());
 				candidateEPFOResponse.setCreatedOn(new Date());
 				candidateEPFOResponse.setLastUpdatedOn(new Date());
-				System.out.println("\n____________________before candidateEPFOResponse"+candidateEPFOResponse);
+				System.out.println("\n____________________before candidateEPFOResponse"+candidateByCandidateCode.getData().getCandidateId()+candidateEPFOResponse);
 				candidateEPFOResponseRepository.save(candidateEPFOResponse);
-				System.out.println("\n____________________after candidateEPFOResponse "+candidateEPFOResponse);
+				System.out.println("\n____________________after candidateEPFOResponse "+candidateByCandidateCode.getData().getCandidateId()+candidateEPFOResponse);
 				if(!obj.getString("code").equals("fail")){
 					JSONArray epfoData = obj.getJSONArray("message");
 			        final ObjectMapper objectMapper = new ObjectMapper();
@@ -425,7 +440,7 @@ public class EpfoServiceImpl implements EpfoService {
 					
 			        List<EpfoData> epfoExperiencesList = new ArrayList<>();
 			        if(epfoList !=null && epfoList.size()>0) {
-		        		log.debug("Post Login Information retrieved successfully");
+		        		log.debug("Post Login Information retrieved successfully"+candidateByCandidateCode.getData().getCandidateId());
 		        		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 						Candidate candidate = candidateRepository.findByCandidateCode(
 							epfoDetails.getCandidateCode());
@@ -449,20 +464,46 @@ public class EpfoServiceImpl implements EpfoService {
 							epfoData1.setUan(epfo.getUan());
 							epfoData1.setDoj(DateUtil.getDate(epfo.getDoj(),"dd/MM/yyyy"));
 							epfoData1.setDoe(DateUtil.getDate(epfo.getDoe(),"dd/MM/yyyy"));
+							
+							//adding member id(New column)
+							epfoData1.setMemberId(epfo.getMemberId());
+							
 							epfoExperiencesList.add(epfoData1);
+							
 		        		}
 		        		
 		        		if(epfoExperiencesList!=null && epfoExperiencesList.size()>0) {
+		        			
+		        			List<EpfoData> existingEpfoList = epfoDataRepository.findAllByCandidateIdAndUan(candidateEPFOResponse.getCandidateId(), candidateEPFOResponse.getUan());
+		        			if(existingEpfoList.size() > 0) {
+		        				existingEpfoList.forEach(temp -> epfoDataRepository.deleteById(temp.getEpfoId()));
+		        				log.info("Epfo Details deleted for {}{}",candidateEPFOResponse.getCandidateId(), candidateEPFOResponse.getUan());
+		        			}
+		        				
+		        			
 		        			epfoDataRepository.saveAll(epfoExperiencesList);
 		        			
-		        			CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(epfoDetails.getCandidateCode());
-		        			candidateStatus.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("EPFO"));
-		        			candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("EPFO"));
-		        			candidateStatus.setLastUpdatedOn(new Date());
-		        			candidateStatusRepository.save(candidateStatus);
-		        			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
+		        			if(epfoDetails.isUanSearch() || epfoDetails.isEnterUanInQcPending()) {
+		        				
+		        				System.out.println("ByPASS"+candidateByCandidateCode.getData().getCandidateId());
+		        			}
+		        			else {
+		        				CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(epfoDetails.getCandidateCode());
+			        			candidateStatus.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("EPFO"));
+			        			candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("EPFO"));
+			        			candidateStatus.setLastUpdatedOn(new Date());
+			        			candidateStatusRepository.save(candidateStatus);
+								if(candidateStatus.getCandidate().getOrganization().getCallBackUrl() != null)
+									candidateService.postStatusToOrganization(candidateStatus.getCandidate().getCandidateCode());
+			        			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
+		        			}
+		        			
+		        			if(epfoDetails.isEnterUanInQcPending()) {
+		        				candidateService.updateCandidateExperienceDetails(epfoDetails.getCandidateCode());
+		        			}
 		        			
 		        			outcomeBoolean=true;
+		        			
 		        		}else {
 		        			message = "Unable to save epfo details";
 			        		outcomeBoolean=false;
@@ -476,15 +517,15 @@ public class EpfoServiceImpl implements EpfoService {
 	        		}
 	        		outcomeBoolean=false;
 	        	}else if(response.getStatusCode() == HttpStatus.UNAUTHORIZED){
-	        		log.error("User is Unauthorized");
+	        		log.error("User is Unauthorized"+candidateByCandidateCode.getData().getCandidateId());
 	        		message = "User is Unauthorized";
 	        		outcomeBoolean=false;
 	        	}else if(response.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT){
-	        		log.error("Server response is slow, getting timeout");
+	        		log.error("Server response is slow, getting timeout"+candidateByCandidateCode.getData().getCandidateId());
 	        		message = "Server response is slow, getting timeout";
 	        		outcomeBoolean=false;
 	        	}else if(response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR){
-	        		log.error("Server is down or Not responding at this Moment");
+	        		log.error("Server is down or Not responding at this Moment"+candidateByCandidateCode.getData().getCandidateId());
 	        		message = "Server is down or Not responding at this Moment";
 	        		outcomeBoolean=false;
 	        	}
@@ -547,23 +588,23 @@ public class EpfoServiceImpl implements EpfoService {
 				request.put(EPFOConstants.EPFO_PARAM_L,"string");
 				
 				HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
-				System.out.println("\n------entity--------------"+entity);
+				System.out.println("\n------entity--------------"+epfoDetails.getCandidateCode()+entity);
 				System.out.println("\n------epfoSecurityConfig ------ new "+epfoSecurityConfig.getFinalSubmitPostUrl());
 				System.out.println("\n------epfoDetails ------ new "+epfoDetails.getTransactionid());
 				response = restTemplate.exchange(epfoSecurityConfig.getFinalSubmitPostUrl()+epfoDetails.getTransactionid(), HttpMethod.POST, entity, String.class);
 				String responseBody=response.getBody();
 				JSONObject obj = new JSONObject(responseBody);
-				System.out.println("\n--------obj --------- new "+obj);
+				System.out.println("\n--------obj --------- new "+epfoDetails.getCandidateCode()+obj);
 				ServiceOutcome<CandidateDetailsDto> candidateByCandidateCode = candidateService.getCandidateByCandidateCode(
 					epfoDetails.getCandidateCode());
 				System.out.println("\n--------candidateByCandidateCode --------- new "+candidateByCandidateCode);
 				String resMsg = obj.toString();
 				System.out.println("\n--------resMsg --------- new "+resMsg);
-				System.out.println("\n--------resMsg --------- "+epfoDetails.getUanusername());
+				System.out.println("\n--------resMsg --------- "+epfoDetails.getCandidateCode()+epfoDetails.getUanusername());
 				CandidateEPFOResponse candidateEPFOResponse = candidateEPFOResponseRepository
 					.findByCandidateIdAndUan(candidateByCandidateCode.getData().getCandidateId(),epfoDetails.getUanusername())
 					.orElse(new CandidateEPFOResponse());
-				System.out.println("\n--------resMsg --------- "+candidateEPFOResponse);
+				System.out.println("\n--------resMsg --------- "+epfoDetails.getCandidateCode()+candidateEPFOResponse);
 				candidateEPFOResponse.setEPFOResponse(resMsg);
 				candidateEPFOResponse.setUan(epfoDetails.getUanusername());
 				candidateEPFOResponse.setCandidateId(candidateByCandidateCode.getData().getCandidateId());
@@ -571,7 +612,7 @@ public class EpfoServiceImpl implements EpfoService {
 				candidateEPFOResponse.setLastUpdatedOn(new Date());
 				System.out.println("\n____________________before candidateEPFOResponse new "+candidateEPFOResponse);
 				candidateEPFOResponseRepository.save(candidateEPFOResponse);
-				System.out.println("\n____________________after candidateEPFOResponse  new "+candidateEPFOResponse);
+				System.out.println("\n____________________after candidateEPFOResponse  new "+epfoDetails.getCandidateCode()+candidateEPFOResponse);
 				if(!obj.getString("code").equals("fail")){
 					JSONArray epfoData = obj.getJSONArray("message");
 			        final ObjectMapper objectMapper = new ObjectMapper();
@@ -580,7 +621,7 @@ public class EpfoServiceImpl implements EpfoService {
 					
 			        List<EpfoData> epfoExperiencesList = new ArrayList<>();
 			        if(epfoList !=null && epfoList.size()>0) {
-		        		log.debug("Post Login Information retrieved successfully");
+		        		log.debug("Post Login Information retrieved successfully"+epfoDetails.getCandidateCode());
 		        		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 						Candidate candidate = candidateRepository.findByCandidateCode(
 							epfoDetails.getCandidateCode());
@@ -615,6 +656,8 @@ public class EpfoServiceImpl implements EpfoService {
 		        			candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("EPFO"));
 		        			candidateStatus.setLastUpdatedOn(new Date());
 		        			candidateStatusRepository.save(candidateStatus);
+							if(candidateStatus.getCandidate().getOrganization().getCallBackUrl() != null)
+								candidateService.postStatusToOrganization(candidateStatus.getCandidate().getCandidateCode());
 		        			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
 		        			
 		        			outcomeBoolean=true;
@@ -631,15 +674,15 @@ public class EpfoServiceImpl implements EpfoService {
 	        		}
 	        		outcomeBoolean=false;
 	        	}else if(response.getStatusCode() == HttpStatus.UNAUTHORIZED){
-	        		log.error("User is Unauthorized");
+	        		log.error("User is Unauthorized"+epfoDetails.getCandidateCode());
 	        		message = "User is Unauthorized";
 	        		outcomeBoolean=false;
 	        	}else if(response.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT){
-	        		log.error("Server response is slow, getting timeout");
+	        		log.error("Server response is slow, getting timeout"+epfoDetails.getCandidateCode());
 	        		message = "Server response is slow, getting timeout";
 	        		outcomeBoolean=false;
 	        	}else if(response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR){
-	        		log.error("Server is down or Not responding at this Moment");
+	        		log.error("Server is down or Not responding at this Moment"+epfoDetails.getCandidateCode());
 	        		message = "Server is down or Not responding at this Moment";
 	        		outcomeBoolean=false;
 	        	}
@@ -651,10 +694,188 @@ public class EpfoServiceImpl implements EpfoService {
 	        	outcome.setData(response!=null?response.getStatusCode().toString():"");
 				outcome.setOutcome(outcomeBoolean);
 				outcome.setMessage("Unable to get epfo details.");
-	        	log.error("Exception occured in getEpfodetailNew:",ex); // Add the Proper logging Message here
+	        	log.error("Exception occured in getEpfodetailNew:"+epfoDetails.getCandidateCode(),ex); // Add the Proper logging Message here
 			}
 		}
 		return outcome;
+	}
+
+	@Transactional
+	@Override
+	public Boolean processEpfoDataForUANCandidate(ResponseEntity<String> response, BulkUanDTO bulkUanDTO) {
+		
+		Boolean outcomeBoolean= false;
+		if(StringUtils.isNotEmpty(bulkUanDTO.getCandidateCode())) {
+			
+			
+	        try {
+				log.info("UAN CANDIDATE TO BE PROCESSING FOR EPFO RECORD::{}",bulkUanDTO.getCandidateCode());
+				
+				String responseBody=response.getBody();
+				JSONObject obj = new JSONObject(responseBody);
+				JSONArray messagee = obj.getBoolean("success") ? obj.getJSONArray("message") : new JSONArray();
+				ServiceOutcome<CandidateDetailsDto> candidateByCandidateCode = candidateService.getCandidateByCandidateCode(bulkUanDTO.getCandidateCode());
+				String resMsg = obj.toString();
+				CandidateEPFOResponse candidateEPFOResponse = candidateEPFOResponseRepository
+					.findByCandidateIdAndUan(candidateByCandidateCode.getData().getCandidateId(),bulkUanDTO.getUan())
+					.orElse(new CandidateEPFOResponse());
+				for(int i=0; i<messagee.length();i++) {
+					JSONObject object = messagee.getJSONObject(i);
+					if(object.length()!=0) {
+						candidateEPFOResponse.setUanName (object.getString("name"));
+					}
+				}
+				candidateEPFOResponse.setEPFOResponse(resMsg);
+				candidateEPFOResponse.setUan(bulkUanDTO.getUan());
+				candidateEPFOResponse.setCandidateId(candidateByCandidateCode.getData().getCandidateId());
+				candidateEPFOResponse.setCreatedOn(new Date());
+				candidateEPFOResponse.setLastUpdatedOn(new Date());
+				candidateEPFOResponseRepository.save(candidateEPFOResponse);
+				
+				if(!obj.getString("code").equals("fail")){
+					JSONArray epfoData = obj.getJSONArray("message");
+			        final ObjectMapper objectMapper = new ObjectMapper();
+			        EpfoDataFromApiDto[] epfoDataFromApiDto = objectMapper.readValue(epfoData.toString(), EpfoDataFromApiDto[].class);
+			        List<EpfoDataFromApiDto> epfoList = new ArrayList(Arrays.asList(epfoDataFromApiDto));
+					
+			        List<EpfoData> epfoExperiencesList = new ArrayList<>();
+			        if(epfoList !=null && !epfoList.isEmpty()) {
+		        		log.debug("Post Login Information retrieved successfully"+candidateByCandidateCode.getData().getCandidateId());
+						Candidate candidate = candidateRepository.findByCandidateCode(bulkUanDTO.getCandidateCode());
+						for(EpfoDataFromApiDto epfo : epfoList) {
+						
+							EpfoData epfoData1 = new EpfoData();
+							epfoData1.setCandidate(candidate);
+							epfoData1.setCompany(epfo.getCompany());
+							epfoData1.setName(epfo.getName());
+							epfoData1.setUan(epfo.getUan());
+							epfoData1.setDoj(DateUtil.getDate(epfo.getDoj(),"dd/MM/yyyy"));
+							epfoData1.setDoe(DateUtil.getDate(epfo.getDoe(),"dd/MM/yyyy"));
+							
+							//adding member id(New column)
+							epfoData1.setMemberId(epfo.getMemberId());
+							
+							epfoExperiencesList.add(epfoData1);
+							candidate.setCandidateName(epfo.getName());
+		        		}
+						candidateRepository.save(candidate);
+		        		
+		        		if(epfoExperiencesList!=null && !epfoExperiencesList.isEmpty()) {
+		        			
+		        			List<EpfoData> existingEpfoList = epfoDataRepository.findAllByCandidateIdAndUan(candidateEPFOResponse.getCandidateId(), candidateEPFOResponse.getUan());
+		        			if(existingEpfoList!=null && !existingEpfoList.isEmpty()) {
+		        				existingEpfoList.forEach(temp -> epfoDataRepository.deleteById(temp.getEpfoId()));
+		        				log.info("Epfo Details deleted for {}{}",candidateEPFOResponse.getCandidateId(), candidateEPFOResponse.getUan());
+		        			}
+		        				
+		        			
+		        			epfoDataRepository.saveAll(epfoExperiencesList);
+		        			
+		        		
+//		        				CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(bulkUanDTO.getCandidateCode());
+//			        			candidateStatus.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("EPFO"));
+//			        			candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("EPFO"));
+//			        			candidateStatus.setLastUpdatedOn(new Date());
+//			        			candidateStatus= candidateStatusRepository.save(candidateStatus);
+//			        			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
+//			        			
+//								candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("PENDINGAPPROVAL"));
+//								candidateStatus = candidateStatusRepository.save(candidateStatus);
+//								candidateService.createCandidateStatusHistory(candidateStatus, "CANDIDATE");
+		        			
+		        	//updating CAF table
+								List<CandidateCafExperience> candidateCafExperiences = candidateService.getCandidateExperienceFromItrAndEpfoByCandidateId(
+							        		candidate.getCandidateId(), false);
+							        log.info("CAFEXPEROEINCE FOR BULK UAN ::{}", candidateCafExperiences.size());
+							     // Reattach detached entities to the current session
+							        List<CandidateCafExperience> attachedExperiences = new ArrayList<>();
+							        for (CandidateCafExperience experience : candidateCafExperiences) {
+							        	//checking suspect employer check
+							        	ServiceOutcome<String> suspectResponse = candidateService.suspectEmpMasterCheck(experience.getCandidateEmployerName(), 
+							        			                 candidate.getOrganization().getOrganizationId());
+							        	if (Boolean.TRUE.equals(suspectResponse.getOutcome()) && suspectResponse.getData().equalsIgnoreCase("RED")) {
+												experience.setColor(colorRepository.findByColorCode("AMBER"));
+												experience.setServiceSourceMaster(
+														serviceSourceMasterRepository.findByServiceCode("DNHDB"));
+										}else {
+											experience.setColor(colorRepository.findByColorCode("GREEN"));
+										}
+							        	//end suspect check
+							            attachedExperiences.add(entityManager.merge(experience));
+							        }
+
+							        // Save all the attached entities
+							        candidateCafExperienceRepository.saveAll(attachedExperiences);
+								
+		        			
+		        			outcomeBoolean=true;
+		        			
+		        		}else {
+			        		outcomeBoolean=false;
+		        		}
+			        }
+		        
+	        	}
+				
+	        }catch (Exception ex) {
+	        	log.error("Exception occured in processEpfoDataForUANCandidate:",ex);
+			}
+		}
+		return outcomeBoolean;
+		
+	}
+	
+	public String getEpfoTIDGeneral() {
+		String tId="";
+		ResponseEntity<String> epfoTokenResponse = null;
+		HttpHeaders headers = new HttpHeaders();
+        setHeaderDetails(headers);
+        JSONObject request = new JSONObject();
+        try {
+        	request.put(epfoSecurityConfig.getClientIdValue(),epfoSecurityConfig.getClientId());
+			request.put(epfoSecurityConfig.getClientSecretValue(),epfoSecurityConfig.getClientSecret());
+			HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
+			
+			epfoTokenResponse = restTemplate.exchange(epfoSecurityConfig.getAccessTokenUrl(), HttpMethod.POST, entity, String.class);
+			log.info("Response from EPFO TOKEN API ",epfoTokenResponse);
+			String message=epfoTokenResponse.getBody(); 
+			JSONObject obj1 = new JSONObject(message);
+			log.info("Response from EPFO TOKEN API - message ",obj1);
+			JSONObject obj = obj1.getJSONObject("message");
+			String accessToken = obj.getString("access_token");
+    		log.info("access_token::{}",accessToken);
+    		if(StringUtils.isNotEmpty(accessToken)) {
+    			ResponseEntity<String> response = null;
+    			HttpHeaders tIdheaders = new HttpHeaders();
+    			tIdheaders.setBearerAuth(accessToken);
+    			tIdheaders.add("Bearer", accessToken);
+    	        HttpEntity<String> tidrequest = new HttpEntity<String>(tIdheaders);
+    	        try {
+    	        	response = restTemplate.exchange(epfoSecurityConfig.getTransactionIdUrl(), HttpMethod.GET, tidrequest, String.class);
+    			  	try {
+    					String tidmessage=response.getBody();
+    					log.info("Response from EPFO Transaction API : {}",tidmessage);
+    					JSONObject tidobj = new JSONObject(tidmessage);
+    					log.info("Response from EPFO Transaction API - obj:{} ",tidobj);
+    			  		tId=tidobj.getString("message");
+    					log.info("Generated transactionId Id is ::{}",tId);
+    				} catch (JSONException e) {
+    					log.error("Json Exception occured inn TID..",e);
+    				}
+    			  	
+    			}catch(HttpClientErrorException e) {
+    			    log.error("HttpClientErrorException occured in TID...::{}", e);
+    			} catch(HttpServerErrorException ex) {
+    				log.error("HttpServerErrorException occured...::{}",ex);
+    			}
+    		}else {
+    			log.error("transactionId could Not be generated.");
+    		}
+    		return tId;
+        }catch (Exception ex) {
+        	log.error("Exception occured in getEpfoTIDGeneral:",ex); // Add the Proper logging Message here
+		}
+        return tId;
 	}
 }
 

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en-us" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>DigiVerifier Pdf</title>
+<meta charset="UTF-8" />
+<!--    <link  th:href="@{styles/css/Metro.css}"  rel="stylesheet"/>-->
+<link th:href="${cssPath + '/fonts.css'}" rel="stylesheet" />
+<link th:if="${!#strings.equalsIgnoreCase(root.project, 'KPMG')}" th:href="${cssPath + '/common.css'}" rel="stylesheet" />
+<link th:if="${#strings.equalsIgnoreCase(root.project, 'KPMG')}" th:href="${cssPath + '/KPMGcommon.css'}" rel="stylesheet" />
+<link th:href="@{http://fonts.googleapis.com/css?family=Calibri}"
+	rel='stylesheet' type='text/css' />
+<!--<script src='http://localhost:9090/chart.js'></script>-->
+<style>
+span {
+	font-family: 'Calibri', sans-serif;
+}
+
+.table-st {
+	clear: both;
+	width: 100%;
+	border: 1px solid #1C4E80;
+	border-collapse: collapse;
+}
+
+.table-st tr {
+	border: 1px solid #1C4E80;
+	border-collapse: collapse;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.text-left {
+	text-align: left;
+}
+
+.table-st tr td {
+	border: 1px solid #1C4E80;
+	border-collapse: collapse;
+	padding: 5px;
+}
+
+.table-st tr td span {
+	margin-left: 5px;
+}
+
+.blue-bg {
+	background-color: #1C4E80;
+}
+
+.grey-bg {
+	background-color: #DDDDDD;
+}
+
+.black-text {
+	color: black;
+	font-size: 14px;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+}
+
+.grey-text {
+	color: black;
+	font-size: 13px !important;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+}
+
+.white-text {
+	font-weight: bold;
+	color: #1C4E80;
+	font-family: 'Calibri', sans-serif;
+	font-size: 13px;
+}
+
+.td-heading {
+	font-weight: bold;
+	font-size: 15px;
+}
+
+.line-break {
+	display: block;
+	height: 15px;
+}
+
+.sub-heading {
+	text-align: center;
+	font-weight: bold;
+	font-size: 18px;
+}
+
+.green-status {
+	margin: 0px;
+	color: #008000;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.amber-status {
+	margin: 0px;
+	color: #ffA500;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.red-status {
+	margin: 0px;
+	color: #ff0000;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.invalid-status {
+	margin: 0px;
+	color: #000000;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.black-box {
+	border: 1px solid black;
+}
+/* Base styles for the table */
+.table-st {
+            width: 100%;
+            border-collapse: collapse;
+        } 
+
+.table-st td {
+            padding: 7px;
+            border: 1px solid #ccc;
+        } 
+
+/* Media query for small screens */
+        @media screen and (max-width: 480px) {
+            .table-st td {
+                display: block;
+                width: 100%;
+            }
+        } 
+
+        /* Additional styles for specific elements */
+        .text-center {
+            text-align: center;
+        } 
+
+        .text-left {
+            text-align: left;
+        } 
+
+        .sub-heading {
+            font-size: 14px;
+            font-weight: 600;
+            color: whitesmoke;
+        } 
+
+        /* Optional styles for the logo */
+        /* You can modify these styles based on your preference */
+        .table-st img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .profile-width{
+            min-width:160px;
+        }
+        
+        .centered-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%; /* Adjust as needed */
+            height: 100%; /* Adjust as needed */
+            margin-left: 40px
+        }
+</style>
+</head>
+<body
+	style="background-color: #fff; padding: 0px; margin: 0px; position: relative; font-family: 'Calibri', sans-serif; color: #666666;">
+	<section class="wrapper"
+		style="width: 100%; margin: 0 auto; height: 80%;">
+	<!--	<span class="line-break"></span> -->
+    
+	<!-- ADDING THE BELOW SECTION FOR REMITTANCE RECORDS-->	
+
+<!-- New VendorChecks -->
+    
+    
+        <!-- OverAll Checks with proof starts -->
+    
+     <div th:each="vendorUploadChecks, loopCount : ${root.vendorProofDetails}" th:if="${loopCount.count == 1}">
+    <div th:each="vendorsourcename: ${vendorUploadChecks.vendorAttirbuteValue}">
+    <th:block th:if="${vendorsourcename.sourceName != null and #strings.containsIgnoreCase(vendorsourcename.sourceName, 'Education PG')}">
+           <!-- <div style="page-break-after:always;"></div> -->
+            <div class="table-container" >
+                <table class="table-st employer-name-verification" border="0">
+                    <div class="text-center">
+                        <div>
+                            <br>
+                            <span style="color: black;font-family: 'Roboto'; font-size: 15px; font-weight: bold;"
+                                  th:text="${vendorsourcename.sourceName}"
+                                  th:if="${not #lists.isEmpty(vendorsourcename.attributeAndValue)}"></span>
+                            <span class="line-break"></span>
+                            <tr th:if="${not #lists.isEmpty(vendorsourcename.attributeAndValue)}">
+                                <td class=""
+                                    style="background-color: #1C4E80; color: #DDDDDD; text-align: center;font-size: 15px; font-weight: bold; width: 50%; padding: 5px;">
+                                    Particular
+                                </td>
+                                <td class=""
+                                    style="background-color: #1C4E80; color: #DDDDDD; text-align: center;font-size: 15px; font-weight: bold; width: 50%; padding: 5px;">
+                                    Remarks
+                                </td>
+                            </tr>
+                           <tr th:each="vendoratts : ${vendorsourcename.attributeAndValue}"
+    th:if="${not #lists.isEmpty(vendorsourcename.attributeAndValue)}"
+    th:unless="${vendoratts.contains('type') or vendoratts.contains('vendorCheckStatusMasterId') or vendoratts.contains('Candidate Name') or vendoratts.contains('checkType') or vendoratts.contains('vendorcheckId') or vendoratts.contains('documentname') or vendoratts.contains('colorid') }">
+    <td class="grey-bg grey-text text-left" style="padding: 5px;"
+        th:with="splitValue=${#strings.listSplit(vendoratts, '=')}, sourceName=${vendorsourcename.sourceName}">
+        <span style="font-size: 13px" th:if="${splitValue.size() &gt;= 1}"
+              th:with="firstWord=${splitValue[0]}, lastWord=${sourceName.contains('ID Items') ? sourceName.split(' ')[sourceName.split(' ').length - 1] : ''}"
+              th:text="${#strings.replace(#strings.capitalize(firstWord), 'NameAsPerProof', 'Name As Per') +
+                    (firstWord.equalsIgnoreCase('NameAsPerProof') and sourceName.contains('ID Items') ? ' ' + lastWord : '') +
+                    (firstWord.equalsIgnoreCase('ProofName') ? ' ' + lastWord : '')}">
+        </span>
+    </td>
+    <td class="grey-text text-left" style="padding: 5px;"
+        th:with="splitValue=${#strings.listSplit(vendoratts, '=')}">
+        <span style="font-size: 13px" th:if="${splitValue.size() &gt;= 2}"
+              th:text="${splitValue[1]}"></span>
+    </td>
+</tr>
+
+                        </div>
+                    </div>
+                </table>
+          <div class="text-center">
+                <span style="color: black;font-family: 'Roboto'; font-size: 15px; font-weight: bold; text-align: center;" th:if="${#strings.containsIgnoreCase(vendorsourcename.sourceName, 'Address')}" th:text="${vendorsourcename.sourceName}"></span>
+          </div>
+                 <!--        start of documents -->
+         
+        <div th:each="encodedImageMap : ${root.pdfByes}">
+            <div th:each="entry : ${encodedImageMap}">
+                <span th:if="${#strings.equalsIgnoreCase(#strings.trim(vendorsourcename.sourceName), #strings.trim(entry.key))}">
+                    <!-- Debug: Print the values of sourceName and key -->
+                    <span style="color: black; font-family: 'Arial Black'; font-size: 10px; font-weight: bold;">
+                        <th:block th:each="value : ${entry.value}">
+                            <!-- Display image only if the condition is met -->
+                          <img th:src="'data:image/png;base64,' + ${value}" alt="PDF Image"
+                                 style="width: 600px; height: auto;">
+                        </th:block>
+                    </span>
+                </span>
+            </div>
+        </div>
+        <!--        end  of documents -->
+
+                <!-- Print loopCount and vendorUploadChecks.size() -->
+                <!-- Break out of the loop when loopCount.count is equal to the size of vendorUploadChecks -->
+            </div>
+               </th:block>
+    </div>
+</div>
+    
+    
+    
+        <!-- OverAll Checks with proof End -->
+   
+
+ 
+
+
+		<!-- <p class ="text-center grey-text" style="font-size:14px"><b>- End of the report -</b></p> -->
+	</section>
+</body>
+</html>

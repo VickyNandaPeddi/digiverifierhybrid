@@ -41,6 +41,12 @@ public class EPFOSecurityConfig {
 	@Value("${com.dgv.client.access.epfo.captcha.image.path}")
 	private String epfoCaptchaImagePath;
 	
+	@Value("${com.dgv.client.access.epfo.bulk.uan.url}")
+	private String epfoBulkUanUrl;
+	
+	@Value("${PANTOUAN.BASE.URL}")
+	private String epfoPanToUanUrl;
+	
 	/**
 	 * @return the clientId
 	 */
@@ -104,6 +110,14 @@ public class EPFOSecurityConfig {
 	 */
 	public String getEpfoCaptchaImagePath() {
 		return epfoCaptchaImagePath;
+	}
+	
+	public String getEpfoBulkUanUrl() {
+		return epfoBulkUanUrl;
+	}
+	
+	public String getEpfoPanToUanUrl() {
+		return epfoPanToUanUrl;
 	}
 	
 }

@@ -8,11 +8,11 @@
                 <option [value]="7">Last 7 days</option>
                 <option [value]="30">Last 30 days</option>
             </select>
-            <select class="form-control form-control-sm float-right" #cid (change)="getCustomerData(cid.value)">
+            <!-- <select class="form-control form-control-sm float-right" #cid (change)="getCustomerData(cid.value)">
                 <option [value]="" disabled>--Select--</option>
                 <option [value]="0">All</option>
                 <option *ngFor="let item of getCustID" [value]="item.organizationId">{{ item.organizationName }}</option>
-            </select>
+            </select> -->
         </h4>
     </div>
     <div class="card-body">

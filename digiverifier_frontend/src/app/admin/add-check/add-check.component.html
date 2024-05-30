@@ -1,0 +1,132 @@
+<!-- <div class="pageHeader">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="pageTitle">{{ pageTitle }}</h2>
+            </div>
+        </div>
+    </div>
+</div> -->
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        <!-- Vendor Manage -->
+                        <button type="button" class="btn btn-sm btn-success float-right" (click)="triggerModal(addCheck)">Add Vendor Checks</button>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <th>SI#</th>
+                                        <th>Source Name</th>
+                                        <th>Source Code</th>
+                                        <th>Created On</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let item of checks;let i = index;">
+                                            <td>{{i+1}}</td>
+                                            <td>{{ item.sourceName}}</td>
+                                            <td>{{ item.sourceCode }}</td>
+                                            <td>{{ item.createdOn | date:'dd-MM-yyyy' }}</td>
+                                            <td>{{ item.isActive == true ?'Active':'Inactive'}}</td>
+                                            <td>
+                                                <button type="button" id="edit{{i}}"  [disabled]="!item.isActive" (click)="openModal(addCheck, item)" class="btn btn-primary btn-sm m-1" data-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i>Edit</button>
+                                                <button *ngIf="item.isActive; else inactiveButton" type="button" id="inactiveCust_d{{i}}" class="btn btn-warning btn-sm m-1" (click)="inactiveCust(item.sourceId, item.isActive)"  data-toggle="tooltip" title="Inactive"><i class="fas fa-times-circle"></i></button>
+                                                <ng-template #inactiveButton>
+                                                    <button type="button" id="inactiveCust_d{{i}}" class="btn btn-success btn-sm m-1" (click)="inactiveCust(item.sourceId, item.isActive)" data-toggle="tooltip" title="active">
+                                                      <i class="fas fa-check-circle"></i>
+                                                    </button>
+                                                  </ng-template>
+                                                  <button  type="button" id="" class="btn btn-danger btn-sm m-1" [disabled]="isDisabled(item.sourceId)" (click)="deleteCheck(item.sourceId)"  data-toggle="tooltip" title="Delete"><i class="fas fa-trash-alt"></i></button>
+ 
+                                            </td>
+                                        </tr> 
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+<ng-template #addCheck let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Add Check</h4>
+      <button
+        type="button"
+        class="close"
+        aria-label="Close"
+        (click)="modal.dismiss('Cross click')"
+      >
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="addChecksForm" (ngSubmit)="submitAddCheck()">
+        <div class="form-group">
+          <div class="col-md-12">
+            <label for="" class="">Source Name</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              formControlName="sourceName"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-12">
+              <label for="" class="">Source Code</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                formControlName="sourceCode"
+                readonly
+                [value]="sourceNameValue | uppercase"
+                />
+            </div>
+          </div>
+
+          <!-- <div class="form-group">
+            <div class="col-md-12">
+              <label for="" class="">Is Active</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                formControlName="isActive"
+              />
+            </div>
+          </div> -->
+  
+        <div class="row">
+          <div class="col-md-12 text-center mt-3 pb-3">
+            <button
+              type="submit"
+              class="btn btn-success btn-sm"
+              [disabled]="!addChecksForm.valid"
+            >
+              Submit
+            </button>
+            <button type="button" class="btn btn-danger btn-sm"  (click)="modal.dismiss('Cross click')">Close</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </ng-template>
+  
+
+

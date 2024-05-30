@@ -1,9 +1,7 @@
 package com.aashdit.digiverifier.common.model;
 
-import lombok.AllArgsConstructor;
-
 import java.io.Serializable;
-@AllArgsConstructor
+
 public class ServiceOutcome<T> implements Serializable {
 
 	/**
@@ -43,12 +41,7 @@ public class ServiceOutcome<T> implements Serializable {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-
-	public ServiceOutcome(String message, String status) {
-		this.message = message;
-		this.status = status;
-	}
-
+	
 	public ServiceOutcome()
 	{
 		this.setOutcome(true);

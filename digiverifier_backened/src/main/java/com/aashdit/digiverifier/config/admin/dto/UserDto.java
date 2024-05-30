@@ -52,5 +52,7 @@ public class UserDto {
 	private Long agentSupervisorId;
 	
 	private String roleName;
+
+	private String oldPassword;
 	
 }

@@ -1,14 +1,7 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {Router} from '@angular/router';
-import {AuthenticationService} from 'src/app/services/authentication.service';
-import {OrgadminService} from 'src/app/services/orgadmin.service';
-import {CandidateService} from "../../services/candidate.service";
-import {dataLoader} from "@amcharts/amcharts4/core";
-import * as buffer from "buffer";
-
-
-import * as XLSX from 'xlsx';
-import {HttpHeaders} from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthenticationService } from 'src/app/services/authentication.service';
+import { OrgadminService } from 'src/app/services/orgadmin.service';
 
 @Component({
   selector: 'app-admin-header',
@@ -16,57 +9,51 @@ import {HttpHeaders} from '@angular/common/http';
   styleUrls: ['./admin-header.component.scss']
 })
 export class AdminHeaderComponent implements OnInit {
-  details: any;
-  rolename: any;
-  getRolePerMissionCodes: any = [];
-  CustUtilizationReport_stat: boolean = false;
-  eKycReport_stat: boolean = false;
+  details:any;
+  rolename:any;
+  getRolePerMissionCodes:any=[];
+  CustUtilizationReport_stat:boolean=false;
+  eKycReport_stat:boolean=false;
+  getServiceConfigCodes: any = [];
 
-  constructor(public authService: AuthenticationService,
-              private router: Router, private orgadmin: OrgadminService, private candidateservice: CandidateService) {
-  }
+  constructor(public authService: AuthenticationService, private auth: AuthenticationService,
+    private router: Router, private orgadmin:OrgadminService) { 
+      this.orgadmin.getServiceConfigForOrg(auth.getOrgID())
+      .subscribe((result: any) => {this.getServiceConfigCodes = result.data;
+        console.log("ORG SERVICES::{}",this.getServiceConfigCodes);
+      });
+    }
 
   ngOnInit(): void {
     this.details = this.authService.getuserName();
     this.rolename = this.authService.getroleName();
 
-    this.orgadmin.getRolePerMissionCodes(localStorage.getItem('roles')).subscribe(
-      (result: any) => {
-        this.getRolePerMissionCodes = result.data;
-        console.log("permissioncodes-->" + this.getRolePerMissionCodes);
-        if (this.getRolePerMissionCodes) {
-          if (this.getRolePerMissionCodes.includes('CUSTOMERUTILIZATIONREPORT')) {
+    this.orgadmin.getRolePerMissionCodes(this.authService.getRoles()).subscribe(
+      (result:any) => {
+      this.getRolePerMissionCodes = result.data;
+        console.log("permissioncodes-->"+this.getRolePerMissionCodes);
+        if(this.getRolePerMissionCodes){
+          if(this.getRolePerMissionCodes.includes('CUSTOMERUTILIZATIONREPORT')){
             this.CustUtilizationReport_stat = true;
           }
 
-          if (this.getRolePerMissionCodes.includes('E-KYCREPORT')) {
+          if(this.getRolePerMissionCodes.includes('E-KYCREPORT')){
             this.eKycReport_stat = true;
           }
 
         }
-      });
-  }
-
-  displayExcel() {
-    this.candidateservice.generateDataForExcel().subscribe((data: any) => {
-      const link = document.createElement('a');
-      link.href = 'data:application/vnd.ms-excel;base64,' + data.message;
-      link.download = "Conventional Utilization Report"+ ".xlsx";
-      link.target = '_blank';
-      link.click();
     });
   }
 
-
-
-  public isLoggedIn() {
+  public isLoggedIn(){ 
     return this.authService.isLoggedIn();
   }
 
   public logout() {
     this.authService.logOut().subscribe(
-      (response: any) => {
-        if (response.outcome === true) {
+      (response:any)=>{
+        if (response.outcome === true)
+        {
           this.authService.clear();
           this.router.navigate(['./']);
         }

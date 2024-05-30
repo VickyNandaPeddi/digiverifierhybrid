@@ -13,6 +13,9 @@ import { AuthenticationService } from 'src/app/services/authentication.service';
 export class MyprofileComponent implements OnInit {
   pageTitle = 'My Profile';
   userId:any;
+  isPasswordVisibleNew = false;
+  isPasswordVisibleOld = false;
+  isPasswordValuesCorrect= false;
   formMyProfile = new FormGroup({
     employeeId: new FormControl('', Validators.required),
     roleId: new FormControl('', Validators.required),
@@ -22,6 +25,7 @@ export class MyprofileComponent implements OnInit {
     userEmailId: new FormControl('', [Validators.required,Validators.email]),
     userMobileNum: new FormControl('', [Validators.required,Validators.minLength(10), Validators.maxLength(10), Validators.pattern('[6-9]\\d{9}')]),
     password: new FormControl(''),
+    oldPassword: new FormControl(''),
   });
   constructor(private authService: AuthenticationService, private customers:CustomerService) { 
     this.customers.getUserById().subscribe((data: any)=>{
@@ -34,7 +38,12 @@ export class MyprofileComponent implements OnInit {
         userFirstName: new FormControl(data.data['userFirstName'], Validators.required),
         userEmailId: new FormControl(data.data['userEmailId'], [Validators.required,Validators.email]),
         userMobileNum: new FormControl(data.data['userMobileNum'], [Validators.required,Validators.minLength(10), Validators.maxLength(10), Validators.pattern('[6-9]\\d{9}')]),
-        password: new FormControl(''),
+        oldPassword: new FormControl(''),
+        password: new FormControl('', [
+          // Validators.required,
+          Validators.minLength(10),
+          Validators.pattern(/^(?=(.*[A-Z]){1,})(?=(.*[a-z]){2,})(?=(.*\d){1,})(?=(.*[!@#$%^&*()_+\-=[\]{}|]){1,})(?!.*(.)\1\1)[A-Za-z\d!@#$%^&*()_+\-=[\]{}|]{10,}$/)
+        ]),
       });
     });
   }
@@ -42,22 +51,50 @@ export class MyprofileComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  get password() {
+    return this.formMyProfile.get('password');
+  }
+
+  // Check if the password has errors
+  isPasswordInvalid() {
+    const passwordControl = this.formMyProfile.get('password');
+    return passwordControl?.invalid && (passwordControl?.touched || passwordControl?.dirty);
+  }
+
+  // Check if the password is valid
+  isPasswordValid() {
+    const passwordControl = this.formMyProfile.get('password');
+    return passwordControl?.valid && (passwordControl?.touched || passwordControl?.dirty);
+  }
+
+  togglePasswordVisibilityNew() {
+    this.isPasswordVisibleNew = !this.isPasswordVisibleNew;
+  }
+  togglePasswordVisibilityOld() {
+    this.isPasswordVisibleOld = !this.isPasswordVisibleOld;
+  }
+
   onSubmit(formMyProfile: FormGroup) {
-    if(this.formMyProfile.valid){
-      this.customers.saveAdminSetup(this.formMyProfile.value).subscribe((result:any)=>{
-         if(result.outcome === true){
+    console.log("Checking passwords values::{}",this.isButtonDisabled());
+    if(this.formMyProfile.valid && this.isButtonDisabled()){
+      this.customers.saveAdminSetup(this.formMyProfile.value).subscribe((data:any)=>{
+         if(data.outcome === true){
            Swal.fire({
-             title: result.message,
+             title: data.message,
              icon: 'success'
            }).then((result) => {
              if (result.isConfirmed) {
                //window.location.reload();
-               this.authService.forceLogout();
+               if(data.status == null){
+                window.location.reload();
+               }else{
+                 this.authService.forceLogout();
+               }
              }
            });
          }else{
            Swal.fire({
-             title: result.message,
+             title: data.message,
              icon: 'warning'
            })
          }
@@ -68,6 +105,25 @@ export class MyprofileComponent implements OnInit {
        icon: 'warning'
      })
    }
+  }
+
+  isButtonDisabled(): boolean {
+    const passwordControl = this.formMyProfile.get('password');
+    const oldPasswordControl = this.formMyProfile.get('oldPassword');
+  
+    // Use non-null assertion operator (!) to indicate that these values are not null
+    const passwordValue = passwordControl!.value;
+    const oldPasswordValue = oldPasswordControl!.value;
+
+    console.log("passwordValue::{}",passwordValue);
+    console.log("oldPasswordValue::{}",oldPasswordValue);
+  
+    if((passwordValue === '' && oldPasswordValue === '') || (passwordValue !== '' && oldPasswordValue !== '')){
+      this.isPasswordValuesCorrect=true;
+    }else{
+      this.isPasswordValuesCorrect=false;
+    }
+    return this.isPasswordValuesCorrect;
   }
 
 }

@@ -1,0 +1,62 @@
+.unbreakable
+{
+    display:inline-block;
+}
+.unbreakable:after
+{
+    display:block;
+    height:0px;
+    visibility: hidden;
+}
+.mars_tab table {
+    border: 1px solid;
+    border-color: #E8E7E7;
+}
+.mars_tab th {
+    border: 1px solid;
+    border-color: #E8E7E7;
+}
+.mars_tab td {
+    border: 1px solid;
+    border-color: #E8E7E7;
+}
+.second_table_header {
+  padding: 10px;
+}
+.common_padding {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+ span {
+            font-size: 14px;
+            font-family: 'Roboto';
+ }
+
+ .line-break {
+    display:block;
+ }
+
+@page {
+    margin:50pt;
+    border-top-style: solid;
+    border-top-color: gray;
+    border-bottom-style: solid;
+    border-bottom-color: gray;
+
+
+     @bottom-left {
+        content: "© 2023 KPMG, an Indian Registered Partnership and a member firm of the KPMG network of independent member firms affiliated with KPMG International Cooperative (“KPMG International”), a Swiss entity. All rights reserved. The KPMG name and logo are registered trademarks or trademarks of KPMG International.";
+        font-family: sans-serif;
+        font-weight: lighter;
+        font-size: 10px;
+        max-width : 90%
+    }
+
+    @bottom-right {
+        content: "Page " counter(page) " of " counter(pages);
+        font-family: sans-serif;
+        font-weight: lighter;
+        font-size: 10px;
+    }
+}
+

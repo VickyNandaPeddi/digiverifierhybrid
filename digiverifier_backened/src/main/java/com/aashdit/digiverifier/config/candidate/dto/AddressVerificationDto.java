@@ -7,5 +7,5 @@ import lombok.Data;
 public class AddressVerificationDto extends CommonVerificationDto {
 
 	private String type;
-	
+	private String customRemark;
 }

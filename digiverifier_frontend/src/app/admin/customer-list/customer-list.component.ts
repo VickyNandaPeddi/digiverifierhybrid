@@ -25,8 +25,9 @@ export class CustomerListComponent implements OnInit {
   }
 
   inactiveCust(organizationId: any, isActive: any){
-    $(this).hide();
-     this.customers.customerStat(organizationId, !isActive).subscribe((data: any)=>{
+    // $(this).hide();
+    const toggle = !isActive;
+     this.customers.customerStat(organizationId, toggle).subscribe((data: any)=>{
        for (let index = 0; index < this.allPost.length; index++) {
         if(this.allPost[index].organizationId === data.data.organizationId){
           this.allPost[index] = data.data;
@@ -53,6 +54,27 @@ export class CustomerListComponent implements OnInit {
         localStorage.setItem('orgID', custID);
         localStorage.setItem('userId', result.data.userId);
         this._router.navigate(['admin/orgadminDashboard']);
+      }else{
+        Swal.fire({
+          title: result.message,
+          icon: 'warning'
+        })
+      }
+    });
+  }
+
+  deleteCust(custID: any){
+    this.customers.deleteCust(custID).subscribe((result: any)=>{
+      console.log(result);
+      if(result.outcome === true){ 
+        Swal.fire({
+          title: result.message,
+          icon: 'success',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.reload();
+          }
+        });
       }else{
         Swal.fire({
           title: result.message,

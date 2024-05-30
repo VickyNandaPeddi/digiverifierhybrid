@@ -4,6 +4,8 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
@@ -14,7 +16,10 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
 
+@Slf4j
 public class AesUtil {
+	private final SecureRandom random = new SecureRandom();
+	private static final String AES_GCM_NOPADDING ="AES/GCM/NoPadding";
 
 	private final int keySize;
 	private final int iterationCount;
@@ -26,7 +31,7 @@ public class AesUtil {
 		this.keySize = keySize;
 		this.iterationCount = iterationCount;
 		try {
-			cipher = Cipher.getInstance("AES/GCM/NoPadding");
+			cipher = Cipher.getInstance(AES_GCM_NOPADDING);
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			throw fail(e);
 		}
@@ -54,26 +59,16 @@ public class AesUtil {
 		}
 	}
 
-	private final SecureRandom random = new SecureRandom();
 	private byte[] doFinal(int encryptMode, SecretKey key, String iv, byte[] bytes) {
-
 		try {
 			byte[] bytesIV = new byte[16];
-
-			random.nextBytes(bytesIV);
-
+		    random.nextBytes(bytesIV);
 			cipher.init(encryptMode, key, new IvParameterSpec(bytesIV));
-
 			return cipher.doFinal(bytes);
-
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException
-
-					| BadPaddingException e) {
-
+				| BadPaddingException e) {
 			return null;
-
 		}
-
 	}
 
 	private SecretKey generateKey(String salt, String passphrase) {
@@ -122,19 +117,19 @@ public class AesUtil {
 		MessageDigest sha = null;
 		try {
 			key = myKey.getBytes("UTF-8");
-			sha = MessageDigest.getInstance("SHA-1");
+			sha = MessageDigest.getInstance("SHA-512");
 			key = sha.digest(key);
 			key = Arrays.copyOf(key, 16);
 			secretKey = new SecretKeySpec(key, "AES");
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-			e.printStackTrace();
+			log.error("error in setKey occured....", e);
 		}
 	}
 	
 	public static String encrypt(final String strToEncrypt, final String secret) {
 		try {
 			setKey(secret);
-			Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+			Cipher cipher = Cipher.getInstance(AES_GCM_NOPADDING);
 			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 			return java.util.Base64.getEncoder()
 				.encodeToString(cipher.doFinal(strToEncrypt.getBytes("UTF-8")));
@@ -147,7 +142,7 @@ public class AesUtil {
 	public static String decrypt(final String strToDecrypt, final String secret) {
 		try {
 			setKey(secret);
-			Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+			Cipher cipher = Cipher.getInstance(AES_GCM_NOPADDING);
 			cipher.init(Cipher.DECRYPT_MODE, secretKey);
 			return new String(cipher.doFinal(java.util.Base64.getDecoder()
 				.decode(strToDecrypt)));

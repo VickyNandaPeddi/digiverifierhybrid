@@ -17,7 +17,7 @@ public class CandidateDetailsForReport {
 	private String createdOn;
 	private String candidateCode;
 	private Long candidateId;
-	private Integer experienceInMonth;
+	private String experience;
 	private String dateOfEmailInvite;
 	private String statusName;
 	private String statusDate;
@@ -42,4 +42,17 @@ public class CandidateDetailsForReport {
 	private String aadharGender;
 	
 	
+    private Long ClearCount;
+	private Long inProgressCount;
+	private Long inSufficiencyCount;
+	private Long majorDiscrepancyCount;
+	private Long minorDiscrepancyCount;
+	private Long unableToVerifyCount;
+	
+	private String qcCreatedOn;
+	private String interimCreatedOn;
+	private String preOfferReportColor;
+	private String interimReportColor;
+	
+	private String gstNumber;
 }

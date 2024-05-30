@@ -7,7 +7,7 @@
         </div>
     </div>
 </div>
-<div class="container">
+<div class="container" style="width: 50%;">
     <div class="row">
         <div class="col-md-12">
             <div class="card">
@@ -16,63 +16,88 @@
                 </div>
                 <div class="card-body">
                     <form [formGroup]="formMyProfile">
-                        <input type="hidden" class="form-control form-control-sm"
-                                            formControlName="employeeId">
-                        <input type="hidden" class="form-control form-control-sm"
-                                            formControlName="userId">
-                        <input type="hidden" class="form-control form-control-sm"
-                                            formControlName="roleId">
+                        <input type="hidden" class="form-control form-control-sm" formControlName="employeeId">
+                        <input type="hidden" class="form-control form-control-sm" formControlName="userId">
+                        <input type="hidden" class="form-control form-control-sm" formControlName="roleId">
                         <div class="row">
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label for="" class="col-md-12 required">Name :</label>
-                                        <div class="col-md-12">
-                                            <input type="text" class="form-control form-control-sm"
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12 required">Name :</label>
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control form-control-sm"
                                             formControlName="userFirstName">
-                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label for="" class="col-md-12 required">Email :</label>
-                                        <div class="col-md-12">
-                                            <input type="text" class="form-control form-control-sm"
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12 required">Email :</label>
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control form-control-sm"
                                             formControlName="userEmailId">
-                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label for="" class="col-md-12 required">Phone :</label>
-                                        <div class="col-md-12">
-                                            <input type="text" maxlength="10" class="form-control form-control-sm"
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12 required">Phone :</label>
+                                    <div class="col-md-12">
+                                        <input type="text" maxlength="10" class="form-control form-control-sm"
                                             formControlName="userMobileNum">
-                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label for="" class="col-md-12 required">Location :</label>
-                                        <div class="col-md-12">
-                                            <input type="text" class="form-control form-control-sm"
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12 required">Location :</label>
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control form-control-sm"
                                             formControlName="location">
-                                        </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label for="" class="col-md-12">Password :</label>
-                                        <div class="col-md-12">
-                                            <input type="text" class="form-control form-control-sm"
-                                            formControlName="password">
-                                        </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12">Old Password :</label>
+                                    <div class="col-md-12">
+                                        <input type="{{ isPasswordVisibleOld ? 'text' : 'password' }}" class="form-control form-control-sm"
+                                            formControlName="oldPassword">
+                                            <button class="eye-button" type="button" (click)="togglePasswordVisibilityOld()">
+                                                <i class="{{ isPasswordVisibleOld ? 'fa fa-eye-slash' : 'fa fa-eye' }}"></i>
+                                            </button>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12">Password :</label>
+                                    <div class="col-md-12">
+                                        <input
+                                        type="{{ isPasswordVisibleNew ? 'text' : 'password' }}"                                          [class.error]="isPasswordInvalid()"
+                                            [class.success]="isPasswordValid()" class="form-control form-control-sm"
+                                            formControlName="password">
+                                            <button class="eye-button" type="button" (click)="togglePasswordVisibilityNew()">
+                                                <i class="{{ isPasswordVisibleNew ? 'fa fa-eye-slash' : 'fa fa-eye' }}"></i>
+                                            </button>
+                                    </div>
+                                    <div class="warning-icon" *ngIf="isPasswordInvalid()" [title]="
+                                        '• Must be at least 10 characters long\n' +
+                                        '• Must include at least one uppercase letter (A-Z)\n' +
+                                        '• Must include at least two lowercase letter (a-z)\n' +
+                                        '• Must include at least one number (0-9)\n' +
+                                        '• Must include at least one non-alphanumeric character (! @ # $ % ^ & * ( ) _ + - = [ ] { } | )'
+                                        ">
+                                        <i class="fa fa-exclamation-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 text-center mt-3 pb-3">
-                                <button type="button" [disabled]="!formMyProfile.valid" (click)="onSubmit(formMyProfile)" class="btn btn-primary btn-sm">Update</button>
+                                <button type="button" [disabled]="!formMyProfile.valid"
+                                    (click)="onSubmit(formMyProfile)" class="btn btn-primary btn-sm">Update</button>
                             </div>
                         </div>
                     </form>
@@ -82,6 +107,3 @@
 
     </div>
 </div>
-
-
-

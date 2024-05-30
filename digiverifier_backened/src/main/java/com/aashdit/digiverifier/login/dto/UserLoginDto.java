@@ -11,9 +11,9 @@ public class UserLoginDto {
 	
 	String roleName;
 	
-	Long organizationId;
+	String organizationId;
 	
 	String roleCode;
 	
-	Long userId;
+	String userId;
 }

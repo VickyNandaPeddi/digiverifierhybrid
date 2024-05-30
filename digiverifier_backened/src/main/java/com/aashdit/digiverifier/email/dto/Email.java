@@ -18,13 +18,15 @@ public class Email {
 	private String attachmentName;
 	private File attachmentFile;
 	private String copiedReceiver;
+	private String bccReceiver;
 	
-	public Email(String emailTitle, String emailContent, String sender, String receiver, String copiedReceiver) {
+	public Email(String emailTitle, String emailContent, String sender, String receiver, String copiedReceiver, String bccReceiver) {
 		this.title = emailTitle;
 		this.content = emailContent;
 		this.sender = sender;
 		this.receiver = receiver;
 		this.copiedReceiver = copiedReceiver;
+		this.bccReceiver = bccReceiver;	
 	}
 
 	

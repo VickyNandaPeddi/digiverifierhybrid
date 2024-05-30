@@ -11,4 +11,8 @@ public class EpfoDetailsDto {
 	String captcha;
 	String transactionid;
 	String errorMessage;
+	
+	
+	boolean uanSearch;
+	boolean enterUanInQcPending;
 }

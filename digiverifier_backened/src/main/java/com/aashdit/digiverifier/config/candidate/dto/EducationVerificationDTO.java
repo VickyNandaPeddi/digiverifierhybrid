@@ -9,5 +9,5 @@ public class EducationVerificationDTO extends CommonVerificationDto {
 	
 	private String university;
 	
-
+	private String customRemark;
 }

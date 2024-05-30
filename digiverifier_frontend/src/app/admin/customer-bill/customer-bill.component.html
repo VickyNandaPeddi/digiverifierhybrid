@@ -1,0 +1,130 @@
+<div class="pageHeader">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="pageTitle">{{ pageTitle }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row mt-1 justify-content-between">
+                        <div class="col-md-2 text-center">
+                            <div class="icon-container">
+                                <button (click)="onEditCustInfo()" class="ms-btn ms-btn-primary">
+                                    <span class="fas fa-pencil-alt"></span>
+                                </button>
+                                <p class="icon-label" type="button" (click)="onEditCustInfo()">Edit Customer Information</p>
+                            </div>
+                        </div>
+                        <div class="col-md-1 line-container">
+                            <div class="line"></div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="icon-container">
+                                <button (click)="onEditCustBill()" class="ms-btn ms-btn-primary">
+                                    <span class="fas fa-file-invoice-dollar"></span>
+                                </button>
+                                <p class="icon-label" type="button" (click)="onEditCustBill()">Edit Billing Information</p>
+                            </div>
+                        </div>
+                        <div class="col-md-1 line-container">
+                            <div class="line"></div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="icon-container">
+                                <button (click)="onEditCustEmailTemp()" class="ms-btn ms-btn-primary">
+                                    <span class="fas fa-envelope"></span>
+                                </button>
+                                <p class="icon-label" type="button" (click)="onEditCustEmailTemp()">Edit Customer Email Templates</p>
+                            </div>
+                        </div>
+                        <div class="col-md-1 line-container">
+                            <div class="line"></div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="icon-container">
+                                <button (click)="onEditCustScope()" class="ms-btn ms-btn-primary">
+                                    <span class="fas fa-envelope"></span>
+                                </button>
+                                <p class="icon-label" type="button" (click)="onEditCustScope()">Edit Organisation Scope</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>  
+<span class="line-break"></span>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card ms-Card">
+                <div class="card-header">
+                    <h4 class="card-title">Customer Bill Summary
+                        <small class="text-danger float-right">(Please enter rates of atleast one BGV items)</small>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table class="table table-bordered mt-2">
+                                    <thead class="ms-Table-head">
+                                        <tr>
+                                            <th>SI#</th>
+                                            <th>BGV Items</th>
+                                            <th>Rate per Report</th>
+                                            <th>Rate per Item</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let item of getbgv;let i = index;">
+                                            <td>
+                                                <input type="hidden" class="billServiceId{{item.sourceId}}" [(ngModel)]="item.serviceId">{{i+1}}
+                                            </td>
+                                            <td>
+                                                {{item.sourceName}}
+                                            </td>
+                                            <td>
+                                                <input type="text" (keyup)="onKeyUp()" class="form-control form-control-sm x-billcomponents billrpp{{item.sourceId}}" id="ratePerReport{{i+1}}" [(ngModel)]="item.ratePerReport"/>
+                                            </td>
+                                            <td>
+                                                <input type="text" (keyup)="onKeyUp()" class="form-control form-control-sm x-billcomponents billrpi{{item.sourceId}}" id="ratePerItem{{i+1}}" [(ngModel)]="item.ratePerItem"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot *ngIf="BillData_stat">
+                                        <tr>
+                                            <td class="text-right" colspan="4">
+                                                <b>Bill Total: {{getCustomerBillData}}</b>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center mt-3 pb-3">
+                                <button type="button" (click)="billsubmit()" *ngIf="this.getBillValues == null" class="ms-button ms-secondary-button">Submit</button>
+                                <button type="button" (click)="billUpdate()" *ngIf="this.getBillValues != null" class="ms-button ms-primary-button">Update</button>
+                                <!-- <a routerLink="../../admindashboard" class="btn btn-danger btn-sm">Cancel</a> -->
+                                <button type="button" (click)="cancel()" *ngIf="this.getBillValues == null" class="ms-button ms-skip-button">Cancel</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+

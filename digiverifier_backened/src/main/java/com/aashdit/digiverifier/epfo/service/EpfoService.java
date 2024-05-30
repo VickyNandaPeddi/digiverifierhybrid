@@ -1,6 +1,9 @@
 package com.aashdit.digiverifier.epfo.service;
 
+import org.springframework.http.ResponseEntity;
+
 import com.aashdit.digiverifier.common.model.ServiceOutcome;
+import com.aashdit.digiverifier.config.candidate.dto.BulkUanDTO;
 import com.aashdit.digiverifier.epfo.dto.EpfoDetailsDto;
 
 public interface EpfoService {
@@ -10,4 +13,7 @@ public interface EpfoService {
 	ServiceOutcome<String> getEpfodetail(EpfoDetailsDto epfoDetails);
 
 	ServiceOutcome<String> getEpfodetailNew(EpfoDetailsDto epfoDetails);
+
+	Boolean processEpfoDataForUANCandidate(ResponseEntity<String> response, BulkUanDTO details);
+	
 }

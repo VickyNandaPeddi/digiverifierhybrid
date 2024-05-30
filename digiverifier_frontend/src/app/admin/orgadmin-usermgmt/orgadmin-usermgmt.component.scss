@@ -1,1 +1,15 @@
 @import  "../../../assets/scss/admin.scss";
+
+.position-relative {
+    position: relative;
+}
+ 
+.eye-button {
+    position: absolute;
+    right: 30px; /* Adjust the positioning as needed */
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+}

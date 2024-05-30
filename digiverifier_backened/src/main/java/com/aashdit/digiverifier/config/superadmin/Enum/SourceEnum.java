@@ -5,5 +5,9 @@ public enum SourceEnum {
 	EPFO,
 	ADMIN,
 	CONVENTIONAL,
-	DIGILOCKER
+	DIGILOCKER,
+	AADHAR,
+	CANDIDATE,
+	DrivingLicense,
+	DNHDB
 }

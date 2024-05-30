@@ -3,8 +3,8 @@ package com.aashdit.digiverifier.itr.model;
 import com.aashdit.digiverifier.config.candidate.model.Candidate;
 import lombok.Data;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data

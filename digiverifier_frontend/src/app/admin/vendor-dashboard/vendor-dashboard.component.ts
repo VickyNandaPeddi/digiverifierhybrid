@@ -1,560 +1,503 @@
-import {Component, NgZone, OnInit} from '@angular/core';
-import {OrgadminService} from 'src/app/services/orgadmin.service';
-import {
-  ModalDismissReasons,
-  NgbModal,
-  NgbCalendar,
-  NgbDate,
-  NgbDateStruct
-} from '@ng-bootstrap/ng-bootstrap';
-import {
-  FormGroup,
-  FormControl,
-  FormBuilder,
-  Validators,
-} from '@angular/forms';
-import {HttpEventType, HttpResponse} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import { Component, OnInit } from '@angular/core';
+import { OrgadminService } from 'src/app/services/orgadmin.service';
+import {ModalDismissReasons, NgbModal, NgbCalendar, NgbDate} from '@ng-bootstrap/ng-bootstrap';
+import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import Swal from 'sweetalert2';
-import {AuthenticationService} from 'src/app/services/authentication.service';
-import {OrgadminDashboardService} from 'src/app/services/orgadmin-dashboard.service';
-import {LoaderService} from 'src/app/services/loader.service';
-import {CustomerService} from 'src/app/services/customer.service';
-import {Router} from '@angular/router';
-
-import * as am4core from '@amcharts/amcharts4/core';
-import * as am4charts from '@amcharts/amcharts4/charts';
-
+import { AuthenticationService } from 'src/app/services/authentication.service';
+import { OrgadminDashboardService } from 'src/app/services/orgadmin-dashboard.service';
+import { LoaderService } from 'src/app/services/loader.service';
+import { CustomerService } from 'src/app/services/customer.service';
 @Component({
   selector: 'app-vendor-dashboard',
   templateUrl: './vendor-dashboard.component.html',
-  styleUrls: ['./vendor-dashboard.component.scss'],
+  styleUrls: ['./vendor-dashboard.component.scss']
 })
 export class VendorDashboardComponent implements OnInit {
-  pageTitle = 'Conventional Dashboard';
+  pageTitle = 'VendorDashboard';
   closeModal: string | undefined;
   selectedFiles: any;
   currentFile: any;
-  formMyProfile: any;
-  createdOnDate: any;
-  containerStat: boolean = false;
+  containerStat:boolean = false;
   fileInfos: any;
   getReportDeliveryStatCodes: any;
   getPendingDetailsStatCode: any;
-  getStatCodes: any;
-  candidateId: any;
-  isShowDiv: boolean = false;
-  isCBadmin: boolean = false;
-  getUserByOrganizationIdAndUserId: any = [];
-  getRolePerMissionCodes: any = [];
-  AGENTUPLOAD_stat: boolean = false;
-  CANDIDATEUPLOAD_stat: boolean = false;
-  fromDate: any;
-  toDate: any;
-  getToday: NgbDate = new NgbDate(2023, 1, 1);
+  getStatCodes:any;
+  isShowDiv:boolean=false;
+  isCBadmin:boolean = false;
+  getUserByOrganizationIdAndUserId:any=[];
+  getRolePerMissionCodes:any=[];
+  AGENTUPLOAD_stat:boolean=false;
+  CANDIDATEUPLOAD_stat:boolean=false;
+  fromDate:any;
+  toDate:any;
+  getToday: NgbDate;
   getMinDate: any;
-  setfromDate: any;
-  settoDate: any;
-  initToday: any;
+  setfromDate:any;
+  settoDate:any;
+  initToday:any;
+  orgID: any;
+  pageNumber: number = 0;
+  pageSize: number = 10;
+  totalPages: number = 0; // Add this variable
+  vendorchecksupload: any = [];
+  vendorDashboardStatus: any;
+
   dashboardFilter = new FormGroup({
     fromDate: new FormControl('', Validators.required),
-    toDate: new FormControl('', Validators.required),
+    toDate: new FormControl('', Validators.required)
   });
-
-  // added for chart
-  getChartData: any = [];
-  ChartDataListing: any = [];
-  getuploadinfo: any = [];
-
-  ngOnInit(): void {
-
-    this.customers.getUserById().subscribe((data: any) => {
-      this.formMyProfile = data.data
-      if (data.data.createdOn) {
-        this.createdOnDate = this.Dateformatter(data.data.createdOn);
-      }
-    });
-
-    if (this.getPendingDetailsStatCode) {
-      this.isShowDiv = true;
-    } else if (this.getReportDeliveryStatCodes) {
-      this.isShowDiv = false;
-    }
-
-    if (
-      this.getStatCodes ||
-      this.getPendingDetailsStatCode ||
-      this.getReportDeliveryStatCodes
-    ) {
-      this.containerStat = true;
-    }
-    setTimeout(() => {
-      this.loaderService.hide();
-    }, 7000);
-    //isCBadmin required for drilldown dashboard at Superadmin
-    const isCBadminVal = localStorage.getItem('roles');
-    if (isCBadminVal == '"ROLE_CBADMIN"') {
-      this.isCBadmin = true;
-    } else {
-      this.isCBadmin = false;
-    }
-
-    this.orgadmin
-      .getRolePerMissionCodes(localStorage.getItem('roles'))
-      .subscribe((result: any) => {
-        this.getRolePerMissionCodes = result.data;
-        //console.log(this.getRolePerMissionCodes);
-        if (this.getRolePerMissionCodes) {
-          if (this.getRolePerMissionCodes.includes('AGENTUPLOAD')) {
-            this.AGENTUPLOAD_stat = true;
-          }
-
-          if (this.getRolePerMissionCodes.includes('CANDIDATEUPLOAD')) {
-            this.CANDIDATEUPLOAD_stat = true;
-          }
-        }
-      });
-  }
-  Dateformatter(timestamp: number): NgbDateStruct {
-    const date = new Date(timestamp);
-    return {
-      year: date.getFullYear(),
-      month: date.getMonth() + 1,
-      day: date.getDate(),
-    };
-  }
-  candidateData: any;
-
-  constructor(
-    private orgadmin: OrgadminService,
-    private modalService: NgbModal,
-    private navRouter: Router,
-    public authService: AuthenticationService,
-    private dashboardservice: OrgadminDashboardService,
-    public loaderService: LoaderService,
-    public calendar: NgbCalendar,
-    private customer: CustomerService,
-    private zone: NgZone,
-    private customers:CustomerService
-  ) {
-    var userId: any = localStorage.getItem('userId');
-    this.getToday = calendar.getToday();
-    if (
-      localStorage.getItem('dbFromDate') == null &&
-      localStorage.getItem('dbToDate') == null
-    ) {
-      let inityear = this.getToday.year;
-      let initmonth =
-        this.getToday.month <= 9
-          ? '0' + this.getToday.month
-          : this.getToday.month;
-      let initday =
-        this.getToday.day <= 9 ? '0' + this.getToday.day : this.getToday.day;
-      let initfinalDate = initday + '/' + initmonth + '/' + inityear;
-      this.initToday = initfinalDate;
-      this.customer.setFromDate(this.initToday);
-      this.customer.setToDate(this.initToday);
-      this.fromDate = this.initToday;
-      this.toDate = this.initToday;
-    }
-
-
-    this.getReportDeliveryStatCodes =
-      this.dashboardservice.getReportDeliveryStatCode();
-    this.getPendingDetailsStatCode =
-      this.dashboardservice.getPendingDetailsStatCode();
-    //this.getStatCodes = this.dashboardservice.getStatusCode();
-    this.dashboardservice
-      .getUsersByRoleCode(localStorage.getItem('roles'))
-      .subscribe((data: any) => {
-        this.getUserByOrganizationIdAndUserId = data.data;
+  utilizationReportFilter = new FormGroup({
+    fromDate: new FormControl('', Validators.required),
+    toDate: new FormControl('', Validators.required),
+    // sourceId: new FormControl('', Validators.required)
+  });
+  constructor(private orgadmin:OrgadminService, private modalService: NgbModal,
+    public authService: AuthenticationService,  private dashboardservice:OrgadminDashboardService,
+    public loaderService: LoaderService, public calendar: NgbCalendar, private customer: CustomerService) { 
+      this.getReportDeliveryStatCodes = this.dashboardservice.getReportDeliveryStatCode();
+      this.getPendingDetailsStatCode = this.dashboardservice.getPendingDetailsStatCode();
+      this.getStatCodes = this.dashboardservice.getStatusCode();
+      this.dashboardservice.getUsersByRoleCode(this.authService.getRoles()).subscribe((data: any)=>{
+        this.getUserByOrganizationIdAndUserId=data.data;
         //console.log(this.getUserByOrganizationIdAndUserId)
       });
-    let filterData = {
-      userId: userId,
-      fromDate: localStorage.getItem('dbFromDate'),
-      toDate: localStorage.getItem('dbToDate'),
-      status: this.getStatCodes,
-    };
+      this.orgID = this.authService.getuserId();
+      // this.getToday = calendar.getToday(); 
+      // if(localStorage.getItem('dbFromDate')==null && localStorage.getItem('dbToDate')==null){
+        // let inityear = this.getToday.year;
+        // let initmonth = this.getToday.month <= 9 ? '0' + this.getToday.month : this.getToday.month;;
+        // let initday = this.getToday.day <= 9 ? '0' + this.getToday.day : this.getToday.day;
+        // let initfinalDate = initday + "/" + initmonth + "/" + inityear;
+        // this.initToday = initfinalDate;
+        // this.customer.setFromDate(this.initToday);
+        // this.customer.setToDate(this.initToday);
+        // this.fromDate = this.initToday;
+        // this.toDate = this.initToday;
+      // }
 
-    this.updateChartDetails(filterData);
-
-    var checkfromDate: any = localStorage.getItem('dbFromDate');
-    let getfromDate = checkfromDate.split('/');
-    this.setfromDate = {
-      day: +getfromDate[0],
-      month: +getfromDate[1],
-      year: +getfromDate[2],
-    };
-
-    var checktoDate: any = localStorage.getItem('dbToDate');
-    let gettoDate = checktoDate.split('/');
-    this.settoDate = {
-      day: +gettoDate[0],
-      month: +gettoDate[1],
-      year: +gettoDate[2],
-    };
-    this.getMinDate = {
-      day: +gettoDate[0],
-      month: +gettoDate[1],
-      year: +gettoDate[2],
-    };
-
-    this.dashboardFilter.patchValue({
-      fromDate: this.setfromDate,
-      toDate: this.settoDate,
-    });
-
-    this.getStatCodes = this.dashboardservice.getStatusCode();
-    if (this.getStatCodes) {
-      var userId: any = localStorage.getItem('userId');
-      var fromDate: any = localStorage.getItem('dbFromDate');
-      var toDate: any = localStorage.getItem('dbToDate');
-      let filterData = {
-        userId: userId,
-        fromDate: localStorage.getItem(""),
-        toDate: toDate,
-        status: this.getStatCodes,
-      };
-      this.dashboardservice
-        .getChartDetails(filterData)
-        .subscribe((data: any) => {
-          this.ChartDataListing = data.data.candidateDtoList;
-
-        });
-
-    }
-  }
-
-  filterToday(){
+      this.getToday = calendar.getToday(); 
     let inityear = this.getToday.year;
-      let initmonth =
-        this.getToday.month <= 9
-          ? '0' + this.getToday.month
-          : this.getToday.month;
-      let initday =
-        this.getToday.day <= 9 ? '0' + this.getToday.day : this.getToday.day;
-      let initfinalDate = initday + '/' + initmonth + '/' + inityear;
-      this.initToday = initfinalDate;
-      this.customer.setFromDate(this.initToday);
-      this.customer.setToDate(this.initToday);
-    window.location.reload();
+    let initmonth = this.getToday.month <= 9 ? '0' + this.getToday.month : this.getToday.month;;
+    let initday = this.getToday.day <= 9 ? '0' + this.getToday.day : this.getToday.day;
+    let initfinalDate = initday + "/" + initmonth + "/" + inityear;
+    this.initToday = initfinalDate;
+    if(localStorage.getItem('dbFromDate')==null && localStorage.getItem('dbToDate')==null){
+    this.customer.setFromDate(this.initToday);
+    this.customer.setToDate(this.initToday);
+    this.fromDate = this.initToday;
+    this.toDate = this.initToday;
   }
+      
+      var checkfromDate:any = localStorage.getItem('dbFromDate');
+      let getfromDate = checkfromDate.split('/');
+      this.setfromDate = { day:+getfromDate[0],month:+getfromDate[1],year:+getfromDate[2]};
 
-  filterLastMonth() {
-    let date = new Date();
-    date.setMonth(date.getMonth() - 1);
-    let firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 2);
-    let lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1);
-    let fromDateString = firstDayOfMonth.toISOString().split('T')[0];
-    let toDateString = lastDayOfMonth.toISOString().split('T')[0];
-  
-    let getInputFromDate: any = fromDateString.split('-');
-    let finalInputFromDate =
-      getInputFromDate[2] +
-      '/' +
-      getInputFromDate[1] +
-      '/' +
-      getInputFromDate[0];
-  
-      let getInputToDate: any = toDateString.split('-');
-      let finalInputToDate =
-        getInputToDate[2] +
-        '/' +
-        getInputToDate[1] +
-        '/' +
-        getInputToDate[0];
-    this.customer.setFromDate(finalInputFromDate);
-    this.customer.setToDate(finalInputToDate);
-    window.location.reload();
-  }
+      var checktoDate:any = localStorage.getItem('dbToDate');
+      let gettoDate =checktoDate.split('/');
+      this.settoDate = { day:+gettoDate[0],month:+gettoDate[1],year:+gettoDate[2]};
+      this.getMinDate = { day:+gettoDate[0],month:+gettoDate[1],year:+gettoDate[2]};
 
-  filterMonthToDate() {
-    let currentDate = new Date();
-    let firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 2);
-    let fromDateString = firstDayOfMonth.toISOString().split('T')[0];
-    let toDateString = currentDate.toISOString().split('T')[0];
-  
-    let getInputFromDate: any = fromDateString.split('-');
-    let finalInputFromDate =
-      getInputFromDate[2] +
-      '/' +
-      getInputFromDate[1] +
-      '/' +
-      getInputFromDate[0];
+      this.dashboardFilter.patchValue({
+        fromDate: this.setfromDate,
+        toDate: this.settoDate
+       });
 
-      let inityear = this.getToday.year;
-      let initmonth =
-        this.getToday.month <= 9
-          ? '0' + this.getToday.month
-          : this.getToday.month;
-      let initday =
-        this.getToday.day <= 9 ? '0' + this.getToday.day : this.getToday.day;
-      let initfinalDate = initday + '/' + initmonth + '/' + inityear;
-      this.initToday = initfinalDate;
-  
-      this.customer.setFromDate(finalInputFromDate);
-      this.customer.setToDate(this.initToday);
-      window.location.reload();
-  }
+       const vendorCheckDashboardStatusCode = this.dashboardservice.getPendingDetailsStatCode();
+       this.vendorDashboardStatus = (vendorCheckDashboardStatusCode == 'CLEAR')? "Clear"
+       : (vendorCheckDashboardStatusCode === 'INPROGRESS') ? "New Upload"
+       : (vendorCheckDashboardStatusCode === 'INSUFFICIENCY') ? "Insufficiency" 
+       : (vendorCheckDashboardStatusCode === 'MAJORDISCREPANCY') ? 'Major Discrepancy'
+       : (vendorCheckDashboardStatusCode === 'MINORDISCREPANCY') ? 'Minor Discrepancy'
+       : (vendorCheckDashboardStatusCode === 'UNABLETOVERIFY') ? 'Unable to Verify' : vendorCheckDashboardStatusCode;
 
-  updateChartDetails(filterData: any) {
-    this.dashboardservice.getConventionalUploadDetails(filterData).subscribe((resp) => {
-      // @ts-ignore
-      this.candidateData = resp.data;
-    });
 
-  }
+       const dateSearchFilter = {
+        fromDate: customer.getFromDate(),
+        toDate: customer.getToDate(),
+        // vendorCheckDashboardStatusCode:vendorCheckDashboardStatusCode
+      };
 
+      // console.warn("dateSearchFilter::::::::::",dateSearchFilter)
+
+       this.utilizationReportFilter.patchValue({
+        fromDate: this.setfromDate,
+        toDate: this.settoDate,
+      });
+
+      // this.customer
+      // .getallVendorCheckDetails(this.orgID,dateSearchFilter,this.pageNumber,this.pageSize,vendorCheckDashboardStatusCode)
+      // .subscribe((data: any) => {
+      //   console.log(data);
+      //   this.vendorchecksupload = data.data;
+      //   this.totalPages = data.status; // Set the total pages
+
+      //   const dataArray: { createdOn: string; }[] = this.vendorchecksupload;
+
+      //   dataArray.forEach((element, index) => {
+      //     const createdOnDate = new Date(element.createdOn);
+      //     // console.log(`Element ${index + 1}: ${createdOnDate.toDateString()}`);
+      //   });
+
+      //   dataArray.sort((a, b) => {
+      //     const dateA = new Date(a.createdOn);
+      //     const dateB = new Date(b.createdOn);
+        
+      //     return dateB.getTime() - dateA.getTime();
+      //   });
+
+      //   // console.log(dataArray);
+
+        
+      //   // console.warn("VENDORCHECKS::::::::::::::::",this.vendorchecksupload);
+
+      //   const createdOnDate = data.data[0].createdOn;
+      //   // console.warn("CreatedOONDATE:::",createdOnDate)
+
+
+      // });
+       
+    }
   uploadAgent = new FormGroup({
-    file: new FormControl('', Validators.required),
+    file: new FormControl('', Validators.required)
   });
 
-
-  selectFile(event: any) {
+  selectFile(event:any) {
     const fileType = event.target.files[0].name.split('.').pop();
-    if (
-      fileType == 'xlsx' ||
-      fileType == 'XLSX' ||
-      fileType == 'xls' ||
-      fileType == 'XLS' ||
-      fileType == 'csv' ||
-      fileType == 'CSV'
-    ) {
+    if(fileType == 'xlsx' || fileType == 'XLSX' || fileType == 'xls' || fileType == 'XLS' || fileType == 'csv' || fileType == 'CSV'){
       this.selectedFiles = event.target.files;
-    } else {
+    }else{
       event.target.value = null;
       Swal.fire({
         title: 'Please select .xlsx, .xls, .csv file type only.',
-        icon: 'warning',
+        icon: 'warning'
       });
     }
-  }
 
+  }
   uploadAgents() {
     this.currentFile = this.selectedFiles.item(0);
-    this.orgadmin.uploadAgent(this.currentFile).subscribe((event: any) => {
-      //console.log(event);
-      if (event instanceof HttpResponse) {
-        Swal.fire({
-          title: event.body.message,
-          icon: 'success',
-        }).then(function () {
-          window.location.reload();
+    this.orgadmin.uploadAgent(this.currentFile).subscribe(
+      (event:any) => {
+        //console.log(event);
+        if(event instanceof HttpResponse){
+          Swal.fire({
+            title: event.body.message,
+            icon: 'success'
+          }).then(function() {
+            window.location.reload();
         });
-      }
-    });
+        }
+       });
   }
 
   uploadCandidate() {
     this.currentFile = this.selectedFiles.item(0);
-    this.orgadmin.uploadCandidate(this.currentFile).subscribe((event: any) => {
-      //console.log(event);
-      if (event instanceof HttpResponse) {
-        Swal.fire({
-          title: event.body.message,
-          icon: 'success',
-        }).then(function () {
-          window.location.reload();
+    this.orgadmin.uploadCandidate(this.currentFile).subscribe(
+      (event:any) => {
+        //console.log(event);
+        if(event instanceof HttpResponse){
+          Swal.fire({
+            title: event.body.message,
+            icon: 'success'
+          }).then(function() {
+            window.location.reload();
         });
-      }
-    });
+        }
+       });
   }
 
   uploadClientscope() {
     this.currentFile = this.selectedFiles.item(0);
-    this.orgadmin
-      .uploadClientscope(this.currentFile)
-      .subscribe((event: any) => {
+    this.orgadmin.uploadClientscope(this.currentFile).subscribe(
+      (event:any) => {
         //console.log(event);
-        if (event instanceof HttpResponse) {
+        if(event instanceof HttpResponse){
           Swal.fire({
             title: event.body.message,
-            icon: 'success',
-          }).then(function () {
+            icon: 'success'
+          }).then(function() {
             window.location.reload();
-          });
+        });
         }
-      });
+       });
+  }
+
+  ngOnInit(): void {
+    if(this.getReportDeliveryStatCodes){
+      this.isShowDiv = true;
+    }else if(this.getPendingDetailsStatCode){
+      this.isShowDiv = false;
+    }
+
+    if(this.getStatCodes || this.getPendingDetailsStatCode || this.getReportDeliveryStatCodes){
+      this.containerStat = true;
+    }
+    setTimeout(() =>{
+      this.loaderService.hide();
+    },7000);
+    //isCBadmin required for drilldown dashboard at Superadmin
+    const isCBadminVal = this.authService.getRoles();
+    if(isCBadminVal == '"ROLE_CBADMIN"'){
+      this.isCBadmin = true;
+    }else{
+      this.isCBadmin = false;
+    }
+    
+    this.orgadmin.getRolePerMissionCodes(this.authService.getRoles()).subscribe(
+      (result:any) => {
+      this.getRolePerMissionCodes = result.data;
+        //console.log(this.getRolePerMissionCodes);
+        if(this.getRolePerMissionCodes){
+          if(this.getRolePerMissionCodes.includes('AGENTUPLOAD')){
+            this.AGENTUPLOAD_stat = true;
+          }
+
+          if(this.getRolePerMissionCodes.includes('CANDIDATEUPLOAD')){
+            this.CANDIDATEUPLOAD_stat = true;
+          }
+
+        }
+    });
+
+    
   }
 
 
   triggerModal(content: any) {
-    this.modalService.open(content).result.then(
-      (res) => {
-        this.closeModal = `Closed with: ${res}`;
-      },
-      (res) => {
-        this.closeModal = `Dismissed ${this.getDismissReason(res)}`;
-      }
-    );
+    this.modalService.open(content).result.then((res) => {
+      this.closeModal = `Closed with: ${res}`;
+    }, (res) => {
+      this.closeModal = `Dismissed ${this.getDismissReason(res)}`;
+    });
   }
-
+  
   private getDismissReason(reason: any): string {
     if (reason === ModalDismissReasons.ESC) {
       return 'by pressing ESC';
     } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
       return 'by clicking on a backdrop';
     } else {
-      return `with: ${reason}`;
+      return  `with: ${reason}`;
     }
   }
 
-  toggleDisplayDiv() {
-    this.isShowDiv = !this.isShowDiv;
-  }
-
-  getuserId(userId: any) {
-    if (userId != 'null') {
+  toggleDisplayDiv() {  
+    this.isShowDiv = !this.isShowDiv;  
+  } 
+  
+  getuserId(userId:any){
+    if(userId != 'null'){
       localStorage.setItem('userId', userId);
       window.location.reload();
-    } else {
+    }else{
       Swal.fire({
         title: 'Please select the user.',
-        icon: 'success',
+        icon: 'success'
       });
     }
   }
 
-  onfromDate(event: any) {
+  onfromDate(event:any) {
     let year = event.year;
-    let month = event.month <= 9 ? '0' + event.month : event.month;
+    let month = event.month <= 9 ? '0' + event.month : event.month;;
     let day = event.day <= 9 ? '0' + event.day : event.day;
-    let finalDate = day + '/' + month + '/' + year;
+    let finalDate = day + "/" + month + "/" + year;
     this.fromDate = finalDate;
-    this.getMinDate = {day: +day, month: +month, year: +year};
-  }
-
-  ontoDate(event: any) {
+    this.getMinDate = { day:+day,month:+month,year:+year};
+   }
+   ontoDate(event:any) {
     let year = event.year;
-    let month = event.month <= 9 ? '0' + event.month : event.month;
-    let day = event.day <= 9 ? '0' + event.day : event.day;
-    let finalDate = day + '/' + month + '/' + year;
+    let month = event.month <= 9 ? '0' + event.month : event.month;;
+    let day = event.day <= 9 ? '0' + event.day : event.day;;
+    let finalDate = day + "/" + month + "/" + year;
     this.toDate = finalDate;
-  }
+   }
+  //  onSubmitFilter(dashboardFilter:FormGroup){
+  //    let inputFromDate:any = $("#inputFromDate").val();
+  //    //let getInputFromDate:any = inputFromDate.split('-');
+  //    let finalInputFromDate = inputFromDate;
 
-  onSubmitFilter(dashboardFilter: FormGroup) {
-    let inputFromDate: any = $('#inputFromDate').val();
-    //let getInputFromDate:any = inputFromDate.split('-');
-    let finalInputFromDate = inputFromDate;
+  //    let inputToDate:any = $("#inputToDate").val();
+  //    //let getInputToDate:any = inputToDate.split('-');
+  //    let finalInputToDate = inputToDate;
 
-    let inputToDate: any = $('#inputToDate').val();
-    //let getInputToDate:any = inputToDate.split('-');
-    let finalInputToDate = inputToDate;
+  //   if(this.fromDate==null){
+  //       this.fromDate = finalInputFromDate;
+  //   }
+  //   if(this.toDate==null){
+  //     this.toDate = finalInputToDate;
+  //   }
+  //   if (this.dashboardFilter.valid) {
+  //     this.customer.setFromDate(this.fromDate);
+  //     this.customer.setToDate(this.toDate);
+  //     window.location.reload();
+  //   }else{
+  //     Swal.fire({
+  //       title: 'Please select the valid dates.',
+  //       icon: 'warning'
+  //     });
+  //   }
+  //  }
 
+  onSubmitFilter() {
+    const inputFromDate: any = $("#inputFromDateVendor").val();
+    const finalInputFromDate = inputFromDate;
+    const inputToDate: any = $("#inputToDateVendor").val();
+    const finalInputToDate = inputToDate;
     if (this.fromDate == null) {
       this.fromDate = finalInputFromDate;
     }
     if (this.toDate == null) {
       this.toDate = finalInputToDate;
     }
-    if (this.dashboardFilter.valid) {
-      this.customer.setFromDate(this.fromDate);
-      this.customer.setToDate(this.toDate);
+    // if (this.utilizationReportFilter.valid) {
+    //   this.vendorchecksupload();
+    // }
+    
+    if (this.utilizationReportFilter.valid) {
+      this.customer.setFromDate(finalInputFromDate);
+      this.customer.setToDate(finalInputToDate);
       window.location.reload();
-
-    } else {
+    }else{
       Swal.fire({
         title: 'Please select the valid dates.',
-        icon: 'warning',
+        icon: 'warning'
       });
     }
+
+    const vendorCheckDashboardStatusCode = this.dashboardservice.getPendingDetailsStatCode();
+    const dateSearchFilter ={
+      fromDate: this.fromDate,
+      toDate:this.toDate,
+      // vendorCheckDashboardStatusCode:vendorCheckDashboardStatusCode
+    }
+    console.warn("dateSearchFilter ================ ",dateSearchFilter);
+    console.warn("VENDORID ============= ",this.orgID);
+    console.warn("VENDORID ============= ",this.authService.getuserId());
+    console.warn("VENDORID ============= ",this.authService.getOrgID());
+
+    this.customer
+      .getallVendorCheckDetails(this.orgID,dateSearchFilter,this.pageNumber,this.pageSize,vendorCheckDashboardStatusCode)
+      .subscribe((data: any) => {
+        console.log(data);
+        this.vendorchecksupload = data.data;
+        this.totalPages = data.status; // Set the total pages
+        // console.warn("totalPages::",this.totalPages);
+        // console.warn("vendorchecksupload:::::",this.vendorchecksupload)
+
+        const dataArray: { createdOn: string; }[] = this.vendorchecksupload;
+
+        dataArray.forEach((element, index) => {
+          const createdOnDate = new Date(element.createdOn);
+          // console.log(`Element ${index + 1}: ${createdOnDate.toDateString()}`);
+        });
+
+        dataArray.sort((a, b) => {
+          const dateA = new Date(a.createdOn);
+          const dateB = new Date(b.createdOn);
+        
+          return dateB.getTime() - dateA.getTime();
+        });
+        // console.log(dataArray);
+      })
   }
 
-  // ngAfterViewInit() {
-  //   setTimeout(() => {
-  //     // this.ngOnDestroy();
-  //     this.loadCharts();
-  //   }, 50);
-  // }
 
-  // loadCharts() {
-  //   this.zone.runOutsideAngular(() => {
-  //     let chart = am4core.create('chartdiv', am4charts.PieChart);
-  //     chart.innerRadius = am4core.percent(50);
-  //     chart.legend = new am4charts.Legend();
+   filterToday(){
+    this.customer.setFromDate(this.initToday);
+    this.customer.setToDate(this.initToday);
+    console.warn("fromDate:::",this.customer.getFromDate());
+    console.warn("ToDate:::",this.customer.getToDate());
 
-  //     chart.legend.itemContainers.template.paddingTop = 4;
-  //     chart.legend.itemContainers.template.paddingBottom = 4;
-  //     chart.legend.fontSize = 13;
-  //     chart.legend.useDefaultMarker = true;
-  //     let marker: any = chart.legend.markers.template.children.getIndex(0);
-  //     marker.cornerRadius(12, 12, 12, 12);
-  //     marker.strokeWidth = 3;
-  //     marker.strokeOpacity = 1;
-  //     marker.stroke = am4core.color('#000');
+    window.location.reload();
+  }
+  
+  filterLast7days(){
+      var date = new Date();
+      date.setDate(date.getDate() - 7);
+      var dateString = date.toISOString().split('T')[0];
+      let getInputFromDate:any = dateString.split('-');
+      let finalInputFromDate = getInputFromDate[2] + "/" + getInputFromDate[1] + "/" + getInputFromDate[0];
+      this.customer.setFromDate(finalInputFromDate);
+      this.customer.setToDate(this.initToday);
+      window.location.reload();
+  }
+ 
+  filterLast30days(){
+    var date = new Date();
+    date.setDate(date.getDate() - 30);
+    var dateString = date.toISOString().split('T')[0];
+    let getInputFromDate:any = dateString.split('-');
+    let finalInputFromDate = getInputFromDate[2] + "/" + getInputFromDate[1] + "/" + getInputFromDate[0];
+    this.customer.setFromDate(finalInputFromDate);
+    this.customer.setToDate(this.initToday);
+    window.location.reload();
+ }
+ 
+ filterByYear() {
+  var date = new Date();
+  date.setFullYear(date.getFullYear() - 1);  // subtract one year instead of 30 days
+  var dateString = date.toISOString().split('T')[0];
+  let getInputFromDate: any = dateString.split('-');
+  let finalInputFromDate = getInputFromDate[2] + "/" + getInputFromDate[1] + "/" + getInputFromDate[0];
+  this.customer.setFromDate(finalInputFromDate);
+  this.customer.setToDate(this.initToday);
+  window.location.reload();
+ }
+ 
+ filterLastMonth() {
+  let date = new Date();
+  date.setMonth(date.getMonth() - 1);
+  let firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 2);
+  let lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+  let fromDateString = firstDayOfMonth.toISOString().split('T')[0];
+  let toDateString = lastDayOfMonth.toISOString().split('T')[0];
+ 
+  let getInputFromDate: any = fromDateString.split('-');
+  let finalInputFromDate =
+    getInputFromDate[2] +
+    '/' +
+    getInputFromDate[1] +
+    '/' +
+    getInputFromDate[0];
+ 
+    let getInputToDate: any = toDateString.split('-');
+    let finalInputToDate =
+      getInputToDate[2] +
+      '/' +
+      getInputToDate[1] +
+      '/' +
+      getInputToDate[0];
+  this.customer.setFromDate(finalInputFromDate);
+  this.customer.setToDate(finalInputToDate);
+  window.location.reload();
+ }
+ 
+ filterMonthToDate() {
+  let currentDate = new Date();
+  let firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 2);
+  let fromDateString = firstDayOfMonth.toISOString().split('T')[0];
+  let toDateString = currentDate.toISOString().split('T')[0];
+ 
+  let getInputFromDate: any = fromDateString.split('-');
+  let finalInputFromDate =
+    getInputFromDate[2] +
+    '/' +
+    getInputFromDate[1] +
+    '/' +
+    getInputFromDate[0];
+ 
+    this.customer.setFromDate(finalInputFromDate);
+    this.customer.setToDate(this.initToday);
 
-  //     chart.legend.maxHeight = 210;
-  //     chart.legend.scrollable = true;
-  //     chart.legend.position = 'right';
-  //     chart.logo.disabled = true;
-  //     chart.padding(0, 0, 0, 0);
-  //     chart.radius = am4core.percent(95);
-  //     chart.paddingRight = 0;
-  //     var userId: any = localStorage.getItem('userId');
-  //     var fromDate: any = localStorage.getItem('dbFromDate');
-  //     var toDate: any = localStorage.getItem('dbToDate');
-  //     let filterData = {
-  //       userId: userId,
-  //       fromDate: fromDate,
-  //       toDate: toDate,
-  //     };
-  //     this.dashboardservice
-  //       .getConventionalUploadDetails(filterData)
-  //       .subscribe((uploadinfo: any) => {
-  //         this.getuploadinfo = uploadinfo.data.candidateStatusCountDto;
-  //         //console.log(this.getuploadinfo);
-  //         let data = [];
-  //         for (let i = 0; i < this.getuploadinfo.length; i++) {
-  //           let obj = {};
-  //           obj = this.getuploadinfo[i].statusName;
-  //           data.push({
-  //             name: this.getuploadinfo[i].statusName,
-  //             value: this.getuploadinfo[i].count,
-  //             statcode: this.getuploadinfo[i].statusCode,
-  //           });
-  //         }
-  //         chart.data = data;
-  //       });
-  //     // Add and configure Series
-  //     let pieSeries = chart.series.push(new am4charts.PieSeries());
+    console.warn("FORMDATESTRING::",fromDateString)
+    console.warn("toDateString::",toDateString)
 
-  //     pieSeries.slices.template.tooltipText = '{category}: {value}';
-  //     pieSeries.labels.template.disabled = true;
-  //     pieSeries.dataFields.value = 'value';
-  //     pieSeries.dataFields.category = 'name';
-  //     pieSeries.slices.template.stroke = am4core.color('#fff');
-  //     pieSeries.slices.template.strokeWidth = 2;
-  //     pieSeries.slices.template.strokeOpacity = 1;
-  //     // This creates initial animation
-  //     pieSeries.hiddenState.properties.opacity = 1;
-  //     pieSeries.hiddenState.properties.endAngle = -90;
-  //     pieSeries.hiddenState.properties.startAngle = -90;
-  //     pieSeries.legendSettings.itemValueText = '[bold]{value}[/bold]';
-  //     pieSeries.colors.list = [
-  //       am4core.color('#FF8E00'),
-  //       am4core.color('#ffd400'),
-  //       am4core.color('#fd352c'),
-  //       am4core.color('#08e702'),
-  //       am4core.color('#9c27b0'),
-  //       am4core.color('#021aee'),
-  //     ];
 
-  //     pieSeries.slices.template.events.on('hit', (e) => {
-  //       const getchartData = e.target._dataItem as any;
-  //       const statuscodes = getchartData._dataContext.statcode;
-  //       //console.log(statuscodes);
-  //       this.dashboardservice.setStatusCode(statuscodes);
-  //       window.location.reload();
-  //     });
+     window.location.reload();
+ }
 
-  //     chart.legend.itemContainers.template.events.on("hit", (ev) => {
-  //       const getchartData = ev.target._dataItem as any;
-  //       const statuscodes = getchartData._label._dataItem._dataContext.statcode;
-  //       this.dashboardservice.setStatusCode(statuscodes);
-  //       window.location.reload();
-  //     });
-  //     pieSeries.slices.template.cursorOverStyle = am4core.MouseCursorStyle.pointer;
-  //   });
-  // }
+
 }

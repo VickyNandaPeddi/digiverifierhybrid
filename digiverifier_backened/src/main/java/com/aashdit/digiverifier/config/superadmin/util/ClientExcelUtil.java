@@ -53,6 +53,9 @@ public class ClientExcelUtil {
 						String drugtest = String.valueOf(workbook.getSheetAt(0).getRow(1).getCell(9));
 						String creditcheck = String.valueOf(workbook.getSheetAt(0).getRow(1).getCell(10));
 						String addremarks = String.valueOf(workbook.getSheetAt(0).getRow(1).getCell(11));
+						String accountName = String.valueOf(workbook.getSheetAt(0).getRow(1).getCell(22));
+						String conventionalCandidateCheck = String.valueOf(workbook.getSheetAt(0).getRow(1).getCell(23));
+						
 						// String value = workbook.getSheetAt(0).getRow(1).getCell(1);
 		            	orgclientscope.setClientName(clientname);
 						orgclientscope.setEducation(education);
@@ -65,6 +68,8 @@ public class ClientExcelUtil {
 						orgclientscope.setDrugTest(drugtest);
 						orgclientscope.setCreditCheck(creditcheck);
 						orgclientscope.setAdditionalRemarks(addremarks);
+						orgclientscope.setAccountName(accountName);
+						orgclientscope.setConventionalCandidateCheck(conventionalCandidateCheck);
 						clientscopeList.add(orgclientscope);
 
 		            // }

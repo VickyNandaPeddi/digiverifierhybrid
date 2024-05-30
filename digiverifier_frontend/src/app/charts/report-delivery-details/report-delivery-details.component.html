@@ -1,43 +1,225 @@
-
+<div class="card-body" style="padding: 5px;" class="float-right">
+    <div class="input-group mb-4">
+        <input type="text" placeholder="search" class="form-control form-control-sm" [(ngModel)]="searchText" *ngIf="containerStat"  (keyup.enter)="performSearch()"/>  
+        <button class="btn-sm btn-primary" type="button" [(ngModel)]="searchText" *ngIf="containerStat"  (click)="performSearch()">
+          <i class="fa fa-search"></i>
+        </button>
+      </div>
+</div>
         <div class="table-responsive" *ngIf="containerStat">
             <table class="table table-bordered" id="tbl-uploaddetails">
                 <thead>
-                    <th>S.Ndsfaso</th>
+                    <th>SI#</th>
                     <th>Agent Name</th>
                     <th>Candidate Name</th>
                     <th>Contact Number</th>
                     <th>Email ID</th>
                     <th>Applicant ID</th>
+                    <th *ngIf="!this.getServiceConfigCodes.includes('PANTOUAN')">Status</th>
                     <th>Data uploaded</th>
-                    <th>Invited On</th>
-                    <th>CAF Submitted On</th>
-                    <th>Pre Approval Report</th>
-                    <th *ngIf="finalreport">Final/Interium Report</th>
-                    <th>Action</th>
+                    <th *ngIf="!this.getServiceConfigCodes.includes('PANTOUAN')">Invited On</th>
+                    <th *ngIf="!this.getServiceConfigCodes.includes('PANTOUAN')">CWF completed on</th>
+                    <th *ngIf="(getReportDeliveryStatCodes==='PENDINGAPPROVAL' || getReportDeliveryStatCodes==='INTERIMREPORT' || getReportDeliveryStatCodes==='FINALREPORT' || getConventionalReportDeliveryStatCodes==='CONVENTIONALPENDINGAPPROVAL' || getConventionalReportDeliveryStatCodes==='CONVENTIONALINTERIMREPORT')
+                    && (!this.getServiceConfigCodes.includes('PANTOUAN'))">Case Initiated on</th>
+                    <th *ngIf="(getReportDeliveryStatCodes==='PENDINGAPPROVAL' || getReportDeliveryStatCodes==='INTERIMREPORT' || getReportDeliveryStatCodes==='FINALREPORT' || getConventionalReportDeliveryStatCodes==='CONVENTIONALINTERIMREPORT')
+                    && (!this.getServiceConfigCodes.includes('PANTOUAN'))">Report Delivered on</th>
+                    <th *ngIf="this.getServiceConfigCodes.includes('ITR') || this.getServiceConfigCodes.includes('DIGILOCKER') || getConventionalReportDeliveryStatCodes==='CONVENTIONALPENDINGAPPROVAL' || getConventionalReportDeliveryStatCodes==='CONVENTIONALINTERIMREPORT'">Pre Approval Report</th>
+                    <td *ngIf="this.getServiceConfigCodes.includes('PANTOUAN')">Report</td>
+                    <th *ngIf="finalreport">Interim Report</th>
+                    <th *ngIf="finalreport">Final Report</th>
+                    <th *ngIf="interimreport">Interim Report</th>
+                    <th *ngIf="Action && (!this.getServiceConfigCodes.includes('PANTOUAN'))">Action</th>
+                    <th *ngIf="this.getServiceConfigCodes.includes('FORWARDREPORT') && interimreport"><input type="checkbox" (click)="selectAll($event)"></th>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let item of CharReportDelivery; let i=index">
+                    <tr *ngFor="let item of CharReportDelivery; let i=index" [hidden]="!searchFilter(item)">
                         <td>{{i+1}}</td>
                         <td>{{ item.createdByUserFirstName }} {{ item.createdByUserLastName }}</td>
                         <td>{{item.candidateName}}</td>
                         <td>{{item.contactNumber}}</td>
                         <td>{{item.emailId}}</td>
                         <td>{{item.applicantId}}</td>
+                        <td *ngIf="!this.getServiceConfigCodes.includes('PANTOUAN')">{{item.candidateStatusName}}</td>
                         <td>{{item.createdOn}}</td>
-                        <td>{{item.dateOfEmailInvite}}</td>
-                        <td>{{item.submittedOn}}</td>
-                        <td>
-                            <button type="button" (click)="downloadPreApprovalReport(item)" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button>
+                        <td *ngIf="!this.getServiceConfigCodes.includes('PANTOUAN')">{{item.dateOfEmailInvite}}</td>
+                        <td *ngIf="!this.getServiceConfigCodes.includes('PANTOUAN')">{{item.submittedOn}}</td>
+                        <td *ngIf="(getReportDeliveryStatCodes==='PENDINGAPPROVAL' || getReportDeliveryStatCodes==='INTERIMREPORT'|| getReportDeliveryStatCodes==='FINALREPORT'  || getConventionalReportDeliveryStatCodes==='CONVENTIONALINTERIMREPORT' || getConventionalReportDeliveryStatCodes==='CONVENTIONALPENDINGAPPROVAL')
+                        && (!this.getServiceConfigCodes.includes('PANTOUAN'))">{{item.caseInitiationDate}}</td>
+                        <td *ngIf="getReportDeliveryStatCodes==='PENDINGAPPROVAL' || getConventionalReportDeliveryStatCodes==='CONVENTIONALPENDINGAPPROVAL' && (!this.getServiceConfigCodes.includes('PANTOUAN'))">{{item.preOfferReportDate || 'NA'}}</td>
+                        <td *ngIf="getReportDeliveryStatCodes==='INTERIMREPORT' || getConventionalReportDeliveryStatCodes==='CONVENTIONALINTERIMREPORT' && (!this.getServiceConfigCodes.includes('PANTOUAN'))">{{item.interimReportDate}}</td>
+                        <td *ngIf="getReportDeliveryStatCodes==='FINALREPORT' && (!this.getServiceConfigCodes.includes('PANTOUAN'))">{{item.finalReportDate}}</td>
+                    
+                        <ng-template [ngIf]="item.candidateStatusName !== 'Conventional Interim Report'">
+                        <td *ngIf="(item.candidateStatusName !== 'Conventional QC Pending') && (this.getServiceConfigCodes.includes('ITR') || this.getServiceConfigCodes.includes('DIGILOCKER')|| this.getServiceConfigCodes.includes('PANTOUAN'))">
+                            <button type="button" *ngIf="item.candidateStatusName === 'QC Pending' || item.candidateStatusName === 'Interim Report'  || item.candidateStatusName === 'Final Report' || item.candidateStatusName === 'EPFO Completed' || item.candidateStatusName === 'EPFO Skipped'" (click)="downloadPreApprovalReport(item)" class="btn btn-sm btn-primary" title="View Report">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </ng-template>
+                    <ng-template [ngIf]="item.candidateStatusName === 'Conventional Interim Report'">
+                        <td>NA</td>
+                    </ng-template>
+                    <!-- <td *ngIf="this.getServiceConfigCodes.includes('ITR') || this.getServiceConfigCodes.includes('DIGILOCKER') || this.getServiceConfigCodes.includes('PANTOUAN')">
+                            <button type="button" *ngIf="item.candidateStatusName === 'QC Pending' || item.candidateStatusName === 'Interim Report'  || item.candidateStatusName === 'Final Report' || item.candidateStatusName === 'EPFO Completed' || item.candidateStatusName === 'EPFO Skipped'" (click)="downloadPreApprovalReport(item)" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button>
+                        </td> -->
+                        <td *ngIf="finalreport">
+                            <button type="button" *ngIf="item.candidateStatusName === 'Interim Report'  || item.candidateStatusName === 'Final Report'" (click)="downloadFinalReport(item, 'INTERIM')" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button>
                         </td>
                         <td *ngIf="finalreport">
-                            <button type="button"  (click)="downloadFinalReport(item)" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button>
+                            <button type="button" *ngIf="item.candidateStatusName === 'Final Report'" (click)="downloadFinalReport(item, 'FINAL')" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button>
                         </td>
-                        <td>
-                            <button type="button" *ngIf="stat_linkAdminApproval" (click)="linkAdminApproval(item.candidateCode)" class="btn btn-sm btn-warning" title="Edit"><i class="fas fa-edit"></i></button>
-                            <button type="button" *ngIf="stat_linkCandidateReport" (click)="linkCandidateReport(item.candidateCode)" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button>
+                        <td *ngIf="interimreport">
+                            <button type="button" *ngIf="item.candidateStatusName === 'Interim Report'  || item.candidateStatusName === 'Final Report'|| item.candidateStatusName === 'Conventional Interim Report'" (click)="downloadFinalReport(item, getConventionalReportDeliveryStatCodes ? 'CONVENTIONALINTERIM' : 'INTERIM')" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button>
+                            <!-- <button type="button" *ngIf="item.candidateStatusName === 'Interim Report' || item.candidateStatusName === 'Final Report'|| item.candidateStatusName === 'Conventional Interim Report'" (click)="downloadInterimReport(item,null)" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button> -->
                         </td>
+                        <td *ngIf="Action && (!this.getServiceConfigCodes.includes('PANTOUAN'))">
+                        <!-- <td *ngIf="Action">    -->
+                            <button 
+                            type="button" 
+                            *ngIf="item.conventionalCandidate && (item.candidateStatusName === 'Conventional QC Pending' || item.candidateStatusName === 'Conventional Interim Report')"
+                            (click)="initiatevendor(item.candidateId,item.candidateCode)" 
+                            class="btn btn-primary btn-sm" 
+                            title="Edit"
+                          >
+                            <i class="fa fa-edit"></i>
+                          </button> 
+                          
+                            <button type="button" *ngIf="item.candidateStatusName === 'QC Pending' || item.candidateStatusName === 'Interim Report'" (click)="linkAdminApproval(item.candidateCode)" class="btn btn-warning btn-sm" title="Edit"> <i class="fa fa-edit"></i></button>
+                            <button type="button" *ngIf="!item.conventionalCandidate && item.candidateStatusName === 'Invitation Sent' || item.candidateStatusName === 'Digilocker Completed' || item.candidateStatusName === 'ITR Completed' || item.candidateStatusName === 'EPFO Completed' || item.candidateStatusName === 'EPFO Skipped' || item.candidateStatusName === 'CAF Pending' || item.candidateStatusName === 'Invitation Expired' || item.candidateStatusName === 'Invalid Upload' || item.candidateStatusName === 'Relative Address Completed' || item.candidateStatusName === 'Re Invite' || item.candidateStatusName === 'Process Declined'" (click)="openModal(modalData, item.candidateCode)" class="btn btn-warning btn-sm"  title="Edit"><i class="fa fa-edit"></i></button>
+                            <button type="button" *ngIf="!item.conventionalCandidate && item.candidateStatusName === 'Invitation Sent' || item.candidateStatusName === 'Digilocker Completed' || item.candidateStatusName === 'ITR Completed' || item.candidateStatusName === 'EPFO Completed' || item.candidateStatusName === 'EPFO Skipped' || item.candidateStatusName === 'CAF Pending' || item.candidateStatusName === 'Invitation Expired' || item.candidateStatusName === 'Invalid Upload' || item.candidateStatusName === 'Relative Address Completed' || item.candidateStatusName === 'Re Invite' || item.candidateStatusName === 'Process Declined'" (click)="activeInactive(item.candidateCode)" class="btn btn-danger btn-sm" title="Decline"><i class="fas fa-times"></i></button>
+                           <!-- <button type="button" *ngIf="stat_linkAdminApproval" (click)="linkAdminApproval(item.candidateCode)" class="btn btn-sm btn-warning" title="Edit"><i class="fas fa-edit"></i></button> -->
+                            <!-- <button type="button" *ngIf="item.candidateStatusName === 'Interim Report'" (click)="linkCandidateReport(item.candidateCode)" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button> -->
+                        </td>
+                        <td *ngIf="this.getServiceConfigCodes.includes('FORWARDREPORT') && interimreport"><input type="checkbox" id="{{item.candidateId}}" value="{{item.candidateId}}" class="childCheck" (change)="childCheck($event, item.applicantId)"></td>
                     </tr>
                 </tbody>
             </table>
+
+            <form [formGroup]="formSendInvitation" *ngIf="containerStat">
+                <input type="hidden" formControlName="candidateReferenceNo">
+                <input type="hidden" formControlName="statuscode">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <button type="submit" *ngIf="this.getServiceConfigCodes.includes('FORWARDREPORT') && interimreport" (click)="openForwardReportModal(modalForwardReportData)" class="btn btn-sm btn-success ">Forward Report</button>
+                    </div>
+                </div>
+                
+            </form>
+            <!-- <div class="pagination">
+                <button [disabled]="currentPageIndex == 0" (click)="goToPrevPage()">Previous</button>
+                <span>Page {{currentPageIndex}} of {{totalPages}}</span>
+                <button [disabled]="currentPageIndex == totalPages - 1" (click)="goToNextPage()">Next</button>
+            </div> -->
+            <div class="pagination">
+                <button class="pagination-button prev-button" [disabled]="currentPageIndex === 0" (click)="onPageChange(currentPageIndex - 1)">
+                    Previous
+                </button>
+           
+                <ng-container *ngFor="let page of getDisplayedPages()">
+                    <button class="pagination-button page-number-button" [ngClass]="{'active': page === currentPageIndex}" (click)="onPageChange(page)">
+                        {{ page + 1 }}
+                    </button>
+                </ng-container>
+           
+                <button class="pagination-button next-button" [disabled]="currentPageIndex === totalPages - 1" (click)="onPageChange(currentPageIndex + 1)">
+                    Next
+                </button>
+            </div>
+        
         </div>
+        <ng-template #modalData let-modal>
+            <div class="modal-header">
+              <h4 class="modal-title" id="modal-basic-title">Update Candidate</h4>
+              <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="updateCandidate">
+                    <div class="row ">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="" class="required">Candidate Name</label>
+                                <input type="text" class="form-control form-control-sm" id="" formControlName="candidateName">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="" class="required">Agent Name</label>
+                                <input type="text" readonly class="form-control form-control-sm" id="" formControlName="createdByUserFirstName">
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-none">
+                            <div class="form-group">
+                                <label for="" class="required">Reference No</label>
+                                <input type="text" readonly class="form-control form-control-sm" id="" formControlName="candidateCode">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="" class="">Applicant Id</label>
+                                <input type="text" class="form-control form-control-sm" id="" formControlName="applicantId">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="" class="">Contact Number</label>
+                                <input type="text" class="form-control form-control-sm" minlength="10" maxlength="10" id="" formControlName="contactNumber">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="" class="required">Email ID</label>
+                                <input type="text" class="form-control form-control-sm" id="" formControlName="emailId">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 text-center mt-3 pb-3">
+                            <button type="button" (click)="onSubmit(updateCandidate)" class="btn btn-primary btn-sm">Submit</button>
+                            <button type="button" class="btn btn-danger btn-sm" (click)="modal.close('Save click')">Close</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+          </ng-template>
+        
+          <ng-template #modalForwardReportData let-modal>
+            <div class="modal-header">
+              <h4 class="modal-title" id="modal-basic-title">Forward Report</h4>
+              <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="forwardReportForm">
+                    <!-- <div class="row">
+                        <div class="col-md-10">
+                            <div class="form-group">
+                                <label for="" class="required">Result</label>
+                                <select class="form-control form-control-sm" formControlName="applicantId">
+                                    <option [ngValue]="null" disabled>--Select--</option>
+                                    <option *ngFor="let item of tmp" [value]="item.candidateCode" >{{ item.applicantId }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div> -->
+                    <div class="row ">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="" class="required">Email ID</label>
+                                <input type="text" class="form-control form-control-sm" id="" formControlName="emailIds">
+                                <label style="font-size: 10px !important; font-weight: 500 !important;" for="" >e.g., example1@example.com, example2@example.com</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 text-center mt-3 pb-3">
+                            <button type="button" (click)="onForwardReportSubmit(forwardReportForm)" class="btn btn-primary btn-sm">Submit</button>
+                            <button type="button" class="btn btn-danger btn-sm" (click)="modal.close('Save click')">Close</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+          </ng-template>
 

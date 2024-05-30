@@ -11,8 +11,13 @@ export class LoaderInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     this.loaderService.show();
+    const secureReq = req.clone({
+      headers: req.headers
+        .set('Content-Security-Policy', "default-src 'self';")
+    });
     return next.handle(req).pipe(
         finalize(() => this.loaderService.hide())
     );
   }
 }
+

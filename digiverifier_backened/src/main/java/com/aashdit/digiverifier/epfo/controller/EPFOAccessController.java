@@ -15,7 +15,9 @@ import com.aashdit.digiverifier.epfo.dto.EpfoDetailsDto;
 import com.aashdit.digiverifier.epfo.service.EpfoService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
+//import io.swagger.annotations.ApiOperation;
 
 @RequestMapping(value = "/api/allowAll")
 @RestController
@@ -33,7 +35,7 @@ public class EPFOAccessController {
 	 * @throws JsonProcessingException
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "generating an access token from the EPFO site")
+	@Operation(summary = "generating an access token from the EPFO site")
 	@GetMapping(value = "/epfoCaptcha/{candidateCode}")
 	public ServiceOutcome<EpfoDetailsDto> getEpfoCaptcha(@PathVariable String candidateCode) {
 		ServiceOutcome<EpfoDetailsDto> svcSearchResult = new ServiceOutcome<>();
@@ -48,7 +50,7 @@ public class EPFOAccessController {
 		return svcSearchResult;
     }
 	
-	@ApiOperation(value = "Getting the epfo details from EPFO site")
+	@Operation(summary = "Getting the epfo details from EPFO site")
 	@PostMapping(value = "/getEpfodetail")
 	public ServiceOutcome<String> getEpfodetail(@RequestBody EpfoDetailsDto epfoDetails){
 	
@@ -63,7 +65,7 @@ public class EPFOAccessController {
 		return response;
 	}
 
-	@ApiOperation(value = "Getting the epfo details from EPFO site")
+	@Operation(summary = "Getting the epfo details from EPFO site")
 	@PostMapping(value = "/getEpfodetailNew")
 	public ServiceOutcome<String> getEpfodetailNew(@RequestBody EpfoDetailsDto epfoDetails){
 	

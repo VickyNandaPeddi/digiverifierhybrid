@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en-us" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<title>DigiVerifier Pdf</title>
+		<meta charset="UTF-8" />
+		<link th:href="${cssPath + '/fonts.css'}" rel="stylesheet" />
+		<link th:if="${!#strings.equalsIgnoreCase(root.project, 'KPMG')}" th:href="${cssPath + '/common.css'}" rel="stylesheet" />
+		<link th:href="@{http://fonts.googleapis.com/css?family=Calibri}" rel='stylesheet' type='text/css' />
+<style>
+span {
+	font-family: 'Calibri', sans-serif;
+}
+
+.table-st {
+	clear: both;
+	width: 100%;
+	border: 1px solid #1C4E80;
+	border-collapse: collapse;
+}
+
+.table-st tr {
+	border: 1px solid #1C4E80;
+	border-collapse: collapse;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.text-left {
+	text-align: left;
+}
+
+.table-st tr td {
+	border: 1px solid #1C4E80;
+	border-collapse: collapse;
+	padding: 5px;
+}
+
+.table-st tr td span {
+	margin-left: 5px;
+}
+
+.blue-bg {
+	background-color: #1C4E80;
+}
+
+.grey-bg {
+	background-color: #DDDDDD;
+}
+
+.black-text {
+	color: black;
+	font-size: 14px;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+}
+
+.grey-text {
+	color: black;
+	font-size: 13px !important;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+}
+
+.white-text {
+	font-weight: bold;
+	color: #1C4E80;
+	font-family: 'Calibri', sans-serif;
+	font-size: 13px;
+}
+
+.td-heading {
+	font-weight: bold;
+	font-size: 15px;
+}
+
+.line-break {
+	display: block;
+	height: 15px;
+}
+
+.sub-heading {
+	text-align: center;
+	font-weight: bold;
+	font-size: 18px;
+}
+
+.green-status {
+	margin: 0px;
+	color: #008000;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.amber-status {
+	margin: 0px;
+	color: #ffA500;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.red-status {
+	margin: 0px;
+	color: #ff0000;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.invalid-status {
+	margin: 0px;
+	color: #000000;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.black-box {
+	border: 1px solid black;
+}
+
+.table-st {
+            width: 100%;
+            border-collapse: collapse;
+        } 
+
+.table-st td {
+            padding: 7px;
+            border: 1px solid #ccc;
+        } 
+
+/* Media query for small screens */
+        @media screen and (max-width: 480px) {
+            .table-st td {
+                display: block;
+                width: 100%;
+            }
+        } 
+
+        /* Additional styles for specific elements */
+        .text-center {
+            text-align: center;
+        } 
+
+        .text-left {
+            text-align: left;
+        } 
+
+        .sub-heading {
+            font-size: 14px;
+            font-weight: 600;
+            color: whitesmoke;
+        } 
+        .table-st img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .profile-width{
+            min-width:160px;
+        }
+        
+        .centered-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%; 
+            height: 100%; 
+            margin-left: 40px
+        }
+		</style>
+	</head>
+	<body style="background-color: #fff; padding: 0px; margin: 0px; position: relative; font-family: 'Calibri', sans-serif; color: #666666;">
+		<section class="wrapper" style="width: 100%; margin: 0 auto; height: 80%;">
+			<span class="line-break"></span>
+			<table class="table-st">
+				<tr>						
+					<td class="text-center blue-bg" colspan="2" style="width: 50%;font-size: 23px; color: whitesmoke;padding: 13px;">
+						<span class="sub-heading" style="font-family: Roboto;">Pre-Offer UAN Report</span>
+					</td>
+				</tr>
+				<tr>
+					<td class="text-left" style="padding: 23px;">
+						<span style="font-size: 13px; color: #605f5f; width: 50%; font-weight: bold;font-family: system-ui, 'Segoe UI', Roboto, sans-serif;"><b th:text="${root.organizationName}"></b></span>
+					</td>
+					<td class="text-left" style="padding: 23px;">
+						<span style="font-size: 12px; color: #605f5f; width: 50%;"><b th:text="${root.organizationLocation}"></b></span>
+					</td>					
+				</tr>			
+			</table>
+			<span class="line-break"></span>
+			<span class="line-break"></span>
+			<table class="table_head table-st">
+				<tr class="text-center">
+					<td class="blue-bg" colspan="2">
+						<span class="td-heading black-text" style="color: whitesmoke;">BACKGROUND PROFILE</span>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding: 5px; width: 31%" class="grey-bg text-left">
+						<span class="black-text"><b>Name of the Candidate</b></span>
+					</td>
+					<td style="padding: 5px;" class="text-left">
+						<span th:if="${root.itrEpfoHeaderDetails.itrName == null}" th:text="${root.name}" class="grey-text"></span>
+						<span th:if="${root.itrEpfoHeaderDetails.itrName != null}" th:text="${root.itrEpfoHeaderDetails.itrName}" class="grey-text"></span>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding: 5px; width: 31%" class="grey-bg text-left">
+						<span class="black-text"><b>UAN</b></span>
+					</td>
+				<!--	<td style="padding: 5px;" class="text-left">
+						    <span class="grey-text" th:if="${#lists.size(root.epfoDetailsForMultiUAN) == 1 and root.epfoDetailsForMultiUAN[0] != null}" <b th:text="${root.epfoDetailsForMultiUAN[0].uanNo1}"></b></span>
+						    <span class="grey-text" th:if="${#lists.size(root.epfoDetailsForMultiUAN) > 1 and root.epfoDetailsForMultiUAN[1] != null}" <b th:text="${root.epfoDetailsForMultiUAN[0].uanNo1}+ '/' +${root.epfoDetailsForMultiUAN[1].uanNo1}"></b></span>
+					</td>-->
+					<td style="padding: 5px;" class="text-left">
+					    <span class="grey-text" th:if="${#lists.size(root.epfoDetailsForMultiUAN) > 0}">
+					        <b th:text="${root.epfoDetailsForMultiUAN[0].uanNo1}"></b>
+					    </span>
+					    <span class="grey-text" th:each="detail, iterStat : ${root.epfoDetailsForMultiUAN}" th:if="${iterStat.index > 0}">
+					        <span th:text="'/' + ${detail.uanNo1}" th:remove="tag"></span>
+					    </span>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding: 5px; width: 31%" class="grey-bg text-left" th:if="!${#lists.contains(root.orgServices, 'PANTOUAN')}">
+						<span class="black-text"><b>CG & DIGI Reference ID </b></span>
+					</td>
+					<td style="padding: 5px; width: 31%" class="grey-bg text-left" th:if="${#lists.contains(root.orgServices, 'PANTOUAN')}">
+						<span class="black-text"><b>Reference ID </b></span>
+					</td>
+					<td style="padding: 5px;" class="text-left">
+						<span class="grey-text"> <b th:text="${root.applicantId}"></b></span>
+					</td>
+				</tr>
+				<tr th:if="${root.accountName != null and not #strings.isEmpty(root.accountName)}" th:trim="true">
+					<td style="text-align: left; padding: 5px; width: 31%" class="grey-bg text-left">
+						<span class="black-text"><b>Client Name</b></span>
+					</td>
+					<td style="padding: 5px;" class="text-left">
+						<span class="grey-text"> <b th:text="${root.accountName}"></b></span>
+					</td>
+				</tr>
+				<tr>
+					<td style="text-align: left; padding: 5px; width: 31%" class="grey-bg text-left">
+						<span class="black-text"><b>Project</b></span>
+					</td>
+					<td style="padding: 5px;" class="text-left">
+						<span class="grey-text"> <b th:text="${root.project}"></b></span>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding: 5px; width: 31%" class="grey-bg text-left">
+						<span class="black-text"><b>Case Initiation Date</b></span>
+					</td>
+					<td style="padding: 5px" class="text-left">
+						<span class="grey-text"> <b th:text="${#strings.toUpperCase(#dates.format(root.caseInitiationDate, 'dd-MMM-yyyy'))}"></b></span>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding: 5px; width: 31%" class="grey-bg text-left">
+						<span class="black-text"><b>Report Delivered Date</b></span>
+					</td>
+					<td style="padding: 5px;" class="text-left" th:if="!${#lists.contains(root.orgServices, 'PANTOUAN')}">
+						<span class="grey-text"> <b th:text="${#strings.toUpperCase(#dates.format(root.interimReportDate, 'dd-MMM-yyyy'))}"></b></span>
+					</td>
+					<td style="padding: 5px;" class="text-left" th:if="${#lists.contains(root.orgServices, 'PANTOUAN')}">
+						<span class="grey-text"> <b th:text="${#strings.toUpperCase(#dates.format(root.preOfferReportDate, 'dd-MMM-yyyy'))}"></b></span>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding: 5px; width: 31%" class="grey-bg text-left">
+						<span class="black-text"><b>Case Reinitiation Date</b></span>
+					</td>
+					<td style="padding: 5px;" class="text-left" th:if="${root.caseReinitDate != null}">
+						<span class="grey-text"> <b th:text="${#strings.toUpperCase(#dates.format(root.caseReinitDate, 'dd-MMM-yyyy'))}"></b></span></span>
+					</td>
+					<td style="padding: 5px;" class="text-left" th:if="${root.caseReinitDate == null}">
+						<span class="grey-text"> <b>NA</b></span></span>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding: 5px; width: 31%" class="grey-bg text-left">
+						<span class="black-text"><b>Amended Report Date</b></span>
+					</td>
+					<td style="padding: 5px;" class="text-left" th:if="${root.interimAmendedDate != null}">
+						<span class="grey-text"> <b th:text="${#strings.toUpperCase(#dates.format(root.interimAmendedDate, 'dd-MMM-yyyy'))}"></b></span></span>
+					</td>
+					<td style="padding: 5px;" class="text-left" th:if="${root.interimAmendedDate == null}">
+						<span class="grey-text"> <b>NA</b></span></span>
+					</td>
+				</tr>
+				<tr th:if="!${#lists.contains(root.orgServices, 'PANTOUAN')}">
+					<td style="padding: 5px; width: 31%" class="grey-bg text-left">
+						<span class="black-text"><b>Report Status</b></span>
+					</td>
+					<td style="padding: 5px;" class="text-left" th:switch="${root.verificationStatus.name()}">
+							<span class="grey-text" th:case="'GREEN'">PRELIMINARY GREEN</span>
+							<span class="grey-text" th:case="'AMBER'">PRELIMINARY AMBER</span> 
+						    <span class="grey-text" th:case="'RED'">PRELIMINARY RED</span>
+					        <span class="grey-text" th:case="*">INVALID</span>
+					</td>
+				</tr>
+				<tr style="padding: 5px">
+					<td style="text-align: left; width: 31%; padding: 10px 5px;" class="grey-bg text-left" th:if="!${#lists.contains(root.orgServices, 'PANTOUAN')}">
+						<span class="black-text"><b>Verification Status</b></span>
+					</td>
+					<td style="text-align: left; width: 31%; padding: 10px 5px;" class="grey-bg text-left" th:if="${#lists.contains(root.orgServices, 'PANTOUAN')}">
+						<span class="black-text"><b>Report Status</b></span>
+					</td>
+					<td style="border-collapse: collapse; padding: 10px 5px;" th:switch="${root.verificationStatus.name()}">
+						<span class="green-status" th:case="'GREEN'" th:text="${root.verificationStatus}"></span> 
+						<span class="amber-status" th:case="'AMBER'" th:text="${root.verificationStatus}"></span> 
+						<span class="red-status" th:case="'RED'" th:text="${root.verificationStatus}"></span>
+					    <span class="invalid-status grey-text" th:case="*">INVALID</span>
+					</td>	
+				</tr>
+			</table>
+			<span class="line-break"></span>
+			
+			<span class="line-break"></span>
+			<table class="table-st" style="page-break-inside: avoid;">
+				<tr>
+					<td colspan="3" class="blue-bg text-center">
+						<span class="td-heading black-text"	style="color: whitesmoke;">COLOR CODE</span>
+					</td>
+				</tr>
+				
+				<tr class="text-center">	
+					<td style="width: 33%">
+						<span style="font-size: 10px; font-weight: bold;" class="grey-text">DISCREPANCY - <b style="color: #ff0000">RED</b></span>
+					</td>
+					<td style="width: 33%">
+						<span style="font-size: 10px; font-weight: bold;" class="grey-text">CLEARED - <b style="color: #008000">GREEN</b></span>
+					<td style="width: 33%">
+						<span style="font-size: 10px; font-weight: bold;" class="grey-text">UNABLE TO VERIFY/ DUAL - <b style="color: #ffA500">AMBER</b>
+					</td>	
+				</tr>
+			</table>
+			<span class="line-break"></span>
+			<table class="table_head table-st" style="page-break-inside: avoid;" th:if="${root.organisationScope!=null}">
+			    <!-- Concept Title head -->
+			    <tr>
+			        <td class="blue-bg">
+			            <span class="td-heading black-text" style="color: whitesmoke;">REMARKS / COMMENTS</span>
+			        </td>
+			    </tr>
+			    <tr th:if="${root.organisationScope!=null and root.organisationScope.dualEmployment != null and root.organisationScope.dualEmployment != ''}">
+			        <td style="padding: 5px; min-width: 100px;" class="text-left">
+			            <span class="grey-text" th:if="${root.organisationScope}">
+			                <b th:text="${root.organisationScope.dualEmployment}"></b>
+			            </span>
+			        </td>
+			    </tr>
+			    <tr th:if="${root.organisationScope!=null and root.organisationScope.undisclosed != null and root.organisationScope.undisclosed != ''}">
+			        <td style="padding: 5px; min-width: 100px;" class="text-left">
+			            <span class="grey-text" th:if="${root.organisationScope}">
+			                <b th:text="${root.organisationScope.undisclosed}"></b>
+			            </span>
+			        </td>
+			    </tr>
+			    <tr th:if="${root.organisationScope!=null and root.organisationScope.dataNotFound != null and root.organisationScope.dataNotFound != ''}">
+			        <td style="padding: 5px; min-width: 100px;" class="text-left">
+			            <span class="grey-text" th:if="${root.organisationScope}">
+			                <b th:text="${root.organisationScope.dataNotFound}"></b>
+			            </span>
+			        </td>
+			    </tr>
+			    <tr th:if="${root.organisationScope!=null and root.organisationScope.dNHDB != null and root.organisationScope.dNHDB != ''}">
+			        <td style="padding: 5px; min-width: 100px;" class="text-left">
+			            <span class="grey-text" th:if="${root.organisationScope}">
+			                <b th:text="${root.organisationScope.dNHDB}"></b>
+			            </span>
+			        </td>
+			    </tr>
+			    <tr th:if="${root.organisationScope!=null and root.organisationScope.tenureMismatch != null and root.organisationScope.tenureMismatch != ''}">
+			        <td style="padding: 5px; min-width: 100px;" class="text-left">
+			            <span class="grey-text" th:if="${root.organisationScope}">
+			                <b th:text="${root.organisationScope.tenureMismatch}"></b>
+			            </span>
+			        </td>
+			    </tr>
+			    <tr th:if="${root.organisationScope!=null and root.organisationScope.overseasEmployment != null and root.organisationScope.overseasEmployment != ''}">
+			        <td style="padding: 5px; min-width: 100px;" class="text-left">
+			            <span class="grey-text" th:if="${root.organisationScope}">
+			                <b th:text="${root.organisationScope.overseasEmployment}"></b>
+			            </span>
+			        </td>
+			    </tr>
+			    <tr th:if="${root.organisationScope!=null and root.organisationScope.others != null and root.organisationScope.others != ''}">
+			        <td style="padding: 5px; min-width: 100px;" class="text-left">
+			            <span class="grey-text" th:if="${root.organisationScope}">
+			                <b th:text="${root.organisationScope.others}"></b>
+			            </span>
+			        </td>
+			    </tr>
+			</table>
+
+			<span class="line-break"></span>
+			<!--<table class="table-st">
+				<tr>
+					<td class="blue-bg text-center">
+						<span class="td-heading black-text"	style="color: whitesmoke;">REMARKS / COMMENTS</span>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding: 5px;" class="text-left"><span class="grey-text"><b th:text="${root.comments}"></b></span></td>
+				</tr>
+			</table>-->
+			<div style="page-break-after: always;"></div>
+			<p class="td-heading text-center" style="color: black; font-family: Roboto; font-size: 15px;">UAN CHECK SUMMARY</p>
+			<span class="line-break"></span>
+			<!-- Assuming this code is within a Thymeleaf template -->
+<!-- Assuming root.epfoDetailsForMultiUAN is a list of objects with properties: epfoName1, uanNo1 -->
+
+<div th:each="epfoDetails, index: ${root.epfoDetailsForMultiUAN}">
+    <span class="inline-block left output-data grey-text" style="float: left;" th:if="${epfoDetails != null}"
+        th:text="'Candidate: ' + ${epfoDetails.epfoName1}"></span>
+    <span class="inline-block left output-data grey-text" style="float: right;" th:if="${epfoDetails != null}"
+        th:text="'UAN: ' + ${epfoDetails.uanNo1}"></span>
+
+    <span class="line-break"></span>
+
+    <table class="table-st" style="page-break-inside: avoid;">
+        <tr class="blue-bg text-center">
+            <td class="white-text" colspan="6">
+                <span class="td-heading" style="color: whitesmoke;"><b>Employment Details Found in EPFO-Service History</b></span>
+            </td>
+        </tr>
+        <tr class="text-center">
+            <td style="width: 20%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+                <span class="white-text text-center">MEMBER ID</span>
+            </td>
+            <td style="width: 30%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+                <span class="white-text text-left">Employer Name</span>
+            </td>
+            <td style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+                <span class="white-text">DOJ </span>
+            </td>
+            <td style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+                <span class="white-text">DOE</span>
+            </td>
+            <td style="width: 5%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+                <span class="white-text">Source</span>
+            </td>
+        </tr>
+        <tr class="text-center" th:if="${root.serviceHistory==null}">
+            <td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td>
+        </tr>
+        <th:block class="text-center" th:each="epfo, stat: ${root.serviceHistory}" th:if="${epfo.uan == epfoDetails.uanNo1}">
+            <tr class="text-center">
+                <td class="grey-text text-left">
+                    <span style="font-size: 12px" th:text="${epfo.memberId}"></span>
+                </td>
+                <td class="grey-text text-left">
+                    <span style="font-size: 12px" th:text="${epfo.candidateEmployerName}"></span>
+                </td>
+                <td class="grey-text text-center">
+                    <span style="font-size: 12px" th:text="${epfo.inputDateOfJoining != null ? #strings.replace(epfo.inputDateOfJoining, '/', '-') : ''}"></span>
+                </td>
+                <td class="grey-text text-center">
+                    <span style="font-size: 12px" th:text="${epfo.inputDateOfExit != null ? #strings.replace(epfo.inputDateOfExit, '/', '-') : ''}"></span>
+                </td>
+                <td class="grey-text text-center">
+                    <span style="font-size: 12px" th:text="${epfo.serviceName}"></span>
+                </td>
+            </tr>
+        </th:block>
+    </table>
+    <span class="line-break"></span>
+    <span class="line-break"></span>
+</div>
+
+            
+<!--			<span class="inline-block left output-data grey-text" style="float: left;" th:if="${#lists.size(root.epfoDetailsForMultiUAN) > 0 and root.epfoDetailsForMultiUAN[0] != null}" th:text="'Candidate: ' + ${root.epfoDetailsForMultiUAN[0].epfoName1}"></span>
+			<span class="inline-block left output-data grey-text" style="float: right;" th:if="${#lists.size(root.epfoDetailsForMultiUAN) > 0 and root.epfoDetailsForMultiUAN[0] != null}" th:text="'UAN: ' + ${root.epfoDetailsForMultiUAN[0].uanNo1}"></span>
+            
+            <span class="line-break"></span>
+			<table class="table-st">
+				<tr class="blue-bg text-center">
+					<td class="white-text" colspan="6">
+						<span class="td-heading" style="color: whitesmoke;"><b>Employment Details Found in EPFO-Service History</b> </span>
+					</td>
+				</tr>
+				<tr class="text-center">
+					<td	style="width: 20%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text text-center">MEMBER ID</span>
+					</td>
+					<td	style="width: 30%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text text-left">Employer Name</span>
+					</td>
+					<td	style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">DOJ </span>
+					</td>
+				    <td	style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">DOE</span>
+					</td>
+					<td	style="width: 5%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">Source</span>
+					</td>
+
+				<!--	<td style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">Result</span>
+					</td>-->
+<!--				</tr>
+				<tr class="text-center" th:if="${root.serviceHistory==null}">
+				    <td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td>
+				</tr>
+				<th:block class="text-center" th:each="epfo,stat: ${root.serviceHistory}" th:if="${epfo.uan == root.epfoDetailsForMultiUAN[0].uanNo1}">
+				<!--	    <th:block th:each="epfoEmp, statEmp: ${root.employementDetailsDTOlist}" 
+					    th:if="${epfoEmp.uan == root.epfoDetailsForMultiUAN[0].uanNo1 and epfoEmp.candidateEmployerName==epfo.candidateEmployerName}">-->
+								
+<!--	         	  <tr class="text-center">
+					<td class="grey-text text-left">
+						<span style="font-size: 12px" th:text="${epfo.memberId}"></span>
+					</td>
+					<td class="grey-text text-left">
+						<span style="font-size: 12px" th:text="${epfo.candidateEmployerName}"></span>
+					</td>
+					<td class="grey-text text-center">
+						<span style="font-size: 12px" th:text="${epfo.inputDateOfJoining != null ? #strings.replace(epfo.inputDateOfJoining, '/', '-') : ''}"></span>
+					</td>
+					<td class="grey-text text-center">
+						<span style="font-size: 12px" th:text="${epfo.inputDateOfExit != null ? #strings.replace(epfo.inputDateOfExit, '/', '-') : ''}"></span>
+					</td>
+					<td class="grey-text text-center">
+						<span style="font-size: 12px" th:text="${epfo.serviceName}"></span>
+					</td>
+
+				<!--	<td th:switch="${epfoEmp.colorColorCode}">
+						<span class="green-status" th:case="'GREEN'">GREEN</span> <span
+						class="amber-status" th:case="'AMBER'">AMBER</span> <span
+						class="red-status" th:case="'RED'">RED</span>
+					</td>-->
+<!--			      </tr>
+			      
+			  <!-- </th:block>-->
+<!--			  </th:block>
+			</table>
+			<span class="line-break"></span>
+			<span class="line-break"></span>
+			<!-- <div style="display: flex;" th:if="${#lists.size(root.epfoDetailsForMultiUAN) > 1}">
+                <span style="font-size:15px; margin-right: auto;" class="grey-text">Candidate: </span>
+                <span style="font-size:10px; margin-right: 300px;" th:if="${#lists.size(root.epfoDetailsForMultiUAN) > 0 and root.epfoDetailsForMultiUAN[1] != null}"
+                th:text="${root.epfoDetailsForMultiUAN[1].epfoName1}" class="grey-text"></span>
+                <span style="font-size:15px; margin-left: auto;" class="grey-text">UAN: </span>
+                <span style="font-size:10px; margin-left: auto;" th:if="${#lists.size(root.epfoDetailsForMultiUAN) > 0 and root.epfoDetailsForMultiUAN[1] != null}"
+                th:text="${root.epfoDetailsForMultiUAN[1].uanNo1}" class="grey-text"></span>
+            </div> -->
+            
+ <!--           <span class="inline-block left output-data grey-text" style="float: left;" th:if="${#lists.size(root.epfoDetailsForMultiUAN) > 1 and root.epfoDetailsForMultiUAN[1] != null}" th:text="'Candidate: ' + ${root.epfoDetailsForMultiUAN[1].epfoName1}"></span>
+			<span class="inline-block left output-data grey-text" style="float: right;" th:if="${#lists.size(root.epfoDetailsForMultiUAN) > 1 and root.epfoDetailsForMultiUAN[1] != null}" th:text="'UAN: ' + ${root.epfoDetailsForMultiUAN[1].uanNo1}"></span>
+            
+            <span class="line-break"></span>
+			<table class="table-st" th:if="${#lists.size(root.epfoDetailsForMultiUAN) > 1}">
+				<tr class="blue-bg text-center">
+					<td class="white-text" colspan="6">
+						<span class="td-heading" style="color: whitesmoke;"><b>Employment Details Found in EPFO-Service History</b> </span>
+					</td>
+				</tr>
+				<tr class="text-center">
+					<td	style="width: 20%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text text-center">MEMBER ID</span>
+					</td>
+					<td	style="width: 30%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text text-center">Employer Name</span>
+					</td>
+					<td	style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">DOJ </span>
+					</td>
+				    <td	style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">DOE</span>
+					</td>
+					<td	style="width: 5%; padding: 3px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">Source</span>
+					</td>
+				<!--	<td style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">Result</span>
+					</td>-->
+<!--				</tr>
+				<tr class="text-center" th:if="${root.serviceHistory==null}">
+				    <td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td>
+				</tr>
+				<th:block class="text-center" th:each="epfo,stat: ${root.serviceHistory}" th:if="${epfo.uan == root.epfoDetailsForMultiUAN[1].uanNo1}">
+					<!--    <th:block th:each="epfoEmp, statEmp: ${root.employementDetailsDTOlist}" 
+					    th:if="${epfoEmp.uan == root.epfoDetailsForMultiUAN[1].uanNo1 and epfoEmp.candidateEmployerName==epfo.candidateEmployerName}">-->
+								
+<!--	         	  <tr class="text-center">
+					<td class="grey-text text-left">
+						<span style="font-size: 12px" th:text="${epfo.memberId}"></span>
+					</td>
+					<td class="grey-text text-left">
+						<span style="font-size: 12px" th:text="${epfo.candidateEmployerName}"></span>
+					</td>
+					<td class="grey-text text-center">
+						<span style="font-size: 12px" th:text="${epfo.inputDateOfJoining != null ? #strings.replace(epfo.inputDateOfJoining, '/', '-') : ''}"></span>
+					</td>
+					<td class="grey-text text-center">
+						<span style="font-size: 12px" th:text="${epfo.inputDateOfExit != null ? #strings.replace(epfo.inputDateOfExit, '/', '-') : ''}"></span>
+					</td>
+					<td class="grey-text text-center">
+						<span style="font-size: 12px" th:text="${epfo.serviceName}"></span>
+					</td>
+				<!--	<td th:switch="${epfoEmp.colorColorCode}">
+						<span class="green-status" th:case="'GREEN'">GREEN</span> <span
+						class="amber-status" th:case="'AMBER'">AMBER</span> <span
+						class="red-status" th:case="'RED'">RED</span>
+					</td>-->
+<!--			      </tr>
+			      
+			   <!--</th:block>-->
+<!--			  </th:block>
+			</table>-->
+			<span class="line-break"></span>
+			<span class="line-break"></span>
+			<span class="line-break"></span>
+			<table class="table-st" style="page-break-inside: avoid;" th:if="!${#lists.contains(root.orgServices, 'PANTOUAN')}">
+				<tr class="blue-bg text-center">
+					<td class="white-text" colspan="6">
+						<span class="td-heading" style="color: whitesmoke;"><b>Employment Details Not Found in EPFO-Service History</b> </span>
+					</td>
+				</tr>
+				<tr class="text-center">
+					<td	style="width: 35%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text text-center">Employer Name</span>
+					</td>
+					<td	style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">DOJ </span>
+					</td>
+				    <td	style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">DOE</span>
+					</td>
+					<td	style="width: 7%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">Source</span>
+					</td>
+				<!--	<td style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">Result</span>
+					</td>-->
+				</tr>
+				<tr class="text-center" th:each="epfo,stat: ${root.employementDetailsDTOlist}" th:unless="${epfo.uan != null}">
+					<td class="grey-text text-left">
+						<span style="font-size: 12px" th:text="${epfo.candidateEmployerName}"></span>
+					</td>
+					<td class="grey-text text-center">
+						<span style="font-size: 12px" th:text="${#strings.substring(epfo.inputDateOfJoining, 3)}"></span>
+					</td>
+					<td class="grey-text text-center">
+						<span style="font-size: 12px" th:text="${#strings.substring(epfo.inputDateOfExit, 3)}"></span>
+					</td>
+					<td class="grey-text text-center">
+						<span style="font-size: 12px" th:if="${epfo.serviceName!=null}" th:text="${epfo.serviceName}"></span>
+						<span style="font-size: 12px" th:if="${epfo.serviceName==null or epfo.serviceName==''}">DNT </span>
+					</td>
+				<!--	<td th:switch="${epfo.colorColorCode}">
+						<span class="green-status" th:case="'GREEN'">GREEN</span> <span
+						class="amber-status" th:case="'AMBER'">AMBER</span> <span
+						class="red-status" th:case="'RED'">RED</span>
+					</td>-->
+			    </tr>
+			   <tr class="text-center" th:if="${root.employementDetailsDTOlist}" th:unless="${#lists.isEmpty(root.employementDetailsDTOlist.![uan]) || root.employementDetailsDTOlist.![uan].contains(null)}">
+				    <td>NA</td><td>NA</td><td>NA</td><td>NA</td>
+				</tr>
+			    <tr class="text-center" th:if="${root.employementDetailsDTOlist==null}">
+				    <td>NA</td><td>NA</td><td>NA</td><td>NA</td>
+				</tr>
+			</table>
+			 <!-- ADDING THE BELOW SECTION FOR REMITTANCE RECORDS-->
+    
+    <div th:if="${root.remittanceProofImagesData}">
+		<div style="page-break-after: always;">
+			<!-- content -->
+		</div>
+		<p class="td-heading text-center" style="color: #605f5f; font-size: 17px;">REMITANCE PROOF FOR OVERALL RESULT</p>
+		<div th:each="image, iterStat : ${root.remittanceProofImagesData}" style="page-break-inside: avoid;">
+				<span style="font-size: 15px" class="grey-text" th:text="'Evidence ' + ${iterStat.count} + ':'"></span> 
+				<span
+					style="font-size: 10px"
+					th:text="${image.remark}" class="grey-text"></span>
+				<!--<span style="font-size: 15px" class="grey-text">Year: </span>
+				<span style="font-size: 10px"
+					th:text="${image.year}" class="grey-text"></span>  -->
+				<span class="line-break"></span>
+		
+          <!-- <img th:src="'data:image/png;base64,' + ${#strings.toString(image.image)}" alt="Image" style="width: 200px; height: auto;"> -->
+          <img th:src="'data:image/png;base64,' + ${#strings.toString(image.image)}" alt="Image" style="width: 600px; height: auto;">
+       
+       <span class="line-break"></span><span class="line-break"></span>
+        </div>
+    </div>		
+    
+	<!-- ADDING THE BELOW SECTION FOR REMITTANCE RECORDS-->	
+		</section>
+	</body>
+</html>

@@ -1,0 +1,69 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Digiverifier</title>
+  <!-- <link rel="stylesheet" href="https://img1.digitallocker.gov.in/public/smart/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://img1.digitallocker.gov.in/public/smart/css/global-style-v5_071219.css"> -->
+</head>
+<body>
+<div class="bg-white pt-2 pb-2 mt-sm-0 shadow d-flex justify-content-center align-items-center">
+    <a href="https://www.digilocker.gov.in/" target="_blank">
+        <img src="assets/img/digilocker_logo.png" alt="DigiLocker Logo" style="width: 65%;">
+    </a>
+</div>
+<div class="col-sm-12 col-md-8 col-lg-4 col-xl-4 mx-auto">
+<section class="card-signin">
+<div class="card mb-1 mt-1box-shabow">
+   <div class="col-xs-12 col-md-12">
+      <br>
+        <div class="container container-md">
+        	<div class="col-xs-12">
+        	    <div class="row">
+        	        <div class="col-xs-12 col-md-12">
+                        <form [formGroup]="formEPFOlogin" (ngSubmit)="onSubmit()" class="mb-5 mt-10" >
+                            <div class="text-center" style="margin-top: 20px !important;">
+                                <h3>Sign In to your account!</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="">
+                                    <div class="form-group" id="user_div" style="margin-top: 20px !important;">
+                                        <input class="form-control" minlength="12"  formControlName="aadhaar" placeholder="Aadhaar/Username*" tabindex="1"/>
+                                        <span class="line-break"></span>
+                                        <small style="display: block; color: rgb(0, 123, 255); font-weight: 500; font-size: 13px;">
+                                            Enter your Aadhar number
+                                        </small>
+                                    </div>
+                                </div>                        
+                                <div class="form-group">
+                                    <div class="row justify-content-md-center justify-content-sm-center">
+                                        <div class="col text-center mt-4">
+                                            <button class="btn btn-success btn-lg btn-block" type="submit">Proceed</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>                
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+<div class="row justify-content-md-center justify-content-sm-center mt-2">
+    <div class="col text-center">
+        <div class="form-group">            
+            <div style="font-size: 17px; font-weight: 400;">Do not have an account? <a href="https://accounts.digitallocker.gov.in/oauth_partner/register/%252Foauth2%252F1%252Fconsent%253Fresponse_type%253Dcode%2526client_id%253DEABCF5B4%2526state%253D12345%2526redirect_uri%253Dhttps%25253A%25252F%25252Fwww.digiverifier.com%2526orgid%253D002483%2526txn%253D6396f6e098338oauth21670837984%2526hashkey%253De823761440be064f196b6ba48d4c7d9fd39ae5d76e04321ce6f9fb24e02c2f90%2526requst_pdf%253DY%2526app_name%253DcHJvdG90eXBl%2526signup%253Dsignup">Sign Up</a> </div>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>
+
+
+
+
+
+
+

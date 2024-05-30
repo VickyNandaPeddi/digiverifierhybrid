@@ -13,7 +13,9 @@ import com.aashdit.digiverifier.itr.dto.ITRDetailsDto;
 import com.aashdit.digiverifier.itr.service.ITRService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
+//import io.swagger.annotations.ApiOperation;
 
 @RequestMapping(value = "/api/allowAll")
 @RestController
@@ -32,7 +34,7 @@ public class ITRAccessController {
 	 * @throws JsonProcessingException
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "generating an access token from the ITR site")
+	@Operation(summary ="generating an access token from the ITR site")
 	@PostMapping(value = "/getITRDetailsFromITRSite")
 	public ServiceOutcome<String> getITRDetailsFromITRSite(@RequestBody ITRDetailsDto iTRDetails) throws JsonProcessingException, IOException {
 //		candidateId = "123456"; // Please remove this hard-coaded value, as this API should Be Called along with candidate ID as a Request Parameter.

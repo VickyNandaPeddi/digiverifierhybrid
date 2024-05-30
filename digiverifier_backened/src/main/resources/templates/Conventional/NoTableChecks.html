@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en-us" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>DigiVerifier Pdf</title>
+    <meta charset="UTF-8"/>
+    <link th:href="${cssPath + '/common.css'}" rel="stylesheet"/>
+    <link th:href="@{https://fonts.googleapis.com/css?family=Calibri:400,700,400,700&display=swap}" rel="stylesheet"/>
+    <style>
+        .table-st {
+            clear: both;
+            width: 100%;
+            border: 1px solid #808080;
+            border-collapse: collapse;
+        }
+          .table-cell {
+            overflow: auto;
+            word-wrap: break-word;
+        }
+        .table-st tr {
+            border: 1px solid #808080;
+            border-collapse: collapse;
+        }
+        .table-st tr td {
+            border: 1px solid #808080;
+            border-collapse: collapse;
+            padding: 10px;
+        }
+        .table-st tr td span {
+            margin-left: 5px;
+        }
+        .table-container {
+            page-break-inside: avoid; /* Prevent table from splitting across pages */
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-left {
+            text-align: left;
+        }
+        .blue-bg {
+            background-color: #808080;
+        }
+        .grey-bg {
+            background-color: rgba(49, 119, 235, 0.8);
+        }
+        .black-heading {
+            color: black;
+            font-size: 15px !important;
+            font-weight: 700;
+            font-family: 'Calibri';
+        }
+        .white-heading {
+			color: #FFF;
+            font-family:Calibri, sans-serif;
+            font-style: normal;
+            font-weight: bold;
+            font-size: 15pt;
+        }
+        .black-text {
+            color: black;
+            font-family:Calibri, sans-serif;
+            font-style: normal;
+            font-weight: bold;
+            font-size: 13pt;
+        }
+        .grey-text {
+            color: black;
+            font-family:Calibri, sans-serif;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 12pt;
+        }
+        .white-text {
+            color: #fff;
+            font-weight: 700 !important;;
+            font-size: 13px;
+            font-family: 'Calibri';
+        }
+        .line-break {
+            display: block;
+            height: 15px;
+        }
+        .green-status {
+            margin: 0px;
+            color: #008000;
+            font-weight: 700;
+            font-family: 'Calibri';
+            font-size: 13px;
+        }
+        .amber-status {
+            margin: 0px;
+            color: #ffA500;
+            font-weight: 700;
+            font-family: 'Calibri';
+            font-size: 13px;
+        }
+        .red-status {
+            margin: 0px;
+            color: #ff0000;
+            font-weight: 700;
+            font-family: 'Calibri';
+            font-size: 13px;
+        }
+        .invalid-status {
+            margin: 0px;
+            color: #000000;
+            font-weight: 700;
+            font-family: 'Calibri';
+            font-size: 13px;
+        }
+        .black-box {
+            border: 1px solid black;
+        }
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+        .color-container {
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+        }
+        .box {
+            width: 10px;
+            height: 10px;
+            margin-right: 5px;
+            background-color: transparent; /* Set the desired background color */
+            display: inline-block;
+        }
+        .red {
+            background-color: red;
+        }
+        .green {
+            background-color: green;
+        }
+        .amber {
+            background-color: #ffA500;;
+        }
+        .yellow {
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body style="background-color:#fff;padding:0px;margin:0px;position:relative;font-family: 'Calibri', sans-serif;color:#666666;">
+<section class="wrapper" style="width:100%;margin:0 auto;height:80%;">
+<!--    proof with no table starts-->
+    <div th:each="vendorUploadChecks : ${root.vendorProofDetails}">
+        <div th:each="vendorsourcename:${vendorUploadChecks.vendorAttirbuteValue}">
+            <div class="text-center" th:if="${vendorsourcename != null}">
+                <div th:unless="${#strings.equalsIgnoreCase(vendorsourcename.sourceName, 'GLOBAL DATABASE CHECK') or #strings.contains(vendorsourcename.sourceName, 'EDUCATION') or #strings.contains(vendorsourcename.sourceName, 'LEGAL RIGHT TO WORK') or #strings.contains(vendorsourcename.sourceName, 'EMPLOYMENT') or #strings.contains(vendorsourcename.sourceName, 'ADDRESS') or #strings.contains(vendorsourcename.sourceName, 'IDENTITY') or #strings.contains(vendorsourcename.sourceName, 'OFAC CHECK') or #strings.contains(vendorsourcename.sourceName, 'CRIMINAL')}">
+                               <span style="color: black; font-family:Calibri, sans-serif; font-style: normal; font-weight: bold; font-size: 14pt;"
+                                     th:text="${#strings.containsIgnoreCase(vendorsourcename.sourceName, 'EDUCATION') ?
+                                                                      #strings.substring(vendorsourcename.sourceName.replace('EDUCATION', 'EDUCATION CHECK'), 0, #strings.indexOf(vendorsourcename.sourceName.replace('EDUCATION', 'EDUCATION CHECK'), 'CHECK') + 5) :
+                                                                      vendorsourcename.sourceName}"></span>
+                    <br>
+                    <div th:each="encodedImageMap : ${root.pdfByes}">
+                        <div th:each="entry : ${encodedImageMap}">
+                                    <span th:if="${#strings.equalsIgnoreCase(#strings.trim(vendorsourcename.sourceName), #strings.trim(entry.key))}">
+                                        <span style="color: black; font-family:Calibri, sans-serif; font-style: normal; font-weight: bold; font-size: 14pt;">
+                                                <th:block th:each="value : ${entry.value}">
+                                                    <img th:src="'data:image/png;base64,' + ${value}" alt="PDF Image"
+                                                         style="width: 600px; height: auto;">
+                                                </th:block>
+                                        </span>
+                                    </span>
+                            <span th:unless="${#strings.equalsIgnoreCase(#strings.trim(vendorsourcename.sourceName), #strings.trim(entry.key))}">
+                                    </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--    proof with no table ends-->
+</section>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<div class="pageHeader">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="pageTitle">{{ pageTitle }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container container-sm">
+    <form [formGroup]="candidateAddress" >
+        <input type="hidden" formControlName="candidateCode">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card" style="margin-bottom: 100px;">
+                    <div class="card-header">
+                        <h4 class="card-title">Address Verification</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8 offset-2">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12 required">Relationship :</label>
+                                    <div class="col-md-12">
+                                        <select class="form-control form-control-sm" (change)="selectRelationship($event)" formControlName="candidateRelationship">
+                                            <option value="">--Select--</option>
+                                            <option value="FATHER">Father </option>
+                                            <option value="MOTHER">Mother </option>
+                                            <option value="SIBLING">Sibling </option>
+                                            <option value="SPOUSE">Spouse</option>
+                                            <option value="LANDLORD">Landlord</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8 offset-2" *ngIf="!stat_LANDLORD">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12 required"> Relationship's e-Mail:</label>
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control form-control-sm" style="padding:.35rem" formControlName="candidateRelationshipEmail">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" *ngIf="stat_LANDLORD">
+                            <div class="col-md-8 offset-2">
+                                <fieldset class="border p-2">
+                                    <legend class="w-auto"
+                                        style="font-size: 1.1rem;text-align: initial;">Rent
+                                        Details</legend>
+                                    <label class="container">
+                                        <input type="radio" name="radio" value="Received" formControlName="rentType">
+                                        Rent Received
+                                    </label>
+                                    <label class="container">
+                                        <input type="radio" name="radio" value="Agreement" formControlName="rentType">
+                                        Rent Agreement
+                                    </label>
+                                    <hr>
+                                    <div class="form-group">
+                                        <label for="" class="col-md-12 required required_toggle"> Upload attachment
+                                            :</label>
+                                        <div class="col-md-12">
+                                            <input type="file" class="form-control-file" (change)="uploadAttachment($event)" accept=".pdf" formControlName="uploadFile">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center" style="margin: 30px 0; ">
+                                <button type="button" (click)="onSubmit(candidateAddress)" class="btn btn-success" >Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+

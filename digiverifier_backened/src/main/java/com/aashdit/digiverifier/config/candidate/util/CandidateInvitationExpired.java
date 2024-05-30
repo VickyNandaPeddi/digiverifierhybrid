@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.aashdit.digiverifier.config.admin.model.User;
 import com.aashdit.digiverifier.config.admin.service.UserService;
+import com.aashdit.digiverifier.config.candidate.model.Candidate;
 import com.aashdit.digiverifier.config.candidate.model.CandidateStatus;
 import com.aashdit.digiverifier.config.candidate.service.CandidateService;
 
@@ -41,21 +42,21 @@ public class CandidateInvitationExpired {
 	
 	}
 	
-	@Scheduled(cron="${com.dgv.candidateSchedularTime}")
-	public void processDeclined() {
-		List<String> collect=null;
-		try {		
-			log.info("candidate process declined Started Successfully At " + new Date());	
-			List<CandidateStatus> candidateStatusList=candidateService.processDeclined();
-			if(!candidateStatusList.isEmpty()) {
-				collect = candidateStatusList.stream().map(c -> c.getCandidate().getCandidateCode()).collect(Collectors.toList());
-				log.info("Invitation expired for Candidates" + collect);	
-			}
-		} catch (Exception e) {
-		 	log.error("Exception occured in processDeclined method in CandidateInvitationExpired-->",e);
-		}
-	
-	}
+//	@Scheduled(cron="${com.dgv.candidateSchedularTime}")
+//	public void processDeclined() {
+//		List<String> collect=null;
+//		try {		
+//			log.info("candidate process declined Started Successfully At " + new Date());	
+//			List<CandidateStatus> candidateStatusList=candidateService.processDeclined();
+//			if(!candidateStatusList.isEmpty()) {
+//				collect = candidateStatusList.stream().map(c -> c.getCandidate().getCandidateCode()).collect(Collectors.toList());
+//				log.info("Invitation expired for Candidates" + collect);	
+//			}
+//		} catch (Exception e) {
+//		 	log.error("Exception occured in processDeclined method in CandidateInvitationExpired-->",e);
+//		}
+//	
+//	}
 	
 	@Scheduled(cron="${com.dgv.logoutSchedularTime}")
 	public void logoutUser() {
@@ -66,4 +67,16 @@ public class CandidateInvitationExpired {
 		}
 	
 	}
+	
+	//@Scheduled(cron="${com.dgv.candidatesPurgeTime}")
+//	public void oldCandidatesPurge() {
+//		try {
+//			List<Candidate> purgedCandidatesList = candidateService.oldCandidatesPurge();
+//			log.info("No of purgedCandidatesList ::::{}",purgedCandidatesList.size());
+//			} catch (Exception e) {
+//		 	log.error("Exception occured in oldCandidatesPurge method in CandidateInvitationExpired-->",e);
+//		}
+//	
+//	}
+		
 }

@@ -1,0 +1,252 @@
+<div class="pageHeader">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="pageTitle"></h2>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <!-- <div class="card-header">
+        <h6 class="card-title">DNH Report</h6>
+    </div>  -->
+    <form>
+        <input type="hidden" >
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12 required">Customer Name :</label>
+                                    <div class="col-md-12">
+                                        <select class="form-control form-control-sm" #t (change)="getCustomerData(t.value)"
+                                        formControlName="organizationId" >
+                                            
+                                            <option  *ngIf="admin == true" value="{{orgid}}" [selected]="true" >{{ organizationame }}</option>
+                                            <option *ngFor="let item of getCustID"   [value]="item.organizationId">{{ item.organizationName }}</option>
+                                        </select>-->
+
+                                        <!-- <select class="form-control form-control-sm" #t (change)="getCustomerData(t.value)"
+                                        formControlName="organizationId">
+                                            <option [value]="" disabled>--Select--</option>
+                                            <option *ngFor="let item of getCustID"  [value]="item.organizationId">{{ item.organizationName }}</option>
+                                        </select> -->
+                                    <!--</div>
+                                </div>
+                            </div>
+                        </div> -->
+                        <!-- <div class="d-flex justify-content-between btn-block"> -->
+                            <!-- <form [formGroup]="searchForm" (ngSubmit)="performSearch()" class="d-flex float-right">
+                                <input type="text" formControlName="searchText" class="form-control form-control-sm" placeholder="Search" aria-label="Search">
+                                <button type="submit" class="btn-primary btn-sm ml-1">Search</button>
+                            </form> -->
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <select class="form-control form-control" #t (change)="getCustomerData(t.value)"
+                                            formControlName="organizationId" style="font-weight: bold; -webkit-appearance: none; -moz-appearance: none; appearance: none;">   
+                                        <option  *ngIf="admin == true" value="{{orgid}}" [selected]="true" >{{ organizationame }}</option>
+                                        <option *ngFor="let item of getCustID"   [value]="item.organizationId">{{ item.organizationName }}</option>
+                                </select>
+                                </div>
+                                <div class="col-md-9">
+                                    <button type="button" [disabled]="organizationId==null || AllSuspectEmpList.length === 0" class="btn btn-danger mx-1 float-right" (click)="removeDNHDB()">Delete All</button>
+                                    <button type="button" [disabled]="organizationId==null" class="btn btn-primary mx-1 float-right" (click)="triggerModal(modalData)">Upload DNHDB Data</button> 
+                                     
+                                    <a href="#/admin/dnh" (click)="downloadUploadResourceFile('DNHDB','xlsx')" title="Dowload XLS Template" class="btn btn-broder mx-1 float-right">
+                                        XLS <i class="fas fa-download"></i>
+                                    </a>
+                                    <a href="#/admin/dnh" (click)="downloadUploadResourceFile('DNHDB','csv')" title="Dowload CSV Template" class="btn btn-broder mx-1 float-right">
+                                        CSV <i class="fas fa-download"></i>
+                                    </a>    
+                                    <!-- <a href="#/admin/dnh" (click)="downloadUploadResourceFile('DNHDB','csv')" title="Dowload CSV" class="btn btn-broder mx-1 float-right">
+                                        CSV <i class="fas fa-download"></i>
+                                    </a>                               -->
+                                </div>
+                            </div>
+                        <!-- </div> -->
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Pagination controls -->
+    </form>
+    <span class="line-break"></span>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">   
+                         
+                <div class="card-body">
+                    <div class="col-md-12">
+                        <form [formGroup]="searchForm" (ngSubmit)="performSearch()" class="d-flex">
+                            <input type="text" formControlName="searchText" class="form-control" placeholder="Search Employer Name" aria-label="Search">
+                            <button type="submit" class="btn btn-primary mx-1">Search</button>
+                        </form>  
+                    </div>  
+                    <div class="row"> 
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="styled-table">
+                                    <thead>
+                                        <tr>   
+                                            <th style="width: 3px;"><input type="checkbox" class="inputcheckbox" (click)="selectAll($event)"> S.No</th>
+                                            <th style="width: 20px;">Employer Name</th>
+                                            <th style="width: 60px;">Employer Address</th>
+                                            <th style="width: 7px;">Status</th>
+                                            <th style="width: 7px;">Action</th>
+                                            <!-- <th style="width: 3px;"><input type="checkbox" class="inputcheckbox" (click)="selectAll($event)"></th> -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let item of AllSuspectEmpList;let i = index;">
+                                            <td data-label="SI#" style="text-align: center;"><input type="checkbox"  id="{{item.suspectEmpMasterId}}" value="{{item.suspectEmpMasterId}}" class="childCheck inputcheckbox" (change)="childCheck($event)">{{i+1}}</td>
+                                            <td data-label="Employer Name">{{ item.suspectCompanyName }}</td>
+                                            <td data-label="Employer Address">{{ item.address }}</td>
+                                            <td data-label="Status" style="text-align: center;">{{item.isActive == true ?'Active':'InActive'}}</td>
+                                            <td data-label="Action" style="text-align: center;">                                        
+                                                <button type="button" data-toggle="tooltip" class="btn p-0" title="Edit" 
+                                                id="edit{{i}}" (click)="openSuspectEmployeeModal(modalSuSpectEmploye, item.suspectEmpMasterId,item.suspectCompanyName,item.address)">
+                                                    <i class="fas fa-edit" style="color: #0078d4; font-size: 1rem; padding-right: 10px;"></i>
+                                                </button>
+                                                <button type="button" (click)="deleteSuspectEmp(item.suspectEmpMasterId)" class="btn p-0" data-toggle="tooltip"><i class="fas fa-trash-alt"  style="color: #a80000; font-size: 1rem;"></i></button>
+                                            </td>  
+                                            <!-- <td data-label="checkbox" style="text-align: center;"><input type="checkbox"  id="{{item.suspectEmpMasterId}}" value="{{item.suspectEmpMasterId}}" class="childCheck inputcheckbox" (change)="childCheck($event)"></td> -->
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <form [formGroup]="formToDelete">
+                                    <input type="hidden" formControlName="suspectEmpMasterId">
+                                    <div class="row">
+                                        <div class="col-md-12 text-center">
+                                            <button type="submit" style="margin-top: 5px;" [disabled]="AllSuspectEmpList.length === 0" (click)="deleteSuspectedEmployers()" class="btn btn-danger ">Delete</button>
+                                        </div>
+                                    </div>
+                                    
+                                </form>
+                                
+                            </div>
+                            <!-- <div class="pagination-container">
+                                <button class="pagination-button prev-button" [disabled]="pageNumber === 0" (click)="onPageChange(pageNumber - 1)">
+                                    <em class="fas fa-chevron-left"></em> Previous
+                                </button>
+                                <span class="page-number">Page {{ pageNumber + 1 }}<span [ngClass]="{'disabled-span': totalPages === 0}"> of {{totalPages}}</span></span>
+                                <button class="pagination-button next-button btn-primary" [disabled]="AllSuspectEmpList.length < pageSize" (click)="onPageChange(pageNumber + 1)">
+                                    Next <em class="fas fa-chevron-right"></em>
+                                </button>
+                            </div> -->
+                            <div class="pagination">
+                                <button class="pagination-button prev-button" [disabled]="pageNumber === 0" (click)="onPageChange(pageNumber - 1)">
+                                  Previous
+                                </button>
+                                <ng-container *ngFor="let page of getDisplayedPages()">
+                                  <button class="pagination-button page-number-button" [ngClass]="{'active': page === pageNumber}" (click)="onPageChange(page)">
+                                    {{ page + 1 }}
+                                  </button>
+                                </ng-container>
+                                <button class="pagination-button next-button" [disabled]="pageNumber >= totalPages - 1 || AllSuspectEmpList.length < pageSize" (click)="onPageChange(pageNumber + 1)">
+                                  Next
+                                </button>
+                            </div>
+                              
+                              
+                            
+
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+
+    </div>
+</div>
+
+
+<ng-template #modalData let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Upload DNHDB Data</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <form >
+            <!-- <div class="row text-center">
+                <div class="col">
+                  
+                    <a href="#/admin/dnh" (click)="downloadUploadResourceFile('DNHDB','csv')" class="btn btn-primary btn-sm">
+                        Sample CSV <i class="fas fa-download"></i>
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="#/admin/dnh" (click)="downloadUploadResourceFile('DNHDB','xlsx')" class="btn btn-primary btn-sm">
+                        Sample XLS <i class="fas fa-download"></i>
+                    </a>
+                </div>
+            </div> -->
+            <!-- <hr> -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group mb-3">
+                        <input type="file" class="form-control" required (change)="selectFile($event)" accept=".xlsx, .xls, .csv">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-right mt-3 pb-3">
+                    <button class="btn btn-primary mx-1" (click)="uploadFakeCompanyDetails()">Submit</button>
+                    <button type="button" class="btn btn-cancel mx-1" (click)="modal.close('Save click')">Close</button>
+                </div>
+            </div>
+        </form>
+    </div>
+  </ng-template>
+  <ng-template #modalSuSpectEmploye let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Employee Status</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="formSuSpectEMP" (ngSubmit)="submitSuspectEmploye()">
+            <input type="hidden"  formControlName="id">
+            <div class="row " >
+                <div class="col-md-12">
+                    <div class="form-group mb-3">
+                        <label for="inputCompanyName" class="required">Company Name</label>
+                        <input type="text" class="form-control form-control-sm"  id="inputCompanyName" formControlName="suspectCompanyName">
+                      </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group mb-3">
+                        <label for="inputCompanyAddress" class="required">Company Address</label>
+                        <textarea type="text" class="form-control form-control-sm"  id="inputCompanyAddress" formControlName="address" style="height: auto"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group mb-3">
+                        <label for="inputCompanyStatus" class="required">Status</label>
+                        <select class="form-control form-control-sm" id="inputCompanyStatus" formControlName="isActive">
+                            <!-- <option [ngValue]="null" disabled>{{ item.colorColorName }}</option> -->
+                            <option [ngValue]="null" disabled>--Select--</option>
+                            <option  [value]="true">Active</option>
+                            <option  [value]="false">InActive</option>
+                            <!-- <option *ngFor="let item of getColors" [value]="item.colorId" >{{ item.colorName }}</option> -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-right mt-3 pb-3">
+                    <button type="submit"  [disabled]="!formSuSpectEMP.valid" class="btn btn-primary mx-1">Submit</button>
+                    <button type="button" class="btn btn-cancel mx-1" (click)="modal.close('Save click')">Close</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</ng-template>

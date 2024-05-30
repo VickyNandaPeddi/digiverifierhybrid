@@ -12,6 +12,60 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
+                    <div class="row mt-1 justify-content-between">
+                        <div class="col-md-2 text-center">
+                            <div class="icon-container">
+                                <button (click)="onEditCustInfo()" class="ms-btn ms-btn-primary">
+                                    <span class="fas fa-pencil-alt"></span>
+                                </button>
+                                <p class="icon-label" type="button" (click)="onEditCustInfo()">Edit Customer Information</p>
+                            </div>
+                        </div>
+                        <div class="col-md-1 line-container">
+                            <div class="line"></div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="icon-container">
+                                <button (click)="onEditCustBill()" class="ms-btn ms-btn-primary">
+                                    <span class="fas fa-file-invoice-dollar"></span>
+                                </button>
+                                <p class="icon-label" type="button" (click)="onEditCustBill()">Edit Billing Information</p>
+                            </div>
+                        </div>
+                        <div class="col-md-1 line-container">
+                            <div class="line"></div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="icon-container">
+                                <button (click)="onEditCustEmailTemp()" class="ms-btn ms-btn-primary">
+                                    <span class="fas fa-envelope"></span>
+                                </button>
+                                <p class="icon-label" type="button" (click)="onEditCustEmailTemp()">Edit Customer Email Templates</p>
+                            </div>
+                        </div>
+                        <div class="col-md-1 line-container">
+                            <div class="line"></div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="icon-container">
+                                <button (click)="onEditCustScope()" class="ms-btn ms-btn-primary">
+                                    <span class="fas fa-envelope"></span>
+                                </button>
+                                <p class="icon-label" type="button" (click)="onEditCustScope()">Edit Organisation Scope</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>  
+<span class="line-break"></span>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
                     <h4 class="card-title">Update Customer Details</h4>
                 </div>
                 <div class="card-body">
@@ -139,15 +193,35 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="">
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12">Callback Url :
+                                    </label>
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control form-control-sm"
+                                        formControlName="callBackUrl">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
                                 <div >
-                                    <label><b>Show validation form to candidate:</b>
-                                     <div class="showvalid" formControlName="showValidation">
-                                        <div class="checkbox">                                
-                                            <span><label class="firstcheckbox" >Yes</label></span>
-                                            <span><input type="checkbox" class="inputcheckbox"(click)="selectshowValidation($event)" name="showValidation" value="true" >></span>
-                                            <span><label class="firstcheckbox">NO</label></span>
-                                            <span><input type="checkbox" class="inputcheckbox"(click)="selectshowValidation($event)" name="showValidation" value="false"  ></span>
+                                    <label><b>Show validation form to candidate:</b></label>
+                                     <div class="showvalid" >
+                                        <div class="checkbox">
+                                            <span>
+                                                <label class="checkbox-label">Yes</label>
+                                            </span>
+                                            <span>
+                                                <input type="checkbox" class="inputcheckbox" (click)="selectshowValidation($event)" formControlName="showValidation" value="true">
+                                            </span>
+                                            <span class="space"></span>
+                                            <span>
+                                                <label class="checkbox-label">NO</label>
+                                            </span>
+                                            <span>
+                                                <input type="checkbox" class="inputcheckbox" (click)="selectshowValidation($event)" formControlName="showValidation" value="false">
+                                            </span>
                                         </div>
                                     </div>
                                       <!-- <div class="checkbox">
@@ -163,23 +237,36 @@
                                         </label>    
                                         <b >No</b>
                                     </div> -->
-                                    </label>
+                                    
                                 </div>
                                 
                             </div>
                     </div>
                         <div class="row">
                             <div class="col-md-12 text-center mt-3 pb-3">
-                                <a routerLink="../../custlist" class="btn btn-warning btn-sm">Back</a>
-                                <button type="submit"  (click)="onSubmit(updateCustomers)" class="btn btn-primary btn-sm">Update Customer</button>
+                                <!-- <a routerLink="../../custlist" class="btn btn-warning btn-sm">Back</a> -->
+                                <button type="submit"  (click)="onSubmit(updateCustomers)" class="ms-button ms-primary-button">Update Customer</button>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
+            <!-- <div class="row mt-3 justify-content-between">
+                <div class="col-md-4">
+                    <button type="submit"  (click)="onEditCustInfo()" class="btn btn-light">Edit Customer Information</button>
+                </div>
+                <div class="col-md-4 text-left">
+                    <button type="submit"  (click)="onEditCustBill()" class="btn btn-light">Edit Billing Information</button>
+                </div>
+                <div class="col-md-4 text-right">
+                    <button type="submit"  (click)="onEditCustEmailTemp()" class="btn btn-light">Edit Customer Email Templates</button>
+                </div>
+            </div> -->
         </div>
 
     </div>
+
+    
 </div>
 
 <ng-template #modalData let-modal>
