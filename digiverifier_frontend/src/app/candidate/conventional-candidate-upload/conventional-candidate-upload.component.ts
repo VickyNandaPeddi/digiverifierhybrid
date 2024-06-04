@@ -112,9 +112,8 @@ export class ConventionalCandidateUploadComponent implements OnInit {
           this.candidateForm.controls['email'].setValue(this.candidateMailId);
 
           this.agentAttributeListForm = this.conventionalCandidateCheck.map((ele: any) => {
-            // let defaultValue;
             let defaultValue = ele === "Database" ? "NA" : ''; // Check if ele is "database", set defaultValue to "NA", otherwise empty string
-            console.log(`Setting default value for "${ele}" to:`, defaultValue);
+            console.log(`Setting default value for "${ele}" to: ${defaultValue}`);
             return {
 
               label: ele,
@@ -245,7 +244,7 @@ export class ConventionalCandidateUploadComponent implements OnInit {
 
     // Remove files associated with the previous education level
     // if (this.previousEducationLevel) {
-    //   this.educationSelectedFiles = this.educationSelectedFiles.filter(fileObj => 
+    //   this.educationSelectedFiles = this.educationSelectedFiles.filter(fileObj =>
     //     !fileObj.key.startsWith(`Education ${this.previousEducationLevel}`)
     //   );
     // }

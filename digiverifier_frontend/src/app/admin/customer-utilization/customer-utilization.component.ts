@@ -38,6 +38,7 @@ export class CustomerUtilizationComponent implements OnInit {
   company_name: any = [];
   excel_data: any = [];
   geteKycReport: any = [];
+  unfilteredgeteKycReport: any = [];
   orgKycReport: any = [];
   getAgentUtilizationReport: any = [];
   init_agent_details: any = [];
@@ -169,23 +170,23 @@ export class CustomerUtilizationComponent implements OnInit {
 
     // Convert the table to an Excel sheet
     // Iterate through the cells in the sheet and set the cell format to "General"
-    for (let cellAddress in ws_OVERALLSummary) {   
+    for (let cellAddress in ws_OVERALLSummary) {
       if (ws_OVERALLSummary.hasOwnProperty(cellAddress)) {
-             let cell = ws_OVERALLSummary[cellAddress]; // Check if the cell contains a date value (you may need to adjust this condition)    
-             if (cellAddress == 'A1') {       // Set the cell format to "General"      
-              cell.t = 'n'; // 'n' stands for number format (General)    
+             let cell = ws_OVERALLSummary[cellAddress]; // Check if the cell contains a date value (you may need to adjust this condition)
+             if (cellAddress == 'A1') {       // Set the cell format to "General"
+              cell.t = 'n'; // 'n' stands for number format (General)
               cell.z = 'dd/mm/yy';
               cell.v = 'Start Date : ' + this.start_date;
               console.log('cell a1', cell, cellAddress)
-            }   
+            }
 
-            if (cellAddress == 'B1') {       // Set the cell format to "General"      
-              cell.t = 'n'; // 'n' stands for number format (General)    
+            if (cellAddress == 'B1') {       // Set the cell format to "General"
+              cell.t = 'n'; // 'n' stands for number format (General)
               cell.z = 'dd/mm/yy';
               cell.v = 'End Date : ' + this.end_date;
               console.log('cell a1', cell, cellAddress)
             }
-      } 
+      }
     } // Create a new workbook and add the sheet to it
 
     // let filteredList = this.filteredItems();
@@ -223,7 +224,7 @@ export class CustomerUtilizationComponent implements OnInit {
         delete value[val].panName;
         delete value[val].candidateUanName;
         delete value[val].relationship;
-       
+
         if(value[val].preOfferReportColor || value[val].interimReportColor){
           value[val].preOfferReportColor=value[val].preOfferReportColor;
           value[val].interimReportColor=value[val].interimReportColor;
@@ -246,8 +247,8 @@ export class CustomerUtilizationComponent implements OnInit {
           delete value[val].createdByUserLastName;
         }
 
-        
-        
+
+
         if(value[val].contactNumber){
           value[val].contactNumber=value[val].contactNumber;
         }else{
@@ -279,7 +280,7 @@ export class CustomerUtilizationComponent implements OnInit {
         }else{
           delete value[val].Status ;
         }
-        
+
         // value[val].Date = value[val].statusDate
 
         if(value[val].qcCreatedOn){
@@ -292,9 +293,9 @@ export class CustomerUtilizationComponent implements OnInit {
           value[val].InterimDate = value[val].interimCreatedOn;
         }else{
           delete value[val].InterimDate;
-          
+
         }
-        
+
         delete value[val].qcCreatedOn;
         delete value[val].interimCreatedOn;
 
@@ -307,7 +308,7 @@ export class CustomerUtilizationComponent implements OnInit {
           delete value[val].gstNumber;
           delete value[val].colorName;
         }
-        
+
       }
 
       // Set column widths
@@ -342,7 +343,7 @@ export class CustomerUtilizationComponent implements OnInit {
           // let tempValueList = value.filter((temp: any) => {
           //   if(temp.statusName == "QC Pending" || temp.statusName == "Interim Report" || temp.statusName == "Final Report") {
           //     return temp;
-          //   } 
+          //   }
           // })
           // console.log('Report delivered', tempValueList)
           // ws_ReportDelivered = XLSX.utils.json_to_sheet(tempValueList);
@@ -431,10 +432,10 @@ export class CustomerUtilizationComponent implements OnInit {
         if (INVITATIONEXPIRED == 0) {
           console.log('Inside zero', key, value.length, value);
           value.forEach((item:any) => {
-            
+
             item['Expired On'] = item['statusDate'];
             delete item['statusDate'];
-            
+
             delete item['panNumber'];
           });
           ws_INVITATIONEXPIRED = XLSX.utils.json_to_sheet(value);
@@ -773,7 +774,7 @@ export class CustomerUtilizationComponent implements OnInit {
   filteredItems() {
     let uniqueIds : string[] = [];
 
-    return this.geteKycReport.filter((item: any) => {
+    return this.unfilteredgeteKycReport.filter((item: any) => {
       if (uniqueIds.includes(item.applicantId)) {
         return false; // Skip duplicate items
       } else {
@@ -899,7 +900,7 @@ export class CustomerUtilizationComponent implements OnInit {
 
       this.customers.posteKycReport(rportData).subscribe((data: any) => {
         if (data.data) {
-          this.geteKycReport = data.data.candidateDetailsDto;
+          this.unfilteredgeteKycReport = data.data.candidateDetailsDto;
           this.geteKycReport = this.filteredItems();
           this.orgKycReport = data.data.candidateDetailsDto;
 
@@ -1481,7 +1482,7 @@ export class CustomerUtilizationComponent implements OnInit {
   }
   onSubmitFilter(utilizationReportFilter: FormGroup) {
     this.hideLoadingBtn = false;
-    
+
     this.resetMap();
     this.fromDate = this.fromDate != null ? this.fromDate : '';
     this.toDate = this.toDate != null ? this.toDate : '';
@@ -1766,7 +1767,7 @@ export class CustomerUtilizationComponent implements OnInit {
       this.responseCheck.set('ekycReport', true);
 
       if (data.data) {
-        this.geteKycReport = data.data.candidateDetailsDto;
+        this.unfilteredgeteKycReport = data.data.candidateDetailsDto;
         this.geteKycReport = this.filteredItems();
         this.orgKycReport = data.data.candidateDetailsDto;
         console.log(data, '------------------------------------');
@@ -1923,7 +1924,7 @@ export class CustomerUtilizationComponent implements OnInit {
     let orgID = this.authService.getOrgID();
     let fromDate = localStorage.getItem('dbFromDate');
     let toDate = localStorage.getItem('dbToDate');
-    
+
     this.company = new Map<string, {}>();
     this.statusList.forEach((status: any) => {
       var features: any = {};
@@ -1968,7 +1969,7 @@ export class CustomerUtilizationComponent implements OnInit {
           //   result.data.candidateDetailsDto.length
           // );
 
-          this.responseCheck.set(status, true); 
+          this.responseCheck.set(status, true);
           if (
             result['data']['organizationName'] != null &&
             result.data?.candidateDetailsDto?.length > 0
@@ -2201,7 +2202,7 @@ export class CustomerUtilizationComponent implements OnInit {
     let lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1);
     let fromDateString = firstDayOfMonth.toISOString().split('T')[0];
     let toDateString = lastDayOfMonth.toISOString().split('T')[0];
-  
+
     let getInputFromDate: any = fromDateString.split('-');
     let finalInputFromDate =
       getInputFromDate[2] +
@@ -2217,12 +2218,12 @@ export class CustomerUtilizationComponent implements OnInit {
         getInputToDate[1] +
         '/' +
         getInputToDate[0];
-  
+
     this.fromDate = finalInputFromDate;
     this.toDate = finalInputToDate;
 
     this.customers.setFromDate(finalInputFromDate);
-    this.customers.setToDate(finalInputToDate); 
+    this.customers.setToDate(finalInputToDate);
 
     let organizationIds: any = [];
     organizationIds.push(this.custId);
@@ -2231,16 +2232,16 @@ export class CustomerUtilizationComponent implements OnInit {
       toDate: this.toDate,
       organizationIds: organizationIds,
     });
-  
+
     this.onSubmitFilter(this.utilizationReportFilter);
   }
-  
+
   filterMonthToDate() {
     let currentDate = new Date();
     let firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 2);
     let fromDateString = firstDayOfMonth.toISOString().split('T')[0];
     let toDateString = currentDate.toISOString().split('T')[0];
-  
+
     let getInputFromDate: any = fromDateString.split('-');
     let finalInputFromDate =
       getInputFromDate[2] +
@@ -2248,12 +2249,12 @@ export class CustomerUtilizationComponent implements OnInit {
       getInputFromDate[1] +
       '/' +
       getInputFromDate[0];
-  
+
     this.fromDate = finalInputFromDate;
     this.toDate = this.initToday;
 
     this.customers.setFromDate(finalInputFromDate);
-    this.customers.setToDate(this.initToday); 
+    this.customers.setToDate(this.initToday);
 
     let organizationIds: any = [];
     organizationIds.push(this.custId);
@@ -2262,12 +2263,12 @@ export class CustomerUtilizationComponent implements OnInit {
       toDate: this.toDate,
       organizationIds: organizationIds,
     });
-  
+
     this.onSubmitFilter(this.utilizationReportFilter);
   }
-  
-  
-  
+
+
+
 
   ngOnInit(): void {}
 
