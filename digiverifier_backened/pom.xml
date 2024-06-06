@@ -178,6 +178,11 @@
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
                 </exclusion>
+
+                <exclusion>
+                    <groupId>software.amazon.ion</groupId>
+                    <artifactId>ion-java</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -438,7 +443,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            
+
             <!--below plugins for the sonar -->
 			<plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
