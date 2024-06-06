@@ -257,7 +257,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.ion.IonException;
+//import software.amazon.ion.IonException;
 
 import org.springframework.beans.factory.annotation.Value;
 
