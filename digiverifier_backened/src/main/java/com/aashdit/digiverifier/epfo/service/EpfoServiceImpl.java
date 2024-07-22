@@ -238,7 +238,7 @@ public class EpfoServiceImpl implements EpfoService {
 				}
 			  	if(response.getStatusCode() == HttpStatus.OK) {
 	        		log.info("Transaction ID Created Successfully. Response returned : "+candidateId, transactionId);
-	        		epfoDetails = generateCaptchaImageString(transactionId, candidateId,epfoDetails);
+//	        		epfoDetails = generateCaptchaImageString(transactionId, candidateId,epfoDetails);
 					log.error("---getEPFOTransactionIdString------epfoDetails----------"+candidateId, epfoDetails);
 	        	}else if(response.getStatusCode() == HttpStatus.UNAUTHORIZED){
 	        		log.error("User is Unauthorized"+candidateId);
@@ -786,7 +786,7 @@ public class EpfoServiceImpl implements EpfoService {
 		        	//updating CAF table
 								List<CandidateCafExperience> candidateCafExperiences = candidateService.getCandidateExperienceFromItrAndEpfoByCandidateId(
 							        		candidate.getCandidateId(), false);
-							        log.info("CAFEXPEROEINCE FOR BULK UAN ::{}", candidateCafExperiences.size());
+//							        log.info("CAFEXPEROEINCE FOR BULK UAN ::{}", candidateCafExperiences.size());
 							     // Reattach detached entities to the current session
 							        List<CandidateCafExperience> attachedExperiences = new ArrayList<>();
 							        for (CandidateCafExperience experience : candidateCafExperiences) {
@@ -876,6 +876,281 @@ public class EpfoServiceImpl implements EpfoService {
         	log.error("Exception occured in getEpfoTIDGeneral:",ex); // Add the Proper logging Message here
 		}
         return tId;
+	}
+
+	@Override
+	public ServiceOutcome<EpfoDetailsDto> epfoLoginCaptcha(String candidateCode) {
+		
+        ServiceOutcome<EpfoDetailsDto> svcOutcome = new ServiceOutcome<>();
+        try {
+        	String tID = getEpfoTIDGeneral();
+        	ResponseEntity<String> response = null;
+        	if(StringUtils.isNotEmpty(tID)) {
+	        	response = restTemplate.exchange(epfoSecurityConfig.getEpfoLoginCaptchaUrl()+"login-get?txnid="+tID, HttpMethod.GET, null, String.class);
+	        	try {
+					String captchamessage=response.getBody();
+					JSONObject captchaobj = new JSONObject(captchamessage);
+					log.info("Response from EPFO captchaobj API - obj:{} ",captchaobj);
+					if(captchaobj.getBoolean("success")) {
+						String captchaString = captchaobj.getString("captcha");
+						
+						EpfoDetailsDto epfoDetails = new EpfoDetailsDto();
+						epfoDetails.setCandidateCode(candidateCode);
+						epfoDetails.setTransactionid(tID);
+						epfoDetails.setCaptcha(captchaString);
+						
+						svcOutcome.setData(epfoDetails);
+		        		svcOutcome.setMessage("Login Captcha retrived successfully..");
+		        		svcOutcome.setOutcome(true);
+					}else {
+						
+					    String error = captchaobj.getString("error");
+					    svcOutcome.setData(null);
+		        		svcOutcome.setMessage(error);
+		        		svcOutcome.setOutcome(false);
+					}
+				} catch (JSONException e) {
+					log.error("Json Exception occured inn TID..",e);
+					
+				}
+        	}else {
+    			log.error("transactionId could Not be generated.");
+    			svcOutcome.setData(null);
+        		svcOutcome.setMessage("EPFO site is down, transaction Id could Not be generated.");
+        		svcOutcome.setOutcome(false);
+    		}
+        	
+        	
+		} catch(Exception ex) {
+			svcOutcome.setData(null);
+    		svcOutcome.setMessage("EPFO site is down, Please try after 7 PM or late night, If you don’t have UAN skip and complete the verification.");
+    		svcOutcome.setOutcome(false);
+			log.error("HttpServerErrorException occured in epfoLoginCaptcha...::{}{}",candidateCode, ex);
+		} 
+		return svcOutcome;
+	}
+
+	@Override
+	public ServiceOutcome<EpfoDetailsDto> epfoOTPScreenCaptcha(EpfoDetailsDto epfoDetails) {
+		ServiceOutcome<EpfoDetailsDto> svcOutcome = new ServiceOutcome<>();
+        try {
+    		HttpHeaders headers = new HttpHeaders();
+            setHeaderDetails(headers);
+            JSONObject request = new JSONObject();
+        	String tID = epfoDetails.getTransactionid()!=null ? epfoDetails.getTransactionid() :getEpfoTIDGeneral();
+        	ResponseEntity<String> response = null;
+        	if(StringUtils.isNotEmpty(tID) && StringUtils.isNotEmpty(epfoDetails.getCaptcha())){
+        		headers.add("txnid", tID);
+        		
+        		request.put("username",epfoDetails.getUanusername());
+    			request.put("password",epfoDetails.getUanpassword());
+    			request.put("captcha", epfoDetails.getCaptcha());
+    			
+    			HttpEntity<String> entity = new HttpEntity<>(request.toString(), headers);
+    			
+    			response = restTemplate.exchange(epfoSecurityConfig.getEpfoLoginCaptchaUrl()+"login-post?txnid="+tID, HttpMethod.POST, entity, String.class);
+    			log.info("Response from EPFO TOKEN API for epfoOTPScreenCaptcha",response);
+        		
+	        	try {
+	        		Candidate candidate = candidateRepository.findByCandidateCode(
+							epfoDetails.getCandidateCode());
+	        		candidate.setUan(epfoDetails.getUanusername());
+	        		candidateRepository.save(candidate);
+	        		
+	        		String captchamessage=response.getBody();
+					JSONObject captchaobj = new JSONObject(captchamessage);
+					log.info("Response from EPFO epfoOTPScreenCaptcha API - obj:{} ",captchaobj);
+					if(captchaobj.getBoolean("success")) {
+						String captchaString = captchaobj.getString("captcha");
+						
+//						EpfoDetailsDto epfoDetails = new EpfoDetailsDto();
+//						epfoDetails.setCandidateCode(candidateCode);
+//						epfoDetails.setTransactionid(tID);
+						epfoDetails.setCaptcha(captchaString);
+						
+						svcOutcome.setData(epfoDetails);
+		        		svcOutcome.setMessage("OTP Captcha retrived successfully..");
+		        		svcOutcome.setOutcome(true);
+					}else {
+						
+					    String error = captchaobj.getString("error");
+					    log.info("OTP CAPTCHA ERROR ::{}",error);
+					    svcOutcome.setData(null);
+		        		svcOutcome.setMessage("Please enter the correct and valid captcha..!");
+		        		svcOutcome.setOutcome(false);
+					}
+				} catch (JSONException e) {
+					log.error("Json Exception occured inn TID..",e);
+					svcOutcome.setData(null);
+		    		svcOutcome.setMessage("Please checked the entered captcha is correct..!");
+		    		svcOutcome.setOutcome(false);
+				}
+        	}else {
+    			log.error("transactionId could Not be generated.");
+    			svcOutcome.setData(null);
+        		svcOutcome.setMessage("EPFO site is down, transaction Id Not Found.");
+        		svcOutcome.setOutcome(false);
+    		}
+        	
+        	
+		} catch(Exception ex) {
+			svcOutcome.setData(null);
+    		svcOutcome.setMessage("EPFO site is down, Please try after 7 PM or late night, If you don’t have UAN skip and complete the verification.");
+    		svcOutcome.setOutcome(false);
+			log.error("HttpServerErrorException occured in epfoOTPScreenCaptcha...::{}", ex);
+		} 
+		return svcOutcome;
+	}
+
+	@Override
+	public ServiceOutcome<String> epfoOTPCaptchaSubmit(EpfoDetailsDto epfoDetails) {
+
+		ServiceOutcome<String> outcome = new ServiceOutcome<>();
+		ResponseEntity<String> response = null;
+		
+		if(StringUtils.isNotEmpty(epfoDetails.getCandidateCode()) && StringUtils.isNotEmpty(epfoDetails.getCaptcha())
+				&& StringUtils.isNotEmpty(epfoDetails.getOtp())) {
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			headers.add("txnid", epfoDetails.getTransactionid());
+	        JSONObject request = new JSONObject();
+	        
+			String message="";
+			Boolean outcomeBoolean= false;
+			
+	        try {
+	        	log.info("____________________epfoDetails.getUanusername()"+epfoDetails);
+	        	request.put("otp",epfoDetails.getOtp());
+				
+				request.put("captcha",epfoDetails.getCaptcha());
+				
+				HttpEntity<String> entity = new HttpEntity<>(request.toString(), headers);
+				response = restTemplate.exchange(epfoSecurityConfig.getEpfoLoginCaptchaUrl()+"otp-post?txnid="+epfoDetails.getTransactionid(), HttpMethod.POST, entity, String.class);
+				String responseBody=response.getBody();
+				JSONObject obj = new JSONObject(responseBody);
+				JSONArray messagee = obj.getBoolean("success") ? obj.getJSONArray("message") : new JSONArray();
+				log.info("\n--------obj --------- "+epfoDetails.getCandidateCode()+obj);
+				ServiceOutcome<CandidateDetailsDto> candidateByCandidateCode = candidateService.getCandidateByCandidateCode(
+					epfoDetails.getCandidateCode());
+				log.info("\n--------candidateByCandidateCode --------- "+candidateByCandidateCode);
+				String resMsg = obj.toString();
+				log.info("\n--------resMsg --------- "+resMsg);
+				log.info("\n--------resMsg --------- "+epfoDetails.getUanusername());
+				log.info("\n--------resMsg --------- "+candidateByCandidateCode.getData().getCandidateId());
+				CandidateEPFOResponse candidateEPFOResponse = candidateEPFOResponseRepository
+					.findByCandidateIdAndUan(candidateByCandidateCode.getData().getCandidateId(),epfoDetails.getUanusername())
+					.orElse(new CandidateEPFOResponse());
+				log.info("\n--------message --------- "+messagee);
+				for(int i=0; i<messagee.length();i++) {
+					JSONObject object = messagee.getJSONObject(i);
+					if(object.length()!=0) {
+						candidateEPFOResponse.setUanName (object.getString("name"));
+					}
+				}
+				candidateEPFOResponse.setEPFOResponse(resMsg);
+				candidateEPFOResponse.setUan(epfoDetails.getUanusername());
+				candidateEPFOResponse.setCandidateId(candidateByCandidateCode.getData().getCandidateId());
+				candidateEPFOResponse.setCreatedOn(new Date());
+				candidateEPFOResponse.setLastUpdatedOn(new Date());
+				log.info("\n____________________before candidateEPFOResponse"+candidateByCandidateCode.getData().getCandidateId()+candidateEPFOResponse);
+				candidateEPFOResponseRepository.save(candidateEPFOResponse);
+				log.info("\n____________________after candidateEPFOResponse "+candidateByCandidateCode.getData().getCandidateId()+candidateEPFOResponse);
+				if(!obj.getString("code").equals("fail") && obj.has("message") && obj.get("message") instanceof JSONArray){
+					JSONArray epfoData = obj.getJSONArray("message");
+			        final ObjectMapper objectMapper = new ObjectMapper();
+			        EpfoDataFromApiDto[] epfoDataFromApiDto = objectMapper.readValue(epfoData.toString(), EpfoDataFromApiDto[].class);
+			        List<EpfoDataFromApiDto> epfoList = new ArrayList(Arrays.asList(epfoDataFromApiDto));
+					
+			        List<EpfoData> epfoExperiencesList = new ArrayList<>();
+			        if(epfoList !=null && !epfoList.isEmpty()) {
+		        		log.debug("Post Login Information retrieved successfully"+candidateByCandidateCode.getData().getCandidateId());
+						Candidate candidate = candidateRepository.findByCandidateCode(
+							epfoDetails.getCandidateCode());
+						for(EpfoDataFromApiDto epfo : epfoList) {
+							EpfoData epfoData1 = new EpfoData();
+							epfoData1.setCandidate(candidate);
+							epfoData1.setCompany(epfo.getCompany());
+							epfoData1.setName(epfo.getName());
+							epfoData1.setUan(epfo.getUan());
+							epfoData1.setDoj(DateUtil.getDate(epfo.getDoj(),"dd/MM/yyyy"));
+							epfoData1.setDoe(DateUtil.getDate(epfo.getDoe(),"dd/MM/yyyy"));
+							
+							//adding member id(New column)
+							epfoData1.setMemberId(epfo.getMemberId());
+							
+							epfoExperiencesList.add(epfoData1);
+							
+		        		}
+		        		
+		        		if(epfoExperiencesList!=null && !epfoExperiencesList.isEmpty()) {
+		        			
+		        			List<EpfoData> existingEpfoList = epfoDataRepository.findAllByCandidateIdAndUan(candidateEPFOResponse.getCandidateId(), candidateEPFOResponse.getUan());
+		        			if(!existingEpfoList.isEmpty()) {
+		        				existingEpfoList.forEach(temp -> epfoDataRepository.deleteById(temp.getEpfoId()));
+		        				log.info("Epfo Details deleted for {}{}",candidateEPFOResponse.getCandidateId(), candidateEPFOResponse.getUan());
+		        			}
+		        				
+		        			
+		        			epfoDataRepository.saveAll(epfoExperiencesList);
+		        			
+		        			if(epfoDetails.isUanSearch() || epfoDetails.isEnterUanInQcPending()) {
+		        				
+		        				log.info("ByPASS"+candidateByCandidateCode.getData().getCandidateId());
+		        			}
+		        			else {
+		        				CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(epfoDetails.getCandidateCode());
+			        			candidateStatus.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("EPFO"));
+			        			candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("EPFO"));
+			        			candidateStatus.setLastUpdatedOn(new Date());
+			        			candidateStatusRepository.save(candidateStatus);
+								if(candidateStatus.getCandidate().getOrganization().getCallBackUrl() != null)
+									candidateService.postStatusToOrganization(candidateStatus.getCandidate().getCandidateCode());
+			        			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
+		        			}
+		        			
+		        			if(epfoDetails.isEnterUanInQcPending()) {
+		        				candidateService.updateCandidateExperienceDetails(epfoDetails.getCandidateCode());
+		        			}
+		        			
+		        			outcomeBoolean=true;
+		        			
+		        		}else {
+		        			message = "Unable to save epfo details";
+			        		outcomeBoolean=false;
+		        		}
+			        }
+		        
+	        	}else if(response.getStatusCode() == HttpStatus.OK && obj.getString("code").equals("fail")) {
+	        		message = obj.getString("message");
+	        		if(message.equals("Epfo site is Busy,pls make the request again")) {
+	        			message = "EPFO site is down, Please try after 7 PM or late night, If you don’t have UAN skip and complete the verification.";
+	        		}
+	        		outcomeBoolean=false;
+	        	}else if(response.getStatusCode() == HttpStatus.UNAUTHORIZED){
+	        		log.error("User is Unauthorized"+candidateByCandidateCode.getData().getCandidateId());
+	        		message = "User is Unauthorized";
+	        		outcomeBoolean=false;
+	        	}else if(response.getStatusCode() == HttpStatus.GATEWAY_TIMEOUT){
+	        		log.error("Server response is slow, getting timeout"+candidateByCandidateCode.getData().getCandidateId());
+	        		message = "Server response is slow, getting timeout";
+	        		outcomeBoolean=false;
+	        	}else if(response.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR){
+	        		log.error("Server is down or Not responding at this Moment"+candidateByCandidateCode.getData().getCandidateId());
+	        		message = "Server is down or Not responding at this Moment";
+	        		outcomeBoolean=false;
+	        	}
+				outcome.setData(response.getStatusCode().toString());
+				outcome.setOutcome(outcomeBoolean);
+				outcome.setMessage(message);
+				
+	        }catch (Exception ex) {
+	        	outcome.setData(response!=null?response.getStatusCode().toString():"");
+				outcome.setOutcome(outcomeBoolean);
+				outcome.setMessage("Unable to get epfo details.");
+	        	log.error("Exception occured in epfoOTPCaptchaSubmit:",ex); // Add the Proper logging Message here
+			}
+		}
+		return outcome;
 	}
 }
 

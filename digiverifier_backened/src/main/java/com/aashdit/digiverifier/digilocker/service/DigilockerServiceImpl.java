@@ -616,7 +616,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 			  		//if(action.equals("SELF")) {
 			  			json = XML.toJSONObject(data);
 				  		JSONObject drvlcData = json.getJSONObject("Certificate");
-				  		log.info("DRIVIG LICENCE CERTIFICATE FOR ::{}{}",candidateCode,drvlcData);
+//				  		log.info("DRIVIG LICENCE CERTIFICATE FOR ::{}{}",candidateCode,drvlcData);
 				  		JSONObject issuedTo = drvlcData.getJSONObject("IssuedTo");
 			  			JSONObject person = issuedTo.getJSONObject("Person");
 //			  			log.info("drivinng license person::{}",person);
@@ -688,7 +688,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 			  		}else {
 			  			candidateCafEducation = new CandidateCafEducation();
 				  		JSONObject cerificate = json.getJSONObject("Certificate");
-				  		log.info("DEGREE CERTIFICATE FOR ::{}{}",candidateCode,cerificate);
+//				  		log.info("DEGREE CERTIFICATE FOR ::{}{}",candidateCode,cerificate);
 				  		JSONObject cerificateData = cerificate.getJSONObject("CertificateData");
 						JSONObject examination = cerificateData.getJSONObject("Examination");
 						Integer year = examination.has("year") ? examination.getInt("year") : null;
@@ -737,7 +737,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 			  		}else {
 			  			candidateCafEducation = new CandidateCafEducation();
 				  		JSONObject cerificate = json.getJSONObject("Certificate");
-				  		log.info("PROVISIONAL CERTIFICATE FOR ::{}{}",candidateCode,cerificate);
+//				  		log.info("PROVISIONAL CERTIFICATE FOR ::{}{}",candidateCode,cerificate);
 				  		JSONObject cerificateData = cerificate.getJSONObject("CertificateData");
 						JSONObject examination = cerificateData.getJSONObject("Examination");
 						Integer year = examination.has("year") ? examination.getInt("year") : null;
@@ -784,7 +784,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 			  		}else {
 			  			candidateCafEducation = new CandidateCafEducation();
 				  		JSONObject cerificate = json.getJSONObject("Certificate");
-				  		log.info("SSC CERTIFICATE FOR ::{}{}",candidateCode,cerificate);
+//				  		log.info("SSC CERTIFICATE FOR ::{}{}",candidateCode,cerificate);
 				  		JSONObject cerificateData = cerificate.getJSONObject("CertificateData");
 						JSONObject examination = cerificateData.getJSONObject("Examination");
 						Integer year = examination.has("year") ? examination.getInt("year") : null;
@@ -846,7 +846,7 @@ public class DigilockerServiceImpl implements DigilockerService {
 			  		}else {
 			  			candidateCafEducation = new CandidateCafEducation();
 				  		JSONObject cerificate = json.getJSONObject("Certificate");
-				  		log.info("HSC CERTIFICATE FOR ::{}{}",candidateCode,cerificate);
+//				  		log.info("HSC CERTIFICATE FOR ::{}{}",candidateCode,cerificate);
 				  		JSONObject cerificateData = cerificate.getJSONObject("CertificateData");
 						JSONObject examination = cerificateData.getJSONObject("Examination");
 						Integer year = examination.has("year") ? examination.getInt("year") : null;
@@ -1043,17 +1043,19 @@ public class DigilockerServiceImpl implements DigilockerService {
 				Files.write(Paths.get(tempFile.getPath()), response.getBody());
 				return tempFile;
 			}else {
-//				ResponseEntity<byte[]> response1 = (new RestTemplate()).exchange("https://api.digitallocker.gov.in/public/oauth2/3/xml/eaadhaar", HttpMethod.GET, request, byte[].class);
-//				ResponseEntity<byte[]> response1 = (new RestTemplate()).exchange("https://api.digitallocker.gov.in/public/oauth2/1/xml"+"/"+issuedDocument.getUri(), HttpMethod.GET, request, byte[].class);
-//
-//				if(response1.getStatusCode().equals(HttpStatus.OK)){
-//					System.out.println("----------------response1--------------privateif------------");
+				ResponseEntity<byte[]> response1 = (new RestTemplate()).exchange("https://api.digitallocker.gov.in/public/oauth2/1/xml"+"/"+issuedDocument.getUri(), HttpMethod.GET, request, byte[].class);
+ 
+				if(response1.getStatusCode().equals(HttpStatus.OK) && issuedDocument.getUri().contains("ADHAR")){
+					System.out.println("----------------response1--------------privateif------------");
+					InputStream inputStream = new ByteArrayInputStream(response1.getBody());
+					byte[] pdfBytes = PdfUtil.convertXmlToPdf(inputStream);
+					Files.write(Paths.get(tempFile.getPath()), pdfBytes);
 //					Files.write(Paths.get(tempFile.getPath()), response1.getBody());
-//					return tempFile;
-//				}else {
-//					return null;
-//				}
-				return null;
+					return tempFile;
+				}else {
+					return null;
+				}
+//				return null;
 			}
 		}catch(Exception e){
 			log.error("Exception occured in DigilockerServiceImpl in getFIleFromUri method-->",e);

@@ -86,21 +86,100 @@ export class LoginComponent implements OnInit {
           this.authService.setOrgID(this.decryptData(response.data.organizationId,key));
         }
         const role = this.decryptData(response.data.roleCode,key);
+        // let lastPasswordUpdated: Date = new Date(response.data.lastPasswordUpdated);
+        // let lastPasswordUpdated: Date | null = response.data.lastPasswordUpdated ? new Date(response.data.lastPasswordUpdated) : null;
+        // if (lastPasswordUpdated !== null) {
+        //   // let currentDate: Date = new Date();
+        //   // let timeDifference: number = currentDate.getTime() - lastPasswordUpdated.getTime();
+        //   // let daysDifference: number = timeDifference / (1000 * 3600 * 24);
+        //   console.log("response.data.orgPassPolicy : "+response.data.orgPassPolicy)
+        //   console.log("lastPasswordUpdated : "+lastPasswordUpdated)
+        // }
+
         if(role === "ROLE_CBADMIN"){
           this.router.navigate(['/admin']);
-        }else if(role === "ROLE_ADMIN"){
-          this.router.navigate(['/admin/orgadminDashboard']);
-        }else if(role === "ROLE_PARTNERADMIN"){
-          this.router.navigate(['/admin/orgadminDashboard']);
-        }else if(role === "ROLE_AGENTSUPERVISOR"){
-          this.router.navigate(['/admin/orgadminDashboard']);
-        }else if(role === "ROLE_AGENTHR"){
-          this.router.navigate(['/admin/orgadminDashboard']);
-        }else if(role === "ROLE_VENDOR"){
-          this.router.navigate(['/admin/vendordashboard']);
-        }else{
-          this.router.navigate(['/login']);
         }
+        // else if(response.data.orgPassPolicy === true && lastPasswordUpdated !== null){
+        //   let currentDate: Date = new Date();
+        //   let timeDifference: number = currentDate.getTime() - lastPasswordUpdated.getTime();
+        //   let daysDifference: number = timeDifference / (1000 * 3600 * 24);
+        //   if (daysDifference > 90) {
+        //         Swal.fire({
+        //             title: 'Expired Password',
+        //             text: 'Your password has expired. Please update your password.',
+        //             icon: 'error',
+        //             showCancelButton: true,
+        //             confirmButtonText: 'Change Password',
+        //             cancelButtonText: 'Skip'
+        //         }).then((result) => {
+        //             if (result.isConfirmed) {
+        //                 // Redirect to the change password page or handle the change password action
+        //                 window.location.href = '/change-password'; // example URL, change as needed
+        //             } else if (result.dismiss === Swal.DismissReason.cancel) {
+        //                 // Handle the skip action
+        //                 console.log("User chose to skip updating the password.");
+        //             }
+        //         });
+        //     } else if (daysDifference > (90 - 7)) {
+        //         Swal.fire({
+        //             title: 'Password Expiring Soon',
+        //             text: 'Your password will expire soon. Please update your password.',
+        //             icon: 'warning',
+        //             showCancelButton: true,
+        //             confirmButtonText: 'Change Password',
+        //             cancelButtonText: 'Skip'
+        //         }).then((result) => {
+        //             if (result.isConfirmed) {
+        //               alert("gshdvjhhhhhhhhhhh")
+        //                 // Redirect to the change password page or handle the change password action
+        //                 window.location.href = '/admin/myProfile'; // example URL, change as needed
+        //             } else if (result.dismiss === Swal.DismissReason.cancel) {
+        //                 // Handle the skip action
+        //                 window.location.href = '/admin/orgadminDashboard';
+        //                 console.log("User chose to skip updating the password.");
+        //             }
+        //         });
+        //     } 
+        // }
+        // else if(response.data.orgPassPolicy === false || response.data.orgPassPolicy == null){
+          // alert("gshdvjh")
+          else if(role === "ROLE_ADMIN"){
+            this.router.navigate(['/admin/orgadminDashboard']);
+          }else if(role === "ROLE_PARTNERADMIN"){
+            this.router.navigate(['/admin/orgadminDashboard']);
+          }else if(role === "ROLE_AGENTSUPERVISOR"){
+            this.router.navigate(['/admin/orgadminDashboard']);
+          }else if(role === "ROLE_AGENTHR"){
+            this.router.navigate(['/admin/orgadminDashboard']);
+          }else if(role === "ROLE_VENDOR"){
+            this.router.navigate(['/admin/vendordashboard']);
+          }else if(role === "ROLE_CLIENTAGENT"){
+            this.router.navigate(['/admin/orgadminDashboard']);
+          }else if(role === "ROLE_CLIENTSUPERVISOR"){
+            this.router.navigate(['/admin/orgadminDashboard']);
+          }
+          else{
+            this.router.navigate(['/login']);
+          }
+        // }
+        // else if(role === "ROLE_ADMIN"){
+        
+        // }
+
+        // }else if(role === "ROLE_PARTNERADMIN"){
+        //   this.router.navigate(['/admin/orgadminDashboard']);
+        // }else if(role === "ROLE_AGENTSUPERVISOR"){
+        //   this.router.navigate(['/admin/orgadminDashboard']);
+        // }else if(role === "ROLE_AGENTHR"){
+        //   this.router.navigate(['/admin/orgadminDashboard']);
+        // }else if(role === "ROLE_VENDOR"){
+        //   this.router.navigate(['/admin/vendordashboard']);
+        // }else if(role === "ROLE_CLIENTAGENT"){
+        //   this.router.navigate(['/admin/orgadminDashboard']);
+        // }
+        // else{
+        //   this.router.navigate(['/login']);
+        // }
 
         if(response.message == 'Change your password.')
           window.alert('Change your password.')

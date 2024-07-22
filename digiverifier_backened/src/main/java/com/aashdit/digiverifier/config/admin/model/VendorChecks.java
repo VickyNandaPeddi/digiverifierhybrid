@@ -147,5 +147,10 @@ public class VendorChecks implements Serializable {
 
 	@Column(name = "agent_upload_document_path_key")
 	private String agentUploadDocumentPathKey;
+	
+	@Column(name = "e_court_proof_content_id")
+	private Long eCourtProofContentId;
 
+	@Column(name = "client_approval")
+	private Boolean clientApproval;
 }

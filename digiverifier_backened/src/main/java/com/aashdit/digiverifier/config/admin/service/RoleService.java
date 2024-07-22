@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.aashdit.digiverifier.common.model.ServiceOutcome;
 import com.aashdit.digiverifier.config.admin.dto.RoleHeadPermissionListDto;
+import com.aashdit.digiverifier.config.admin.dto.RoleManagementAndRolePermissionDTO;
 import com.aashdit.digiverifier.config.admin.dto.RolePermissionDTO;
 import com.aashdit.digiverifier.config.admin.model.Role;
 
@@ -22,5 +23,7 @@ public interface RoleService {
 	ServiceOutcome<List<Role>> getRoleDropDownByUser();
 
 	ServiceOutcome<List<String>> getAllRolePerMissionCodeByRoleCode(String roleCode);
+	
+	ServiceOutcome<?> saveRoleManagementAndRolePermission(RoleManagementAndRolePermissionDTO role);
 
 }

@@ -104,7 +104,7 @@ export class AdminCReportApprovalComponent implements OnInit {
   venderSourceId: any;
   venderAttributeCheck: any = [];
   colorid: any;
-  
+
   vendorAttributeListForm: any[] = [];
   vendorAttributeCheckMapped: any[] = [];
   showMessage: any;
@@ -135,6 +135,7 @@ export class AdminCReportApprovalComponent implements OnInit {
   drugCheckSubmitDisable:boolean = false;
   drugtestCheckValidation:boolean = false;
   showGlobalCheck: boolean = true
+  scopeValidation: boolean = false;
 
   formEditEdu = new FormGroup({
     colorId: new FormControl('', Validators.required),
@@ -149,7 +150,7 @@ export class AdminCReportApprovalComponent implements OnInit {
     id: new FormControl(''),
     candidateCode: new FormControl(''),
   });
-  
+
   myForm = new FormGroup({
     caseReinitiationDate: new FormControl('')
   });
@@ -157,21 +158,21 @@ export class AdminCReportApprovalComponent implements OnInit {
   specialCharacterValidator(control: any) {
     const specialCharacterPattern = /[^\w\s]/;
     const hasSpecialCharacter = specialCharacterPattern.test(control.value);
-  
+
     return hasSpecialCharacter ? { containsSpecialCharacter: true } : null;
   }
 
   percentageValidator(control: any) {
     const specialCharacterPattern = /[!@#$%^&*(),?":{}|<>\/]/;
     const hasSpecialCharacter = specialCharacterPattern.test(control.value);
-  
+
     return hasSpecialCharacter ? { containsSpecialCharacter: true } : null;
   }
 
   customRemarkValidator(control: any) {
     const specialCharacterPattern = /[!@#$%^&*()?":{}|<>\/]/;
     const hasSpecialCharacter = specialCharacterPattern.test(control.value);
-  
+
     return hasSpecialCharacter ? { containsSpecialCharacter: true } : null;
   }
 
@@ -265,8 +266,8 @@ export class AdminCReportApprovalComponent implements OnInit {
   drugCheckPanel = new FormGroup({
     drugPanelValue: new FormControl('')
   })
-  
-  
+
+
    vendorlist = new FormGroup({
     vendorcheckId: new FormControl(''),
     documentname: new FormControl(''),
@@ -282,8 +283,8 @@ export class AdminCReportApprovalComponent implements OnInit {
     }),
     // drugCheckPanel: new FormControl('')
   });
-  
-  
+
+
     get civilProceedingsList() {
     return (
       this.vendorlist.get('legalProcedings.civilProceedingsList') as FormArray
@@ -407,7 +408,7 @@ export class AdminCReportApprovalComponent implements OnInit {
     }
   }
 
-  
+
   orgid: string | null;
   isCommentAdded: boolean = true;
   suspectEmpCheckResponse: any;
@@ -476,6 +477,27 @@ export class AdminCReportApprovalComponent implements OnInit {
           '.......................candidateEXPData.........................'
         );
 
+        const filteredList = this.candidateEXPData
+          .filter((caf: any) => caf.outputDateOfExit === null && caf.inputDateOfExit === null)
+          .map((caf: any) => caf.candidateCafExperienceId);
+
+        const filteredLatestEmpList = this.candidateEXPData
+          .filter((dto: any) => filteredList.includes(dto.candidateCafExperienceId));
+
+        if (filteredLatestEmpList && filteredLatestEmpList.length > 1) {
+            filteredLatestEmpList.sort((o1: { doj: string | number | Date; }, o2: { doj: string | number | Date; }) => {
+              const doj1 = o1.doj && o1.doj !== "NOT_AVAILABLE" ? new Date(o1.doj) : new Date();
+              const doj2 = o2.doj && o2.doj !== "NOT_AVAILABLE" ? new Date(o2.doj) : new Date();
+              return doj1.getTime() - doj2.getTime();
+          });
+
+          const currentIndex = this.candidateEXPData.indexOf(filteredLatestEmpList[0]);
+          if (currentIndex > 0) {
+            this.candidateEXPData.splice(currentIndex, 1);
+            this.candidateEXPData.unshift(filteredLatestEmpList[0]);
+          }
+        }
+
         if(this.getServiceConfigCodes != null && this.getServiceConfigCodes.includes("EPFO") && this.getServiceConfigCodes.includes("DNHDB")
         && !this.getServiceConfigCodes.includes("DIGILOCKER") && !this.getServiceConfigCodes.includes("ITR")) {
 
@@ -483,7 +505,7 @@ export class AdminCReportApprovalComponent implements OnInit {
           for(let exp in this.candidateEXPData) {
             if(this.candidateEXPData[exp].serviceName =="EPFO" || (this.candidateEXPData[exp].serviceName =="DNHDB" && this.candidateEXPData[exp].uan) || this.candidateEXPData[exp].serviceName =="ITR")
               this.candidateEXPDataFromITRAndEPFO.push(this.candidateEXPData[exp]);
-            else 
+            else
               this.candidateEXPDataFromResume.push(this.candidateEXPData[exp]);
           }
         }
@@ -566,7 +588,7 @@ export class AdminCReportApprovalComponent implements OnInit {
           console.log('this.caseReinitiationDate', this.caseReinitiationDate);
           const inputDate: HTMLInputElement | null = this.inputDateRef?.nativeElement;
 
-              // Check if the input element exists before assigning its value  
+              // Check if the input element exists before assigning its value
               if (inputDate) {
                 inputDate.value = this.caseReinitiationDate; // Patching the value into the input field
               }
@@ -625,7 +647,21 @@ export class AdminCReportApprovalComponent implements OnInit {
       .subscribe((result: any) => {
         this.getServiceConfigCodes = result.data;
         console.log(this.getServiceConfigCodes);
+        if(this.getServiceConfigCodes != null && this.getServiceConfigCodes.includes("EPFO") && this.getServiceConfigCodes.includes("DNHDB")
+          && !this.getServiceConfigCodes.includes("DIGILOCKER") && !this.getServiceConfigCodes.includes("ITR")) {
+
+            this.scopeValidation = true;
+          }
       });
+    if (
+      !(
+        this.getServiceConfigCodes.includes('EPFO') &&
+        !this.getServiceConfigCodes.includes('DIGILOCKER') &&
+        !this.getServiceConfigCodes.includes('ITR')
+      )
+    ) {
+      this.loadQcRemarks();
+    }
   }
 
   undisclosedClick() {
@@ -695,7 +731,7 @@ export class AdminCReportApprovalComponent implements OnInit {
 
   suspectEmpCheck(){
     let employer: string = this.formEditEXP.get('candidateEmployerName')?.value;
-    const textWithoutSlashes = employer.replace(/\//g, ' '); 
+    const textWithoutSlashes = employer.replace(/\//g, ' ');
     this.candidateService.suspectEmpCheck(textWithoutSlashes, this.orgid)
     .subscribe((result: any) => {
       if (result.outcome === true) {
@@ -1064,7 +1100,8 @@ export class AdminCReportApprovalComponent implements OnInit {
     }
   }
   submitEditScope() {
-    if(this.orgName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'){
+    if(this.getServiceConfigCodes != null && this.getServiceConfigCodes.includes("EPFO") && this.getServiceConfigCodes.includes("DNHDB")
+      && !this.getServiceConfigCodes.includes("DIGILOCKER") && !this.getServiceConfigCodes.includes("ITR")){
       let defaultColorId = this.getColors.find((temp: any) => temp.colorName == 'Green').colorId;
       this.orgScopeData.othersColorId = defaultColorId;
       this.formEditScope.get('colorId')?.setValue(defaultColorId);
@@ -1268,7 +1305,7 @@ export class AdminCReportApprovalComponent implements OnInit {
     const fileType = event.target.files[0].name.split('.').pop();
     if (fileType == 'pdf' || fileType == 'PDF') {
       this.CaseDetailsDoc = file;
-      
+
       // if(this.getServiceConfigCodes != null && this.getServiceConfigCodes.includes("EPFO") && this.getServiceConfigCodes.includes("DNHDB")
       // && !this.getServiceConfigCodes.includes("DIGILOCKER") && !this.getServiceConfigCodes.includes("ITR")) {
       //     this.candidateService
@@ -1408,12 +1445,12 @@ export class AdminCReportApprovalComponent implements OnInit {
         'data:application/pdf;base64,' + document
       );
     }
-  } 
+  }
 
-  enteruan() { 
-    this.enterUanInQcPending = true; 
-    const navURL = 'candidate/epfologin/' + this.candidateCode; 
-    this.navRouter.navigate([navURL], { queryParams: { enterUanInQcPending: this.enterUanInQcPending } }); 
+  enteruan() {
+    this.enterUanInQcPending = true;
+    const navURL = 'candidate/epfologin/' + this.candidateCode;
+    this.navRouter.navigate([navURL], { queryParams: { enterUanInQcPending: this.enterUanInQcPending } });
   }
   // initiatevendor(){
   //   const navURL = 'admin/vendorinitiaste/'+this.candidateCode;
@@ -1484,19 +1521,22 @@ export class AdminCReportApprovalComponent implements OnInit {
 
   viewDocFromS3(modalCertificate: any,pathkey:any){
     // console.warn("pathkey>>>>>",pathkey)
-    this.orgAdmin.downloadAgentUploadedDocument(pathkey).subscribe((data:any)=>{
+    this.orgAdmin.downloadAgentUploadedDocument(pathkey,true).subscribe((data:any)=>{
       console.warn("data>>>>",data)
-      this.modalService.open(modalCertificate, {
-        centered: true,
-        backdrop: 'static',
-        size: 'lg',
-      });
-      var maxFileSize = 1000000; // 1MB
-      if (pathkey && pathkey.length <= maxFileSize) {
-        this.loadCertificatePDF(data.message);
-      }
+      if (data && data.message) {
+        window.open(data.message);
+    }
+      // this.modalService.open(modalCertificate, {
+      //   centered: true,
+      //   backdrop: 'static',
+      //   size: 'lg',
+      // });
+      // var maxFileSize = 1000000; // 1MB
+      // if (pathkey && pathkey.length <= maxFileSize) {
+      //   this.loadCertificatePDF(data.message);
+      // }
     })
-   
+
   }
 
   detectContentType(base64String: string): string | null {
@@ -1606,7 +1646,7 @@ export class AdminCReportApprovalComponent implements OnInit {
 
     this.formEditEXPResult.patchValue({
       candidateCafExperienceId: candidateCafExperienceId
-    })    
+    })
   }
 
   submitEditReportStatus(){
@@ -1642,7 +1682,7 @@ export class AdminCReportApprovalComponent implements OnInit {
                 this.model.close();
               }
             });
-    
+
       // this.candidateService
       //   .updateCandidateReportStatus(formData)
       //   .subscribe((result: any) => {
@@ -1911,9 +1951,9 @@ export class AdminCReportApprovalComponent implements OnInit {
       }
     });
   }
-  
-  
-    
+
+
+
     selectTab(tabName: string): void {
     this.selectedTab = tabName;
     // Add any additional logic you want to perform when a tab is selected
@@ -2021,7 +2061,7 @@ export class AdminCReportApprovalComponent implements OnInit {
     return this.disableGlobalOptionButton;
   }
 
-  
+
 
   triggerModal(
     content: any,
@@ -2163,7 +2203,7 @@ export class AdminCReportApprovalComponent implements OnInit {
 
      // console.warn("vendorValue>>>>>>>>>>>"+vendorValue)
 
-    
+
 
 
     for (const attribute of vendorValue) {
@@ -2181,19 +2221,19 @@ try {
 }
 
     if (isValidJSON) {
-   
+
           const parsedData = JSON.parse(attribute); // Parse the JSON string
 
           const vendorCheckStatusId = parsedData.vendorCheckStatusMasterId[0].vendorCheckStatusMasterId;
           const remarks = parsedData.remarks[0].remarks;
-  
+
           console.log("Vendor Check Status Master ID:", vendorCheckStatusId);
       console.log("Remarks:", remarks);
-  
+
       this.remarks = remarks// Store the value of "remarks"
-  
+
       const status = vendorCheckStatusId; // Parse the status value to integer
-  
+
       if(status == 1){
         this.checkStatus = "Clear"
       }
@@ -2243,7 +2283,7 @@ try {
     }
   }
    }
-     
+
 }
 else{
   console.warn("ATTRIBUTE>>>>>>>33", attribute);
@@ -2274,13 +2314,13 @@ else{
     }
   }
 }
-      
+
   }
 
   // console.log("fsjkgkfgskgfk",this.remarks); // Output: SuccessVendot
   // console.log("checkStatus:::::",this.checkStatus)
 
-  
+
 
   if(this.isVendorAttributeForm){
     this.vendorlist.patchValue({
@@ -2309,9 +2349,9 @@ else{
   // console.warn("his.vendorlist.patchValu>>>>>>",this.vendorlist.value)
 
 
-    
 
-    // this.remarks = 
+
+    // this.remarks =
 
     // this.venderSourceId = this.vendorchecksupload[i].source.sourceId;
 
@@ -2346,7 +2386,7 @@ else{
                 defaultValue = this.cApplicationFormDetails.candidate.aadharFatherName;
                 console.log("defaultValue for Father Name >>>>", defaultValue);
             }
-        
+
             return {
                 label: ele,
                 value: null,
@@ -2400,7 +2440,7 @@ else{
         vendorcheckId: vendorcheckId,
         colorid: this.colorid,
         roleAdmin: true
-        
+
       });
   }
 
@@ -2563,7 +2603,7 @@ else{
     }
     else{
 
-      
+
     //temp
 
     // console.log("Updated Selected Labels:", this.selectedLabels);
@@ -2582,7 +2622,7 @@ else{
       })
     };
 
-          const {vendorCheckStatusMasterId,remarks,nameAsPerProof,proofName,dateOfBirth,fatherName } = this.vendorlist.value; 
+          const {vendorCheckStatusMasterId,remarks,nameAsPerProof,proofName,dateOfBirth,fatherName } = this.vendorlist.value;
            mergedData = {
             ...this.vendorAttributeCheckMapped,
             vendorCheckStatusMasterId,
@@ -2595,7 +2635,7 @@ else{
 
           if(this.drugCheck){
             mergedData.panel = formData1.panel;
-  
+
             // fetchedData.labels.forEach(labelObject => {
             //   const label = Object.keys(labelObject)[0]; // Get the label
             //   const value = labelObject[label]; // Get the value
@@ -2606,7 +2646,7 @@ else{
             fetchedData.labels.forEach(labelObject => {
               const label = Object.keys(labelObject)[0]; // Get the label
               const value = labelObject[label]; // Get the value
-            
+
               // Check if value is empty
               if (value.trim() === '') {
                 // console.warn("khsfhbhsvfvhj false")
@@ -2636,7 +2676,7 @@ else{
     formData.append('vendorAttributesValue', JSON.stringify(mergedData));
 
     // console.warn('mergedData++++++++++++++++++++', mergedData);
-  
+
     // formData.append('vendorchecks', JSON.stringify(this.vendorlist.value));
     //  if (this.vendorlist.valid && venderAttributeValue !== false) {
       if(this.drugCheck !== true){
@@ -2703,7 +2743,7 @@ else{
       // Start On Submit For Drug Check with Validation
   return undefined;
   }
-  
+
   uploadGlobalCaseDetails2(event: any) {
     const fileType = event.target.files[0].name.split('.').pop();
     const file = event.target.files[0];
@@ -2774,7 +2814,7 @@ else{
     'Panel 12': ['Marijuana / Cannabinoids', 'Amphetamine (AMP)', 'Cocaine (COC)', 'Phencyclidine (PCP)', 'Barbiturate (BAR)', 'Benzodiazepine (BZD)','Methadone','Propoxyphene','Methaqualone','MDMA(ecstasy)','TCA(Tricyclic Antidepressants)','Oxycodone'],
   };
 
-  
+
   onPanelChange(event: any) {
     // this.drugCheckSubmitDisable = true;
     const selectedPanelValue = event.target.value;
@@ -2811,8 +2851,112 @@ else{
             });
           }
         });
-      
     }
   }
 
+  qcRemarksList:any[]=[];
+  qcRemarksText: string = '';
+
+  loadQcRemarks() {
+    this.candidateService.getQcRemarks(this.candidateCode).subscribe(
+        (response:any) => {
+            if (response.outcome) {
+                this.qcRemarksList = response.data;
+            } else {
+                console.error('Failed to fetch QC remarks: ' + response.message);
+            }
+        },
+        error => {
+            console.error('Error fetching QC remarks: ' + error);
+        }
+    );
+}
+
+  addUpdateRemark() {
+    const remarksValue = this.formEditScope.get('customRemark')?.value;
+    const colorId = this.formEditScope.get('colorId')?.value;
+    const candidateQcremarks = {
+      candidateCode: this.candidateCode,
+      qcRemarksId: colorId,
+      qcRemarks: remarksValue,
+    };
+
+    console.log('Sending candidateQcremarks:', candidateQcremarks); // Log to check structure
+    this.candidateService.saveQcRemarks(candidateQcremarks).subscribe(
+      (result: any) => {
+        if (result.outcome === true) {
+          Swal.fire({
+            title: result.message,
+            icon: 'success',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.reload();
+            }
+          });
+        } else {
+          Swal.fire({
+            title: result.message,
+            icon: 'warning',
+          });
+        }
+      },
+      (error) => {
+        console.error('Error sending request:', error); // Log any HTTP request error
+      }
+    );
+  }
+  isUpdateMode: boolean = false;
+  openQcRemarksModal(content: any, qcRemark: any, qcRemarksId: any) {
+    this.isUpdateMode = !!qcRemarksId;
+
+    this.formEditScope.patchValue({
+      colorId: qcRemarksId,
+      customRemark: qcRemark,
+    });
+
+    this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title' });
+  }
+
+  deleteRemark(qcRemarksId: number) {
+    this.candidateService.deleteQcremarks(qcRemarksId).subscribe((result: any) => {
+      if (result.outcome === true) {
+        Swal.fire({
+          title: result.message,
+          icon: 'success',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.reload();
+          }
+        });
+      } else {
+        Swal.fire({
+          title: result.message,
+          icon: 'warning',
+        });
+      }
+    });
+  }
+
+  //
+  // openQcRemarksModal(content: any) {
+  //   this.modalService
+  //     .open(content, {ariaLabelledBy: 'modal-basic-title'})
+  //     .result.then(
+  //     (res) => {
+  //       this.closeModal = `Closed with: ${res}`;
+  //     },
+  //     (res) => {
+  //       this.closeModal = `Dismissed ${this.getDismissReason(res)}`;
+  //     }
+  //   );
+  // }
+
+  // ngAfterViewInit() {
+  //   // Initialize Sortable after view initialization
+  //   const sortable = new Sortable(document.getElementById('remarksBody'), {
+  //     animation: 150,
+  //     handle: '.fa-bars',
+  //     draggable: '.draggable'
+  //   });
+  // }
 }

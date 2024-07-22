@@ -21,7 +21,7 @@ public class OrganisationScope {
 	@Column(name = "org_scope_id")
 	private Long orgScopeId;  
 	
-	@Column(name = "candidate_id")
+	@Column(name = "candidate_id", unique = true)
 	private Long candidateId;
 	
 	@Column(name = "dual_employment", length=2000)

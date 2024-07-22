@@ -71,7 +71,7 @@
                                         <label for="" class="required" >{{i + 4}}. {{ attribute.label }} & Database</label>
                                     </ng-container> -->
 
-                                    <ng-container *ngIf="attribute.label != 'Employment' && attribute.label != 'ID'">
+                                    <ng-container *ngIf="attribute.label != 'Employment' && attribute.label != 'ID' && attribute.label != 'Database' && attribute.label != 'Address' && attribute.label != 'Education'">
                                         <label for="" class="required">{{ i + 4 }}. {{ attribute.label }}</label>
                                     </ng-container>
 
@@ -83,6 +83,18 @@
                                     <ng-container *ngIf="attribute.label == 'ID'">
                                         <label for="" class="required">{{i + 4}}. {{ attribute.label }} (Aadhar &
                                             Pan)</label>
+                                    </ng-container>
+
+                                    <ng-container *ngIf="attribute.label == 'Database'">
+                                        <label for="" class="required">{{i + 4}}. {{ attribute.label }} (Aadhar Only)</label>
+                                    </ng-container>
+
+                                    <ng-container *ngIf="attribute.label == 'Address'">
+                                        <label for="" class="required">{{i + 4}}. {{ attribute.label }} (Enter Full Address)</label>
+                                    </ng-container>
+
+                                    <ng-container *ngIf="attribute.label == 'Education'">
+                                        <label for="" class="required">{{i + 4}}. {{ attribute.label }} (Highest Education)</label>
                                     </ng-container>
 
                                     <!-- <ng-container>
@@ -123,13 +135,14 @@
                                                     class="form-group row mb-3">
                                                     <div class="col-md-12 d-flex flex-row align-items-center">
                                                         <select id="educationLevel{{i}}" [(ngModel)]="check.Education"
-                                                            name="educationLevel{{i}}" class="form-control mr-2"
+                                                            name="educationLevel{{i}}" class="form-control mr-2" [disabled]="isDropdownDisabled"
                                                             required
                                                             (focus)="previousEducationLevel = check.Education"
-                                                            (ngModelChange)="updateEducationDocuments($event, check)">
+                                                            (ngModelChange)="updateEducationDocuments($event, check,null)">
+                                                            <option value="" *ngIf="check.Education" disabled selected>{{ check.Education }}</option>
                                                             <option value="" disabled selected>--Select--</option>
                                                             <option *ngFor="let level of educationLevels"
-                                                                [value]="level">{{ level }}</option>
+                                                                [value]="level"  [disabled]="isLevelEducationIncluded(level) && check.Education !== level">{{ level }}</option>
                                                         </select>
                                                         <button type="button" class="btn btn-sm btn-primary"
                                                             [disabled]="!check.Education"
@@ -140,33 +153,50 @@
                                                     </div>
                                                     <div *ngFor="let doc of check.documents; let j = index"
                                                         class="form-group row mb-3">
+                                                        <!-- <ng-container *ngIf="j === 0">
+                                                            <ng-container *ngIf="doc?.EducationDoc">
+                                                                {{ setDocEducation(doc) }}
+                                                            </ng-container>
+                                                        </ng-container> -->
+                                                        <ng-container *ngIf="j === 0">
+                                                            <ng-container *ngIf="doc?.EducationDoc">
+                                                                {{ setDocProperty(doc, 'docEducation', 'EducationDoc') }}
+                                                            </ng-container>
+                                                        </ng-container>
                                                         <div class="col-md-12 d-flex flex-row align-items-center mt-4">
                                                             <div class="col-md-4">
-                                                                <!-- <select id="educationDocument{{j}}" [(ngModel)]="doc.EducationDoc"
-                                name="educationDocument{{j}}" class="form-control mr-2" required>
-                                <option value="" disabled selected>--Select--</option>
-                                <option *ngFor="let level of filteredEducationDocuments" [value]="level">{{ level }}</option>
-                            </select> -->
+                                                                                                    <!-- <select id="educationDocument{{j}}" [(ngModel)]="doc.EducationDoc"
+                                                                    name="educationDocument{{j}}" class="form-control mr-2" required>
+                                                                    <option value="" disabled selected>--Select--</option>
+                                                                    <option *ngFor="let level of filteredEducationDocuments" [value]="level">{{ level }}</option>
+                                                                </select> -->
                                                                 <select id="educationDocument{{i}}_{{j}}"
                                                                     [(ngModel)]="doc.EducationDoc"
                                                                     name="educationDocument{{i}}_{{j}}"
                                                                     class="form-control mr-2" required>
+                                                                    <option value="" *ngIf="doc.EducationDoc" disabled selected>{{ doc.EducationDoc }}</option>
                                                                     <option value="" disabled selected>--Select--
                                                                     </option>
                                                                     <option
                                                                         *ngFor="let level of allEducationDocuments[check.Education]"
-                                                                        [value]="level">{{ level }}</option>
+                                                                        [value]="level" [disabled]="isLevelEducationDocIncluded(level, check) && doc.EducationDoc !== level">{{ level }}</option>
                                                                 </select>
+                                                                <ng-container *ngIf="j === 0">
+                                                                    <ng-container *ngIf="doc?.EducationDoc">
+                                                                        {{ setDocProperty(doc, 'docEducation', 'EducationDoc') }}
+                                                                    </ng-container>
+                                                                </ng-container>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <input type="file" id="document{{j}}"
                                                                     [disabled]="!doc.EducationDoc"
-                                                                    (change)="uploadFile($event, 'Education', check.Education, doc.EducationDoc)"
+                                                                    (change)="uploadFile($event, 'Education', check.Education, doc.EducationDoc,null)"
                                                                     class="form-control mr-2" required multiple />
                                                             </div>      
                                                             <button type="button"
                                                             class="btn btn-sm btn-outline-danger"
-                                                            (click)="removeEducationDoc(check, j)">&#10006;</button>
+                                                            (click)="removeEducationDoc(check,'Education '+check.Education+' '+doc.EducationDoc, j,'Education '+check.Education,check.Education)">&#10006;</button>
+                                     
                                                         </div>
                                                         <div *ngIf="educationSelectedFiles.length > 0">
                                                             <p style="margin: 20px;">{{check.Education}}</p>
@@ -182,7 +212,7 @@
                                                                         *ngIf="fileObj.key === 'Education '+ check.Education+' '+doc.EducationDoc">
                                                                         <li>{{ fileObj.file.name }}
                                                                             <button
-                                                                                (click)="removeFile('education', check.Education, fileObj.file,i, j, k)">&#10006;</button>
+                                                                                (click)="removeFile('education', check.Education, fileObj.file,i, j, k,0,i)">&#10006;</button>
                                                                         </li>
                                                                     </ng-container>
                                                                 </ng-container>
@@ -234,12 +264,15 @@
                                             <form>
                                                 <div *ngFor="let employmentCheck of employmentChecks; let i = index" class="form-group row mb-3">
                                                     <div class="col-md-12 d-flex flex-row align-items-center">
-                                                        <select id="employment{{i}}" [(ngModel)]="employmentCheck.Employment" (focus)="previousEmploymentLevel = employmentCheck.Employment" (ngModelChange)="updateEmploymentDocuments($event, employmentCheck)" name="employment{{i}}"
-                                                            class="form-control mr-2" required>
+                                                        <select id="employment{{i}}" [(ngModel)]="employmentCheck.Employment" (focus)="previousEmploymentLevel = employmentCheck.Employment" (ngModelChange)="updateEmploymentDocuments($event, employmentCheck,null)" name="employment{{i}}"
+                                                            class="form-control mr-2" [disabled]="isDropdownDisabled" required>
+                                                            <option value="" *ngIf="employmentCheck.Employment" disabled selected>{{ employmentCheck.Employment }}</option>
                                                             <option value="" disabled selected>--Select--</option>
-                                                            <option value="EMP1">EMP1</option>
+                                                            <!-- <option value="EMP1">EMP1</option>
                                                             <option value="EMP2">EMP2</option>
-                                                            <option value="EMP3">EMP3</option>
+                                                            <option value="EMP3">EMP3</option> -->
+                                                            <option *ngFor="let level of employmentLevels"
+                                                            [value]="level"  [disabled]="isLevelEmploymentIncluded(level) && employmentCheck.Employment !== level">{{ level }}</option>
                                                         </select>
                                                         <button type="button" class="btn btn-sm btn-primary" [disabled]="!employmentCheck.Employment"
                                                             (click)="addDocumentForEmployment(employmentCheck)">Add Document</button>
@@ -248,26 +281,31 @@
                                                     </div>
                                     
                                                     <div *ngFor="let doc of employmentCheck.documents; let j = index" class="form-group row mb-3">
+                                                        <ng-container *ngIf="j === 0">
+                                                            <ng-container *ngIf="doc?.EmploymentDoc">
+                                                                {{ setDocProperty(doc, 'EmploymentDoc', 'EmploymentDoc') }}
+                                                            </ng-container>
+                                                        </ng-container>
                                                         <div class="col-md-12 d-flex flex-row align-items-center mt-4">
                                                             <div class="col-md-6">
                                                                 <select id="employmentDocument{{i}}_{{j}}" [(ngModel)]="doc.EmploymentDoc"
                                                                     name="employmentDocument{{i}}_{{j}}" class="form-control mr-2" required>
+                                                                    <option value="" *ngIf="doc.EmploymentDoc" disabled selected>{{ doc.EmploymentDoc }}</option>
                                                                     <option value="" disabled selected>--Select--</option>
-                                                                    <option *ngFor="let level of employmentDocument" [value]="level">{{ level }}</option>
+                                                                    <option *ngFor="let level of employmentDocument" [value]="level"  [disabled]="isLevelEmploymentDocIncluded(level, employmentCheck) && doc.EmploymentDoc !== level">{{ level }}</option>
                                                                 </select>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <input type="file" id="employmentDocument{{i}}_{{j}}" [disabled]="!doc.EmploymentDoc"
-                                                                    (change)="uploadFile($event, 'Employment', employmentCheck.Employment, doc.EmploymentDoc)"
+                                                                    (change)="uploadFile($event, 'Employment', employmentCheck.Employment, doc.EmploymentDoc,null)"
                                                                     class="form-control mr-2" required multiple />
                                                             </div>
                                                             <button type="button"
                                                             class="btn btn-sm btn-outline-danger"
-                                                            (click)="removeEmploymentDoc(employmentCheck, j)">&#10006;</button>
+                                                            (click)="removeEmploymentDoc(employmentCheck,'Employment '+employmentCheck.Employment+' '+doc.EmploymentDoc, j,'Employment '+employmentCheck.Employment,employmentCheck.Employment)">&#10006;</button>
                                                         </div>
                                                         <div *ngIf="employmentSelectedFiles.length > 0">
-                                                            <p style="margin: 20px;">{{employmentCheck.Employment+'
-                                                                '+employmentCheck.selectedEmploymentSubType}}</p>
+                                                            <p style="margin: 20px;">{{employmentCheck.Employment}}</p>
                                                             <!-- <ul>
                                                           <li *ngFor="let file of employmentSelectedFiles">{{ file.name }}
                                                             <button (click)="removeFile('employment', file)">&#10006;</button>
@@ -280,7 +318,7 @@
                                                                         *ngIf="fileObj.key === 'Employment '+ employmentCheck.Employment+' '+doc.EmploymentDoc">
                                                                         <li>{{ fileObj.file.name }}
                                                                             <button
-                                                                                (click)="removeFile('employment', employmentCheck.Employment+' '+employmentCheck.selectedEmploymentSubType, fileObj.file,i, j, k)">&#10006;</button>
+                                                                                (click)="removeFile('employment', employmentCheck.Employment, fileObj.file,i, j, k,0,i)">&#10006;</button>
                                                                         </li>
                                                                     </ng-container>
                                                                 </ng-container>
@@ -326,27 +364,30 @@
 
                                     <ng-container *ngIf="attribute.label == 'ID'">
                                         <div class="col-md-12">
-                                            <div class="form-group row mb-3">
+                                            <!-- <div class="form-group row mb-3">
                                                 <label class="d-flex justify-content-between align-items-center">
                                                     <button type="button" class="btn btn-sm btn-primary"
                                                         (click)="addIdCheck()"><b>Add Check</b></button>
                                                 </label>
-                                            </div>
+                                            </div> -->
                                             <form>
                                                 <div *ngFor="let idChecks of idChecks; let i = index"
                                                     class="form-group row mb-3">
                                                     <div class="col-md-12 d-flex flex-row align-items-center">
-                                                        <select id="idLevels{{i}}" [(ngModel)]="idChecks.id" (focus)="previousIDLevel = idChecks.id" (ngModelChange)="updateIDDocuments($event, idChecks)"
-                                                            name="idLevels{{i}}" class="form-control mr-2" required>
+                                                        <!-- <select id="idLevels{{i}}" [(ngModel)]="idChecks.id" (focus)="previousIDLevel = idChecks.id" (ngModelChange)="updateIDDocuments($event, idChecks)"
+                                                            name="idLevels{{i}}" class="form-control mr-2" [disabled]="isDropdownDisabled" required>
+                                                            <option value="" *ngIf="idChecks.id" disabled selected>{{ idChecks.id }}</option>
                                                             <option value="" disabled selected>--Select--</option>
-                                                            <option *ngFor="let level of idLevels" [value]="level">{{
-                                                                level }}</option>
-                                                        </select>
-                                                        <input type="file" id="document{{i}}" [disabled]="!idChecks.id"
-                                                            (change)="uploadFile($event, 'ID', idChecks.id,idChecks.id)"
+                                                            <option *ngFor="let level of idLevels" [value]="level" [disabled]="isLevelIdIncluded(level) && idChecks.id !== level">{{level }}</option>
+                                                        </select> -->
+                                                        <input type="text"
+                                                            class="form-control"
+                                                            [(ngModel)]="idChecks.id" name="idChecks.id{{i}}" readonly />
+                                                        <input type="file" id="document{{i}}" [name]="'idFiles' + i" [disabled]="!idChecks.id"
+                                                            (change)="uploadFile($event, 'ID', idChecks.id,idChecks.id,null)"
                                                             class="form-control mr-2" required multiple />
-                                                        <button type="button" class="btn btn-sm btn-outline-danger"
-                                                            (click)="removeIDCheck(i,idChecks.id)">&#10006;</button>
+                                                        <!-- <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            (click)="removeIDCheck(i,idChecks.id)">&#10006;</button> -->
                                                     </div>
                                                     <div *ngIf="idSelectedFiles.length > 0">
                                                         <p style="margin: 20px;">{{idChecks.id}}</p>
@@ -356,12 +397,12 @@
                                                         </li>
                                                         </ul> -->
                                                         <ul>
-                                                            <ng-container *ngFor="let fileObj of idSelectedFiles">
+                                                            <ng-container *ngFor="let fileObj of idSelectedFiles; let k = index">
                                                                 <ng-container
                                                                     *ngIf="fileObj.key === 'ID '+ idChecks.id">
                                                                     <li>{{ fileObj.file.name }}
                                                                         <button
-                                                                            (click)="removeFile('ID', idChecks.id, fileObj.file,0,0,0)">&#10006;</button>
+                                                                            (click)="removeFile('ID', idChecks.id, fileObj.file,0,0,k,0,i)">&#10006;</button>
                                                                     </li>
                                                                 </ng-container>
                                                             </ng-container>
@@ -384,30 +425,44 @@
                                     </ng-container> -->
 
                                     <ng-container *ngIf="attribute.label == 'Address'">
+                                        <p><b>Note : </b>Both Present and Permanent are Mandatory.</p>
                                         <div class="col-md-12">
-                                            <div class="form-group row mb-3">
+                                            <!-- <div class="form-group row mb-3">
                                                 <label class="d-flex justify-content-between align-items-center">
                                                     <button type="button" class="btn btn-sm btn-primary"
                                                         (click)="addAddressCheck()"><b>Add Check</b></button>
                                                 </label>
-                                            </div>
+                                            </div> -->
                                             <form>
                                                 <div *ngFor="let address of addressCheck; let i = index"
                                                     class="form-group row mb-3">
                                                     <div class="col-md-12 d-flex flex-row align-items-center">
-                                                        <select id="addressLevels{{i}}"
+                                                        <!-- <select id="addressLevels{{i}}"
                                                             [(ngModel)]="address.addressType" name="addressLevels{{i}}"
                                                             class="form-control mr-2" required>
+                                                            <option value="" *ngIf="address.addressType" disabled selected>{{ address.addressType }}</option>
                                                             <option value="" disabled selected>--Select--</option>
-                                                            <option *ngFor="let level of addressLevels" [value]="level">
+                                                            <option *ngFor="let level of addressLevels" [value]="level" [disabled]="isAddressTypeUsed(level)">
                                                                 {{ level }}</option>
-                                                        </select>
+                                                        </select> -->
                                                         <!-- <input type="text" name="idFiles" id="document{{i}}" (change)="uploadFile($event, 'Id', idChecks.id)"
                                                             class="form-control mr-2" required multiple /> -->
+                                                            <input type="text"
+                                                            class="form-control"
+                                                            [(ngModel)]="address.addressType" name="address.addressType{{i}}" readonly />
+
+                                                            <input type="file"  id="document{{i}}" 
+                                                            [disabled]="!address.addressType" [name]="'addressFiles' + i"
+                                                            (change)="uploadFile($event, 'Address', address.addressType,'null',null)"
+                                                            class="form-control mr-2" required multiple/>
 
                                                         <input type="text" [disabled]="!address.addressType"
-                                                            class="form-control form-control-sm"
+                                                            class="form-control"
                                                             [(ngModel)]="address.address" name="address{{i}}" />
+ 
+                                                        <!-- <input *ngIf="address.address" type="text" [disabled]="!address.addressType"
+                                                            class="form-control form-control-sm"
+                                                            [value]="address.address" name="address{{i}}" /> -->
                                                         <!-- 
                                                             <input type="text" class="form-control form-control-sm"
                                                             [value]="address.address" /> -->
@@ -417,8 +472,27 @@
                                                                        [(ngModel)]="address[i].address" />
                                                             </div> -->
 
-                                                        <button type="button" class="btn btn-sm btn-outline-danger"
-                                                            (click)="removeAddressCheck(i)">&#10006;</button>
+                                                        <!-- <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            (click)="removeAddressCheck(i)">&#10006;</button> -->
+                                                    </div>
+                                                    <div *ngIf="addressSelectedFiles.length > 0">
+                                                        <p style="margin: 20px;">{{address.addressType}}</p>
+                                                        <!-- <ul>
+                                                          <li *ngFor="let file of criminalSelectedFiles">{{ file.name }}
+                                                            <button (click)="removeFile('criminal', file)">&#10006;</button>
+                                                          </li>
+                                                        </ul> -->
+                                                        <ul>
+                                                            <ng-container *ngFor="let fileObj of addressSelectedFiles; let k = index">
+                                                                <ng-container
+                                                                    *ngIf="fileObj.key === 'Address '+ address.addressType">
+                                                                    <li>{{ fileObj.file.name }}
+                                                                        <button
+                                                                            (click)="removeFile('address', address.addressType, fileObj.file,0,0,k,0,i)">&#10006;</button>
+                                                                    </li>
+                                                                </ng-container>
+                                                            </ng-container>
+                                                        </ul>
                                                     </div>
                                                 </div>
                                                 <div *ngIf="idSelectedFiles.length > 0">
@@ -428,6 +502,7 @@
                                                     </li>
                                                     </ul> -->
                                                 </div>
+                                                
                                             </form>
                                             <p class="text-muted">File size limit: 10MB. Allowed file types: PDF, Image,
                                                 zip.</p>
@@ -454,30 +529,51 @@
                                     </ng-container> -->
 
                                     <ng-container *ngIf="attribute.label == 'Criminal'">
+                                        <p><b>Note : </b>Both Present and Permanent are Mandatory.</p>
                                         <div class="col-md-12">
-                                            <div class="form-group row mb-3">
+                                            <!-- <div class="form-group row mb-3">
                                                 <label class="d-flex justify-content-between align-items-center">
                                                     <button type="button" class="btn btn-sm btn-primary"
                                                         (click)="addCriminalCheck()"><b>Add Check</b></button>
                                                 </label>
-                                            </div>
+                                            </div> -->
                                             <form>
+                                                <!-- [disabled]="isDropdownDisabled" -->
+                                                <!-- <p>{{newProofList}}</p> -->
                                                 <div *ngFor="let criminalCheck of criminalCheck; let i = index"
                                                     class="form-group row mb-3">
                                                     <div class="col-md-12 d-flex flex-row align-items-center">
-                                                        <select id="idLevels{{i}}" [(ngModel)]="criminalCheck.criminal" (focus)="previousCriminalLevel = criminalCheck.criminal" (ngModelChange)="updateCriminalDocuments($event, criminalCheck)"
-                                                            name="criminalLevels{{i}}" class="form-control mr-2"
+                                                        <!-- <select id="idLevels{{i}}" [(ngModel)]="criminalCheck.criminal" (focus)="previousCriminalLevel = criminalCheck.criminal" (ngModelChange)="updateCriminalDocuments($event, criminalCheck)"
+                                                           name="criminalLevels{{i}}" class="form-control mr-2" [disabled]="isDropdownDisabled"
                                                             required>
+                                                            <option value="" *ngIf="criminalCheck.criminal" disabled selected>{{ criminalCheck.criminal }}</option>
                                                             <option value="" disabled selected>--Select--</option>
                                                             <option *ngFor="let level of criminalLevels"
-                                                                [value]="level">{{ level }}</option>
-                                                        </select>
-                                                        <input type="file" id="document{{i}}"
-                                                            [disabled]="!criminalCheck.criminal"
-                                                            (change)="uploadFile($event, 'Criminal', criminalCheck.criminal,'null')"
-                                                            class="form-control mr-2" required multiple />
-                                                        <button type="button" class="btn btn-sm btn-outline-danger"
-                                                            (click)="removeCriminalCheck(i,criminalCheck.criminal)">&#10006;</button>
+                                                                [value]="level" [disabled]="isLevelIncluded(level)">{{ level }}</option>
+                                                        </select> -->
+                                                        <!-- <select id="idLevels{{i}}" [(ngModel)]="criminalCheck.criminal" (focus)="previousCriminalLevel = criminalCheck.criminal" (ngModelChange)="updateCriminalDocuments($event, criminalCheck)"
+                                                           name="criminalLevels{{i}}" class="form-control mr-2" [disabled]="isDropdownDisabled"
+                                                            required>
+                                                            <option value="" *ngIf="criminalCheck.criminal" disabled selected>{{ criminalCheck.criminal }}</option>
+                                                            <option value="" disabled selected>--Select--</option>
+                                                            <option *ngFor="let level of criminalLevels"
+                                                                [value]="level" [disabled]="isLevelCriminalIncluded(level) && criminalCheck.criminal !== level">{{ level }}</option>
+                                                        </select> -->
+                                                        <input type="text"
+                                                        class="form-control"
+                                                        [(ngModel)]="criminalCheck.criminal" name="criminalCheck.criminal{{i}}" readonly />
+                                                        <!-- name="criminalFiles" -->
+                                                        <input type="file"  id="document{{i}}" 
+                                                            [disabled]="!criminalCheck.criminal" [name]="'criminalFiles' + i"
+                                                            (change)="uploadFile($event, 'Criminal', criminalCheck.criminal,'null',null)"
+                                                            class="form-control mr-2" required multiple/>
+                                                        <!-- <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            (click)="removeCriminalCheck(i,criminalCheck.criminal)">&#10006;</button> -->
+                                                            <!-- New permanent input field -->
+                                                            <!-- name="additionalInfo{{i}}" -->
+                                                            <input *ngIf="criminalCheck.criminal === 'present'" [(ngModel)]="criminalCheck.criminalAddress" type="text" class="form-control" />
+                                                            <input *ngIf="criminalCheck.criminal === 'permanent'" [(ngModel)]="criminalCheck.criminalAddress" type="text" class="form-control" />
+
                                                     </div>
                                                     <div *ngIf="criminalSelectedFiles.length > 0">
                                                         <p style="margin: 20px;">{{criminalCheck.criminal}}</p>
@@ -487,12 +583,12 @@
                                                           </li>
                                                         </ul> -->
                                                         <ul>
-                                                            <ng-container *ngFor="let fileObj of criminalSelectedFiles">
+                                                            <ng-container *ngFor="let fileObj of criminalSelectedFiles; let k = index">
                                                                 <ng-container
                                                                     *ngIf="fileObj.key === 'Criminal '+ criminalCheck.criminal">
                                                                     <li>{{ fileObj.file.name }}
                                                                         <button
-                                                                            (click)="removeFile('criminal', criminalCheck.criminal, fileObj.file,0,0,0)">&#10006;</button>
+                                                                            (click)="removeFile('criminal', criminalCheck.criminal, fileObj.file,0,0,k,0,i)">&#10006;</button>
                                                                     </li>
                                                                 </ng-container>
                                                             </ng-container>
@@ -582,8 +678,8 @@
                                                             <option value="" disabled selected>--Select--</option>
                                                             <option *ngFor="let level of databaseLevels" [value]="level">{{ level }}</option>
                                                         </select> -->
-                                                        <input type="file" id="document{{i}}"
-                                                            (change)="uploadFile($event, 'Database', databaseCheck.database,'null')"
+                                                        <input type="file" id="document{{i}}" [name]="'databaseFiles' + i"
+                                                            (change)="uploadFile($event, 'Database', databaseCheck.database,'null',null)"
                                                             class="form-control mr-2" required multiple />
                                                         <button type="button" class="btn btn-sm btn-outline-danger"
                                                             (click)="removeDatabaseCheck(i,databaseCheck.database)">&#10006;</button>
@@ -596,12 +692,12 @@
                                                           </li>
                                                         </ul> -->
                                                         <ul>
-                                                            <ng-container *ngFor="let fileObj of databaseSelectedFiles">
+                                                            <ng-container *ngFor="let fileObj of databaseSelectedFiles; let k = index">
                                                                 <ng-container
                                                                     *ngIf="fileObj.key === 'Database '+ databaseCheck.database">
                                                                     <li>{{ fileObj.file.name }}
                                                                         <button
-                                                                            (click)="removeFile('database', databaseCheck.database, fileObj.file,0,0,0)">&#10006;</button>
+                                                                            (click)="removeFile('database', databaseCheck.database, fileObj.file,0,0,k,0,i)">&#10006;</button>
                                                                     </li>
                                                                 </ng-container>
                                                             </ng-container>

@@ -55,4 +55,6 @@ public class UserDto {
 
 	private String oldPassword;
 	
+	private String confirmPassword;
+	
 }

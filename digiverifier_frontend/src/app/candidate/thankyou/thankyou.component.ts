@@ -47,16 +47,16 @@ export class ThankyouComponent implements OnInit {
           //  console.log(this.result,"----------------------------------------result")
           // })
         // }
+        console.log("before qc || this.conventionalCandidate == nullPendingstatus THANKYOU FROM>>>>>::{}",new Date().toLocaleTimeString());
+        console.log("this.conventionalCandidate : ",this.conventionalCandidate)
+        if(this.conventionalCandidate === false || this.conventionalCandidate == null){  
+        this.candidateService.qcPendingstatus(this.candidateCode).subscribe((data:any)=>{
+          this.result=data.outcome;
+          console.log("after qcPendingstatus THANKYOU FROM>>>>>::{}",new Date().toLocaleTimeString());
+          console.log(this.result,"----------------------------------------result")
+         }) 
+        }
       });
-      console.log("before qc || this.conventionalCandidate == nullPendingstatus THANKYOU FROM>>>>>::{}",new Date().toLocaleTimeString());
-      console.log("this.conventionalCandidate : ",this.conventionalCandidate)
-      if(this.conventionalCandidate === false || this.conventionalCandidate == null){  
-      this.candidateService.qcPendingstatus(this.candidateCode).subscribe((data:any)=>{
-        this.result=data.outcome;
-        console.log("after qcPendingstatus THANKYOU FROM>>>>>::{}",new Date().toLocaleTimeString());
-        console.log(this.result,"----------------------------------------result")
-       }) 
-      }
        
     }
   // })

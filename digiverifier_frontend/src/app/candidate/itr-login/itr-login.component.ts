@@ -21,6 +21,19 @@ export class ItrLoginComponent implements OnInit {
       history.pushState(null, "", document.URL);
     }); 
     this.candidateCode = this.router.snapshot.paramMap.get('candidateCode');
+    this.candidateService.getCurrentStatusByCandidateCode(this.candidateCode).subscribe((result:any)=>{
+      if(result.outcome==true){
+        console.log(result.data)
+        const navURL = result.data.split('#/')[1];
+        this.navRouter.navigate([navURL]);
+      } else {
+        Swal.fire({
+          title: result.message,
+          icon: 'warning',
+        });
+      }
+    });
+    
     this.candidateService.getServiceConfigCodes(this.candidateCode).subscribe((result:any)=>{
       this.getServiceConfigCodes = result.data;
     });

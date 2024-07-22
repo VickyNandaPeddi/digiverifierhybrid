@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.aashdit.digiverifier.common.model.ServiceOutcome;
 import com.aashdit.digiverifier.config.admin.dto.RoleHeadPermissionListDto;
+import com.aashdit.digiverifier.config.admin.dto.RoleManagementAndRolePermissionDTO;
 import com.aashdit.digiverifier.config.admin.dto.RolePermissionDTO;
 import com.aashdit.digiverifier.config.admin.model.Role;
 import com.aashdit.digiverifier.config.admin.model.User;
@@ -115,6 +116,12 @@ public class RoleController {
 	public ResponseEntity<ServiceOutcome<List<String>>> getAllRolePerMissionCodeByRoleCode(@PathVariable("roleCode") String roleCode,@RequestHeader("Authorization") String authorization) {
 		ServiceOutcome<List<String>> svcSearchResult = roleService.getAllRolePerMissionCodeByRoleCode(roleCode);
 		return new ResponseEntity<ServiceOutcome<List<String>>>(svcSearchResult, HttpStatus.OK);
+	}
+	
+	@PostMapping("/saveRoleManagement")
+	public ResponseEntity<ServiceOutcome<?>> saveRoleManagementAndRolePermission(@RequestBody RoleManagementAndRolePermissionDTO role,@RequestHeader("Authorization") String authorization){		
+		ServiceOutcome<?> svcSearchResult = roleService.saveRoleManagementAndRolePermission(role);
+		return new ResponseEntity<ServiceOutcome<?>>(svcSearchResult, HttpStatus.OK);
 	}
 
 }

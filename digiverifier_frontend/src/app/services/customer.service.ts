@@ -139,6 +139,13 @@ export class CustomerService {
     );
   }
 
+  getCandidatePurgedReport(data: any) {
+    return this.http.post(
+      `${environment.apiUrl}/api/report/getCandidatePurgedReport`,
+      data
+    );
+  }
+
   getCustomerUtilizationReportByAgent(data: any) {
     return this.http.post(
       `${environment.apiUrl}/api/report/getCustomerUtilizationReportByAgent`,
@@ -146,9 +153,23 @@ export class CustomerService {
     );
   }
 
+  getCandidatePurgedReportByAgent(data: any) {
+    return this.http.post(
+      `${environment.apiUrl}/api/report/getCandidatePurgedReportByAgent`,
+      data
+    );
+  }
+
   getCanididateDetailsByStatus(data: any) {
     return this.http.post(
       `${environment.apiUrl}/api/report/getCanididateDetailsByStatus`,
+      data
+    );
+  }
+
+  getPurgedCanididateDetailsByStatus(data: any) {
+    return this.http.post(
+      `${environment.apiUrl}/api/report/getPurgedCanididateDetailsByStatus`,
       data
     );
   }

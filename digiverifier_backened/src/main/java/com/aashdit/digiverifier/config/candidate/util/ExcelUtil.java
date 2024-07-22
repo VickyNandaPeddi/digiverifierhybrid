@@ -15,6 +15,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -118,6 +119,11 @@ public class ExcelUtil {
 	      return false;
 	    }
 	    return true;
+	  }
+	  
+	  static {
+	    // Adjust the min inflate ratio
+	    ZipSecureFile.setMinInflateRatio(0);  // Adjust this value as needed
 	  }
       
 	  public  List<Candidate> excelToCandidate(InputStream is,String filename,String yearsToBeVerified) {
@@ -353,7 +359,7 @@ public class ExcelUtil {
 	      }
 	  
 	  private String getCellValue(Row row, int cellNo) {
-		  String cellValue=null;
+		  String cellValue="";
 		  try {
 	        DataFormatter formatter = new DataFormatter();
 	        Cell cell = row.getCell(cellNo);
@@ -862,27 +868,34 @@ public class ExcelUtil {
 			  for(int i=1;i<worksheet.getPhysicalNumberOfRows() ;i++) {
 				  BulkPanToUanDTO bulkPanToUanDTO = new BulkPanToUanDTO();
 		            XSSFRow row = worksheet.getRow(i);
-				  if(getCellValue(row, 0) != null && !getCellValue(row, 0).equals("") 
-						  && getCellValue(row, 1) != null && !getCellValue(row, 1).equals("")
+				  if(getCellValue(row, 1) != null && !getCellValue(row, 1).equals("")
 						  && getCellValue(row, 2) != null && !getCellValue(row, 2).equals("") 
 						  && getCellValue(row, 3) != null && !getCellValue(row, 3).equals("")) {
-					  String dob = getCellValue(row, 2);
-					  String pan = getCellValue(row, 3);
-					  String uan =getCellValue(row, 4);
+					  String dob = getCellValue(row, 2).trim();
+					  String pan = getCellValue(row, 3).trim();
+					  String uan =getCellValue(row, 4).trim();
+					  String appId ="";
+					  if(getCellValue(row, 0) != null && !getCellValue(row, 0).equals("")) {
+						  appId= getCellValue(row, 0);
+					  }else {
+						  SecureRandom secureRnd = new SecureRandom();
+                          int n = 100000 + secureRnd.nextInt(900000);
+                          appId = String.valueOf(n);
+					  }
 					  log.info("PAN NUMBER::: {} {}",pan,dob);
 					  if(orgServices!=null && orgServices.contains("PANTOUAN") 
 							  && dob.contains("/") && pan.length()==10) {
-						  bulkPanToUanDTO.setApplicantId(getCellValue(row, 0));
-						  bulkPanToUanDTO.setCandidateName(getCellValue(row, 1));
-						  bulkPanToUanDTO.setDob(getCellValue(row, 2));
-						  bulkPanToUanDTO.setPan(getCellValue(row, 3));
+						  bulkPanToUanDTO.setApplicantId(appId.trim());
+						  bulkPanToUanDTO.setCandidateName(getCellValue(row, 1).trim());
+						  bulkPanToUanDTO.setDob(getCellValue(row, 2).trim());
+						  bulkPanToUanDTO.setPan(getCellValue(row, 3).trim());
 						  bulkPanToUanDTO.setUan(uan.equals("")?null:uan);
 						  bulkPanToUanDTO.setUploadedBy(getUserForUploadedBy);
 						  bulkPanToUanDTO.setBulkUanId(bulkUanId);				  
 						  
 				          UanSearchData uanSave = new UanSearchData(); 
-						  uanSave.setApplicantId(getCellValue(row, 0));
-						  uanSave.setPan(getCellValue(row, 3));
+						  uanSave.setApplicantId(appId.trim());
+						  uanSave.setPan(getCellValue(row, 3).trim());
 						  uanSave.setUan(uan.equals("")?null:uan);	
 						  uanSave.setBulkUanId(bulkUanId);
 						  uanSave.setEPFOResponse("Search In Progress...");
@@ -907,12 +920,12 @@ public class ExcelUtil {
 							}
 							
 							candidate.setOrganization(findByUserName.getOrganization());
-							candidate.setCandidateName(getCellValue(row, 1));
-							candidate.setContactNumber(getCellValue(row, 3));
+							candidate.setCandidateName(getCellValue(row, 1).trim());
+							candidate.setContactNumber(getCellValue(row, 3).trim());
 							candidate.setEmailId("pantouan@gmail.com");
-							candidate.setApplicantId(getCellValue(row, 0));
+							candidate.setApplicantId(appId.trim());
 							candidate.setDateOfBirth(dob.replace("/", "-"));
-							candidate.setPanNumber(getCellValue(row, 3));
+							candidate.setPanNumber(getCellValue(row, 3).trim());
 							candidate.setUan(uan.equals("")?null:uan);
 							candidate.setCreatedOn(new Date());
 							candidate.setCreatedBy(findByUserName);
@@ -955,13 +968,13 @@ public class ExcelUtil {
 							}
 							
 							candidate.setOrganization(findByUserName.getOrganization());
-							candidate.setCandidateName(getCellValue(row, 1));
-							candidate.setContactNumber(getCellValue(row, 3));
+							candidate.setCandidateName(getCellValue(row, 1).trim());
+							candidate.setContactNumber(getCellValue(row, 3).trim());
 							candidate.setEmailId("pantouan@gmail.com");
-							candidate.setApplicantId(getCellValue(row, 0));
+							candidate.setApplicantId(appId.trim());
 							candidate.setDateOfBirth(dob.replace("/", "-"));
-							candidate.setPanNumber(getCellValue(row, 3));
-							candidate.setUan(getCellValue(row, 4));
+							candidate.setPanNumber(getCellValue(row, 3).trim());
+							candidate.setUan(getCellValue(row, 4).trim());
 							candidate.setCreatedOn(new Date());
 							candidate.setCreatedBy(findByUserName);
 							candidate = candidateRepository.save(candidate);

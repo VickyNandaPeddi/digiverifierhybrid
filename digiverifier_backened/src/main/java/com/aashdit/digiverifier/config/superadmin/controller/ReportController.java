@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.aashdit.digiverifier.common.model.ServiceOutcome;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateReportDTO;
 import com.aashdit.digiverifier.config.superadmin.Enum.ReportType;
+import com.aashdit.digiverifier.config.superadmin.dto.CandidatePurgedReportResponseDto;
 import com.aashdit.digiverifier.config.superadmin.dto.DateRange;
 import com.aashdit.digiverifier.config.superadmin.dto.ReportSearchDto;
 import com.aashdit.digiverifier.config.superadmin.dto.VendorSearchDto;
@@ -118,4 +119,25 @@ public class ReportController {
 	    public ResponseEntity<byte[]> downloadCandidateEmploymentReport(@RequestHeader("Authorization") String authorization,@RequestBody ReportSearchDto reportSearchDto) {
 	    	return reportService.downloadCandidateEmploymentReport(reportSearchDto);
 	    }
+	    
+		@Operation(summary ="Get Purged Candidate Details By Status")
+		@PostMapping("/getPurgedCanididateDetailsByStatus")
+		public ResponseEntity<ServiceOutcome<CandidatePurgedReportResponseDto>> getPurgedCanididateDetailsByStatus(@RequestHeader("Authorization") String authorization,@RequestBody ReportSearchDto reportSearchDto) {
+			ServiceOutcome<CandidatePurgedReportResponseDto> svcSearchResult=  reportService.getPurgedCanididateDetailsByStatus(reportSearchDto);
+			return new ResponseEntity<ServiceOutcome<CandidatePurgedReportResponseDto>>(svcSearchResult, HttpStatus.OK);
+		}
+
+		@Operation(summary ="Customer Utilization Report")
+		@RequestMapping(value = "/getCandidatePurgedReport", method = { RequestMethod.GET, RequestMethod.POST })
+		public ResponseEntity<ServiceOutcome<ReportSearchDto>> getCandidatePurgedReport(@RequestHeader("Authorization") String authorization,@RequestBody(required=false) ReportSearchDto reportSearchDto) {
+			ServiceOutcome<ReportSearchDto> svcSearchResult=  reportService.getCandidatePurgedReport(reportSearchDto);
+			return new ResponseEntity<ServiceOutcome<ReportSearchDto>>(svcSearchResult, HttpStatus.OK);
+		}
+		
+		@Operation(summary ="Customer Utilization Report")
+		@PostMapping("/getCandidatePurgedReportByAgent")
+		public ResponseEntity<ServiceOutcome<ReportSearchDto>> getCandidatePurgedReportByAgent(@RequestHeader("Authorization") String authorization,@RequestBody ReportSearchDto reportSearchDto) {
+			ServiceOutcome<ReportSearchDto> svcSearchResult=  reportService.getCandidatePurgedReportByAgent(reportSearchDto);
+			return new ResponseEntity<ServiceOutcome<ReportSearchDto>>(svcSearchResult, HttpStatus.OK);
+		}
 }

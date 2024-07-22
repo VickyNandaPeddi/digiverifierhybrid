@@ -113,7 +113,7 @@ public class VendorInitiatDto {
 	
 	private String AgentUploadDocumentPathKey;
 
-
+	private Boolean clientApproval;
 
 	
 	

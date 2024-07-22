@@ -16,6 +16,7 @@ export class CustomerEditComponent implements OnInit {
   orgId:any;
   CustomersData: any=[];
   public showvalid: any;
+  public passwordPolicy: any;
   updateCustomers = new FormGroup({
     organizationId: new FormControl('', Validators.required),
     organizationName: new FormControl('', Validators.required),
@@ -32,6 +33,8 @@ export class CustomerEditComponent implements OnInit {
     billingAddress: new FormControl(),
     callBackUrl: new FormControl(),
     showValidation:new FormControl(),
+    passwordPolicy:new FormControl('',Validators.required),
+    lastPasswords:new FormControl('',Validators.required)
   });
   constructor( private customers:CustomerService, 
     private router:ActivatedRoute,
@@ -59,6 +62,8 @@ export class CustomerEditComponent implements OnInit {
         callBackUrl: new FormControl(result.data['callBackUrl']),
         // showValidation: new FormControl(result.data['showValidation'], Validators.required),
         showValidation:new FormControl('',Validators.required),
+        passwordPolicy:new FormControl('',Validators.required),
+        lastPasswords:new FormControl('',Validators.required)
       })
     });
   }
@@ -79,6 +84,11 @@ export class CustomerEditComponent implements OnInit {
   selectshowValidation(event:any){
     this.showvalid=event.target.value
     console.log( this.showvalid,"-----------------------kkk")
+    
+  }
+  selectPasswordPolicy(event:any){
+    this.passwordPolicy=event.target.value
+    console.log( this.passwordPolicy,"-----------------------kkk")
     
   }
   onSubmit(updateCustomers: FormGroup) {

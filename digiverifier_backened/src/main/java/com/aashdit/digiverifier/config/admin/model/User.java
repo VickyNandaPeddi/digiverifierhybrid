@@ -123,6 +123,12 @@ public class User implements Serializable{
 	
 	@Column(name = "reporting_email_id")
 	private String reportingEmailId;
+	
+	@Column(name = "last_updated_password")
+	private Date lastUpdatedPassword;
+	
+	@Column(name = "last_passwords")
+	private String lastPasswords;
 
 	public User(@NotBlank String employeeId, @NotBlank String userFirstName, String userLastName,
 			@NotBlank String userEmailId, @NotBlank String location, @NotBlank String userMobileNum,

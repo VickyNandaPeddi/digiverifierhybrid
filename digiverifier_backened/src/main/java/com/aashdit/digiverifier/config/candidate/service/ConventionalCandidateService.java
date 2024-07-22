@@ -51,6 +51,9 @@ public interface ConventionalCandidateService {
 	ConventionalCandidateVerificationState addOrUpdateConventionalCandidateVerificationStateByCandidateId(Long candidateId,ConventionalCandidateVerificationState candidateVerificationState);
 
 	ServiceOutcome<DashboardDto> conventionalSearchAllCandidate(SearchAllCandidateDTO searchAllcandidate);
+	
+	ServiceOutcome<?> clientApproval(String vendorCheckID);
+
 
 
 

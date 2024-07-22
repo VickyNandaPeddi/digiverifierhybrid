@@ -15,25 +15,25 @@
                     <div class="card-body" style="padding: 15px 20px 10px;">
                         <div class="row">
                             <div class="col-md-4">
-                                <button type="button" (click)="filterToday()" 
+                                <button type="button" (click)="filterToday()"
                                 class="btn btn-sm btn-primary btn-block">Today</button>
                             </div>
                             <!-- <div class="col-md-3">
-                                <button type="button" (click)="filterLast7days()" 
+                                <button type="button" (click)="filterLast7days()"
                                  class="btn btn-sm btn-primary btn-block">Last 7 Day</button>
                             </div>
                             <div class="col-md-3">
-                                <button type="button" (click)="filterLast30days()" 
+                                <button type="button" (click)="filterLast30days()"
                                 class="btn btn-sm btn-primary btn-block">Last 30 Day</button>
                             </div>
                             <div class="col-md-3">
-                                <button type="button" (click)="filterByYear()" 
+                                <button type="button" (click)="filterByYear()"
                                 class="btn btn-sm btn-primary btn-block">Year</button>
                             </div> -->
                             <div class="col-md-4">
                                 <button type="button" (click)="filterMonthToDate()"
                                 class="btn btn-sm btn-primary btn-block">MTD</button>
-                            </div>     
+                            </div>
                             <div class="col-md-4">
                                 <button type="button" (click)="filterLastMonth()"
                                 class="btn btn-sm btn-primary btn-block">Last Month</button>
@@ -58,8 +58,8 @@
                                 <div class="form-group mb-0">
                                     <div class="input-group date-picker">
                                         <span>To</span>
-                                        <input #rangeTo="ngbDatepicker" [startDate]="getMinDate" [minDate]="getMinDate" [maxDate]="getToday" 
-                                        formControlName="toDate" (dateSelect)="ontoDate($event)" 
+                                        <input #rangeTo="ngbDatepicker" [startDate]="getMinDate" [minDate]="getMinDate" [maxDate]="getToday"
+                                        formControlName="toDate" (dateSelect)="ontoDate($event)"
                                         class="form-control form-control-sm text-right" ngbDatepicker readonly  placeholder="To Date" id="inputToDate"/>
                                         <div class="input-group-append">
                                             <button  class="btn btn-sm btn-outline-secondary" (click)="rangeTo.toggle()" type="button"><img src="../assets/img/calendar.png"/></button>
@@ -69,7 +69,7 @@
                             </div>
                             <div class="col-md-2">
                                 <div class="form-group mb-0">
-                                    <button type="button" (click)="onSubmitFilter(dashboardFilter)" 
+                                    <button type="button" (click)="onSubmitFilter(dashboardFilter)"
                                     class="btn btn-sm btn-success btn-block">Apply</button>
                                 </div>
                             </div>
@@ -87,21 +87,25 @@
                                 </button>
 
 
-                                <button class="btn btn-sm btn-info" (click)="triggerModal(modalCandidate)" *ngIf="((!isCBadmin && CANDIDATEUPLOAD_stat) || authService.roleMatch(['ROLE_ADMIN','ROLE_PARTNERADMIN']) || authService.roleMatch(['ROLE_AGENTHR']))
+                                <button class="btn btn-sm btn-info" (click)="triggerModal(modalCandidate)" *ngIf="((!isCBadmin && CANDIDATEUPLOAD_stat && !authService.roleMatch(['ROLE_CLIENTAGENT'])) || authService.roleMatch(['ROLE_ADMIN','ROLE_PARTNERADMIN']) || authService.roleMatch(['ROLE_AGENTHR']))
                                 && (this.getServiceConfigCodes.includes('ITR') || this.getServiceConfigCodes.includes('DIGILOCKER'))">
                                     <i class="fas fa-user"></i>
                                     Upload Candidate
                                 </button>
- 
+
                                 <button class="btn btn-sm btn-info" (click)="triggerModal(modalConventionalCandidate)" *ngIf="((!isCBadmin && CANDIDATEUPLOAD_stat) || authService.roleMatch(['ROLE_ADMIN','ROLE_PARTNERADMIN']) || authService.roleMatch(['ROLE_AGENTHR']))
-                                && (this.getServiceConfigCodes.includes('ITR') || this.getServiceConfigCodes.includes('DIGILOCKER'))">
+                                && (this.getServiceConfigCodes.includes('CONVENTIONALALLCHECKS'))">
                                     <i class="fas fa-user"></i>
                                     Upload Conventional Candidate
                                 </button>
 
-                                <button class="btn btn-sm btn-info" (click)="triggerModal(Clientscope)" *ngIf=" authService.roleMatch(['ROLE_PARTNERADMIN','ROLE_ADMIN'])">
+                                <button class="btn btn-sm btn-info" (click)="triggerModal(Clientscope)" *ngIf=" authService.roleMatch(['ROLE_PARTNERADMIN','ROLE_ADMIN']) && !this.getServiceConfigCodes.includes('PANTOUAN') ">
                                     <i class="fas fa-user"></i>
                                     Upload Client Scope
+                                </button>
+                                <button class="btn btn-sm btn-primary" (click)="triggerModal(bulkUanSearch)" *ngIf="this.getServiceConfigCodes.includes('PANTOUAN')" >
+                                    <i class="fas fa-upload"></i>
+                                    Bulk PAN Upload
                                 </button>
                             <!-- <div class="card-body" style="padding: 15px 20px 10px;">
                                 <div class="row">
@@ -167,15 +171,24 @@
             </div>
             <div class="col-md-6" style="padding-left: 8px; position: relative;" >
                 <div class="toggleDivContainer">
-                    <div class="card cardStat{{!isShowDiv}}" >
+                    <div class="card cardStat{{!isShowDiv}}">
                         <div class="card-header">
                             <h4 class="card-title">Report Delivery Details
-                                <button  *ngIf="!this.getServiceConfigCodes.includes('PANTOUAN')" (click)=toggleDisplayDiv() style="margin: -5px 0;" class="btn btn-sm btn-warning float-right">
-                                    View Pending Details
-                                </button>  
-                                <button (click)=toggleConventionalDisplayDiv() style="margin: -5px 0;" class="btn btn-sm btn-primary float-right">
+
+                              <button  *ngIf="!this.getServiceConfigCodes.includes('PANTOUAN') && !(this.getServiceConfigCodes.includes('EPFO') && !this.getServiceConfigCodes.includes('ITR') && !this.getServiceConfigCodes.includes('DIGILOCKER'))" (click)=toggleDisplayDiv() style="margin: -5px 0;" class="btn btn-sm btn-warning float-right">
+                                View Pending Details
+                              </button>
+                                <button  *ngIf="this.getServiceConfigCodes.includes('CONVENTIONALALLCHECKS') && !authService.roleMatch(['ROLE_CLIENTAGENT']) && !authService.roleMatch(['ROLE_CLIENTSUPERVISOR'])" (click)=toggleConventionalDisplayDiv() style="margin: -5px 0;" class="btn btn-sm btn-primary float-right">
+                              <ng-template #nopantouan>
+                                <div  *ngIf="!(this.getServiceConfigCodes.includes('EPFO') && !this.getServiceConfigCodes.includes('ITR') && !this.getServiceConfigCodes.includes('DIGILOCKER'))">
+                                </div>
+                              </ng-template>
+                                <button  *ngIf="this.getServiceConfigCodes.includes('CONVENTIONALALLCHECKS') && !authService.roleMatch(['ROLE_CLIENTAGENT'])" (click)=toggleConventionalDisplayDiv() style="margin: -5px 0;" class="btn btn-sm btn-primary float-right">
                                     Conventional
-                                </button>  
+                                </button>
+                                <!-- <button  *ngIf="this.getServiceConfigCodes.includes('CONVENTIONALALLCHECKS') && this.getServiceConfigCodes.includes('CONVENTIONALCLIENTAPPROVAL')" (click)=toggleConventionalDisplayDiv() style="margin: -5px 0;" class="btn btn-sm btn-primary float-right">
+                                    Conventional
+                                </button>  -->
                             </h4>
                         </div>
                         <div class="card-body" style="padding: 10px 5px;">
@@ -192,10 +205,13 @@
                             <h4 class="card-title">Conventional Report Delivery Details
                                 <button (click)=toggleDisplayDiv() style="margin: -5px 0;" class="btn btn-sm btn-warning float-right">
                                     View Pending Details
-                                </button>  
-                                <button (click)=toggleDigitalDisplayDiv() style="margin: -5px 0;" class="btn btn-sm btn-primary float-right">
+                                </button>
+                                <button *ngIf="!authService.roleMatch(['ROLE_CLIENTAGENT']) && !authService.roleMatch(['ROLE_CLIENTSUPERVISOR'])" (click)=toggleDigitalDisplayDiv() style="margin: -5px 0;" class="btn btn-sm btn-primary float-right">
                                     Digital
-                                </button>  
+                                </button>
+                                <!-- <button *ngIf="this.getServiceConfigCodes.includes('CONVENTIONALALLCHECKS') && this.getServiceConfigCodes.includes('CONVENTIONALCLIENTAPPROVAL')" (click)=toggleDigitalDisplayDiv() style="margin: -5px 0;" class="btn btn-sm btn-primary float-right">
+                                    Digital
+                                </button>  -->
                             </h4>
                         </div>
                         <div class="card-body" style="padding: 10px 5px;">
@@ -329,7 +345,7 @@
         </form>
     </div>
   </ng-template>
- 
+
   <ng-template #Clientscope let-modal>
     <div class="modal-header">
       <h4 class="modal-title" id="modal-basic-title">Upload Client Scope</h4>
@@ -370,8 +386,8 @@
             </div>
         </form>
     </div>
-  </ng-template> 
- 
+  </ng-template>
+
   <ng-template #modalConventionalCandidate let-modal>
     <div class="modal-header">
       <h4 class="modal-title" id="modal-basic-title">Upload Conventional Candidate</h4>
@@ -400,7 +416,7 @@
                         <div class="col">
                             <input type="file" class="form-control-file form-control" required (change)="selectFile($event)"  accept=".xlsx, .xls, .csv">
                         </div>
- 
+
                     </div>
                 </div>
             </div>
@@ -414,6 +430,42 @@
     </div>
   </ng-template>
 
+  <ng-template #bulkUanSearch let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">bulkUANSearch</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <form >
+            <div class="row text-center">
+                <div class="col" *ngIf="this.getServiceConfigCodes.includes('PANTOUAN')">
+                    <a href="#/admin/uanSearch" (click)="downloadUploadResourceFile('BulkPanToUan','xlsx')" class="btn btn-primary btn-sm">
+                        Sample XLS <i class="fas fa-download"></i>
+                    </a>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <div class="col">
+                            <input type="file" class="form-control-file form-control" required (change)="selectFile($event)"  accept=".xlsx, .xls, .csv">
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-center mt-3 pb-3" *ngIf="this.getServiceConfigCodes.includes('PANTOUAN')">
+                  <button class="btn btn-success btn-sm" [disabled]="!selectedFiles" (click)="uploadBulkPanData()">Submit</button>
+                  <button type="button" class="btn btn-danger btn-sm" (click)="modal.close('Save click')">Close</button>
+              </div>
+            </div>
+        </form>
+    </div>
+  </ng-template>
 
 
- 
+

@@ -157,6 +157,12 @@ public class Candidate implements Serializable {
 	@Column(name = "conventional_candidate")
 	private Boolean conventionalCandidate;
 	
+	@Column(name = "masked_aadhar")
+	private String maskedAadhar;
+	
+	@Column(name = "aadhar_linked")
+	private Boolean aadharLinked;
+	
 //	@Column(name = "conventional_status_id")
 //	private Integer conventionalStatusId;
 	

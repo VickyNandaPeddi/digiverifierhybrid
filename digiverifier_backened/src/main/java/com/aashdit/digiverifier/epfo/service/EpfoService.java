@@ -15,5 +15,11 @@ public interface EpfoService {
 	ServiceOutcome<String> getEpfodetailNew(EpfoDetailsDto epfoDetails);
 
 	Boolean processEpfoDataForUANCandidate(ResponseEntity<String> response, BulkUanDTO details);
+
+	ServiceOutcome<EpfoDetailsDto> epfoLoginCaptcha(String candidateCode);
+
+	ServiceOutcome<EpfoDetailsDto> epfoOTPScreenCaptcha(EpfoDetailsDto epfoDetails);
+
+	ServiceOutcome<String> epfoOTPCaptchaSubmit(EpfoDetailsDto epfoDetails);
 	
 }

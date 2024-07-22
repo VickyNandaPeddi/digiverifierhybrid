@@ -5,7 +5,8 @@ public enum IDtype {
 	PAN("PAN"),
 	UAN("UAN"),
 	DRIVING_LICENSE("Driving License"),
-	PASSPORT("Passport");
+	PASSPORT("Passport"),
+	ALP("Aadhar linked Pan");
 	
 	public final String label;
 	

@@ -141,4 +141,9 @@ public class Organization implements Serializable {
 	@Column(name = "call_back_url")
 	private String callBackUrl;
 	
+	@Column(name = "password_policy")
+	private Boolean passwordPolicy;
+	
+	@Column(name = "last_passwords")
+	private String lastPasswords;
 }

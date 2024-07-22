@@ -78,7 +78,7 @@ private String applicantId;
     
     private String agentUploadDocumentPathKey;
 	
-	
+	private Boolean clientApproval; 
 
 	// private Long VendorCheckStatusId;
 

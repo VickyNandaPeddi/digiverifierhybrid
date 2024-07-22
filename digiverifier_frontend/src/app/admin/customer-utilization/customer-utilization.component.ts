@@ -38,7 +38,6 @@ export class CustomerUtilizationComponent implements OnInit {
   company_name: any = [];
   excel_data: any = [];
   geteKycReport: any = [];
-  unfilteredgeteKycReport: any = [];
   orgKycReport: any = [];
   getAgentUtilizationReport: any = [];
   init_agent_details: any = [];
@@ -170,23 +169,23 @@ export class CustomerUtilizationComponent implements OnInit {
 
     // Convert the table to an Excel sheet
     // Iterate through the cells in the sheet and set the cell format to "General"
-    for (let cellAddress in ws_OVERALLSummary) {
+    for (let cellAddress in ws_OVERALLSummary) {   
       if (ws_OVERALLSummary.hasOwnProperty(cellAddress)) {
-             let cell = ws_OVERALLSummary[cellAddress]; // Check if the cell contains a date value (you may need to adjust this condition)
-             if (cellAddress == 'A1') {       // Set the cell format to "General"
-              cell.t = 'n'; // 'n' stands for number format (General)
+             let cell = ws_OVERALLSummary[cellAddress]; // Check if the cell contains a date value (you may need to adjust this condition)    
+             if (cellAddress == 'A1') {       // Set the cell format to "General"      
+              cell.t = 'n'; // 'n' stands for number format (General)    
               cell.z = 'dd/mm/yy';
               cell.v = 'Start Date : ' + this.start_date;
               console.log('cell a1', cell, cellAddress)
-            }
+            }   
 
-            if (cellAddress == 'B1') {       // Set the cell format to "General"
-              cell.t = 'n'; // 'n' stands for number format (General)
+            if (cellAddress == 'B1') {       // Set the cell format to "General"      
+              cell.t = 'n'; // 'n' stands for number format (General)    
               cell.z = 'dd/mm/yy';
               cell.v = 'End Date : ' + this.end_date;
               console.log('cell a1', cell, cellAddress)
             }
-      }
+      } 
     } // Create a new workbook and add the sheet to it
 
     // let filteredList = this.filteredItems();
@@ -194,9 +193,50 @@ export class CustomerUtilizationComponent implements OnInit {
     // for (let item in filteredList) {
     //   delete filteredList[item]['applicantId'];
     // }
-    let ws_ekycReport = XLSX.utils.json_to_sheet(this.geteKycReport);
+    this.geteKycReport.forEach((item:any) => {
+      // if (item.hasOwnProperty('aadharLinked')) {
+      //   if (item.hasOwnProperty('maskedAadhar')) {
+      //     item['ALP'] = item['maskedAadhar'] ? item['maskedAadhar'] : 'Not Linked';
+      //       delete item['maskedAadhar'];
+      //   }
+
+        // item['ALP'] = item['maskedAadhar'] ? item['maskedAadhar'] : 'Not Linked';
+        //   delete item['maskedAadhar'];
+      // }
+      // if (item.hasOwnProperty('maskedAadhar')) {
+      //   item['ALP'] = item['maskedAadhar'] ? item['maskedAadhar'] : 'Not Linked';
+      //     delete item['maskedAadhar'];
+      // }
+
+      if (item.hasOwnProperty('aadharLinked')) {
+        if (item.aadharLinked === true) {
+            if (item.hasOwnProperty('maskedAadhar')) {
+                item['ALP'] = item['maskedAadhar'] ? item['maskedAadhar'] : '';
+            } else {
+                item['ALP'] = '';
+            }
+        } else if (item.aadharLinked === false) {
+            item['ALP'] = 'Not Linked';
+        } else if (item.aadharLinked === null) {
+            item['ALP'] = '';
+        }
+
+        // Optionally delete the maskedAadhar property if it exists
+        if (item.hasOwnProperty('maskedAadhar')) {
+            delete item['maskedAadhar'];
+        }
+        if (item.hasOwnProperty('aadharLinked')) {
+          delete item['aadharLinked'];
+      }
+    } else {
+        item['ALP'] = '';
+    }
+
+  });  
+  let ws_ekycReport = XLSX.utils.json_to_sheet(this.geteKycReport);
 
     this.company.forEach((value: any = [], key: string) => {
+      console.log("KEY : ",key)
       const filter_key = key.slice(0, 30);
 
       for (let val in value) {
@@ -224,7 +264,7 @@ export class CustomerUtilizationComponent implements OnInit {
         delete value[val].panName;
         delete value[val].candidateUanName;
         delete value[val].relationship;
-
+       
         if(value[val].preOfferReportColor || value[val].interimReportColor){
           value[val].preOfferReportColor=value[val].preOfferReportColor;
           value[val].interimReportColor=value[val].interimReportColor;
@@ -247,8 +287,8 @@ export class CustomerUtilizationComponent implements OnInit {
           delete value[val].createdByUserLastName;
         }
 
-
-
+        
+        
         if(value[val].contactNumber){
           value[val].contactNumber=value[val].contactNumber;
         }else{
@@ -280,7 +320,7 @@ export class CustomerUtilizationComponent implements OnInit {
         }else{
           delete value[val].Status ;
         }
-
+        
         // value[val].Date = value[val].statusDate
 
         if(value[val].qcCreatedOn){
@@ -293,13 +333,16 @@ export class CustomerUtilizationComponent implements OnInit {
           value[val].InterimDate = value[val].interimCreatedOn;
         }else{
           delete value[val].InterimDate;
-
+          
         }
-
+        
         delete value[val].qcCreatedOn;
         delete value[val].interimCreatedOn;
 
         delete value[val].statusName;
+        if(value[val].maskedAadhar){
+          value[val].maskedAadhar = value[val].maskedAadhar;
+        }
         if (!key.includes('REINVITE') && !key.includes('INVITATIONEXPIRED') && !key.includes('GST')){
           delete value[val].statusDate;
         }
@@ -308,7 +351,7 @@ export class CustomerUtilizationComponent implements OnInit {
           delete value[val].gstNumber;
           delete value[val].colorName;
         }
-
+        
       }
 
       // Set column widths
@@ -332,6 +375,10 @@ export class CustomerUtilizationComponent implements OnInit {
 
       if (key.includes('NEWUPLOAD')) {
         console.log('Outside', key, value.length, value);
+        value.forEach((item:any) => {
+          delete item['maskedAadhar']
+          delete item['aadharLinked'];
+        });
         if (NEWUPLOAD == 0) {
           console.log('Inside zero', key, value.length, value);
           ws_newupload = XLSX.utils.json_to_sheet(value);
@@ -343,7 +390,7 @@ export class CustomerUtilizationComponent implements OnInit {
           // let tempValueList = value.filter((temp: any) => {
           //   if(temp.statusName == "QC Pending" || temp.statusName == "Interim Report" || temp.statusName == "Final Report") {
           //     return temp;
-          //   }
+          //   } 
           // })
           // console.log('Report delivered', tempValueList)
           // ws_ReportDelivered = XLSX.utils.json_to_sheet(tempValueList);
@@ -378,6 +425,10 @@ export class CustomerUtilizationComponent implements OnInit {
         // ws_ReportDelivered['!cols'] = columnWidths;
       } else if (key.includes('FINALREPORT')) {
         // console.log("Outside",key, value.length, value)
+        value.forEach((item:any) => {
+          delete item['maskedAadhar']
+          delete item['aadharLinked'];
+        });
         if (FINALREPORT == 0) {
           console.log('Inside zero', key, value.length, value);
           ws_FINALREPORT = XLSX.utils.json_to_sheet(value);
@@ -395,6 +446,10 @@ export class CustomerUtilizationComponent implements OnInit {
         ws_FINALREPORT['!cols'] = columnWidths;
       } else if (key.includes('PENDINGNOW')) {
         // console.log("Outside",key, value.length, value)
+        value.forEach((item:any) => {
+          delete item['maskedAadhar']
+          delete item['aadharLinked'];
+        });
         if (PENDINGNOW == 0) {
           console.log('Inside zero', key, value.length, value);
           ws_PENDINGNOW = XLSX.utils.json_to_sheet(value);
@@ -412,6 +467,10 @@ export class CustomerUtilizationComponent implements OnInit {
         ws_PENDINGNOW['!cols'] = columnWidths;
       } else if (key.includes('PENDINGAPPROVAL')) {
         // console.log("Outside",key, value.length, value)
+        value.forEach((item:any) => {
+          delete item['maskedAadhar']
+          delete item['aadharLinked'];
+        });
         if (PENDINGAPPROVAL == 0) {
           console.log('Inside zero', key, value.length, value);
           ws_PENDINGAPPROVAL = XLSX.utils.json_to_sheet(value);
@@ -432,11 +491,13 @@ export class CustomerUtilizationComponent implements OnInit {
         if (INVITATIONEXPIRED == 0) {
           console.log('Inside zero', key, value.length, value);
           value.forEach((item:any) => {
-
+            
             item['Expired On'] = item['statusDate'];
             delete item['statusDate'];
-
+            
             delete item['panNumber'];
+            delete item['maskedAadhar']
+            delete item['aadharLinked'];
           });
           ws_INVITATIONEXPIRED = XLSX.utils.json_to_sheet(value);
           INVITATIONEXPIRED = 1;
@@ -462,6 +523,8 @@ export class CustomerUtilizationComponent implements OnInit {
             delete item['statusDate'];
             item['Uploaded Date'] = item['createdOn'];
             delete item['createdOn'];
+            delete item['maskedAadhar']
+            delete item['aadharLinked'];
           });
           ws_REINVITE = XLSX.utils.json_to_sheet(value);
           REINVITE = 1;
@@ -479,6 +542,34 @@ export class CustomerUtilizationComponent implements OnInit {
       } else if (key.includes('REPORTDELIVERED')) {
         // console.log("Outside",key, value.length, value)
         if (REPORTDELIVERED == 0) {
+        //   value.forEach((item:any) => {
+        //     console.log('ITEMS :: ',item);
+        //     console.log('maskedAadhar:', item['maskedAadhar']);
+        //     item['ALP'] = (item['maskedAadhar'] == null) ? 'No' : 'Yes';
+        //     console.log('ALP:', item['ALP']);
+        //     delete item['maskedAadhar'];
+        // });
+        value.forEach((item: any) => {
+          if (item.hasOwnProperty('aadharLinked')) {
+              if (item.aadharLinked === true) {
+                    item['ALP'] = (item.hasOwnProperty('maskedAadhar') && item['maskedAadhar'].trim() !== '') ? 'Yes' : 'No';
+              } else if (item.aadharLinked === false) {
+                  item['ALP'] = 'No';
+              } else if (item.aadharLinked === null) {
+                  item['ALP'] = '';
+              }
+      
+              if (item.hasOwnProperty('maskedAadhar')) {
+                  delete item['maskedAadhar'];
+              }
+              if (item.hasOwnProperty('aadharLinked')) {
+                delete item['aadharLinked'];
+            }
+          } else {
+              item['ALP'] = '';
+          }
+      });
+
           console.log('Inside zero..', key, value.length, value);
           ws_ReportDelivered = XLSX.utils.json_to_sheet(value);
           REPORTDELIVERED = 1;
@@ -504,6 +595,7 @@ export class CustomerUtilizationComponent implements OnInit {
             item['Loa Stored'] = 'Yes';
             delete item['createdOn'];
             delete item['PreOfferDate'];
+            delete item['maskedAadhar']
           });
           ws_Loa = XLSX.utils.json_to_sheet(value);
           LOA = 1;
@@ -660,6 +752,8 @@ export class CustomerUtilizationComponent implements OnInit {
 
     ws_ekycReport['!cols'] = eKycReportcolumnWidths;
 
+
+
     // Set font size for the cells
     const fontSize = { sz: 10 }; // Font size set to 12 points
     const style = XLSX.utils.encode_cell({ r: 0, c: 0 }); // Choose a cell to apply the font size
@@ -774,7 +868,7 @@ export class CustomerUtilizationComponent implements OnInit {
   filteredItems() {
     let uniqueIds : string[] = [];
 
-    return this.unfilteredgeteKycReport.filter((item: any) => {
+    return this.geteKycReport.filter((item: any) => {
       if (uniqueIds.includes(item.applicantId)) {
         return false; // Skip duplicate items
       } else {
@@ -900,7 +994,8 @@ export class CustomerUtilizationComponent implements OnInit {
 
       this.customers.posteKycReport(rportData).subscribe((data: any) => {
         if (data.data) {
-          this.unfilteredgeteKycReport = data.data.candidateDetailsDto;
+          this.geteKycReport = data.data.candidateDetailsDto;
+          console.log("this.geteKycReport : ",this.geteKycReport)
           this.geteKycReport = this.filteredItems();
           this.orgKycReport = data.data.candidateDetailsDto;
 
@@ -1482,7 +1577,7 @@ export class CustomerUtilizationComponent implements OnInit {
   }
   onSubmitFilter(utilizationReportFilter: FormGroup) {
     this.hideLoadingBtn = false;
-
+    
     this.resetMap();
     this.fromDate = this.fromDate != null ? this.fromDate : '';
     this.toDate = this.toDate != null ? this.toDate : '';
@@ -1767,7 +1862,7 @@ export class CustomerUtilizationComponent implements OnInit {
       this.responseCheck.set('ekycReport', true);
 
       if (data.data) {
-        this.unfilteredgeteKycReport = data.data.candidateDetailsDto;
+        this.geteKycReport = data.data.candidateDetailsDto;
         this.geteKycReport = this.filteredItems();
         this.orgKycReport = data.data.candidateDetailsDto;
         console.log(data, '------------------------------------');
@@ -1924,7 +2019,7 @@ export class CustomerUtilizationComponent implements OnInit {
     let orgID = this.authService.getOrgID();
     let fromDate = localStorage.getItem('dbFromDate');
     let toDate = localStorage.getItem('dbToDate');
-
+    
     this.company = new Map<string, {}>();
     this.statusList.forEach((status: any) => {
       var features: any = {};
@@ -1969,7 +2064,7 @@ export class CustomerUtilizationComponent implements OnInit {
           //   result.data.candidateDetailsDto.length
           // );
 
-          this.responseCheck.set(status, true);
+          this.responseCheck.set(status, true); 
           if (
             result['data']['organizationName'] != null &&
             result.data?.candidateDetailsDto?.length > 0
@@ -2202,7 +2297,7 @@ export class CustomerUtilizationComponent implements OnInit {
     let lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1);
     let fromDateString = firstDayOfMonth.toISOString().split('T')[0];
     let toDateString = lastDayOfMonth.toISOString().split('T')[0];
-
+  
     let getInputFromDate: any = fromDateString.split('-');
     let finalInputFromDate =
       getInputFromDate[2] +
@@ -2218,12 +2313,12 @@ export class CustomerUtilizationComponent implements OnInit {
         getInputToDate[1] +
         '/' +
         getInputToDate[0];
-
+  
     this.fromDate = finalInputFromDate;
     this.toDate = finalInputToDate;
 
     this.customers.setFromDate(finalInputFromDate);
-    this.customers.setToDate(finalInputToDate);
+    this.customers.setToDate(finalInputToDate); 
 
     let organizationIds: any = [];
     organizationIds.push(this.custId);
@@ -2232,16 +2327,16 @@ export class CustomerUtilizationComponent implements OnInit {
       toDate: this.toDate,
       organizationIds: organizationIds,
     });
-
+  
     this.onSubmitFilter(this.utilizationReportFilter);
   }
-
+  
   filterMonthToDate() {
     let currentDate = new Date();
     let firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 2);
     let fromDateString = firstDayOfMonth.toISOString().split('T')[0];
     let toDateString = currentDate.toISOString().split('T')[0];
-
+  
     let getInputFromDate: any = fromDateString.split('-');
     let finalInputFromDate =
       getInputFromDate[2] +
@@ -2249,12 +2344,12 @@ export class CustomerUtilizationComponent implements OnInit {
       getInputFromDate[1] +
       '/' +
       getInputFromDate[0];
-
+  
     this.fromDate = finalInputFromDate;
     this.toDate = this.initToday;
 
     this.customers.setFromDate(finalInputFromDate);
-    this.customers.setToDate(this.initToday);
+    this.customers.setToDate(this.initToday); 
 
     let organizationIds: any = [];
     organizationIds.push(this.custId);
@@ -2263,12 +2358,12 @@ export class CustomerUtilizationComponent implements OnInit {
       toDate: this.toDate,
       organizationIds: organizationIds,
     });
-
+  
     this.onSubmitFilter(this.utilizationReportFilter);
   }
-
-
-
+  
+  
+  
 
   ngOnInit(): void {}
 

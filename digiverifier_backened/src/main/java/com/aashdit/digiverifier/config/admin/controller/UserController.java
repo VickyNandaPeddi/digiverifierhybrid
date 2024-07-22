@@ -25,6 +25,7 @@ import com.aashdit.digiverifier.config.admin.dto.UserDto;
 import com.aashdit.digiverifier.config.admin.model.ConventionalAttributesMaster;
 import com.aashdit.digiverifier.config.admin.model.User;
 import com.aashdit.digiverifier.config.admin.service.UserService;
+import com.aashdit.digiverifier.config.candidate.service.ConventionalCandidateService;
 import com.aashdit.digiverifier.config.superadmin.dto.DashboardDto;
 import com.aashdit.digiverifier.config.superadmin.model.Source;
 import com.aashdit.digiverifier.utils.AwsUtils;
@@ -50,6 +51,9 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private ConventionalCandidateService conventionalCandidateService;
 
 	@Operation(summary ="Save and  Update ConventionalAttributesMaster")
 	@PostMapping("/saveConventionalAttributesMaster")
@@ -298,9 +302,9 @@ public class UserController {
 	
 	@Operation(summary = "OverAll search By vendorId for vendorDashboard")
 	@PostMapping("/searchByVendorId")
-	public ResponseEntity<ServiceOutcome<List<VendorChecks>>> getAllSearchDataForVendor(@RequestBody SearchAllVendorCheckDTO searchAllVendorCheck,@RequestHeader("Authorization") String authorization){
-		ServiceOutcome<List<VendorChecks>> svcSearchResult = userService.getAllSearchDataForVendor(searchAllVendorCheck);
-		return new ResponseEntity<ServiceOutcome<List<VendorChecks>>>(svcSearchResult, HttpStatus.OK);
+	public ResponseEntity<ServiceOutcome<List<VendorcheckdashbordtDto>>> getAllSearchDataForVendor(@RequestBody SearchAllVendorCheckDTO searchAllVendorCheck,@RequestHeader("Authorization") String authorization){
+		ServiceOutcome<List<VendorcheckdashbordtDto>> svcSearchResult = userService.getAllSearchDataForVendor(searchAllVendorCheck);
+		return new ResponseEntity<ServiceOutcome<List<VendorcheckdashbordtDto>>>(svcSearchResult, HttpStatus.OK);
 	}
 	
 	@Operation(summary ="Get CandidateList Status And Count")
@@ -374,9 +378,22 @@ public class UserController {
 		return userService.getFilesFromResource(uploadFor,uploadType);
 	}
 	
-	@PostMapping("/getAgentUploadedProof")
-	public ResponseEntity<ServiceOutcome<?>> getAgentUploadedDocument(@RequestBody String documentPathKey) {
-	    ServiceOutcome<?> svcSearchResult = userService.getAgentUploadedDocument(documentPathKey);
+	@PostMapping("/getAgentUploadedProof/{viewDocument}")
+	public ResponseEntity<ServiceOutcome<?>> getAgentUploadedDocument(@RequestBody String documentPathKey, @PathVariable("viewDocument") boolean viewDocument) {
+	    ServiceOutcome<?> svcSearchResult = userService.getAgentUploadedDocument(documentPathKey,viewDocument);
         return new ResponseEntity<>(svcSearchResult, HttpStatus.OK);
+	}
+	
+	@PostMapping("/getECourtProof")
+	public ResponseEntity<ServiceOutcome<?>> getECourtProof(@RequestBody VendorInitiatDto vendorInitiatDto) {
+	    ServiceOutcome<?> svcSearchResult = userService.getECourtProof(vendorInitiatDto);
+        return new ResponseEntity<>(svcSearchResult, HttpStatus.OK);
+	}
+	
+	//This is for ClientApproval
+	@PostMapping("/clientApprove")
+	public ResponseEntity<ServiceOutcome<?>> ClientCandidateOrDocumentApprove(@RequestBody String vendorCheckIdStr){
+		ServiceOutcome<?> svcSearchResult = conventionalCandidateService.clientApproval(vendorCheckIdStr);
+		return new ResponseEntity<>(svcSearchResult, HttpStatus.OK);
 	}
 }

@@ -1,0 +1,98 @@
+
+  
+  .pageTitle {
+    margin: 0;
+  }
+  
+  .container-md {
+    padding: 20px;
+  }
+  
+  .card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #E9F3F4;
+  }
+  
+  .card-body {
+    padding: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .required::after {
+    content: '*';
+    color: red;
+    margin-left: 5px;
+  }
+  
+  .form-control {
+    width: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Use Segoe UI font */
+  }
+  
+  .btn-primary {
+    background-color: #0078d4;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+  
+  .btn-primary:hover {
+    background-color: #005a9e;
+  }
+
+  .container{
+    max-width: 60%;
+  }
+//   .formHeader{
+//     margin-top: 10px;
+//     height: 150px;
+//     background-color: #03787C;
+//     border-radius: 5px;
+//   }
+
+//   body{
+//     background-color: #E9F3F4;
+//   }
+
+//   .headerFormContent{
+//     height: 10px;
+//   }
+
+.formHeader {
+    background-color: #3177EB;
+    padding: 20px;
+    border-radius: 5px;
+    margin-top: 20px;
+  }
+  
+  .headerFormContent {
+    color: #fff; /* White text color */
+  }
+  
+  .headerFormContent h3 {
+    margin: 0 0 10px;
+  }
+  
+  .headerFormContent p {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .form-group label {
+    font-size: 16px; /* Adjust font size as needed */
+  }
+  
+//   body{
+//     background-image: none !important;
+//     background-color: linear-gradient(to bottom, #03787C, white);;
+//   }
+
+  
+  
+

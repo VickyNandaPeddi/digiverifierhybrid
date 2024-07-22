@@ -58,4 +58,29 @@ public interface VendorChecksRepository extends JpaRepository<VendorChecks, Long
     VendorChecks findByCandidateCandidateIdAndvendorcheckId(@Param("candidateId") Long candidateId, @Param("vendorCheckId") Long vendorCheckId);
 
     
+    @Query(value = "SELECT * FROM t_dgv_vendor_checks " +
+            "WHERE vendor_id = :vendorId " +
+            "AND (source_id IN (SELECT s.source_id FROM t_dgv_source s WHERE s.source_name LIKE :userSearchInput) " +
+            "OR created_by = :agentId " +
+            "OR source_id = :sourceId " +
+            "OR vendor_checkstatus_master_id = :checkStatusId)", nativeQuery = true)
+    List<VendorChecks> searchAllVendorChecksByVendorIdAndUserSearchInputBySourceName(
+            @Param("vendorId") Long vendorId,
+            @Param("userSearchInput") String userSearchInput,
+            @Param("agentId") Long agentId,
+            @Param("sourceId") Long sourceId,
+            @Param("checkStatusId") Long checkStatusId);
+    @Query(value = "SELECT * FROM t_dgv_vendor_checks " +
+            "WHERE vendor_id = :vendorId " +
+            "AND (vendor_checkstatus_master_id IN (SELECT v.vendor_checkstatus_master_id FROM t_dgv_vendor_checkstatus_master v WHERE v.checkstatus_code LIKE :userSearchInput) " +
+            "OR created_by = :agentId " +
+            "OR source_id = :sourceId " +
+            "OR vendor_checkstatus_master_id = :checkStatusId)", nativeQuery = true)
+    List<VendorChecks> searchAllVendorChecksByVendorIdAndUserSearchInputByCheckStatus(
+            @Param("vendorId") Long vendorId,
+            @Param("userSearchInput") String userSearchInput,
+            @Param("agentId") Long agentId,
+            @Param("sourceId") Long sourceId,
+            @Param("checkStatusId") Long checkStatusId);
+    
 }

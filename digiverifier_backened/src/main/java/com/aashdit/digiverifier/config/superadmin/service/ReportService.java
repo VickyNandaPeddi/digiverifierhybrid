@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import com.aashdit.digiverifier.common.model.ServiceOutcome;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateReportDTO;
 import com.aashdit.digiverifier.config.superadmin.Enum.ReportType;
+import com.aashdit.digiverifier.config.superadmin.dto.CandidatePurgedReportResponseDto;
 import com.aashdit.digiverifier.config.superadmin.dto.DateRange;
 import com.aashdit.digiverifier.config.superadmin.dto.ReportSearchDto;
 import com.aashdit.digiverifier.config.superadmin.dto.VendorSearchDto;
@@ -37,5 +38,11 @@ public interface ReportService {
 	ResponseEntity<byte[]> downloadCandidateStatusTrackerReport(ReportSearchDto reportSearchDto);
 
 	ResponseEntity<byte[]> downloadCandidateEmploymentReport(ReportSearchDto reportSearchDto);
+
+	ServiceOutcome<CandidatePurgedReportResponseDto> getPurgedCanididateDetailsByStatus(ReportSearchDto reportSearchDto);
+
+	ServiceOutcome<ReportSearchDto> getCandidatePurgedReport(ReportSearchDto reportSearchDto);
+
+	ServiceOutcome<ReportSearchDto> getCandidatePurgedReportByAgent(ReportSearchDto reportSearchDto);
 	
 }

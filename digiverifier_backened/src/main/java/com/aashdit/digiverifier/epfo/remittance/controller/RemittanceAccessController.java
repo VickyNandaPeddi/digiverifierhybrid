@@ -60,4 +60,12 @@ public class RemittanceAccessController {
 		return remittanceService.getRemittanceCaptcha(candidateCode);
 
 	    }
+	
+	@Operation(summary ="getting the remittance details for All employers of LTIMindree")
+	@GetMapping(value = "/LtimindtreeRemittanceRecords/{candidateCode}")
+	public ServiceOutcome<List<RemittanceDataFromApiDto>> getLTIMRemittanceRecords(@PathVariable String candidateCode, @RequestParam String flow) throws JsonProcessingException, IOException {
+
+		return remittanceService.getLTIMRemittanceRecords(candidateCode, flow);
+
+	}
 }

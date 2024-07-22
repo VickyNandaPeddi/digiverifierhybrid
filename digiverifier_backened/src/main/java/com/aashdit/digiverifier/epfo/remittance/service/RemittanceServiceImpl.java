@@ -46,6 +46,15 @@ import com.aashdit.digiverifier.itr.repository.ITRDataRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import org.springframework.data.repository.query.Param;
+import com.aashdit.digiverifier.config.candidate.model.CandidateCafExperience;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateCafExperienceRepository;
+import com.aashdit.digiverifier.config.candidate.service.CandidateService;
+import com.aashdit.digiverifier.itr.model.ITRData;
+import com.aashdit.digiverifier.utils.CommonUtils;
 
 @Service
 @Slf4j
@@ -85,6 +94,12 @@ public class RemittanceServiceImpl implements RemittanceService{
 	
 	@Autowired
 	private RemittanceRepository remittanceRepository;
+	
+	@Autowired
+	private CandidateCafExperienceRepository candidateCafExperienceRepository;
+	
+	@Autowired
+	private CandidateService candidateService;
 	
 	@Value("${REMITTANCE.BASE.URL}")
 	private String remittanceBaseURL;
@@ -403,7 +418,7 @@ public class RemittanceServiceImpl implements RemittanceService{
 								remark = "No Payment details found for " + companyName + " in "  + key;
 								break;
 							case "RED":
-								remark = "No Remittance Found for" + companyName + " in "  + key;
+								remark = "No Remittance Found for " + companyName + " in "  + key;
 								break;
 							default:
 								break;
@@ -657,4 +672,242 @@ public class RemittanceServiceImpl implements RemittanceService{
 		}
 		return message;
 	}
+	
+
+	//need to update the logic based on LTIM requirement
+		@Override
+		public ServiceOutcome<List<RemittanceDataFromApiDto>> getLTIMRemittanceRecords(String candidateCode, String flow) {
+			ServiceOutcome<List<RemittanceDataFromApiDto>> svcOutcome = new ServiceOutcome<>();
+			List<RemittanceDataFromApiDto> dataDTOList = new ArrayList<>();
+			try {
+				Candidate candidate= candidateRepository.findByCandidateCode(candidateCode);
+				List<EpfoData> allEpfoData= epfoDataRepository.findAllByCandidateCandidateCode(candidateCode);
+				
+				
+				if(allEpfoData!=null && !allEpfoData.isEmpty()) {
+					
+					//Check if flow is agent and he wants to override (need to delete existing records of candidate flow)
+					if (flow.equals("NOTCANDIDATE")) {
+						log.info("Remittance call for  ::{}",flow);
+						List<RemittanceData> remittances = remittanceRepository.findAllByCandidateCandidateCode(candidateCode);
+						remittanceRepository.deleteAll(remittances);
+					}
+					
+					List<CandidateCafExperience> candidateCafExperiences = candidateCafExperienceRepository
+							.findAllByCandidateCandidateId(candidate.getCandidateId());
+					//update the null dates
+					cleanNullDates(candidateCafExperiences);
+					List<ITRData> candidateItr= itrDataRepository.findAllByCandidateCandidateCodeOrderByFiledDateDesc(candidateCode);
+					
+					//checking ITR records for each yeas of the employments
+					for(EpfoData epfoData : allEpfoData) {
+						List<String> yearsToFetchRemittance =new ArrayList<>();
+	 
+						boolean remittanceApplied=false;
+						
+						//here needs to check tenuer gap or filing gap of same employer ITR records data.
+					
+						
+						CandidateCafExperience candidateEPFOCafExperience=new CandidateCafExperience();
+						for(CandidateCafExperience candidateCafExperience : candidateCafExperiences) {
+							double similarity = CommonUtils.checkStringSimilarity(
+									candidateCafExperience.getCandidateEmployerName(),
+									epfoData.getCompany());
+							if(similarity > 0.90 && candidateCafExperience.getServiceSourceMaster()!=null
+									&& candidateCafExperience.getServiceSourceMaster().getServiceCode().equalsIgnoreCase("EPFO")) {
+								log.info("SIMILARITY MATCHED FOR ::{}",epfoData.getCompany());
+								candidateEPFOCafExperience = candidateCafExperience;
+							}
+							
+						}
+						
+						if(candidateEPFOCafExperience!=null) {
+							//check tenure gap here
+							long tenureGapInMonths=candidateService.calculateTenuerGap(candidateEPFOCafExperience,candidateCafExperiences);
+							log.info("CHECKING TENURE GAP for employer of the candidate ::{}{}",candidateCode ,"::GAP::" +tenureGapInMonths);
+							if(tenureGapInMonths>6) {
+								remittanceApplied = true;
+							}else {
+								//check the ITR filing gap
+								
+								// Filter EPFO employer ITR list
+						        List<ITRData> filteredList = candidateItr.stream()
+						                .filter(data -> epfoData.getCompany().equalsIgnoreCase(data.getDeductor()))
+						                .collect(Collectors.toList());
+						        
+						        //checking filing gap
+						        long itrFilingGapInMonths= candidateService.calculateITRFilingGap(filteredList);
+						        log.info("CHECKING itrFilingGapInMonths GAP candidate ::{}{}",candidateCode ,"::GAP::" +itrFilingGapInMonths);
+						        remittanceApplied = itrFilingGapInMonths > 6;
+							}
+							
+						}
+						
+						if(remittanceApplied && candidateEPFOCafExperience!=null) {
+							DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM-yyyy");
+							Calendar calendar = Calendar.getInstance();
+							
+							if(candidateEPFOCafExperience.getInputDateOfJoining()!=null) {
+								Date doj = candidateEPFOCafExperience.getInputDateOfJoining();
+								// Convert Date to LocalDate
+						        LocalDate localDateDOJ = doj.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+						        String monthYearDOJ = localDateDOJ.format(formatter);
+						        yearsToFetchRemittance.add(monthYearDOJ);
+						        
+						     // Get the next month
+						        calendar.setTime(doj);
+						        calendar.add(Calendar.MONTH, 1);
+						        Date nextMonthDOJDate = calendar.getTime();
+						        
+						        LocalDate localDateNextDoj = nextMonthDOJDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+						        String nextMonthYearDOJ= localDateNextDoj.format(formatter);
+						        yearsToFetchRemittance.add(nextMonthYearDOJ);
+							}
+							
+							if(candidateEPFOCafExperience.getInputDateOfExit()!=null) {
+								Date doe = candidateEPFOCafExperience.getInputDateOfExit();
+	 
+								 // Convert Date to LocalDate
+						        LocalDate localDateDOE = doe.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+						        String monthYearDOE = localDateDOE.format(formatter);
+						        yearsToFetchRemittance.add(monthYearDOE);
+						        
+						        
+								// Get the previous month
+						        calendar.setTime(doe);
+						        calendar.add(Calendar.MONTH, -1);
+						        Date previousMonthDate = calendar.getTime();
+						        
+						        LocalDate localDatePreDoe = previousMonthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+						        String preMonthYearDOE= localDatePreDoe.format(formatter);
+						        yearsToFetchRemittance.add(preMonthYearDOE);
+							}
+							
+						}
+						
+						log.info("yearsToFetchRemittance ::{}",yearsToFetchRemittance);
+						
+						if(yearsToFetchRemittance!=null && !yearsToFetchRemittance.isEmpty()) {
+							//update flag in EPFO table for remittance check of that particular employer.
+							epfoData.setIsRemittanceChecked(true);
+							epfoDataRepository.save(epfoData);
+							
+							//for these years we need to call remittance API.
+							//calling the remittance token for accessing the transaction id
+							String remittanceToken =getRemittanceToken();
+							
+							//calling the remittance API to get transaction id
+							if(!remittanceToken.equals("") && !remittanceToken.isEmpty()) {
+								String remittanceTID = getRemittanceTransactionID(remittanceToken);
+								
+								if(!remittanceTID.equals("") && !remittanceTID.isEmpty()) {
+			
+									//call the remitance apis for getting images..
+									
+									String res = getRemittanceImagesData(epfoData,yearsToFetchRemittance,remittanceTID,null);
+								//	log.info("Response of remitance Images ::{}",res);
+									
+									//save the records in database.
+									List<RemittanceDataFromApiDto> dataList = saveRemittanceData(res, candidateCode, epfoData);
+									dataDTOList.addAll(dataList);
+								}
+								
+							}
+						}
+						
+					}
+					
+					if(dataDTOList!=null && !dataDTOList.isEmpty()) {
+						log.info("GOT REMITTANCE RESPONCE FOR ::{}",candidateCode);
+						//updating the candidate status history table only
+						if (flow.equals("CANDIDATE")) {
+							CandidateStatusHistory candidateStatusHistoryObj = new CandidateStatusHistory();
+							candidateStatusHistoryObj.setCandidate(candidate);
+							candidateStatusHistoryObj.setStatusMaster(statusMasterRepository.findByStatusCode("REMITTANCE"));
+							candidateStatusHistoryObj.setCreatedBy(candidate.getCreatedBy());
+							candidateStatusHistoryObj.setCreatedOn(new Date());
+							candidateStatusHistoryObj.setCandidateStatusChangeTimestamp(new Date());
+							candidateStatusHistoryRepository.save(candidateStatusHistoryObj);
+						}
+						
+						svcOutcome.setData(dataDTOList);
+		        		svcOutcome.setMessage("Remittance Records Retrived Successfully..");
+		        		svcOutcome.setOutcome(true);
+					}else {
+						log.info("No Remittance records found for this candidate ::{}",candidateCode);
+						svcOutcome.setData(null);
+		        		svcOutcome.setMessage("No Remittance Records available..!");
+		        		svcOutcome.setOutcome(true);
+						
+					}
+					
+				}else {
+					log.info("EPFO RECORDS NOT PRESENT FOR ::{}",candidateCode);
+					svcOutcome.setData(null);
+	        		svcOutcome.setMessage("EPFO SKIPPED");
+	        		svcOutcome.setOutcome(true);
+					
+				}
+			}catch(Exception e) {
+				log.error("Exception occured in getremittanceRecords::{}",e);
+			}
+			return svcOutcome;
+		}
+		
+		private void cleanNullDates(List<CandidateCafExperience> candidateCafExperienceList) {
+			
+			//possible cases
+			//1) if current employer having doj or doe null
+			//logic : doj-> assigning previous employer doe+1day
+			//        doe-> current date
+			//2) if middle employers having doj or doe null
+			//logic : doj-> assigning previous employer doe+1day
+			//        doe-> assigning next employer doj-1day
+			//3) if first employer having doj or doe null
+			//logic : doj-> ??
+			//        doe-> assigning next employer doj-1day
+			
+			//with single emp experience
+			if (candidateCafExperienceList!=null && candidateCafExperienceList.size() == 1
+					&& Objects.isNull(candidateCafExperienceList.get(0).getInputDateOfExit())) {
+				candidateCafExperienceList.get(0).setInputDateOfExit(new Date());
+			}
+	 
+			if (candidateCafExperienceList!=null && candidateCafExperienceList.size() > 1) {
+				for (int i = 0; i < candidateCafExperienceList.size(); i++) {
+					//setting doe to the current null doe employer
+					if(i==0 && Objects.isNull(candidateCafExperienceList.get(0).getInputDateOfExit())) {
+						candidateCafExperienceList.get(0).setInputDateOfExit(new Date());
+					}
+					//setting doj to all the null doj employer except first employer
+					if(i!=(candidateCafExperienceList.size()-1) && Objects.isNull(candidateCafExperienceList.get(i).getInputDateOfJoining())) {  //if not the first employer
+							if(Objects.isNull(candidateCafExperienceList.get(i+1).getInputDateOfExit())){
+//								candidateCafExperienceList.get(i).setInputDateOfJoining(new Date());
+							}else {
+								Date preEmpDOE = candidateCafExperienceList.get(i+1).getInputDateOfExit();
+								LocalDateTime ldt = LocalDateTime.ofInstant(preEmpDOE.toInstant(), ZoneId.systemDefault());
+								LocalDateTime joinDate = ldt.plusDays(1);
+								Date doj = Date.from(joinDate.atZone(ZoneId.systemDefault()).toInstant());
+								
+								candidateCafExperienceList.get(i).setInputDateOfJoining(doj);
+							}
+							
+						
+						
+					}
+					//setting doe to all the null doe employer except current employer
+					if(i>0 && Objects.isNull(candidateCafExperienceList.get(i).getInputDateOfExit())) {
+							Date curEmpDOJ = candidateCafExperienceList.get(i-1).getInputDateOfJoining();
+							LocalDateTime ldt = LocalDateTime.ofInstant(curEmpDOJ.toInstant(), ZoneId.systemDefault());
+							LocalDateTime exitDate = ldt.minusDays(1);
+							Date doe = Date.from(exitDate.atZone(ZoneId.systemDefault()).toInstant());
+							
+							
+							candidateCafExperienceList.get(i).setInputDateOfExit(doe);
+						}
+			 }
+				
+		 }
+	  }
+	 
 }

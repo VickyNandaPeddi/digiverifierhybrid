@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.aashdit.digiverifier.common.model.ServiceOutcome;
 import com.aashdit.digiverifier.config.admin.dto.RoleHeadPermissionListDto;
+import com.aashdit.digiverifier.config.admin.dto.RoleManagementAndRolePermissionDTO;
 import com.aashdit.digiverifier.config.admin.dto.RolePermissionDTO;
 import com.aashdit.digiverifier.config.admin.model.Role;
 import com.aashdit.digiverifier.config.admin.model.RolePermissionHead;
@@ -311,6 +312,70 @@ public class RoleServiceImpl implements RoleService {
 			svcSearchResult.setOutcome(false);
 			svcSearchResult.setMessage("Something Went Wrong, Please Try After Sometimes.");
 		}
+		return svcSearchResult;
+	}
+
+
+	@Override
+	public ServiceOutcome<?> saveRoleManagementAndRolePermission(RoleManagementAndRolePermissionDTO role) {
+		ServiceOutcome<?> svcSearchResult = new ServiceOutcome();
+		
+		try {
+//			System.out.println("ROLE IN SERVICE : "+role);
+			
+			User user = SecurityHelper.getCurrentUser();
+			if(role.getPermissionHeadName() != null && role.getNewPermissionHeadName()!= null && role.getPermissionHeadName().equals("addNew")) {
+				RolePermissionHead rolePermissionHead = new RolePermissionHead();
+				rolePermissionHead.setPermissionHeadName(role.getNewPermissionHeadName());
+				rolePermissionHead.setIsActive(true);
+				rolePermissionHead.setCreatedOn(new Date());
+				rolePermissionHead.setCreatedBy(user);
+				
+				RolePermissionHead save = rolePermissionHeadRepository.save(rolePermissionHead);
+				if(save != null) {
+					RolePermissionHead byPermissionHeadName = rolePermissionHeadRepository.findByPermissionHeadName(role.getPermissionHeadName());
+					RolePermissionMaster rolePermissionMaster = new RolePermissionMaster();
+					rolePermissionMaster.setPermissionName(role.getPermissionName());
+					rolePermissionMaster.setCreatedBy(user);
+					rolePermissionMaster.setCreatedOn(new Date());
+					rolePermissionMaster.setIsActive(true);
+					rolePermissionMaster.setRolePermissionHead(byPermissionHeadName);
+					rolePermissionMaster.setPermissionCode(role.getPermissionName().toUpperCase());
+					
+					RolePermissionMaster saveRolePermission = rolePermissionMasterRepository.save(rolePermissionMaster);
+					if(saveRolePermission != null) {
+						svcSearchResult.setMessage("Role Management And Role Permission Store SuccessFully");	
+						svcSearchResult.setOutcome(true);
+					}		
+				}
+			}else {
+				if(role.getPermissionHeadName() != null) {
+					RolePermissionHead byPermissionHeadName = rolePermissionHeadRepository.findByPermissionHeadName(role.getPermissionHeadName());
+					if(byPermissionHeadName != null) {
+						RolePermissionMaster rolePermissionMaster = new RolePermissionMaster();
+						rolePermissionMaster.setPermissionName(role.getPermissionName());
+						rolePermissionMaster.setCreatedBy(user);
+						rolePermissionMaster.setCreatedOn(new Date());
+						rolePermissionMaster.setIsActive(true);
+						rolePermissionMaster.setRolePermissionHead(byPermissionHeadName);
+						rolePermissionMaster.setPermissionCode(role.getPermissionName().toUpperCase());
+						
+						RolePermissionMaster save = rolePermissionMasterRepository.save(rolePermissionMaster);
+						if(save != null) {
+							svcSearchResult.setMessage("Role Permission Store SuccessFully");	
+							svcSearchResult.setOutcome(true);
+						}
+					}
+				}
+			}
+			
+		} catch (Exception e) {
+			log.error("Exception occured in saveRoleManagementAndRolePermission method in RoleServiceImpl-->",e);
+			svcSearchResult.setData(null);
+			svcSearchResult.setOutcome(false);
+			svcSearchResult.setMessage("Something Went Wrong, Please Try After Sometimes.");
+		}
+
 		return svcSearchResult;
 	}
 

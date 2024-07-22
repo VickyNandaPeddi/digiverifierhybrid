@@ -35,19 +35,30 @@ export class EpfoLoginComponent implements OnInit {
     });
     this.candidateCode = this.router.snapshot.paramMap.get('candidateCode');
     //EPFO Captcha
-    this.candidateService
-      .getepfoCaptcha(this.candidateCode)
-      .subscribe((data: any) => {
-        if (data.outcome === true) {
-          //this.captchaSrc="data:image/png;base64,"+data.data.captcha;
-          this.transactionid = data.data.transactionid;
-        } else {
-          Swal.fire({
-            title: data.message,
-            icon: 'warning',
-          });
-        }
-      });
+    // this.candidateService
+    //   .getepfoCaptcha(this.candidateCode)
+    //   .subscribe((data: any) => {
+    //     if (data.outcome === true) {
+    //       //this.captchaSrc="data:image/png;base64,"+data.data.captcha;
+    //       this.transactionid = data.data.transactionid;
+    //     } else if(data.outcome === false && !this.enterUanInQcPending) {
+          
+    //       const navURL= 'candidate/epfologinnew/' + this.candidateCode;
+    //       Swal.fire({
+    //         title: data.message + " Or try using Captcha",
+    //         icon: 'warning',
+    //       }).then((sresult) => {
+    //         if (sresult.isConfirmed) {
+    //           this.navRouter.navigate([navURL]);
+    //         }
+    //       });
+    //     }else{
+    //           Swal.fire({
+    //             title: data.message,
+    //             icon: 'warning',
+    //           });
+    //     }
+    //   });
 
       //getting candidate details
       this.candidateService.getCandidateDetails(this.candidateCode)
@@ -66,6 +77,16 @@ export class EpfoLoginComponent implements OnInit {
           });
         }
       });
+
+      const navURL= 'candidate/epfologinnew/' + this.candidateCode;
+          Swal.fire({
+            title: "EPFO Site is down, Please try another..!",
+            icon: 'warning',
+          }).then((sresult) => {
+            if (sresult.isConfirmed) {
+              this.navRouter.navigate([navURL]);
+            }
+          });
 
   }
   formEPFOlogin = new FormGroup({
@@ -103,6 +124,22 @@ export class EpfoLoginComponent implements OnInit {
       // Rest of your code...
       console.log(this.enterUanInQcPending)
     });
+
+    if(!this.enterUanInQcPending) {
+      this.candidateService.getCurrentStatusByCandidateCode(this.candidateCode).subscribe((result:any)=>{
+        if(result.outcome==true){
+          console.log(result.data)
+          const navURL = result.data.split('#/')[1];
+          this.navRouter.navigate([navURL]);
+        } else {
+          Swal.fire({
+            title: result.message,
+            icon: 'warning',
+          });
+        }
+      });
+    }
+
   }
 
   onSubmit() {
@@ -162,6 +199,22 @@ export class EpfoLoginComponent implements OnInit {
                 icon: 'warning',
               });
             }
+          } else if(result.outcome === false && !this.enterUanInQcPending) {
+          
+            const navURL= 'candidate/epfologinnew/' + this.candidateCode;
+            Swal.fire({
+              title: result.message + " Or try using Captcha",
+              icon: 'warning',
+            }).then((sresult) => {
+              if (sresult.isConfirmed) {
+                this.navRouter.navigate([navURL]);
+              }
+            });
+          }else{
+                Swal.fire({
+                  title: result.message,
+                  icon: 'warning',
+                });
           }
         });
     } else {
@@ -179,8 +232,17 @@ export class EpfoLoginComponent implements OnInit {
       this.navRouter.navigate([redirectURL]);
     }
     else{
-      const redirectURL = 'candidate/cUanConfirm/' + this.candidateCode + '/1';
-      this.navRouter.navigate([redirectURL]);
+      this.candidateService.cancelEpfoLogin(this.candidateCode).subscribe((result:any)=>{
+        if(result.outcome) {      
+          const redirectURL = 'candidate/cUanConfirm/' + this.candidateCode + '/1';
+          this.navRouter.navigate([redirectURL]);
+        }else{
+          Swal.fire({
+            title: result.message,
+            icon: 'warning'
+          })
+        }
+      });
     }
   }
 }

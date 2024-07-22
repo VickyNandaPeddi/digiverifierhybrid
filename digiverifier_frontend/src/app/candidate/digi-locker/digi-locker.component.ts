@@ -15,6 +15,18 @@ export class DigiLockerComponent implements OnInit {
   constructor(private candidateService: CandidateService,  private router:ActivatedRoute,
     private navRouter: Router) {
       this.candidateCode = this.router.snapshot.paramMap.get('candidateCode');
+      this.candidateService.getCurrentStatusByCandidateCode(this.candidateCode).subscribe((result:any)=>{
+        if(result.outcome==true){
+          console.log(result.data)
+          const navURL = result.data.split('#/')[1];
+          this.navRouter.navigate([navURL]);
+        } else {
+          Swal.fire({
+            title: result.message,
+            icon: 'warning',
+          });
+        }
+      });
       console.log(this.candidateCode,"candidatecode");
       this.candidateService.getDigiTansactionid(this.candidateCode).subscribe((data: any)=>{
         if(data.outcome === true){

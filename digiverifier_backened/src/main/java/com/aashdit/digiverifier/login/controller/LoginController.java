@@ -110,6 +110,12 @@ public class LoginController {
                             userLoginDto.setRoleName(commonUtils.encryptXOR(user.getRole().getRoleName()));
                             userLoginDto.setUserId(String.valueOf(user.getUserId()));
                             userLoginDto.setUserId(commonUtils.encryptXOR(userLoginDto.getUserId()));
+                            if(user.getOrganization().getPasswordPolicy() != null) {
+                            	userLoginDto.setOrgPassPolicy(user.getOrganization().getPasswordPolicy());
+                            }
+//                            if(user.getLastUpdatedPassword() != null) {      	
+                            	userLoginDto.setLastPasswordUpdated(user.getLastUpdatedPassword());
+//                            }
 							response.setData(userLoginDto);
 							user.setIsLoggedIn(true);
 							user.setWrongLoginCount(0);

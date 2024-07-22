@@ -192,6 +192,11 @@ export class UploadVendocheckComponent implements OnInit {
       }
       console.log(this.getVenorcheckStatus);
     });
+
+    if (this.searchText.trim() !== '') {
+      this.performSearch(); // Load initial content only if searchText is not empty
+    }
+  
   }
 
   getvendorcheckstatuss(event: any) {
@@ -501,11 +506,23 @@ export class UploadVendocheckComponent implements OnInit {
             Swal.fire({
               title: result.message,
               icon: 'success',
-            }).then((result) => {
-              if (result.isConfirmed) {
+            // }).then((result) => {
+            //   if (result.isConfirmed) {
+            //     window.location.reload();
+            //   }
+            // });
+          }).then((swalResult) => {
+            if (swalResult.isConfirmed) {
+              this.modalService.dismissAll()
+              this.vendorlist.reset();
+              if (this.searchText.trim() !== '') {
+                this.performSearch(); // Load initial content only if searchText is not empty
+              }
+              else{
                 window.location.reload();
               }
-            });
+            }
+          });
           } else {
             Swal.fire({
               title: result.message,
@@ -557,7 +574,7 @@ export class UploadVendocheckComponent implements OnInit {
 
   downloadPdf(documentPathKey: any, documentname: any, soureName: any) {
     if(documentPathKey != null){  
-    this.orgadmin.downloadAgentUploadedDocument(documentPathKey).subscribe(
+    this.orgadmin.downloadAgentUploadedDocument(documentPathKey,false).subscribe(
       (data: any) => {
         // if (soureName == "Employment" || soureName == "Education") {
           const contentType = this.detectContentType(data.message);
@@ -907,17 +924,20 @@ export class UploadVendocheckComponent implements OnInit {
 
   viewDocFromS3(modalCertificate: any,pathkey:any){
     // console.warn("pathkey>>>>>",pathkey)
-    this.orgadmin.downloadAgentUploadedDocument(pathkey).subscribe((data:any)=>{
+    this.orgadmin.downloadAgentUploadedDocument(pathkey,true).subscribe((data:any)=>{
       console.warn("data>>>>",data)
-      this.modalService.open(modalCertificate, {
-        centered: true,
-        backdrop: 'static',
-        size: 'lg',
-      });
-      var maxFileSize = 1000000; // 1MB
-      if (pathkey && pathkey.length <= maxFileSize) {
-        this.loadCertificatePDF(data.message);
-      }
+      if (data && data.message) {
+        window.open(data.message);
+    }
+      // this.modalService.open(modalCertificate, {
+      //   centered: true,
+      //   backdrop: 'static',
+      //   size: 'lg',
+      // });
+      // var maxFileSize = 1000000; // 1MB
+      // if (pathkey && pathkey.length <= maxFileSize) {
+      //   this.loadCertificatePDF(data.message);
+      // }
     })
    
   }

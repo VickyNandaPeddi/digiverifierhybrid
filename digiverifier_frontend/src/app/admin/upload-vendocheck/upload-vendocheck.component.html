@@ -137,11 +137,17 @@
                   <i class="fa fa-eye"></i>
                  </button>
               </td> -->
-                <td style="cursor: pointer;"
+                <!-- <td style="cursor: pointer;"
                  title="Download Document"
                     (click)="item.stopCheck ? $event.stopPropagation() : downloadPdf(item.agentUploadDocumentPathKey
                     , item.documentname,item.source?.sourceName)"
-                >{{ item.documentname }}</td>
+                >{{ item.documentname }}</td> -->
+                <td style="cursor: pointer; text-decoration: underline; color: blue;" title="Download Document">
+                  <a href="javascript:void(0);" style="color: inherit; text-decoration: inherit;" [ngStyle]="{'cursor' : item.clientApproval == null || item.clientApproval == false ? 'not-allowed':''}"
+                  (click)="(item.clientApproval === null || item.clientApproval === false) ? $event.preventDefault() : (item.stopCheck ? $event.stopPropagation() : (item.documentname ? downloadPdf(item.agentUploadDocumentPathKey, item.documentname, item.source?.sourceName) : null))">
+                  {{ item.agentUploadDocumentPathKey ? item.documentname : 'NA' }}
+                  </a>
+                </td>
                 <!-- <td>
                   <button
                     type="button"
@@ -153,7 +159,7 @@
                   </button>
                 </td> -->
                 <td>
-                  <button [disabled]="item.stopCheck === true"
+                  <button [disabled]="item.stopCheck === true || (item.clientApproval == null || item.clientApproval == false)" [ngStyle]="{cursor : item.clientApproval == null || item.clientApproval == false ?'not-allowed':''}"
                   type="button" class="btn btn-sm btn-primary" title="Download Document"
                           (click)="downloadReferenceExcelData(item.vendorcheckId)">
                     <i class="fa fa-download"></i></button>
@@ -162,7 +168,8 @@
                   <button
                     class="btn btn-sm btn-info"
                     data-toggle="tooltip"
-                    [disabled]="item.stopCheck === true"
+                    [disabled]="item.stopCheck === true || (item.clientApproval == null || item.clientApproval == false)"
+                    [ngStyle]="{cursor : item.clientApproval == null || item.clientApproval == false ?'not-allowed':''}"
                     (click)="
                       triggerModal(
                         modalCandidate,

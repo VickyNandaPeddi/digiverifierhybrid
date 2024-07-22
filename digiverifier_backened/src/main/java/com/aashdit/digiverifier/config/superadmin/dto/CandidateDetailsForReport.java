@@ -55,4 +55,6 @@ public class CandidateDetailsForReport {
 	private String interimReportColor;
 	
 	private String gstNumber;
+	private String maskedAadhar;
+	private Boolean aadharLinked;
 }

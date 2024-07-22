@@ -779,7 +779,7 @@ span {
 					th:text="${education.customRemark}"></td>
 			</tr>
 
-			<tr class="text-center"
+			<!--<tr class="text-center"
 				th:if="${not #lists.isEmpty(root.employmentTenureVerificationDtoList)}">
 				<td class="grey-text text-center">Employment Verification -
 					current</td>
@@ -808,6 +808,36 @@ span {
 				</td>
 				<td class="grey-text text-center"
 					th:text="${root.employmentTenureVerificationDtoList[0].customRemark}"></td>
+			</tr> -->
+
+			<tr class="text-center" th:if="${root.currentEmploymentTenureVerification}">
+				<td class="grey-text text-center">Employment Verification -
+					current</td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${root.currentEmploymentTenureVerification.employerName}"></span></td>
+				<td class="grey-text text-center"
+					th:if="${!#strings.equalsIgnoreCase(root.project, 'Wipro')}"
+					th:switch="${root.currentEmploymentTenureVerification.verificationStatus.name()}">
+					<span class="green-status" th:case="'GREEN'">GREEN</span> <span
+					class="amber-status" th:case="'AMBER'">AMBER</span> <span
+					class="red-status" th:case="'RED'">RED</span>
+					<span class="red-status" th:case="'MOONLIGHTING'">MOONLIGHTING</span>
+					<span class="grey-text" th:case="'OUTOFSCOPE'">OUT OF SCOPE</span>
+					<span class="invalid-status" style="font-size: 12px" th:case="*">INVALID</span>
+				</td>
+
+				<td class="grey-text text-center"
+					th:if="${#strings.equalsIgnoreCase(root.project, 'Wipro')}"
+					th:switch="${root.currentEmploymentTenureVerification.verificationStatus.name()}">
+					<span class="red-status" th:case="'RED'">RED</span> <span
+					class="green-status" th:case="'GREEN'">GREEN</span> <span
+					class="invalid-status" th:case="'AMBER'">DRAFT</span>
+					<span class="red-status" th:case="'MOONLIGHTING'">MOONLIGHTING</span>
+					<span class="grey-text" th:case="'OUTOFSCOPE'">OUT OF SCOPE</span>
+					<span class="invalid-status" style="font-size: 12px" th:case="*">INVALID</span>
+				</td>
+				<td class="grey-text text-center"
+					th:text="${root.currentEmploymentTenureVerification.customRemark}"></td>
 			</tr>
 
 			<tr class="text-center"
@@ -839,15 +869,16 @@ span {
 		</div>
 		
 				<!-- Excutive summary for vendor checks -->
-				<span class="line-break"></span><span class="line-break"></span>
 
-		<div th:each="licheck,loopCount: ${root.vendorProofDetails}" th:if="${loopCount.count == 1}">
+		<!--<div th:each="licheck,loopCount: ${root.vendorProofDetails}" th:if="${loopCount.count == 1}">-->
 		<table class="table-st employer-name-verification" border="0">
 		<!--	<div class="text-center">			
 			<span style="color: black;font-family: 'Roboto'; font-size: 15px; font-weight: bold;"><b>Executive Summary </b>
 </span>
 			</div> -->
-    <thead>
+	<div>
+<thead th:if="${root.vendorProofDetails} != null and ${root.vendorProofDetails.size()} > 0">
+				<span class="line-break"></span><span class="line-break"></span>
         <tr class="text-center">
             <th class="blue-bg td-heading" style="width:7%; padding: 5px;">
                 <span class="" style="font-size: 13px; font-weight: bold; color: white;">S.No</span>
@@ -867,8 +898,8 @@ span {
         </tr>
     </thead>
     <tbody>
-        <tr class="text-center" th:each="vendorsourcename,stat:${licheck.vendorAttirbuteValue}" >
-			
+				<div th:each="licheck,stat: ${root.vendorProofDetails}">
+        <tr class="text-center" th:each="vendorsourcename:${licheck.vendorAttirbuteValue}">
             <td class="grey-text text-center">
                 <span style="font-size: 12px; font-weight: bold;" th:text="${stat.index + 1}"></span>
             </td>
@@ -890,10 +921,12 @@ span {
                 <span style="font-size: 12px; font-weight: bold;" th:text="${vendorsourcename.CheckRemarks != null ? vendorsourcename.CheckRemarks : 'No Record Found'}"></span>
             </td>
              <td class="grey-text text-center">
-                <span style="font-size: 12px; font-weight: bold;" th:text="${vendorsourcename.CheckDetails}"></span>
+                <span style="font-size: 12px; font-weight: bold;" th:text="${vendorsourcename.CheckDetails != null && !vendorsourcename.CheckDetails.isEmpty() ? vendorsourcename.CheckDetails : '-'}"></span>
             </td>
             <!-- Include other columns if needed -->
         </tr>
+				</div>
+        </div>
     </tbody>
 </table>
         </div>
@@ -948,7 +981,7 @@ span {
 				<td class="grey-text text-center"
 					th:if="${#strings.equalsIgnoreCase(root.project, 'Wipro')}"
 					th:switch="${employmentVerification.verificationStatus.name()}">
-					<span class="red-status" th:case="'RED'">RED</span> <span
+					<span class="red-status" th:case="'RED'"></span> <span
 					class="green-status" th:case="'GREEN'">GREEN</span> <span
 					class="invalid-status" th:case="'AMBER'">DRAFT</span> <span
 					class="invalid-status" style="font-size: 12px" th:case="*">INVALID</span>
@@ -958,7 +991,7 @@ span {
 					th:switch="${employmentVerification.verificationStatus.name()}">
 					<span class="green-status" th:case="'GREEN'">GREEN</span> <span
 					class="amber-status" th:case="'AMBER'">AMBER</span> <span
-					class="red-status" th:case="'RED'">RED</span> <span
+					class="red-status" th:case="'RED'"></span> <span
 					class="invalid-status" style="font-size: 12px" th:case="*">INVALID</span>
 				</td>
 			</tr>
@@ -1623,13 +1656,17 @@ span {
 			<!-- content -->
 		</div>
 		<p class="td-heading text-center" style="color: #605f5f; font-size: 17px;">Remittance Proofs</p>
+		<span class="line-break">
 		<div th:each="image, iterStat : ${root.remittanceProofImagesData}" style="page-break-inside: avoid;">
-				<span style="font-size: 15px" class="grey-text">Company: </span> <span
+				<span class="inline-block left output-data grey-text" style="font-size: 15px; float: left;"
+				th:text="'Company: '+ ${image.company}+ '/' + ${image.memberId}"></span>
+				<!--<span
 					style="margin-right: 300px; font-size: 10px"
-					th:text="${image.company}+ '/' + ${image.memberId}" class="grey-text"></span>
-				<span style="font-size: 15px" class="grey-text">Year: </span>
-				<span style="font-size: 10px"
-					th:text="${image.year}" class="grey-text"></span>
+					th:text="${image.company}+ '/' + ${image.memberId}" class="grey-text"></span>-->
+				<span style="font-size: 15px ; float: right;" class="inline-block left output-data grey-text"
+				 th:text="'Year: '+${image.year}"></span>
+				<!--<span style="font-size: 10px ; float: right;"
+					th:text="${image.year}" class="inline-block left output-data grey-text"></span>-->
 				<span class="line-break"></span>
 		
           <!-- <img th:src="'data:image/png;base64,' + ${#strings.toString(image.image)}" alt="Image" style="width: 200px; height: auto;"> -->

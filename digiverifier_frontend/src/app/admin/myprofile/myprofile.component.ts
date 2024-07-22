@@ -15,6 +15,7 @@ export class MyprofileComponent implements OnInit {
   userId:any;
   isPasswordVisibleNew = false;
   isPasswordVisibleOld = false;
+  isConfirmPasswordVisible = false;
   isPasswordValuesCorrect= false;
   formMyProfile = new FormGroup({
     employeeId: new FormControl('', Validators.required),
@@ -26,6 +27,7 @@ export class MyprofileComponent implements OnInit {
     userMobileNum: new FormControl('', [Validators.required,Validators.minLength(10), Validators.maxLength(10), Validators.pattern('[6-9]\\d{9}')]),
     password: new FormControl(''),
     oldPassword: new FormControl(''),
+    confirmPassword: new FormControl('')
   });
   constructor(private authService: AuthenticationService, private customers:CustomerService) { 
     this.customers.getUserById().subscribe((data: any)=>{
@@ -40,6 +42,11 @@ export class MyprofileComponent implements OnInit {
         userMobileNum: new FormControl(data.data['userMobileNum'], [Validators.required,Validators.minLength(10), Validators.maxLength(10), Validators.pattern('[6-9]\\d{9}')]),
         oldPassword: new FormControl(''),
         password: new FormControl('', [
+          // Validators.required,
+          Validators.minLength(10),
+          Validators.pattern(/^(?=(.*[A-Z]){1,})(?=(.*[a-z]){2,})(?=(.*\d){1,})(?=(.*[!@#$%^&*()_+\-=[\]{}|]){1,})(?!.*(.)\1\1)[A-Za-z\d!@#$%^&*()_+\-=[\]{}|]{10,}$/)
+        ]),
+        confirmPassword: new FormControl('', [
           // Validators.required,
           Validators.minLength(10),
           Validators.pattern(/^(?=(.*[A-Z]){1,})(?=(.*[a-z]){2,})(?=(.*\d){1,})(?=(.*[!@#$%^&*()_+\-=[\]{}|]){1,})(?!.*(.)\1\1)[A-Za-z\d!@#$%^&*()_+\-=[\]{}|]{10,}$/)
@@ -67,11 +74,25 @@ export class MyprofileComponent implements OnInit {
     return passwordControl?.valid && (passwordControl?.touched || passwordControl?.dirty);
   }
 
+  isConfirmPasswordInvalid() {
+    const passwordControl = this.formMyProfile.get('confirmPassword');
+    return passwordControl?.invalid && (passwordControl?.touched || passwordControl?.dirty);
+  }
+
+  // Check if the password is valid
+  isConfirmPasswordValid() {
+    const passwordControl = this.formMyProfile.get('confirmPassword');
+    return passwordControl?.valid && (passwordControl?.touched || passwordControl?.dirty);
+  }
+
   togglePasswordVisibilityNew() {
     this.isPasswordVisibleNew = !this.isPasswordVisibleNew;
   }
   togglePasswordVisibilityOld() {
     this.isPasswordVisibleOld = !this.isPasswordVisibleOld;
+  }
+  toggleConfirmPasswordVisibility() {
+    this.isConfirmPasswordVisible = !this.isConfirmPasswordVisible;
   }
 
   onSubmit(formMyProfile: FormGroup) {

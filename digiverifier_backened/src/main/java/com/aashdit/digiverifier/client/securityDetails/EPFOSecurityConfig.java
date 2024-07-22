@@ -47,6 +47,9 @@ public class EPFOSecurityConfig {
 	@Value("${PANTOUAN.BASE.URL}")
 	private String epfoPanToUanUrl;
 	
+	@Value("${com.dgv.client.access.epfo.login.captcha.url}")
+	private String epfoLoginCaptchaUrl;
+	
 	/**
 	 * @return the clientId
 	 */
@@ -120,6 +123,9 @@ public class EPFOSecurityConfig {
 		return epfoPanToUanUrl;
 	}
 	
+	public String getEpfoLoginCaptchaUrl() {
+		return epfoLoginCaptchaUrl;
+	}
 }
 
 

@@ -80,4 +80,49 @@ public class EPFOAccessController {
 		return response;
 	}
 	
+	@Operation(summary = "generating caaptcha for epfo employee login screen")
+	@GetMapping(value = "/epfoLoginCaptcha/{candidateCode}")
+	public ServiceOutcome<EpfoDetailsDto> epfoLoginCaptcha(@PathVariable String candidateCode) {
+		ServiceOutcome<EpfoDetailsDto> svcSearchResult = new ServiceOutcome<>();
+		if(candidateCode!=null) {
+			svcSearchResult = epfoService.epfoLoginCaptcha(candidateCode);
+		}else {
+			svcSearchResult.setData(null);
+			svcSearchResult.setOutcome(false);
+			svcSearchResult.setMessage("Candidate code is null.");
+		}
+		
+		return svcSearchResult;
+    }
+	
+	@Operation(summary = "generating caaptcha for epfo employee OTP screen")
+	@PostMapping(value = "/epfoOTPScreenCaptcha")
+	public ServiceOutcome<EpfoDetailsDto> epfoOTPScreenCaptcha(@RequestBody EpfoDetailsDto epfoDetails) {
+		ServiceOutcome<EpfoDetailsDto> svcSearchResult = new ServiceOutcome<>();
+		if(epfoDetails.getCandidateCode()!=null) {
+			svcSearchResult = epfoService.epfoOTPScreenCaptcha(epfoDetails);
+		}else {
+			svcSearchResult.setData(null);
+			svcSearchResult.setOutcome(false);
+			svcSearchResult.setMessage("Candidate code is null.");
+		}
+		
+		return svcSearchResult;
+    }
+	
+	@Operation(summary = "getting epfo data by epfoOTPCaptchaSubmit OTP screen")
+	@PostMapping(value = "/epfoOTPCaptchaSubmit")
+	public ServiceOutcome<String> epfoOTPCaptchaSubmit(@RequestBody EpfoDetailsDto epfoDetails) {
+		ServiceOutcome<String> svcSearchResult = new ServiceOutcome<>();
+		if(epfoDetails.getCandidateCode()!=null) {
+			svcSearchResult = epfoService.epfoOTPCaptchaSubmit(epfoDetails);
+		}else {
+			svcSearchResult.setData(null);
+			svcSearchResult.setOutcome(false);
+			svcSearchResult.setMessage("Candidate code is null.");
+		}
+		
+		return svcSearchResult;
+    }
+	
 }

@@ -17,20 +17,23 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="radiobtngroup"  *ngFor="let item of getRoleDropdown">
+                            <div class="radiobtngroup" *ngFor="let item of getRoleDropdown">
                                 <div class="single_radio">
-                                    <input type="radio" name="RoleDropdown" id="{{item.roleId}}" (click)="roleDropdown($event)"> {{item.roleName}}
+                                    <input type="radio" name="RoleDropdown" id="{{item.roleId}}"
+                                        (click)="roleDropdown($event)"> {{item.roleName}}
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-9">
-                            <div class="cbox_container"  *ngFor="let item of getAllRolePermission">
+                            <div class="cbox_container" *ngFor="let item of getAllRolePermission">
                                 <div class="single_cboxes">
-                                    <h3> {{item.rolePermissionHead.permissionHeadName}} 
+                                    <h3> {{item.rolePermissionHead.permissionHeadName}}
                                         <!-- <input type="checkbox" class="selectAll" (click)="selectAll($event)"> -->
                                     </h3>
                                     <div class="cboxRoles" *ngFor="let cboxRoles of item.rolePermissionMaster">
-                                        <input type="checkbox"  class="rolecboxbtn{{cboxRoles.permissionId}} rolecboxbtn" value="{{cboxRoles.permissionId}}" id="{{cboxRoles.permissionId}}" (change)="roleCboxes($event)"> <span> {{cboxRoles.permissionName}}</span>
+                                        <input type="checkbox" class="rolecboxbtn{{cboxRoles.permissionId}} rolecboxbtn"
+                                            value="{{cboxRoles.permissionId}}" id="{{cboxRoles.permissionId}}"
+                                            (change)="roleCboxes($event)"> <span> {{cboxRoles.permissionName}}</span>
                                     </div>
                                 </div>
                             </div>
@@ -41,11 +44,15 @@
                             <div class="col-md-12 text-center" style="margin-top: 10px;">
                                 <input type="hidden" value="" id="permissioninput" formControlName="permissionId">
                                 <input type="hidden" value="" formControlName="roleId">
-                                <button type="submit"  class="btn btn-primary btn-sm">Submit</button>
+                                <button type="submit" class="btn btn-primary btn-sm">Submit</button>
                                 <a routerLink="../orgadminDashboard" class="btn btn-danger btn-sm">Cancel</a>
                             </div>
                         </div>
                     </form>
+                    <div class="d-flex justify-content-center">
+                        <button type="button" (click)="openModal(modalData)" class="btn btn-warning btn-sm"
+                            title="Add component">Add New Role Permission</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -56,3 +63,56 @@
 
 
 
+
+<ng-template #modalData let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Add Component</h4>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="addPermissionComponent">
+            <div class="row ">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="" class="required">Management Name</label>
+                        <!-- <input type="text" class="form-control form-control-sm" id="" formControlName="management"> -->
+                        <select class="form-control form-control-sm" id="management" formControlName="permissionHeadName" (change)="onManagementChange($event)">
+                            <option value="" disabled selected>Select</option>
+                            <option *ngFor="let item of getAllRolePermission" [value]="item.rolePermissionHead?.permissionHeadName"> {{ item.rolePermissionHead.permissionHeadName }}
+                            </option>
+                            <option value="addNew">Add New</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-12" *ngIf="selectedManagement === 'addNew'">
+                    <div class="form-group">
+                      <label for="newManagementName" class="required">New Management Name</label>
+                      <input type="text" class="form-control form-control-sm" id="newManagementName" formControlName="newPermissionHeadName">
+                    </div>
+                  </div>
+
+            </div>
+            <div class="row ">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="" class="required">Permission Name</label>
+                        <input type="text" class="form-control form-control-sm" id="" formControlName="permissionName">
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-center mt-3 pb-3">
+                    <!-- <button type="button" (click)="initiatevendor()" class="btn btn-primary btn-sm">Initiate vendor checks</button> -->
+                    <button type="button" (click)="submitRolePermission(addPermissionComponent)"
+                        class="btn btn-primary btn-sm">Submit</button>
+                    <button type="button" class="btn btn-danger btn-sm"
+                        (click)="modal.close('Save click')">Close</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</ng-template>

@@ -264,12 +264,23 @@ List<Candidate> searchAllCandidateByAgent(
 	    
 	    @Query(value="select * from t_dgv_candidate_basic where candidate_id "
 				+ "in (select candidate_id from t_dgv_candidate_status where status_master_id in (:statusIds) and last_updated_on between :startDate and :endDate) and organization_id=:organizationId and uan is null ORDER BY created_on DESC",nativeQuery=true) 
-		List<Candidate> getPageCandidateListByOrganizationIdAndStatusAndLastUpdatedForFailedPanToUan(@Param("organizationId")Long organizationId,@Param("statusIds")List<Long> statusIds,@Param("startDate")Date startDate,@Param("endDate")Date endDate,Pageable pageable);
+	    List<Candidate> getPageCandidateListByOrganizationIdAndStatusAndLastUpdatedForFailedPanToUan(@Param("organizationId")Long organizationId,@Param("statusIds")List<Long> statusIds,@Param("startDate")Date startDate,@Param("endDate")Date endDate);
+//	    List<Candidate> getPageCandidateListByOrganizationIdAndStatusAndLastUpdatedForFailedPanToUan(@Param("organizationId")Long organizationId,@Param("statusIds")List<Long> statusIds,@Param("startDate")Date startDate,@Param("endDate")Date endDate,Pageable pageable);
 	    
 		@Query(value="select * from t_dgv_candidate_basic where candidate_id "
 				+ "in (select candidate_id from t_dgv_candidate_status where status_master_id in (:statusIds) and last_updated_on between :startDate and :endDate) and created_by in (:agentIds) and uan is null ORDER BY created_on DESC",nativeQuery=true) 
-		List<Candidate> getPageCandidateListByUserIdAndStatusAndLastUpdatedForFailedPanToUan(@Param("agentIds")List<Long> agentIds,@Param("statusIds")List<Long> statusIds,@Param("startDate")Date startDate,@Param("endDate")Date endDate,Pageable pageable);
+		List<Candidate> getPageCandidateListByUserIdAndStatusAndLastUpdatedForFailedPanToUan(@Param("agentIds")List<Long> agentIds,@Param("statusIds")List<Long> statusIds,@Param("startDate")Date startDate,@Param("endDate")Date endDate);
+//		List<Candidate> getPageCandidateListByUserIdAndStatusAndLastUpdatedForFailedPanToUan(@Param("agentIds")List<Long> agentIds,@Param("statusIds")List<Long> statusIds,@Param("startDate")Date startDate,@Param("endDate")Date endDate,Pageable pageable);
 		
 		@Query("SELECT cs.candidate FROM CandidateStatus cs WHERE cs.statusMaster.statusCode in (:statusCodes) and cs.lastUpdatedOn < :cutoffDate AND cs.candidate.organization.organizationId = :orgId")
 	    List<Candidate> findCandidatesByLastUpdatedOnAndOrgId(@Param("cutoffDate") Date cutoffDate, @Param("orgId") Long orgId, @Param("statusCodes") List<String> statusCodes);
+		
+		@Query("SELECT c.candidateId FROM Candidate c WHERE c.organization.organizationId in "
+				+ "(SELECT stc.organization.organizationId FROM ServiceTypeConfig stc where stc.serviceSourceMaster.serviceCode=:serviceCode) "
+				+ "and c.uan is not null and c.uan <> ''")
+	    List<Long> findCandidateIdssBySourceServiceCode(@Param("serviceCode") String serviceCode);
+		
+		@Query("SELECT c.candidateCode FROM Candidate c WHERE c.candidateId IN :candidateIds AND c.candidateId NOT IN "
+				+ "(SELECT ed.candidate.candidateId FROM EpfoData ed)")
+	    List<String> findCandidateCodesNotInEpfo(@Param("candidateIds") List<Long> candidateIds);
 }

@@ -449,19 +449,19 @@ span {
 			</div> -->
     <thead>
         <tr class="text-center">
-            <th class="blue-bg td-heading" style="width:7%; padding: 5px;">
+            <th class="blue-bg td-heading" style="width:5%; padding: 5px;">
                 <span class="" style="font-size: 13px; font-weight: bold; color: white;">S.No</span>
             </th>
-            <th class="blue-bg td-heading" style="width:35%; padding: 5px;">
+            <th class="blue-bg td-heading" style="width:30%; padding: 5px;">
                 <span class="" style="font-size: 13px; font-weight: bold; color: white;">Checks</span>
             </th>
-            <th class="blue-bg td-heading" style="width:20%; padding: 5px;">
+            <th class="blue-bg td-heading" style="width:10%; padding: 5px;">
                 <span class="" style="font-size: 13px; font-weight: bold; color: white;">Check Status</span>
             </th>
-            <th class="blue-bg td-heading" style="width:35%; padding: 5px;">
+            <th class="blue-bg td-heading" style="width:25%; padding: 5px;">
                 <span class="" style="font-size: 13px; font-weight: bold; color: white;">Remarks</span>
             </th>
-            <th class="blue-bg td-heading" style="width:20%; padding: 5px;">
+            <th class="blue-bg td-heading" style="width:30%; padding: 5px;">
                 <span class="" style="font-size: 13px; font-weight: bold; color: white;">Details</span>
             </th>
         </tr>
@@ -490,7 +490,8 @@ span {
                 <span style="font-size: 12px; font-weight: bold;" th:text="${vendorsourcename.CheckRemarks != null ? vendorsourcename.CheckRemarks : 'No Record Found'}"></span>
             </td>
              <td class="grey-text text-center">
-                <span style="font-size: 12px; font-weight: bold;" th:text="${vendorsourcename.CheckDetails}"></span>
+               <!-- <span style="font-size: 12px; font-weight: bold;" th:text="${vendorsourcename.CheckDetails}"></span>-->
+                <span style="font-size: 12px; font-weight: bold;" th:text="${vendorsourcename.CheckDetails != null && !vendorsourcename.CheckDetails.isEmpty() ? vendorsourcename.CheckDetails : '-'}"></span>
             </td>
             <!-- Include other columns if needed -->
         </tr>

@@ -343,64 +343,81 @@ span {
 				</tr>
 			</table>
 			<span class="line-break"></span>
-			<table class="table_head table-st" style="page-break-inside: avoid;" th:if="${root.organisationScope!=null}">
-			    <!-- Concept Title head -->
+
+<!--			<table class="table_head table-st" style="page-break-inside: avoid;" th:if="${root.organisationScope!=null}">-->
+<!--				&lt;!&ndash; Concept Title head &ndash;&gt;-->
+<!--				<tr>-->
+<!--					<td class="blue-bg">-->
+<!--						<span class="td-heading black-text" style="color: whitesmoke;">REMARKS / COMMENTS</span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--				<tr th:if="${root.organisationScope!=null and root.organisationScope.dualEmployment != null and root.organisationScope.dualEmployment != ''}">-->
+<!--					<td style="padding: 5px; min-width: 100px;" class="text-left">-->
+<!--			            <span class="grey-text" th:if="${root.organisationScope}">-->
+<!--			                <b th:text="${root.organisationScope.dualEmployment}"></b>-->
+<!--			            </span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--				<tr th:if="${root.organisationScope!=null and root.organisationScope.undisclosed != null and root.organisationScope.undisclosed != ''}">-->
+<!--					<td style="padding: 5px; min-width: 100px;" class="text-left">-->
+<!--			            <span class="grey-text" th:if="${root.organisationScope}">-->
+<!--			                <b th:text="${root.organisationScope.undisclosed}"></b>-->
+<!--			            </span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--				<tr th:if="${root.organisationScope!=null and root.organisationScope.dataNotFound != null and root.organisationScope.dataNotFound != ''}">-->
+<!--					<td style="padding: 5px; min-width: 100px;" class="text-left">-->
+<!--			            <span class="grey-text" th:if="${root.organisationScope}">-->
+<!--			                <b th:text="${root.organisationScope.dataNotFound}"></b>-->
+<!--			            </span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--				<tr th:if="${root.organisationScope!=null and root.organisationScope.dNHDB != null and root.organisationScope.dNHDB != ''}">-->
+<!--					<td style="padding: 5px; min-width: 100px;" class="text-left">-->
+<!--			            <span class="grey-text" th:if="${root.organisationScope}">-->
+<!--			                <b th:text="${root.organisationScope.dNHDB}"></b>-->
+<!--			            </span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--				<tr th:if="${root.organisationScope!=null and root.organisationScope.tenureMismatch != null and root.organisationScope.tenureMismatch != ''}">-->
+<!--					<td style="padding: 5px; min-width: 100px;" class="text-left">-->
+<!--			            <span class="grey-text" th:if="${root.organisationScope}">-->
+<!--			                <b th:text="${root.organisationScope.tenureMismatch}"></b>-->
+<!--			            </span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--				<tr th:if="${root.organisationScope!=null and root.organisationScope.overseasEmployment != null and root.organisationScope.overseasEmployment != ''}">-->
+<!--					<td style="padding: 5px; min-width: 100px;" class="text-left">-->
+<!--			            <span class="grey-text" th:if="${root.organisationScope}">-->
+<!--			                <b th:text="${root.organisationScope.overseasEmployment}"></b>-->
+<!--			            </span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--				<tr th:if="${root.organisationScope!=null and root.organisationScope.others != null and root.organisationScope.others != ''}">-->
+<!--					<td style="padding: 5px; min-width: 100px;" class="text-left">-->
+<!--			            <span class="grey-text" th:if="${root.organisationScope}">-->
+<!--			                <b th:text="${root.organisationScope.others}"></b>-->
+<!--			            </span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--			</table>-->
+			<div th:if="${#lists.contains(root.orgServices, 'EPFO') and !#lists.contains(root.orgServices, 'DIGILOCKER') and !#lists.contains(root.orgServices, 'ITR')and !#lists.contains(root.orgServices, 'PANTOUAN')}">
+			<table class="table_head table-st" style="page-break-inside: avoid;" th:if="${root.qcRemarksDto!=null}">
+
 			    <tr>
 			        <td class="blue-bg">
 			            <span class="td-heading black-text" style="color: whitesmoke;">REMARKS / COMMENTS</span>
 			        </td>
 			    </tr>
-			    <tr th:if="${root.organisationScope!=null and root.organisationScope.dualEmployment != null and root.organisationScope.dualEmployment != ''}">
-			        <td style="padding: 5px; min-width: 100px;" class="text-left">
-			            <span class="grey-text" th:if="${root.organisationScope}">
-			                <b th:text="${root.organisationScope.dualEmployment}"></b>
-			            </span>
-			        </td>
-			    </tr>
-			    <tr th:if="${root.organisationScope!=null and root.organisationScope.undisclosed != null and root.organisationScope.undisclosed != ''}">
-			        <td style="padding: 5px; min-width: 100px;" class="text-left">
-			            <span class="grey-text" th:if="${root.organisationScope}">
-			                <b th:text="${root.organisationScope.undisclosed}"></b>
-			            </span>
-			        </td>
-			    </tr>
-			    <tr th:if="${root.organisationScope!=null and root.organisationScope.dataNotFound != null and root.organisationScope.dataNotFound != ''}">
-			        <td style="padding: 5px; min-width: 100px;" class="text-left">
-			            <span class="grey-text" th:if="${root.organisationScope}">
-			                <b th:text="${root.organisationScope.dataNotFound}"></b>
-			            </span>
-			        </td>
-			    </tr>
-			    <tr th:if="${root.organisationScope!=null and root.organisationScope.dNHDB != null and root.organisationScope.dNHDB != ''}">
-			        <td style="padding: 5px; min-width: 100px;" class="text-left">
-			            <span class="grey-text" th:if="${root.organisationScope}">
-			                <b th:text="${root.organisationScope.dNHDB}"></b>
-			            </span>
-			        </td>
-			    </tr>
-			    <tr th:if="${root.organisationScope!=null and root.organisationScope.tenureMismatch != null and root.organisationScope.tenureMismatch != ''}">
-			        <td style="padding: 5px; min-width: 100px;" class="text-left">
-			            <span class="grey-text" th:if="${root.organisationScope}">
-			                <b th:text="${root.organisationScope.tenureMismatch}"></b>
-			            </span>
-			        </td>
-			    </tr>
-			    <tr th:if="${root.organisationScope!=null and root.organisationScope.overseasEmployment != null and root.organisationScope.overseasEmployment != ''}">
-			        <td style="padding: 5px; min-width: 100px;" class="text-left">
-			            <span class="grey-text" th:if="${root.organisationScope}">
-			                <b th:text="${root.organisationScope.overseasEmployment}"></b>
-			            </span>
-			        </td>
-			    </tr>
-			    <tr th:if="${root.organisationScope!=null and root.organisationScope.others != null and root.organisationScope.others != ''}">
-			        <td style="padding: 5px; min-width: 100px;" class="text-left">
-			            <span class="grey-text" th:if="${root.organisationScope}">
-			                <b th:text="${root.organisationScope.others}"></b>
-			            </span>
-			        </td>
-			    </tr>
+				<tr th:each="remarkDto : ${root.qcRemarksDto}">
+					<td style="padding: 5px; min-width: 100px;" class="text-left">
+						<span class="grey-text">
+							<b th:text="${remarkDto.qcRemarks}"></b>
+						</span>
+					</td>
+				</tr>
 			</table>
-
+			</div>
 			<span class="line-break"></span>
 			<!--<table class="table-st">
 				<tr>

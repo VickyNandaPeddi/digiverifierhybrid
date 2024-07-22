@@ -10,6 +10,7 @@ import { AdminCReportApprovalComponent } from '../admin-c-report-approval/admin-
 import { OrgadminDashboardService } from 'src/app/services/orgadmin-dashboard.service';
 import { ReportDeliveryDetailsComponent } from 'src/app/charts/report-delivery-details/report-delivery-details.component';
 import JSZip from 'jszip';
+import { OrgadminService } from 'src/app/services/orgadmin.service';
 
 @Component({
   selector: 'app-vendor-initiate',
@@ -75,7 +76,7 @@ export class VendorInitiateComponent implements OnInit {
     vendorProof:any;
 
     //Vendor related
-
+    
   idItemsCheckType:boolean = false;
   idItemsPanORAadharORPassport:any;
   idItemsProofName:any;
@@ -114,6 +115,12 @@ export class VendorInitiateComponent implements OnInit {
   conventionalReport:boolean = false;
   conventionalCandidate:boolean = false;
   vendorProofDetails:boolean = false;
+  checkBoxDisable: boolean = false;
+  hideAddCheckAndVendorTableAndInterimReportButton: boolean = false;
+  getRolePerMissionCodes:any=[];
+  documentApprovalPermission:any;
+
+
 
 
     vendorlist = new FormGroup({
@@ -129,7 +136,7 @@ export class VendorInitiateComponent implements OnInit {
       this.vendorlist.patchValue({
         sourceId: this.tmp,
         candidateId: this.candidateId,
-      });
+      });  
     }
 
     vendorProofForm = new FormGroup({
@@ -157,7 +164,7 @@ export class VendorInitiateComponent implements OnInit {
       documentname: new FormControl('', Validators.required),
       vendorId: new FormControl(''),
       sourceId: new FormControl('', Validators.required),
-      candidateId: new FormControl(''),
+      candidateId: new FormControl(''), 
       value: new FormControl(''),
       // fileInput: new FormControl('',Validators.required),
       vendorCheckStatusMasterId: new FormControl(''),
@@ -170,7 +177,7 @@ export class VendorInitiateComponent implements OnInit {
         candidateId: this.candidateId,
         vendorId:this.vendorid
       });
-
+      
     }
 
     foremployements = new FormGroup({
@@ -191,9 +198,9 @@ export class VendorInitiateComponent implements OnInit {
         candidateId: this.candidateId,
         vendorId:this.vendorid
       });
-
+      
     }
-
+    
     forAddressCrimnalGlobal = new FormGroup({
       // candidateName: new FormControl('', Validators.required),
       // dateOfBirth: new FormControl('', Validators.required),
@@ -218,7 +225,7 @@ export class VendorInitiateComponent implements OnInit {
         candidateId: this.candidateId,
         vendorId:this.vendorid
       });
-
+      
     }
 
     formAddressCheck = new FormGroup({
@@ -226,7 +233,7 @@ export class VendorInitiateComponent implements OnInit {
       sourceId: new FormControl(''),
       candidateId: new FormControl(''),
       value: new FormControl(""),
-      // CandidateName: new FormControl(""),
+      // CandidateName: new FormControl(""), 
       vendorCheckStatusMasterId: new FormControl(''),
       type: new FormControl('',Validators.required),
       checkType: new FormControl('')
@@ -237,7 +244,7 @@ export class VendorInitiateComponent implements OnInit {
         candidateId: this.candidateId,
         vendorId:this.vendorid
       });
-
+      
     }
 
     forDrugTest = new FormGroup({
@@ -267,7 +274,7 @@ export class VendorInitiateComponent implements OnInit {
         candidateId: this.candidateId,
         vendorId:this.vendorid
       });
-
+      
     }
 
     formpassport = new FormGroup({
@@ -277,8 +284,8 @@ export class VendorInitiateComponent implements OnInit {
       sourceId: new FormControl('', Validators.required),
       candidateId: new FormControl(''),
       value: new FormControl(""),
-      vendorCheckStatusMasterId: new FormControl('')
-
+      vendorCheckStatusMasterId: new FormControl('') 
+     
     });
     patchpassport() {
       this.formpassport.patchValue({
@@ -286,7 +293,7 @@ export class VendorInitiateComponent implements OnInit {
         candidateId: this.candidateId,
         vendorId:this.vendorid
       });
-
+      
     }
 
     identityCheckForm = new FormGroup({
@@ -299,7 +306,7 @@ export class VendorInitiateComponent implements OnInit {
       vendorCheckStatusMasterId: new FormControl(''),
        type: new FormControl('',Validators.required),
       checkType: new FormControl('')
-
+     
     });
     patchIdentityCheck() {
       this.identityCheckForm.patchValue({
@@ -307,7 +314,7 @@ export class VendorInitiateComponent implements OnInit {
         candidateId: this.candidateId,
         vendorId:this.vendorid
       });
-
+      
     }
 
     ofacForm = new FormGroup({
@@ -317,7 +324,7 @@ export class VendorInitiateComponent implements OnInit {
       vendorCheckStatusMasterId: new FormControl(''),
       value: new FormControl('')
     });
-
+    
      patchOfacCheck() {
       this.ofacForm.patchValue({
         sourceId: this.sourceid,
@@ -331,21 +338,24 @@ export class VendorInitiateComponent implements OnInit {
       vendorcheckId: new FormControl('')
     })
 
+    
 
-
-    constructor( private customers:CustomerService, private router:ActivatedRoute, private fb: FormBuilder,public authService: AuthenticationService,
+    constructor( private customers:CustomerService, private router:ActivatedRoute, private fb: FormBuilder,public authService: AuthenticationService, 
       private modalService: NgbModal, private navRouter: Router,private candidateService:CandidateService, private orgAdmin:OrgadminDashboardService,    private reportDeliveryDetailsComponent:ReportDeliveryDetailsComponent,
-      ) {
+      private orgadmin:OrgadminService) {
       this.userID = this.router.snapshot.paramMap.get('userId');
       this.candidateId = this.router.snapshot.paramMap.get('candidateId');
       this.candidateCode = this.router.snapshot.paramMap.get('candidateCode');
-
-
+      this.hideAddCheckAndVendorTableAndInterimReportButton = authService.roleMatch(['ROLE_CLIENTAGENT']) ||  authService.roleMatch(['ROLE_CLIENTSUPERVISOR']);
+      
 
       console.log(this.candidateId,"-----------------------------------")
       this.customers.getVendorCheckDetails(this.candidateId).subscribe((data: any)=>{
-
+        
         this.vendorchecksupload=data.data;
+        console.log("this.vendorchecksupload : ",this.vendorchecksupload)
+        this.checkBoxDisable = this.vendorchecksupload.every((item:any) => item.clientApproval === true);
+        console.log("this.checkBoxDisable : ",this.checkBoxDisable)
         this.candidateName = this.vendorchecksupload[0].candidate.candidateName;
         this.appId = this.vendorchecksupload[0].candidate.applicantId;
         console.log(this.vendorchecksupload[0])
@@ -374,18 +384,18 @@ export class VendorInitiateComponent implements OnInit {
         this.appId = this.candidateDetails.candidate.applicantId;
         // console.log(this.candidateDetails)
         this.candidateDOB = this.candidateDetails.candidate.aadharDob;
-        this.candidateFatherName = this.candidateDetails.candidate.aadharFatherName
-        this.candidateGender = this.candidateDetails.candidate.aadharGender
-        this.vendorProof = this.candidateDetails.vendorProofDetails
-        // this.candidateAddress = this.candidateDetails.candidateCafAddressDto[0].candidateAddress
-        if (this.candidateDetails &&
-          this.candidateDetails.candidateCafAddressDto &&
-          this.candidateDetails.candidateCafAddressDto.length > 0 &&
-          this.candidateDetails.candidateCafAddressDto[0].candidateAddress !== null &&
+        this.candidateFatherName = this.candidateDetails.candidate.aadharFatherName 
+        this.candidateGender = this.candidateDetails.candidate.aadharGender 
+        this.vendorProof = this.candidateDetails.vendorProofDetails  
+        // this.candidateAddress = this.candidateDetails.candidateCafAddressDto[0].candidateAddress 
+        if (this.candidateDetails && 
+          this.candidateDetails.candidateCafAddressDto && 
+          this.candidateDetails.candidateCafAddressDto.length > 0 && 
+          this.candidateDetails.candidateCafAddressDto[0].candidateAddress !== null && 
           this.candidateDetails.candidateCafAddressDto[0].candidateAddress !== undefined) {
-
+          
           this.candidateAddress = this.candidateDetails.candidateCafAddressDto[0].candidateAddress;
-      }
+      }                  
         this.candidateName = this.candidateDetails.candidate.candidateName;
         this.appId = this.candidateDetails.candidate.applicantId;
         console.log(this.candidateDetails)
@@ -393,7 +403,7 @@ export class VendorInitiateComponent implements OnInit {
         // console.warn("candidateAddress:::",this.candidateAddress)
         // console.warn("candidateFatherName:::",this.candidateFatherName)
         // console.warn("candidateGender:::",this.candidateGender)
-
+      
       });
 
       this.candidateService.getCandidateReportStatus(this.candidateCode).subscribe((data: any) => {
@@ -403,12 +413,12 @@ export class VendorInitiateComponent implements OnInit {
         // console.warn("THIS REPORT STATUS>>",this.reportStatus)
     });
 
-      if(authService.roleMatch(['ROLE_ADMIN']) || authService.roleMatch(['ROLE_AGENTHR']) || authService.roleMatch(['ROLE_AGENTSUPERVISOR'])){
+      if(authService.roleMatch(['ROLE_ADMIN']) || authService.roleMatch(['ROLE_AGENTHR']) || authService.roleMatch(['ROLE_AGENTSUPERVISOR']) || authService.roleMatch(['ROLE_PARTNERADMIN'])){
         // console.log(localStorage.getItem('orgID'),"------------------org id")
         this.customers.getVendorList(0).subscribe((data: any)=>{
           this.getVendorID=data.data;
           console.log(this.getVendorID,"-------------vendoy----------------");
-          if(this.userID){
+          if(this.userID){ 
             for (var index in this.getVendorID){
                 console.log(this.getVendorID[index]["userId"],"indexxxxxxxxxxxxxxxxxxxx");
                 if(this.userID==this.getVendorID[index]["userId"]){
@@ -424,12 +434,12 @@ export class VendorInitiateComponent implements OnInit {
           // }
         });
         console.log(this.vendorlist.value,"-------------vend----------------");
-
+       
       }
       let rportData = {
         'userId': this.authService.getuserId()
       }
-
+      
       this.customers.getSources().subscribe((data: any)=>{
         this.getbgv=data.data;
         console.log(this.getbgv,"-------------getbgv----------------");
@@ -479,13 +489,29 @@ export class VendorInitiateComponent implements OnInit {
               console.log("Service:", billServiceId.value);
 
             }
-
+            
           });
         }
-
+  
       });
     }
 
+    this.orgadmin.getRolePerMissionCodes(this.authService.getRoles()).subscribe(
+      (result:any) => {
+      this.getRolePerMissionCodes = result.data;
+        //console.log(this.getRolePerMissionCodes);
+        if(this.getRolePerMissionCodes){
+          if(this.getRolePerMissionCodes.includes('DOCUMENTAPPROVAL')){
+            this.documentApprovalPermission = true;
+          }
+
+          // if(this.getRolePerMissionCodes.includes('CANDIDATEUPLOAD')){
+          //   this.CANDIDATEUPLOAD_stat = true;
+          // }
+
+        }
+    });
+   
     }
 
     uploadGlobalCaseDetails(event:any) {
@@ -532,7 +558,7 @@ export class VendorInitiateComponent implements OnInit {
           // console.log(inputValues);
           arrNumber.push($(this).val());
         });
-
+        
         this.tmp = arrNumber;
         console.log(this.tmp);
       } else {
@@ -544,8 +570,9 @@ export class VendorInitiateComponent implements OnInit {
         });
       }
       }
-
+      
     }
+    
 
     getvendorid(id:any){
       this.vendorid = id;
@@ -571,10 +598,10 @@ export class VendorInitiateComponent implements OnInit {
       console.log("control entered with value: ", event.target.value);
       this.vendorCheckStatusMasterId = event.target.value;
     }
-
+    
 
     submitEditEdu(formEditEdu: FormGroup) {
-
+     
       this.patcheduValues()
       const checkType = this.checkName +" "+this.formEditEdu.get('type')?.value;;
     //  console.warn("checkType>>>>>>"+checkType)
@@ -606,7 +633,7 @@ export class VendorInitiateComponent implements OnInit {
       // this.educationAgentAttributeCheckMapped = {...this.formEditEdu.value, ...educationAttributeValues}
       const mergedData = {
         ...this.formEditEdu.value,
-        ...educationAttributeValues,
+        ...educationAttributeValues, 
       };
       formData.append('vendorchecks', JSON.stringify(mergedData));
       formData.append('file', this.proofDocumentNew);
@@ -661,9 +688,9 @@ export class VendorInitiateComponent implements OnInit {
         }
         obj[item.label] = item.value;
         return obj;
-
+   
       }, {});
-
+   
       if (employmentAttributeValue === false) {
         // console.error('Please enter values for all attributes');
         this.showMessage = "Please enter values for Mandatory Field";
@@ -673,17 +700,17 @@ export class VendorInitiateComponent implements OnInit {
       //  delete agentAttributeValues.value
       this.employmentAgentAttributeCheckMapped = { ...this.foremployements.value, ...employmentAttributeValue }
       // console.log(" employmentAgentAttributeCheckMapped:::", this.employmentAgentAttributeCheckMapped);
-
+   
       // console.warn("employmentAttributeValue===>", employmentAttributeValue);
-
+   
       const mergedData = {
         ...this.foremployements.value,
         ...this.employmentAgentAttributeCheckMapped,
       };
-
+   
       formData.append('vendorchecks', JSON.stringify(mergedData));
       // console.warn("mergedData++++++++++++++++++++", mergedData)
-
+     
       formData.append('file', this.proofDocumentNew);
       if (this.foremployements.valid && employmentAttributeValue !== false) {
         if (this.foremployements.valid) {
@@ -734,7 +761,7 @@ export class VendorInitiateComponent implements OnInit {
           return false;
         }
 
-         obj[item.label] = item.value;
+         obj[item.label] = item.value;      
         return obj;
 
       }, {});
@@ -763,7 +790,7 @@ export class VendorInitiateComponent implements OnInit {
 
             ...this.forAddressCrimnalGlobal.value,
 
-          // ...this.crimnalGlobalAgentAttributeCheckMapped,
+          // ...this.crimnalGlobalAgentAttributeCheckMapped, 
 
         };
 
@@ -815,77 +842,77 @@ export class VendorInitiateComponent implements OnInit {
 
             submitForAddressCheck(formAddressCheck:FormGroup){
               this.patchedForAddressCheck()
-
+        
               const checkType = this.checkName +" "+this.formAddressCheck.get('type')?.value;;
               // console.warn("checkType>>>>>>"+checkType)
               // console.warn("This sourcename:::",this.checkName)
               this.formAddressCheck.patchValue({
                 checkType:checkType
               })
-
+        
               // console.log("....................",this.formEditEdu.value)
-
+        
               // console.log("....................",this.formAddressCheck.value)
               const formData = new FormData();
-
+        
               // console.log(this.agentAttributeListForm);
               // const CrimnalGlobalAttributeValues = this.agentAttributeListForm.reduce((obj, item) => {
                 const addressAttributeValues = this.agentAttributeListForm.reduce((obj, item) => {
-
+        
                   if (item.value === null || item.value.trim() === '') {
                     return false;
                 }
-
-                 obj[item.label] = item.value;
+        
+                 obj[item.label] = item.value;      
                 return obj;
-
+        
               }, {});
-
+        
               if (addressAttributeValues === false) {
                 // console.error('Please enter values for all attributes');
                 this.showMessage = "Please enter values for Mandatory Field";
               } else {
                 // console.log('CrimnalGlobalAttributeValues:', addressAttributeValues);
               }
-
+        
               //  delete agentAttributeValues.value
                this.addressCheckAgentAttributeCheckMapped = {...this.formAddressCheck.value, ...addressAttributeValues}
-
+        
               // const finalValues = JSON.stringify(this.educationAgentAttributeCheckMapped);
-
+        
               // console.log("finalValues",finalValues)
-
+        
               // console.log(" CrimnalGlobalAttributeValues:::", this.addressCheckAgentAttributeCheckMapped);
-
+        
               // console.warn("CrimnalGlobalAttributeValues===>",addressAttributeValues);
-
+        
                 const mergedData = {
-
+        
                     ...this.formAddressCheck.value,
-
-                  ...this.addressCheckAgentAttributeCheckMapped,
-
+        
+                  ...this.addressCheckAgentAttributeCheckMapped, 
+        
                 };
-
+        
                   //  formData.append('vendorchecks', JSON.stringify(this.forAddressCrimnalGlobal.value ))
-
+        
                   //  formData.append('vendorchecks', JSON.stringify(agentAttributeValues ))
-
-
-
-
+        
+        
+        
+        
                 //  formData.append('vendorchecks', JSON.stringify(this.forAddressCrimnalGlobal.value ))
                    formData.append('vendorchecks', JSON.stringify(mergedData));
-
+        
                 //  console.warn("mergedData++++++++++++++++++++",mergedData)
-
+        
               // formData.append('vendorchecks', JSON.stringify(this.forAddressCrimnalGlobal.value));
               formData.append('file', this.proofDocumentNew);
-
+        
               if(this.formAddressCheck.valid && addressAttributeValues !== false){
                 console.log(".........valid...........")
                 this.customers.saveInitiateVendorChecks(formData).subscribe((result:any)=>{
-
+        
                   // console.log(result);
                   if(result.outcome === true){
                     Swal.fire({
@@ -910,7 +937,7 @@ export class VendorInitiateComponent implements OnInit {
                 })
                }
             }
-
+        
 
     submitDrugTest(forDrugTest: FormGroup) {
       this.patcheduValuesDrugTest()
@@ -963,7 +990,7 @@ export class VendorInitiateComponent implements OnInit {
       // console.warn("This sourcename:::",this.checkName)
       // this.formAddressCheck.patchValue({
       // })
-
+      
       const formData = new FormData();
       // console.log(this.agentAttributeListForm);
       const idItemsChecks = this.agentAttributeListForm.reduce((obj, item) => {
@@ -972,7 +999,7 @@ export class VendorInitiateComponent implements OnInit {
           return false;
         }
 
-         obj[item.label] = item.value;
+         obj[item.label] = item.value;      
         return obj;
 
       }, {});
@@ -983,7 +1010,7 @@ export class VendorInitiateComponent implements OnInit {
       } else {
         // console.log('CrimnalGlobalAttributeValues:', idItemsChecks);
       }
-
+      
       //  delete agentAttributeValues.value
       this.idItemsAgentAttributeCheckMapped = {...this.identityCheckForm.value, ...idItemsChecks}
 
@@ -999,7 +1026,7 @@ export class VendorInitiateComponent implements OnInit {
 
             ...this.identityCheckForm.value,
 
-          ...this.idItemsAgentAttributeCheckMapped,
+          ...this.idItemsAgentAttributeCheckMapped, 
 
         };
 
@@ -1015,14 +1042,14 @@ export class VendorInitiateComponent implements OnInit {
 
         //  console.warn("mergedData++++++++++++++++++++",mergedData)
 
-
+    
       if (identityCheckForm.valid && idItemsChecks !== false) {
         // console.log("....................", identityCheckForm.value);
-
+    
         // const formData = new FormData();
         formData.append('vendorchecks', JSON.stringify(identityCheckForm.value));
         formData.append('file', this.proofDocumentNew);
-
+    
         return this.customers.saveInitiateVendorChecks(formData).subscribe((result: any) => {
           // console.log(result);
           if (result.outcome === true) {
@@ -1046,7 +1073,7 @@ export class VendorInitiateComponent implements OnInit {
           title: 'Please enter the required details.',
           icon: 'warning'
         });
-
+    
         // Add the return statement here to satisfy TypeScript
         return undefined;
       }
@@ -1060,7 +1087,7 @@ export class VendorInitiateComponent implements OnInit {
       //   candidateName: candidateName,
       //   documentname:checkName
       // })
-
+      
       const formData = new FormData();
       console.log(this.agentAttributeListForm);
       const ofacCheck = this.agentAttributeListForm.reduce((obj, item) => {
@@ -1069,7 +1096,7 @@ export class VendorInitiateComponent implements OnInit {
           return false;
         }
 
-         obj[item.label] = item.value;
+         obj[item.label] = item.value;      
         return obj;
 
       }, {});
@@ -1080,7 +1107,7 @@ export class VendorInitiateComponent implements OnInit {
       } else {
         // console.log('CrimnalGlobalAttributeValues:', ofacCheck);
       }
-
+      
       //  delete agentAttributeValues.value
       this.ofacAgentAttributeCheckMapped = {...this.ofacForm.value, ...ofacCheck}
 
@@ -1096,7 +1123,7 @@ export class VendorInitiateComponent implements OnInit {
 
             ...this.ofacForm.value,
 
-          ...this.ofacAgentAttributeCheckMapped,
+          ...this.ofacAgentAttributeCheckMapped, 
 
         };
 
@@ -1112,14 +1139,14 @@ export class VendorInitiateComponent implements OnInit {
 
         //  console.warn("mergedData++++++++++++++++++++",mergedData)
 
-
+    
       if (ofacForm.valid && ofacCheck !== false) {
         // console.log("....................", ofacForm.value);
-
+    
         // const formData = new FormData();
         formData.append('vendorchecks', JSON.stringify(ofacForm.value));
         formData.append('file', this.proofDocumentNew);
-
+    
         return this.customers.saveInitiateVendorChecks(formData).subscribe((result: any) => {
           // console.log(result);
           if (result.outcome === true) {
@@ -1143,12 +1170,12 @@ export class VendorInitiateComponent implements OnInit {
           title: 'Please enter the required details.',
           icon: 'warning'
         });
-
+    
         // Add the return statement here to satisfy TypeScript
         return undefined;
       }
     }
-
+    
 
 
     getsourceid(id:any){
@@ -1174,7 +1201,7 @@ export class VendorInitiateComponent implements OnInit {
           this.IDItems=false;
           this.crimnal=false;
           this.DrugTest=false;
-          this.ofac=false;
+          this.ofac=false; 
         }
         if(( correspondingSourceName && correspondingSourceName.toLowerCase().trim().includes("education")) || (this.sourceid == "2")){
           this.education=true;
@@ -1183,7 +1210,7 @@ export class VendorInitiateComponent implements OnInit {
           this.Address=false;
           this.IDItems=false;
           this.crimnal=false;
-          this.DrugTest=false;
+          this.DrugTest=false; 
           this.ofac=false;
 
         }
@@ -1196,7 +1223,7 @@ export class VendorInitiateComponent implements OnInit {
           this.crimnal=false;
           this.DrugTest=false;
           this.ofac=false;
-
+ 
         }
         if(( correspondingSourceName && correspondingSourceName.toLowerCase().trim().includes("address")) || (this.sourceid == "4")){
           console.warn("ADDRESS TRIGGERD::")
@@ -1208,7 +1235,7 @@ export class VendorInitiateComponent implements OnInit {
           this.crimnal=false;
           this.DrugTest=false;
           this.ofac=false;
-
+ 
         }
         if(( correspondingSourceName && correspondingSourceName.toLowerCase().trim().includes("id")) || (this.sourceid == "5")){
           this.IDItems=true;
@@ -1219,7 +1246,7 @@ export class VendorInitiateComponent implements OnInit {
           this.crimnal=false;
           this.DrugTest=false;
           this.ofac=false;
-
+ 
         }
         if(( correspondingSourceName && correspondingSourceName.toLowerCase().trim().includes("criminal")) || (this.sourceid == "6")){
           this.crimnal=true;
@@ -1228,7 +1255,7 @@ export class VendorInitiateComponent implements OnInit {
           this.GlobalDatabasecheck=false;
           this.Address=false;
           this.IDItems=false;
-          this.DrugTest=false;
+          this.DrugTest=false; 
           this.ofac=false;
 
         }
@@ -1241,7 +1268,7 @@ export class VendorInitiateComponent implements OnInit {
           this.IDItems=false;
           this.crimnal=false;
           this.ofac=false;
-
+ 
         }
         if(( correspondingSourceName && correspondingSourceName.toLowerCase().trim().includes("physical")) || (this.sourceid == "9")){
           this.PhysicalVisit=true;
@@ -1253,7 +1280,7 @@ export class VendorInitiateComponent implements OnInit {
           this.IDItems=false;
           this.crimnal=false;
           this.ofac=false;
-
+ 
         }
         if(( correspondingSourceName && correspondingSourceName.toLowerCase().trim().includes("ofac") || (this.sourceid == "44"))){
           this.ofac=true;
@@ -1264,7 +1291,7 @@ export class VendorInitiateComponent implements OnInit {
           this.GlobalDatabasecheck=false;
           this.Address=false;
           this.IDItems=false;
-          this.crimnal=false;
+          this.crimnal=false; 
         }
         // if(this.sourceid == "25"){
         //   this.DrugTest=false;
@@ -1273,17 +1300,17 @@ export class VendorInitiateComponent implements OnInit {
         //   this.GlobalDatabasecheck=false;
         //   this.Address=false;
         //   this.IDItems=false;
-        //   this.crimnal=false;
+        //   this.crimnal=false; 
         // }
-
+  
 
       } else {
         console.log("SourceId not found in getbgv array");
       }
-
-
+      
+     
     }
-
+    
     opentemplate(id: any) {
 
       // console.warn("IDDDDD::",id);
@@ -1308,18 +1335,17 @@ export class VendorInitiateComponent implements OnInit {
             defaultValue = this.candidateAddress;
         } else if (ele.includes("Father's name")) {
          defaultValue = this.candidateFatherName;
-         }
+         } 
          else if (ele.includes("Date of birth")) {
            defaultValue = this.candidateDOB;
-           }
+           } 
            else if (ele.includes("Gender")) {
              defaultValue = this.candidateGender;
-             }
+             } 
          else {
             defaultValue = null; // or any other default value
         }
-        console.log(`Setting default value for "${ele}" to: ${defaultValue}`);
-
+          console.log(`Setting default value for "${ele}" to:`, defaultValue);
                       return {
 
                         label: ele,
@@ -1339,7 +1365,7 @@ export class VendorInitiateComponent implements OnInit {
       }, (res) => {
         this.closeModal = `Dismissed ${this.getDismissReason(res)}`;
       });
-
+  
     }
 
     private getDismissReason(reason: any): string {
@@ -1365,7 +1391,7 @@ export class VendorInitiateComponent implements OnInit {
 
         const serviceId = document.querySelector(".billServiceId" + element.source.sourceId) as HTMLInputElement;
 
-
+     
 
         if (ratePerItem && tatPerItem && serviceId) {
 
@@ -1382,7 +1408,7 @@ export class VendorInitiateComponent implements OnInit {
           //console.log(element.serviceId);
 
         }
-
+  
         });
         return this.customers.saveVendorChecks(this.getBillValues,this.userID ).subscribe((result:any)=>{
           console.log(result,'--------------------return---------------');
@@ -1423,7 +1449,7 @@ export class VendorInitiateComponent implements OnInit {
           );
         }
       }
-
+    
       closeStatusModal(modal: any) {
         modal.dismiss('Cross click');
         // window.location.reload();
@@ -1521,8 +1547,8 @@ export class VendorInitiateComponent implements OnInit {
             })
           }
         })
-
-
+    
+        
       }
 
       attribute = {
@@ -1544,17 +1570,17 @@ export class VendorInitiateComponent implements OnInit {
 
     loadCertificatePDF(certificate: any) {
       // console.warn("certi",certificate)
-
+  
       this.detectContentType(certificate);
-
+  
       // const pdfUrl = 'data:application/pdf;base64,' + certificate;
       // const iframe = document.getElementById(
       //   'viewcandidateCertificate'
       // ) as HTMLIFrameElement;
       // iframe.src = pdfUrl;
-
+  
       const contentType = this.detectContentType(certificate);
-
+  
       if (contentType === 'pdf') {
           const pdfUrl = 'data:application/pdf;base64,' + certificate;
           const iframe = document.getElementById('viewcandidateCertificate') as HTMLIFrameElement;
@@ -1573,7 +1599,7 @@ export class VendorInitiateComponent implements OnInit {
     // detectContentType(base64String: string): string | null {
     //   const decodedData = atob(base64String);
     //   const firstByte = decodedData.charCodeAt(0);
-
+  
     //   if (firstByte === 0x25 && decodedData.startsWith('%PDF-')) {
     //     return 'pdf';
     //   }
@@ -1582,7 +1608,7 @@ export class VendorInitiateComponent implements OnInit {
     detectContentType(base64String: string): string | null {
       const decodedData = atob(base64String);
       const firstByte = decodedData.charCodeAt(0);
-
+    
       if (firstByte === 0x25 && decodedData.startsWith('%PDF-')) {
         return 'pdf';
       } else if (decodedData.startsWith('PK')) {
@@ -1595,19 +1621,23 @@ export class VendorInitiateComponent implements OnInit {
 
     viewDocFromS3(modalCertificate: any,pathkey:any){
       // console.warn("pathkey>>>>>",pathkey)
-      this.orgAdmin.downloadAgentUploadedDocument(pathkey).subscribe((data:any)=>{
-        console.warn("data>>>>",data)
-        this.modalService.open(modalCertificate, {
-          centered: true,
-          backdrop: 'static',
-          size: 'lg',
-        });
-        var maxFileSize = 1000000; // 1MB
-        if (pathkey && pathkey.length <= maxFileSize) {
-          this.loadCertificatePDF(data.message);
-        }
+      const viewDocument = true;
+      this.orgAdmin.downloadAgentUploadedDocument(pathkey,viewDocument).subscribe((data:any)=>{
+        // console.warn("data>>>>",data.message)
+        if (data && data.message) {
+          window.open(data.message);
+      }
+        // this.modalService.open(modalCertificate, {
+        //   centered: true,
+        //   backdrop: 'static',
+        //   size: 'lg',
+        // });
+        // var maxFileSize = 1000000; // 1MB
+        // if (pathkey && pathkey.length <= maxFileSize) {
+        //   this.loadCertificatePDF(data.message);
+        // }
       })
-
+     
     }
 
 
@@ -1618,7 +1648,7 @@ export class VendorInitiateComponent implements OnInit {
         this.vendorProofForm.get('legalProcedings.civilProceedingsList') as FormArray
       ).controls;
     }
-
+  
     get criminalProceedingsList() {
       return (
         this.vendorProofForm.get(
@@ -1626,12 +1656,12 @@ export class VendorInitiateComponent implements OnInit {
         ) as FormArray
       ).controls;
     }
-
+  
     addCivilProceeding() {
       const civilProceedingsArray = this.vendorProofForm.get(
         'legalProcedings.civilProceedingsList'
       ) as FormArray;
-
+  
       civilProceedingsArray.push(
         this.createProceedingFormGroup(
           'High Court ',
@@ -1646,17 +1676,17 @@ export class VendorInitiateComponent implements OnInit {
           'All Civil Court '
         )
       );
-
+  
       this.civilProceedingsCount++;
-
+  
       console.log("fshggfgbshdghfvh",this.vendorProofForm.value);
     }
-
+  
     addCriminalProceeding() {
       const criminalProceedingsArray = this.vendorProofForm.get(
         'legalProcedings.criminalProceedingsList'
       ) as FormArray;
-
+  
       criminalProceedingsArray.push(
         this.createCriminalProceedingFormGroup(
           'Session Court',
@@ -1671,12 +1701,12 @@ export class VendorInitiateComponent implements OnInit {
           'All Magistrate courts'
         )
       );
-
+  
       this.civilProceedingsCount++;
-
+  
       console.log(this.vendorProofForm.value);
     }
-
+  
     createProceedingFormGroup(
       staticCourt: string,
       staticJurisdiction: string,
@@ -1692,7 +1722,7 @@ export class VendorInitiateComponent implements OnInit {
         result: new FormControl('', [Validators.required]),
       });
     }
-
+  
     createCriminalProceedingFormGroup(
       staticCourt: string,
       staticJurisdiction: string,
@@ -1708,7 +1738,7 @@ export class VendorInitiateComponent implements OnInit {
         result: new FormControl('', [Validators.required]),
       });
     }
-
+  
 
     private updateLegalProcedings() {
       if (this.isVendorAttributeForm) {
@@ -1730,7 +1760,7 @@ export class VendorInitiateComponent implements OnInit {
       }
     }
 
-
+        
     selectTab(tabName: string): void {
       this.selectedTab = tabName;
       // Add any additional logic you want to perform when a tab is selected
@@ -1763,7 +1793,7 @@ export class VendorInitiateComponent implements OnInit {
       const selectedAttribute = this.globalAttributeValue.find(
         (attr) => attr.label === value
       );
-
+  
       if (selectedAttribute) {
         // Remove the selected attribute from the globalAttributeValue array
         const index = this.globalAttributeValue.indexOf(selectedAttribute);
@@ -1779,7 +1809,7 @@ export class VendorInitiateComponent implements OnInit {
         (attr) => attr.label === value
       );
       console.warn("addSelectedIndianAttribute>> selectedIndAttribute>>",selectedIndAttribute)
-
+  
       if (selectedIndAttribute) {
         // Remove the selected attribute from the globalAttributeValue array
         const index = this.indiaAttributeValue.indexOf(selectedIndAttribute);
@@ -1789,9 +1819,9 @@ export class VendorInitiateComponent implements OnInit {
       }
       this.selectedIndiaAttributeValue.push({ label: value, value: '' });
       console.warn("addSelectedIndianAttribute>> selectedIndiaAttributeValue>>",this.selectedIndiaAttributeValue)
-
+  
     }
-
+  
     onKeyUpGlobal(value: string, label: string): void {
       // debugger;
       // Find the attribute in the array based on the label
@@ -1812,16 +1842,16 @@ export class VendorInitiateComponent implements OnInit {
         (attr) => attr.label === label
       );
       console.warn("ONCLICKUP INDIAN BEFORE>>>",JSON.stringify(foundIndianAttribute));
-
+  
       // Update the value if the attribute is found
       if (foundIndianAttribute) {
         foundIndianAttribute.value = value;
       }
       console.warn("ONCLICKUP INDIAN AFTER>>>",JSON.stringify(foundIndianAttribute));
-
+  
       // console.log(JSON.stringify(foundIndianAttribute));
     }
-
+  
     // In your component class
     disableIndianOptionButton: any;
     disableGlobalOptionButton: any;
@@ -1848,8 +1878,8 @@ export class VendorInitiateComponent implements OnInit {
       'Panel 11': ['Amphetamine (AMP)', 'Cocaine (COC)', 'Marijuana / Cannabinoids', 'Phencyclidine (PCP)', 'Opiates', 'Benzodiazepine (BZD)','Barbiturate (BAR)','Methadone','Propoxyphene','Methaqualone','Oxycodone'],
       'Panel 12': ['Marijuana / Cannabinoids', 'Amphetamine (AMP)', 'Cocaine (COC)', 'Phencyclidine (PCP)', 'Barbiturate (BAR)', 'Benzodiazepine (BZD)','Methadone','Propoxyphene','Methaqualone','MDMA(ecstasy)','TCA(Tricyclic Antidepressants)','Oxycodone'],
     };
-
-
+  
+    
     onPanelChange(event: any) {
       // this.drugCheckSubmitDisable = true;
       const selectedPanelValue = event.target.value;
@@ -1857,11 +1887,11 @@ export class VendorInitiateComponent implements OnInit {
       const labels = this.panelLabels[selectedPanelValue];
       this.selectedLabels = labels.map(label => ({ label, value:''}));
     }
-
+  
     updateLabelValue(event:any, label:any) {
       label.value = event.target.value;
     }
-
+  
 
     triggerModal(
       content: any,
@@ -1877,17 +1907,17 @@ export class VendorInitiateComponent implements OnInit {
       this.isVendorAttributeForm = sourceName.includes('Criminal');
       // console.warn("isVendorAttributeForm>>>>>>>>>",this.isVendorAttributeForm)
       // console.warn(' venderChecked=====>', this.vendorchecksupload);
-
+  
       // console.warn('vendorcheckId', vendorcheckId);
-
+  
       // console.warn("number>>>>>",sourceId)
-
+  
       // console.warn("number>>>>>>> IIII",i)
-
+  
       // console.warn("CheckType>>>>>",checkType)
-
+  
       // console.warn("SOURCENAME>>>>>>>",sourceName)
-
+  
       if(sourceId == 5){
         this.idItemsCheckType = true;
         this.vendorProofForm.addControl('nameAsPerProof', new FormControl('',[Validators.required]));
@@ -1899,13 +1929,13 @@ export class VendorInitiateComponent implements OnInit {
             this.idItemsProofName = "PAN";
             this.idItemsDateOfBirth = "Date of Birth";
             this.idItemsFatherName = "Father Name";
-
+  
             this.vendorProofForm.patchValue({
               'nameAsPerProof': this.candidateDetails.candidate.panName,
               'proofName':this.candidateDetails.candidate.itrPanNumber,
               'dateOfBirth':this.candidateDetails.candidate.panDob,
               'fatherName':this.candidateDetails.candidate.aadharFatherName
-
+  
           });
         }
         if (checkType && checkType.includes('Aadhar')) {
@@ -1918,7 +1948,7 @@ export class VendorInitiateComponent implements OnInit {
             'proofName':this.candidateDetails.candidate.aadharNumber,
             'dateOfBirth':this.candidateDetails.candidate.aadharDob,
             'fatherName':this.candidateDetails.candidate.aadharFatherName
-
+  
         });
       }
       if (checkType && checkType.includes('Passport')) {
@@ -1928,16 +1958,16 @@ export class VendorInitiateComponent implements OnInit {
         this.idItemsFatherName = "Father Name";
     }
       }
-
+  
       if(sourceId == 10){
         this.drugCheck = true
         // console.warn("DRUG CHECK >>>",this.drugCheck);
       }
-
+  
       this.globaldataBaseCheck = sourceName.includes(
         'Global Database check'
       );
-
+  
       if (this.globaldataBaseCheck) {
         if (this.globalCheckType != null) {
           this.globalCheckType = 'INDIA';
@@ -1979,7 +2009,7 @@ export class VendorInitiateComponent implements OnInit {
             });
         }
       }
-
+  
       this.updateLegalProcedings();
       if (this.globaldataBaseCheck === false) {
         this.customers
@@ -1996,21 +2026,21 @@ export class VendorInitiateComponent implements OnInit {
             );
           });
       }
-
+  
       // console.warn("Tgdkjbkjsbkj>",this.employ[i])
-
+  
       const vendorValue = this.vendorProof[i].vendorAttribute
-
+  
        // console.warn("vendorValue>>>>>>>>>>>"+vendorValue)
-
-
-
-
+  
+      
+  
+  
       for (const attribute of vendorValue) {
         // console.warn("ATTRIBUTE>>>>>>>",attribute)
         if(this.globaldataBaseCheck){
         //  console.warn("ATTRIBUTE>>>>>>>222", attribute);
-
+  
           let isValidJSON = false;
   try {
     const parsedData = JSON.parse(attribute);
@@ -2019,21 +2049,21 @@ export class VendorInitiateComponent implements OnInit {
   } catch (error) {
     console.error("The attribute is not a valid JSON string:", error);
   }
-
+  
       if (isValidJSON) {
-
+     
             const parsedData = JSON.parse(attribute); // Parse the JSON string
-
+  
             const vendorCheckStatusId = parsedData.vendorCheckStatusMasterId[0].vendorCheckStatusMasterId;
             const remarks = parsedData.remarks[0].remarks;
-
+    
             console.log("Vendor Check Status Master ID:", vendorCheckStatusId);
         console.log("Remarks:", remarks);
-
+    
         this.remarks = remarks// Store the value of "remarks"
-
+    
         const status = vendorCheckStatusId; // Parse the status value to integer
-
+    
         if(status == 1){
           this.checkStatus = "Clear"
         }
@@ -2083,7 +2113,7 @@ export class VendorInitiateComponent implements OnInit {
       }
     }
      }
-
+       
   }
   else{
     console.warn("ATTRIBUTE>>>>>>>33", attribute);
@@ -2114,14 +2144,14 @@ export class VendorInitiateComponent implements OnInit {
       }
     }
   }
-
+        
     }
-
+  
     // console.log("fsjkgkfgskgfk",this.remarks); // Output: SuccessVendot
     // console.log("checkStatus:::::",this.checkStatus)
-
-
-
+  
+    
+  
     if(this.isVendorAttributeForm){
       this.vendorProofForm.patchValue({
         remarks:this.remarks,
@@ -2144,41 +2174,41 @@ export class VendorInitiateComponent implements OnInit {
         vendorCheckStatusMasterId:this.checkStatus,
       })
     }
-
-
+  
+  
     // console.warn("his.vendorProofForm.patchValu>>>>>>",this.vendorProofForm.value)
-
-
-
-
-      // this.remarks =
-
+  
+  
+      
+  
+      // this.remarks = 
+  
       // this.venderSourceId = this.vendorchecksupload[i].source.sourceId;
-
+  
       // console.warn("this.venderSourceId>>>>>>>>>"+this.venderSourceId)
-
-
+  
+  
       // this is the code for Fetching the venderAttributesList
       if (this.globaldataBaseCheck === false) {
-
+  
       this.customers
         .getAgentAttributes(sourceId)
         .subscribe((data: any) => {
           this.venderAttributeCheck = data.data;
-
+  
           // console.warn('===============', this.venderAttributeCheck);
-
+  
           console.warn(
             'VenderCheck:::',
             this.venderAttributeCheck.vendorAttributeList
           );
           const labelValueList: any[] = [];
-
-
+  
+  
           this.venderAttributeValue =
             this.venderAttributeCheck.vendorAttributeList.map((ele: any) => {
               let defaultValue = null;
-
+  
               if (ele === 'Date of Birth') {
                   defaultValue = this.candidateDetails.candidate.aadharDob;
                   console.log("defaultValue for Date of Birth >>>>", defaultValue);
@@ -2186,7 +2216,7 @@ export class VendorInitiateComponent implements OnInit {
                   defaultValue = this.candidateDetails.candidate.aadharFatherName;
                   console.log("defaultValue for Father Name >>>>", defaultValue);
               }
-
+          
               return {
                   label: ele,
                   value: null,
@@ -2202,27 +2232,27 @@ export class VendorInitiateComponent implements OnInit {
   //         defaultValues[ele] = null;
   //     }
   // });
-
+  
   // console.warn("defaultValues >>>>", defaultValues);
-
+  
   // const defaultValueList = this.venderAttributeCheck.vendorAttributeList.map((ele: any) => {
   //     return {
   //         label: ele,
   //         value: defaultValues[ele],
   //     };
   // });
-
+  
   // console.log("defaultValueList >>>>", defaultValueList);
   // this.venderAttributeValue = defaultValueList; // Assigning defaultValueList to venderAttributeValue
-
-
+  
+  
           console.log(
             'this.venderAttributeCheck===========>',
             this.venderAttributeValue
           );
         });
       }
-
+  
       this.modalService.open(content).result.then(
         (res) => {
           console.log(content, '........................');
@@ -2240,10 +2270,10 @@ export class VendorInitiateComponent implements OnInit {
           vendorcheckId: vendorcheckId,
           colorid: this.colorid,
           roleAdmin: true
-
+          
         });
     }
-
+    
 
     // onSubmit(vendorProofForm:FormGroup){
 
@@ -2260,7 +2290,7 @@ export class VendorInitiateComponent implements OnInit {
       // console.warn("RAWVALUE>>>>>>>>>",rawValue)
       // console.warn('VENDORLISTPATCH:::>>>>>>>>>', this.vendorlist.value);
       // console.log(this.vendorAttributeListForm);
-
+  
       if(this.vendorProofForm.get('vendorCheckStatusMasterId')?.value === 'Clear'){
         // console.warn("================TRUE==================")
         this.vendorProofForm.patchValue({
@@ -2284,11 +2314,11 @@ export class VendorInitiateComponent implements OnInit {
           vendorCheckStatusMasterId:6,
         })
       }
-
+  
       // tem
       // this.onPanelChange({ target: { value: this.selectedLabels } });
       // console.log("Updated Selected Labels:", this.selectedLabels);
-
+  
       const formData1 = {
         panel: this.selectedPanel,
         labels: this.selectedLabels
@@ -2298,7 +2328,7 @@ export class VendorInitiateComponent implements OnInit {
       const drugtest = true; // Example condition, replace with your actual condition
        const combinedData = { ...this.form.value, ...vendorProofForm.value };
       //  console.log('Combined data:', combinedData);
-
+  
       this.selectedGlobalAttributeValue.push(...this.globalAttributeValue);
       // console.log('global1' + JSON.stringify(this.selectedGlobalAttributeValue));
       this.attributeMap.set('GLOBAL', this.selectedGlobalAttributeValue);
@@ -2325,16 +2355,16 @@ export class VendorInitiateComponent implements OnInit {
           formData.append('vendorRemarksReport', null);
         } else {
           formData.append('vendorchecks', JSON.stringify(this.vendorProofForm.value));
-
+  
           formData.append(
             'vendorAttributesValue',
             JSON.stringify(attributeMapObject)
           );
         }
       //   formData.append('vendorchecks', JSON.stringify(this.vendorlist.value));
-
+  
       // formData.append('vendorAttributesValue', JSON.stringify(mergedData));
-
+  
         return this.customers
         .saveproofuploadVendorChecks(formData)
         .subscribe((result: any) => {
@@ -2355,40 +2385,40 @@ export class VendorInitiateComponent implements OnInit {
           }
         });
       }
-
+  
   else{
       this.vendorAttributeListForm = this.venderAttributeValue;
-
+  
       const venderAttributeValue = this.vendorAttributeListForm.reduce(
         (obj, item) => {
-
+  
           if (item.value === null || item.value.trim() === '') {
             return false; // Return false if any item.value is null or empty
           }
-
+  
           obj[item.label] = item.value;
-
+  
           return obj;
         },
         {}
       );
-
+  
       if (venderAttributeValue === false) {
         // console.error('Please enter values for all attributes');
         this.showMessage = "Please enter values for Mandatory Field";
       } else {
         // console.log('CrimnalGlobalAttributeValues:', venderAttributeValue);
       }
-
+  
       this.vendorAttributeCheckMapped = { ...venderAttributeValue };
       // console.log(
       //   ' vendorAttributeCheckMapped:::',
       //   this.vendorAttributeCheckMapped
       // );
-
+  
     //  console.warn('vendorAttributeCheckMapped===>', venderAttributeValue);
       let mergedData:any = null;
-
+  
       if(this.isVendorAttributeForm){
         const {vendorCheckStatusMasterId,remarks,nameAsPerProof,proofName,legalProcedings } = this.vendorProofForm.value;
          mergedData = {
@@ -2401,27 +2431,27 @@ export class VendorInitiateComponent implements OnInit {
         };
       }
       else{
-
-
+  
+        
       //temp
-
+  
       // console.log("Updated Selected Labels:", this.selectedLabels);
-
+  
       const formData1 = {
         panel: this.selectedPanel,
         labels: this.selectedLabels
       };
       // console.log("NEW APPROACH>>>",formData1);
-
-
+  
+  
       const fetchedData = {
         panel: formData1.panel,
         labels: formData1.labels.map(label => {
           return { [label.label]: label.value };
         })
       };
-
-            const {vendorCheckStatusMasterId,remarks,nameAsPerProof,proofName,dateOfBirth,fatherName } = this.vendorProofForm.value;
+  
+            const {vendorCheckStatusMasterId,remarks,nameAsPerProof,proofName,dateOfBirth,fatherName } = this.vendorProofForm.value; 
              mergedData = {
               ...this.vendorAttributeCheckMapped,
               vendorCheckStatusMasterId,
@@ -2431,21 +2461,21 @@ export class VendorInitiateComponent implements OnInit {
               dateOfBirth,
               fatherName
             };
-
+  
             if(this.drugCheck){
               mergedData.panel = formData1.panel;
-
+    
               // fetchedData.labels.forEach(labelObject => {
               //   const label = Object.keys(labelObject)[0]; // Get the label
               //   const value = labelObject[label]; // Get the value
               //   mergedData[label] = value; // Append label as key and value to mergedData
               // });
-
-
+  
+  
               fetchedData.labels.forEach(labelObject => {
                 const label = Object.keys(labelObject)[0]; // Get the label
                 const value = labelObject[label]; // Get the value
-
+              
                 // Check if value is empty
                 if (value.trim() === '') {
                   // console.warn("khsfhbhsvfvhj false")
@@ -2456,26 +2486,26 @@ export class VendorInitiateComponent implements OnInit {
                   mergedData[label] = value; // Append label as key and value to mergedData
                 }
               });
-
+  
               // console.log("Fetched Data:", fetchedData);
             }
-
+  
       }
-
+  
       //  formData.append('vendorchecks', JSON.stringify(this.forAddressCrimnalGlobal.value ))
-
+  
       //  formData.append('vendorchecks', JSON.stringify(agentAttributeValues ))
-
+  
       //  formData.append('vendorchecks', JSON.stringify(this.forAddressCrimnalGlobal.value ))
-
-
+  
+  
       const formData = new FormData();
       formData.append('vendorchecks', JSON.stringify(this.vendorProofForm.value));
-
+  
       formData.append('vendorAttributesValue', JSON.stringify(mergedData));
-
+  
       // console.warn('mergedData++++++++++++++++++++', mergedData);
-
+    
       // formData.append('vendorchecks', JSON.stringify(this.vendorlist.value));
       //  if (this.vendorlist.valid && venderAttributeValue !== false) {
         if(this.drugCheck !== true){
@@ -2565,7 +2595,7 @@ export class VendorInitiateComponent implements OnInit {
       //     formReportApproval.setErrors({ invalid: true });
       //   }
       // }
-
+  
       // if (this.getServiceConfigCodes.includes('GLOBAL')) {
       //   this.formReportApproval.controls[
       //     'globalDatabseCaseDetailsColorId'
@@ -2580,7 +2610,7 @@ export class VendorInitiateComponent implements OnInit {
       //     formReportApproval.setErrors({ invalid: true });
       //   }
       // }
-
+  
       const candidateReportApproval = formReportApproval.value;
       const formData = new FormData();
       formData.append(
@@ -2607,12 +2637,12 @@ export class VendorInitiateComponent implements OnInit {
                     console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
                     this.conventionalReport = true;
                     // console.warn("this.candidateDetails.candidate.candidateCode>>",this.candidateDetails.candidate.candidateCode)
-                    this.orgAdmin.getConventionalReportByCandidateCode(this.candidateDetails.candidate.candidateCode,this.reportStatus,this.conventionalReport).subscribe((url: any)=>{
+                    this.orgAdmin.getConventionalReportByCandidateCode(this.candidateDetails.candidate.candidateCode,this.reportStatus,this.conventionalReport).subscribe((url: any)=>{ 
                       // console.warn("url : "+url)
                       window.open(url.data, '_blank');
                     });
                   }
-
+  
                 }else{
                   console.log("showing the FINAL report ::");
                   this.reportDeliveryDetailsComponent.downloadFinalReportDirectFromQC(this.candidateDetails.candidate,this.reportStatus);
@@ -2631,10 +2661,10 @@ export class VendorInitiateComponent implements OnInit {
     }
 
 
-
+    
   downloadPdf(documentPathKey: any, documentname: any, soureName: any) {
-  if(documentPathKey != null){
-  this.orgAdmin.downloadAgentUploadedDocument(documentPathKey).subscribe(
+  if(documentPathKey != null){  
+  this.orgAdmin.downloadAgentUploadedDocument(documentPathKey,false).subscribe(
     (data: any) => {
       // if (soureName == "Employment" || soureName == "Education") {
         const contentType = this.detectContentType(data.message);
@@ -2661,7 +2691,7 @@ export class VendorInitiateComponent implements OnInit {
           downloadLink.download = documentname;
           downloadLink.click();
         }
-
+      
       // else if (documentPathKey != null) {
       //   const linkSource = 'data:application/pdf;base64,' + data.message;
       //   const downloadLink = document.createElement('a');
@@ -2674,13 +2704,13 @@ export class VendorInitiateComponent implements OnInit {
         //   icon: 'warning',
         // });
       // }
-
+      
     },
     (error: any) => {
       console.error('Error occurred while downloading:', error);
     }
   );
-
+    
     // if (soureName == "Employment" && agentUploadedDocument != null) {
     //   const linkSource = 'data:application/zip;base64,' + agentUploadedDocument;
     //   const downloadLink = document.createElement('a');
@@ -2705,27 +2735,27 @@ export class VendorInitiateComponent implements OnInit {
 
 
   downloadAllDocument() {
-    console.warn("Document All", this.vendorchecksupload);
-    console.warn("CANDATENAME::", this.candidateName);
+    // console.warn("Document All", this.vendorchecksupload);
+    // console.warn("CANDATENAME::", this.candidateName);
     // Create a new instance of JSZip
     const zip = new JSZip();
-
+  
     const downloadPromises: Promise<void>[] = [];
-
+  
     // Iterate through each item in vendorchecksupload
     this.vendorchecksupload.forEach((item: any) => {
       const promise = new Promise<void>((resolve, reject) => {
         // Download the file data
-        if (item.agentUploadDocumentPathKey != null) {
-          this.orgAdmin.downloadAgentUploadedDocument(item.agentUploadDocumentPathKey).subscribe(
+        if (item.agentUploadDocumentPathKey != null && (item.clientApproval || this.authService.roleMatch(['ROLE_CLIENTAGENT']))) {
+          this.orgAdmin.downloadAgentUploadedDocument(item.agentUploadDocumentPathKey,false).subscribe(
             (data: any) => {
               // console.warn("Result>>", data);
-
+  
               // Get the content type
               const contentType = this.detectContentType(data.message);
-              console.warn("contentType : ", contentType);
+              // console.warn("contentType : ", contentType);
               let fileExtension = '';
-
+  
               // Determine the file extension based on content type
               if (contentType === 'pdf') {
                 fileExtension = 'pdf';
@@ -2736,10 +2766,10 @@ export class VendorInitiateComponent implements OnInit {
               else {
                 fileExtension = 'zip';
               }
-
+  
               // Add the file to the zip
               zip.file(`${item.documentname}.${fileExtension}`, data.message, { base64: true });
-
+  
               resolve();
             },
             (error) => {
@@ -2752,10 +2782,10 @@ export class VendorInitiateComponent implements OnInit {
           resolve();
         }
       });
-
+  
       downloadPromises.push(promise);
     });
-
+  
     // Wait for all download promises to resolve
     Promise.all(downloadPromises).then(() => {
       // Generate the zip file
@@ -2771,5 +2801,173 @@ export class VendorInitiateComponent implements OnInit {
     });
   }
 
+  downloadPreApprovalReport(vendorCheck: any) {
+    console.log(vendorCheck);
+
+    if(vendorCheck.ecourtProofContentId) {
+      this.orgAdmin.getSignedURLForContent(vendorCheck.ecourtProofContentId).subscribe((url: any)=>{
+        // window.location.href = url;
+        window.open(url.data, '_blank');
+      });
+    } else {
+      let searchData = {
+        "candidateName":this.candidateName,
+        "fatherName":vendorCheck.candidate?.aadharFatherName, 
+        "dateOfBirth":this.convertDate(vendorCheck.candidate?.dateOfBirth),
+        "vendorcheckId": vendorCheck.vendorcheckId,
+        "candidateId":vendorCheck.candidate?.candidateId
+      };
+
+      const nullFields = this.getNullFields(searchData);
+
+      if (nullFields.length > 0) {
+          // alert(`The following fields are null or undefined: ${nullFields.join(', ')}`);
+          Swal.fire({
+            title: nullFields.join(', ') + " can't be empty",
+            icon: 'warning'
+          })
+      } else {
+        this.orgAdmin.getEcourtProof(searchData).subscribe((url: any)=>{
+          if(url.outcome){
+  
+            let pre_approval_content_id = url.message;
+            console.log(pre_approval_content_id," Content Id for ::");
+            this.orgAdmin.getSignedURLForContent(pre_approval_content_id).subscribe((url: any)=>{
+             
+              window.open(url.data, '_blank');
+            });
+          } else {
+            Swal.fire({
+              title: url.message,
+              icon: 'warning'
+            })
+          }
+          
+        });
+      }
+    }
   }
 
+  convertDate(inputDate: string): string {
+    // Split the input date string into day, month, and year components
+    const [day, month, year] = inputDate.split('-');
+
+    // Return the formatted date string in the desired format
+    return `${year}-${month}-${day}`;
+  }
+
+  getNullFields(searchData: Record<string, any>): string[] {
+    const nullFields: string[] = [];
+    for (const [key, value] of Object.entries(searchData)) {
+        if (value === null || value === undefined) {
+            nullFields.push(key);
+        }
+    }
+    return nullFields;
+  }
+
+  childCheck(e:any){
+    var sid = e.target.id;
+    console.log("sid : ",sid)
+    if (e.target.checked) {
+      this.tmp.push(sid);
+    } else {
+      this.tmp.splice($.inArray(sid, this.tmp),1);
+    }
+  }
+  childCheckselected(sid:any){
+    this.tmp.push(sid);
+  }
+
+  // selectAll2(e:any){
+  //   if (e.target.checked) {
+  //     $(".childCheck").prop('checked', true);
+  //     var  cboxRolesinput = $('.childCheck');
+  //     var arrNumber:any = [];
+  //     $.each(cboxRolesinput,function(idx,elem){
+  //      // var inputValues:any  = $(elem).val();
+  //       // console.log(inputValues);
+  //       arrNumber.push($(this).val());
+  //     });
+      
+  //     this.tmp = arrNumber;
+  //     console.log(this.tmp);
+  //   } else {
+  //     $(".childCheck").prop('checked', false);
+  //   }
+    
+  // }
+
+  selectAll2(e:any){
+    if (e.target.checked) {
+        $(".childCheck:not(:disabled)").prop('checked', true);
+        var cboxRolesinput = $('.childCheck:not(:disabled)');
+        var arrNumber:any = [];
+        $.each(cboxRolesinput, function(idx, elem){
+            arrNumber.push($(this).val());
+        });
+        
+        this.tmp = arrNumber;
+        console.log(this.tmp);
+    } else {
+        $(".childCheck:not(:disabled)").prop('checked', false);
+        this.tmp = []; // Clear the tmp array
+      console.log(this.tmp);
+    }
+}
+
+  formClientApprove = new FormGroup({
+    vendorCheckId: new FormControl('', Validators.required),
+    // statuscode: new FormControl('', Validators.required)
+  });
+
+  formClientPatchValues() {
+    this.formClientApprove.patchValue({
+      vendorCheckId: this.tmp,
+      // statuscode: "REINVITE",
+    });
+  }
+
+  DocumentApproval(vendorCheckId:any){
+    this.formClientPatchValues();
+    console.warn("candidateReferenceNo", vendorCheckId.value)
+    console.log("Document Approval : ",vendorCheckId.value)
+
+    this.orgAdmin.clientApprove(vendorCheckId.value).subscribe((result: any) => {
+      if (result.outcome === true) {
+        Swal.fire({
+          title: result.message,
+          icon: 'success',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.reload();
+          }
+        });
+      } else {
+        Swal.fire({
+          title: result.message,
+          icon: 'warning',
+        });
+      }
+    });
+  }
+
+  // getCheckboxStyle(item: any) {
+  //   if (item.clientApproval) {
+  //     return {
+  //       'background-color': 'green',
+  //       'border': '1px solid green',
+  //       'appearance': 'none',
+  //       'width': '16px',
+  //       'height': '16px',
+  //       'border-radius': '3px',
+  //       'position': 'relative'
+  //     };
+  //   }
+  //   return {};
+  // }
+  
+  
+}
+  
+  

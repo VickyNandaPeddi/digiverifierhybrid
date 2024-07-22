@@ -35,6 +35,7 @@ import { AddCheckComponent } from './add-check/add-check.component';
 import { CandidateTrackerComponent } from './candidate-tracker/candidate-tracker.component';
 import { CustomerScopeConfigComponent } from './customer-scope-config/customer-scope-config.component';
 import { EmploymentTrackerSheetComponent } from './employment-tracker-sheet/employment-tracker-sheet.component';
+import { PurgedReportComponent } from './purged-report/purged-report.component';
 
 
 const routes: Routes = [
@@ -48,6 +49,7 @@ const routes: Routes = [
     { path: 'vendormgmt', component: VendorMgmtComponent, canActivate: [AdminGuard], data:{roles:['ROLE_ADMIN']}},
     { path: 'addvendor', component: AddVendorComponent, canActivate: [AdminGuard], data:{roles:['ROLE_ADMIN','ROLE_PARTNERADMIN']}},
     { path: 'customerUtilization', component: CustomerUtilizationComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},
+    { path: 'purgedReport', component: PurgedReportComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},
     { path: 'customerUtilizationAgent', component: CustomerUtilAgentComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},
     { path: 'customerUtilizationCandidate', component: CustomerUtilCandidatesComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},
     { path: 'ekycReport', component: EkycreportComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},
@@ -58,7 +60,7 @@ const routes: Routes = [
     { path: 'adminsetup', component: AdminSetupComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN']}},
     { path: 'custconfig/:organizationId', component: CustomerConfigComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN']}},
     { path: 'test', component: TestComponent},
-    { path: 'orgadminDashboard', component: OrgadminDashboardComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},
+    { path: 'orgadminDashboard', component: OrgadminDashboardComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR','ROLE_CLIENTAGENT','ROLE_CLIENTSUPERVISOR']}},
     { path: 'usermgmt', component: OrgadminUsermgmtComponent, canActivate: [AdminGuard], data:{roles:['ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_CBADMIN']}},
     { path: 'rolemgmt', component: OrgadminRolemgmtComponent, canActivate: [AdminGuard], data:{roles:['ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR']}},
     { path: 'candidateMgmt', component: CandidateMgmtComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},
@@ -66,7 +68,7 @@ const routes: Routes = [
     { path: 'cReportApproval/:candidateCode', component: AdminCReportApprovalComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_PARTNERADMIN','ROLE_ADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},
     { path: 'myProfile', component: MyprofileComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_PARTNERADMIN','ROLE_ADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},
     { path: 'vendordashboard', component: VendorDashboardComponent, canActivate: [AdminGuard], data:{roles:['ROLE_VENDOR']}},
-    { path: 'vendorinitiaste/:candidateId/:candidateCode', component: VendorInitiateComponent, canActivate: [AdminGuard], data:{roles:['ROLE_VENDOR','ROLE_ADMIN','ROLE_AGENTHR','ROLE_AGENTSUPERVISOR','ROLE_PARTNERADMIN']}},
+    { path: 'vendorinitiaste/:candidateId/:candidateCode', component: VendorInitiateComponent, canActivate: [AdminGuard], data:{roles:['ROLE_VENDOR','ROLE_ADMIN','ROLE_AGENTHR','ROLE_AGENTSUPERVISOR','ROLE_PARTNERADMIN','ROLE_CLIENTAGENT','ROLE_CLIENTSUPERVISOR']}},
     { path: 'uploadvendorcheck', component: UploadVendocheckComponent, canActivate: [AdminGuard], data:{roles:['ROLE_VENDOR']}},
     { path: 'tracker', component: CandidateTrackerComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},
     { path: 'dnh', component: DNHComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN']}},

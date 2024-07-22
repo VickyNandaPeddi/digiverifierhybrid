@@ -63,4 +63,8 @@ public interface CandidateStatusDto {
 	public String getQcCreatedOn();
 	
 	public String getInterimCreatedOn();
+	
+	public String getMaskedAadhar();
+	
+	public Boolean getAadharLinked();
 }

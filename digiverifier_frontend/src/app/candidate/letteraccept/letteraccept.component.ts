@@ -31,6 +31,19 @@ export class LetteracceptComponent implements OnInit {
       history.pushState(null, "", document.URL);
     }); 
     this.candidateCode = this.router.snapshot.paramMap.get('candidateCode');
+    this.candidateService.getCurrentStatusByCandidateCode(this.candidateCode).subscribe((result:any)=>{
+      if(result.outcome==true){
+        console.log(result.data)
+        const navURL = result.data.split('#/')[1];
+        this.navrouter.navigate([navURL]);
+      } else {
+        Swal.fire({
+          title: result.message,
+          icon: 'warning',
+        });
+      }
+    });
+
     this.candidateService.getLoaContentData(this.candidateCode).subscribe((result:any)=>{
       if(result.outcome==true){
         this.loaContent=result.data;

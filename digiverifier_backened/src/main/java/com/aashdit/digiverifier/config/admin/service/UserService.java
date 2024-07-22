@@ -79,7 +79,7 @@ public interface UserService {
 	ServiceOutcome<ConventionalAttributesMaster> saveConventionalAttributesMaster(
 			ConventionalAttributesMaster conventionalAttributesMaster);    
 	
-	ServiceOutcome<List<VendorChecks>> getAllSearchDataForVendor(SearchAllVendorCheckDTO searchAllVendorCheck);
+	ServiceOutcome<List<VendorcheckdashbordtDto>> getAllSearchDataForVendor(SearchAllVendorCheckDTO searchAllVendorCheck);
 
 	ServiceOutcome<VendorcheckdashbordtDto> getVendorCheckStatusAndCount(VendorcheckdashbordtDto dashboardDto);
 
@@ -97,8 +97,10 @@ public interface UserService {
 
 	ResponseEntity<Resource> getFilesFromResource(String uploadFor, String uploadType);
 	
-	ServiceOutcome<?> getAgentUploadedDocument(String pathKey);
+	ServiceOutcome<?> getAgentUploadedDocument(String pathKey, boolean viewDocument);
 	
 	ServiceOutcome<VendorChecks> saveConventionalCandidateChecks(String vendorChecks, String proofDocumentNew, String addressCheck);
+
+	ServiceOutcome<?> getECourtProof(VendorInitiatDto vendorInitiatDto);
 
 }

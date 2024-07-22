@@ -1,0 +1,34 @@
+<div class="container">
+    <div class="alert text-center" role="alert">
+      <h3>Login Second Factor Authentication</h3>
+    </div>
+    <div class="alert alert-success" role="alert">
+      <strong>OTP</strong> has been sent on registered mobile number
+    </div>
+  
+    <form [formGroup]="formEPFOlogin" (ngSubmit)="onSubmit()" autocomplete="off">
+        <div class="alert alert-otp" role="alert">
+            <div class="form-group">
+                <label for="otp">One Time Password *</label>
+                <input type="text" class="form-control otp-input" style="width: 220px; " formControlName="otp" placeholder="Enter 6 digit OTP">
+                <label class="form-text" style="color: red; ">Enter 6 digit OTP.</label>
+                <label class="form-text text-muted">(OTP will be valid for <strong style="color: rgb(88, 88, 217);">5 mins</strong>)</label>
+            </div>
+        
+            <div class="form-group">
+                <label for="captcha">Captcha *</label>
+                <div class="captcha-container">
+                <img *ngIf="hiddenCaptcha" [src]="hiddenCaptcha" alt="Captcha is not loaded yet">
+                <button type="button" class="btn btn-refresh" (click)="redirect()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                </div>
+                <input type="text" class="form-control otp-input" style="width: 320px; " formControlName="captcha" placeholder="Enter the Captcha displayed above">
+            </div>
+        
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="button" class="btn btn-danger"  (click)="redirect()">Cancel</button>
+        </div>
+    </form>
+  </div>
+  

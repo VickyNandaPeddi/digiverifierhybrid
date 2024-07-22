@@ -415,8 +415,10 @@ public class ITRServiceImpl implements ITRService {
 								JSONObject name = object.getJSONObject("$");
 								candidate.setItrPanNumber(name.getString("pan"));
 								candidate.setPanDob(name.getString("dob")); 
-								candidate.setPanName(name.getString("name")); 
-                								
+								candidate.setPanName(name.getString("name"));
+								candidate.setMaskedAadhar(name.getString("masked_aadhar"));
+								candidate.setAadharLinked(name.getBoolean("aadhar_linked"));
+								
 								if(!orgServices.contains("DIGILOCKER")) {
 									if(name.has("gender"))
 										candidate.setAadharGender(name.getString("gender"));

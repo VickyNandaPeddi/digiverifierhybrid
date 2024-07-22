@@ -9,5 +9,6 @@ import com.aashdit.digiverifier.config.admin.model.RolePermissionHead;
 public interface RolePermissionHeadRepository extends JpaRepository<RolePermissionHead, Long> {
 
 	List<RolePermissionHead> findAllByIsActiveTrue();
+    RolePermissionHead findByPermissionHeadName(String permissionHeadName);
 
 }

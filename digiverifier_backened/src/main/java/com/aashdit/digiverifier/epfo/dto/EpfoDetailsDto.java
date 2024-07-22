@@ -15,4 +15,5 @@ public class EpfoDetailsDto {
 	
 	boolean uanSearch;
 	boolean enterUanInQcPending;
+	String otp;
 }

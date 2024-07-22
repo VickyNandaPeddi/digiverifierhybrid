@@ -228,5 +228,9 @@ export class OrgadminService {
 
   }
 
+  roleManagementAndRolePermission(data:any){
+    return this.http.post(`${environment.apiUrl}/api/role/saveRoleManagement`, data);
+  }
+
 
 }

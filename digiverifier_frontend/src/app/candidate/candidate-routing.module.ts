@@ -19,6 +19,8 @@ import { DigidocumentComponent } from './digidocument/digidocument.component';
 import { AadharMessageComponent } from './aadhar-message/aadhar-message.component';
 import { ConventionalCandidateUploadComponent } from './conventional-candidate-upload/conventional-candidate-upload.component';
 import { ConventionLetterAcceptComponent } from './convention-letter-accept/convention-letter-accept.component';
+import { ConventionalCandidateFormComponent } from './conventional-candidate-form/conventional-candidate-form.component';
+import { EpfoOtpCaptchaComponent } from './epfo-otp-captcha/epfo-otp-captcha.component';
 const routes: Routes = [
   { path: '', component: CandidateComponent, 
   children:[
@@ -40,8 +42,9 @@ const routes: Routes = [
     { path: 'digiDoc/:candidateCode/:accesstoken/:code', component: DigidocumentComponent},
     { path: 'digiAadhar/:candidateCode', component: AadharMessageComponent},
     { path: 'conventionalCandidate/:candidateCode', component: ConventionalCandidateUploadComponent},
-    { path: 'conventionalLetterAccept/:candidateCode', component: ConventionLetterAcceptComponent}
-
+    { path: 'conventionalCandidateForm/:candidateCode', component: ConventionalCandidateFormComponent},
+    { path: 'conventionalLetterAccept/:candidateCode', component: ConventionLetterAcceptComponent},
+    { path: 'epfootpcaptcha/:candidateCode', component: EpfoOtpCaptchaComponent}
   ]  
 }];
 

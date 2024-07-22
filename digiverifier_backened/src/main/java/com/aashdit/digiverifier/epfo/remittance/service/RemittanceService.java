@@ -16,5 +16,7 @@ public interface RemittanceService {
 	ServiceOutcome<String> deletedRemittanceRecord(String candidateCode, String memberId, String year);
 
 	ServiceOutcome<String> getRemittanceCaptcha(String candidateCode);
+	
+	ServiceOutcome<List<RemittanceDataFromApiDto>> getLTIMRemittanceRecords(String candidateCode, String flow);
 
 }

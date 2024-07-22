@@ -51,9 +51,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import com.aashdit.digiverifier.config.admin.dto.VendorInitiatDto;
 import com.aashdit.digiverifier.config.admin.dto.VendorcheckdashbordtDto;
@@ -84,6 +86,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.aashdit.digiverifier.config.superadmin.dto.DashboardDto;
 import com.aashdit.digiverifier.config.superadmin.model.Color;
+import com.aashdit.digiverifier.config.superadmin.model.Orgclientscope;
+import com.aashdit.digiverifier.config.superadmin.model.ServiceSourceMaster;
+import com.aashdit.digiverifier.config.superadmin.model.ServiceTypeConfig;
+
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.ClassPathResource;
@@ -92,11 +98,14 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.aashdit.digiverifier.config.admin.service.UserService;
+import com.aashdit.digiverifier.common.ContentRepository;
 import com.aashdit.digiverifier.common.enums.ContentCategory;
 import com.aashdit.digiverifier.common.enums.ContentSubCategory;
 import com.aashdit.digiverifier.common.enums.ContentType;
@@ -108,6 +117,8 @@ import com.aashdit.digiverifier.config.admin.dto.VendorCheckStatusAndCountDTO;
 import com.aashdit.digiverifier.config.admin.dto.AgentInvitationSentDto;
 import com.aashdit.digiverifier.config.admin.dto.CivilProceedingsDTO;
 import com.aashdit.digiverifier.config.admin.dto.CriminalProceedingsDTO;
+import com.aashdit.digiverifier.config.admin.dto.ECourtProofResponseDto;
+import com.aashdit.digiverifier.config.admin.dto.ECourtRequestDto;
 import com.aashdit.digiverifier.config.admin.dto.SearchAllVendorCheckDTO;
 import com.aashdit.digiverifier.config.admin.model.AgentSampleCsvXlsMaster;
 import com.aashdit.digiverifier.config.admin.model.ConventionalAttributesMaster;
@@ -132,6 +143,9 @@ import com.aashdit.digiverifier.config.candidate.model.SuspectEmpMaster;
 import com.aashdit.digiverifier.config.candidate.model.UanSearchData;
 import com.aashdit.digiverifier.config.candidate.util.ExcelUtil;
 import com.aashdit.digiverifier.config.superadmin.repository.OrganizationRepository;
+import com.aashdit.digiverifier.config.superadmin.repository.OrgclientscopeRepository;
+import com.aashdit.digiverifier.config.superadmin.repository.ServiceSourceMasterRepository;
+import com.aashdit.digiverifier.config.superadmin.repository.ServiceTypeConfigRepository;
 import com.aashdit.digiverifier.config.superadmin.repository.ColorRepository;
 import com.aashdit.digiverifier.utils.SecurityHelper;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -228,9 +242,23 @@ public class UserServiceImpl implements UserService {
 	 
 	 @Autowired
 	private ConventionalCandidateVerificationStateRepository conventionalCandidateVerificationStateRepository;
-
+	 
+	@Autowired
+	private OrgclientscopeRepository orgClientScopeRepository;
+		
+	@Autowired	
+	private ServiceTypeConfigRepository serviceTypeConfigRepository;
+	
+	@Autowired
+	private ServiceSourceMasterRepository serviceSourceMasterRepository;
+		
+	@Autowired
+	private ContentRepository contentRepository;
 	 
 	 public static final String DIGIVERIFIER_DOC_BUCKET_NAME = "digiverifier-new";
+	 
+	@Value("${E_COURT_PROOF_URL}")
+	private String eCourtURL;
 
 	
 	@Override
@@ -332,13 +360,41 @@ public class UserServiceImpl implements UserService {
 							boolean passwordVerificationForPlainTextAndEncodedPassword = bCryptPasswordEncoder.matches(user.getOldPassword(), oldEncodePasswordDB);
 							log.info("Password matches: {}" + passwordVerificationForPlainTextAndEncodedPassword);
 							boolean passwordVerificationEncodedPasswordVsEncodedPassword = oldPassword.equals(oldEncodePasswordDB);						
+							String[] existingPasswordCount = findUserById.getLastPasswords().split(",");
+							String password = user.getPassword();
+							String confirmPassword = user.getConfirmPassword();
+//							System.out.println("NEW PASSWORD : "+password);
+//							System.out.println("Confirm PASSWORD : "+confirmPassword);
+							boolean passwordMatches = Arrays.asList(existingPasswordCount).contains(password);
+							boolean newPasswordAndConfirmPassword = password.equals(confirmPassword);
+							int lastPasswordCounts = existingPasswordCount.length;
+							int orgPasswordLimit = Integer.parseInt(getExistingPassByUserID.get().getOrganization().getLastPasswords());
 							if(passwordVerificationForPlainTextAndEncodedPassword || passwordVerificationEncodedPasswordVsEncodedPassword) {
 								String passwoString = getExistingPassByUserID.get().getPassword();
-								String password = user.getPassword();
+								if (!passwordMatches && newPasswordAndConfirmPassword) {
+//									System.out.println("Password does not match.:::");
 								findUserById.setUserFirstName(user.getUserFirstName());
 								findUserById.setUserMobileNum(user.getUserMobileNum());
 								findUserById.setLocation(user.getLocation());
 								findUserById.setRole(roleRepository.findById(user.getRoleId()).get());
+//								System.out.println("Last Password in OrgScope : "+getExistingPassByUserID.get().getOrganization().getLastPasswords());
+								findUserById.setLastUpdatedPassword(new Date());
+//						        System.out.println("existingPasswordCount: " + Arrays.toString(existingPasswordCount));
+//								System.out.println("lastPasswordCounts : "+lastPasswordCounts);
+//								System.out.println("orgPasswordLimit : "+orgPasswordLimit);
+								if(orgPasswordLimit >= lastPasswordCounts) {
+//									System.out.println("Count Matches..");
+									if(existingPasswordCount.length > 0) {
+										 String[] newValues = new String[existingPasswordCount.length - 1];
+							             System.arraycopy(existingPasswordCount, 0, newValues, 0, existingPasswordCount.length - 1);
+							                String remainingLastPasswords = String.join(",", newValues);
+//							                System.out.println("remainingLastPasswords : "+remainingLastPasswords);
+										 findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+remainingLastPasswords);
+									}
+									
+								}else {	
+									findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+getExistingPassByUserID.get().getLastPasswords());
+								}
 								if (!password.equals("")) {
 									findUserById.setPassword(bCryptPasswordEncoder.encode(password));
 									findUserById.setAddlPassword(password);
@@ -355,12 +411,29 @@ public class UserServiceImpl implements UserService {
 								svcSearchResult.setMessage("User information Updated successfully, Click OK To Relogin");
 								svcSearchResult.setStatus("Password Changed");
 								
+								}else {
+									if(passwordMatches) {
+//										System.out.println("Password match.");
+										svcSearchResult.setOutcome(false);
+										svcSearchResult.setMessage("New password should not be the same as the last "+orgPasswordLimit+" password.");
+									}
+									else if(!newPasswordAndConfirmPassword) {
+//										System.out.println("New Password And ConfirmPasssword NOT matches.");
+										svcSearchResult.setOutcome(false);
+										svcSearchResult.setMessage("New password and confirm password do not match.");
+									}
+								}
 							}
 							else {
 								if(!passwordVerificationForPlainTextAndEncodedPassword) {	
 									svcSearchResult.setOutcome(false);
 									svcSearchResult.setMessage("Old Password Invalid. ");
 								}
+//								else if(passwordMatches) {
+//									System.out.println("Password match.");
+//									svcSearchResult.setOutcome(false);
+//									svcSearchResult.setMessage("Password Not Should be Same has old Password. ");
+//								}
 								else {
 									svcSearchResult.setOutcome(false);
 									svcSearchResult.setMessage("Something went Wrong.");
@@ -1180,6 +1253,7 @@ public class UserServiceImpl implements UserService {
 		return svcOutcome;
 	}
 
+	// This is for IntiateVendor
 	@Override
 	public ServiceOutcome<List<VendorInitiatDto>> getVendorCheckDetails(Long candidateId) {
 		ServiceOutcome<List<VendorInitiatDto>> svcSearchResult = new ServiceOutcome<List<VendorInitiatDto>>();
@@ -1190,11 +1264,60 @@ public class UserServiceImpl implements UserService {
 			List<VendorChecks> vendorList = vendorChecksRepository.findAllByCandidateCandidateId(candidateId);
 			
 			List<VendorInitiatDto> vendorInitiateDto = new ArrayList<>();
-			
+			String addressPresent = null;
+			String addressPermanent = null;
 			for(VendorChecks vendorCheck : vendorList) {
 				VendorInitiatDto vendorDto = new VendorInitiatDto();
 				
-				String agentAttributeAndValue = vendorCheck.getAgentAttirbuteValue().toString();
+				ArrayList<String> attributeValue = vendorCheck.getAgentAttirbuteValue();
+
+				for (String attribute : attributeValue) {
+				    // Check if the attribute contains "checkType=Address present"
+				    if (attribute.contains("checkType=Address present")) {
+				        for (String attributeIN : attributeValue) {
+				            // Check if the source name is "Address"
+				            if (vendorCheck.getSource().getSourceName().equalsIgnoreCase("Address")) {
+				                int addressIndex = attributeIN.toLowerCase().indexOf("address=");
+				                if (addressIndex != -1) {
+				                    int commaIndex = attributeIN.indexOf(",", addressIndex);
+				                    if (commaIndex == -1) {
+				                        commaIndex = attributeIN.length();
+				                    }
+				                    addressPresent = attributeIN.substring(addressIndex + 8).trim();
+				                    break;
+				                }
+				            }
+				        }
+				    }
+				    
+				    else if(attribute.contains("checkType=Address permanent")) {
+				    	for (String attributeIN : attributeValue) {
+				            // Check if the source name is "Address"
+				            if (vendorCheck.getSource().getSourceName().equalsIgnoreCase("Address")) {
+				                // Extract the address value
+				                int addressIndex = attributeIN.toLowerCase().indexOf("address=");
+				                if (addressIndex != -1) {
+				                    int commaIndex = attributeIN.indexOf(",", addressIndex);
+				                    if (commaIndex == -1) {
+				                        commaIndex = attributeIN.length();
+				                    }
+				                    // Extract the address value
+				                    addressPermanent = attributeIN.substring(addressIndex + 8).trim();
+				                    break;
+				                }
+				            }
+				        }
+				    }
+				}
+				
+//				System.out.println("Address: Prsent: " + addressPresent);
+//				System.out.println("Address: Permanent: " + addressPermanent);
+//				System.out.println("Address: Prsent for Criminal " + criminalPresent);
+//				System.out.println("Address: Permanent for Criminal " + criminalPermanent);
+				
+				String agentAttributeAndValue = vendorCheck.getAgentAttirbuteValue().toString();				
+			
+
 
 				// Extracting type value
 				String type = extractValue(agentAttributeAndValue, "type");
@@ -1238,7 +1361,6 @@ public class UserServiceImpl implements UserService {
 					if(byVendorChecksVendorcheckId != null) {
 						String vendorAttributeValue = byVendorChecksVendorcheckId.toString();
 						idItems = extractValue(vendorAttributeValue, "proofName");
-						System.out.println("idItems>>"+idItems);
 						vendorDto.setDetails(idItems);		
 					}
 				}
@@ -1263,6 +1385,23 @@ public class UserServiceImpl implements UserService {
 				vendorDto.setDocumentname(vendorCheck.getDocumentname());
 				vendorDto.setCheckType(vendorCheck.getCheckType());
 				vendorDto.setType(type);
+//				vendorDto.setClientApproval(vendorCheck.getClientApproval());
+				Long orgId = vendorCheck.getCandidate().getOrganization().getOrganizationId();
+				List<ServiceTypeConfig> allByOrganizationOrganizationId = serviceTypeConfigRepository.findAllByOrganizationOrganizationId(orgId);
+				List<Long> sourceServiceIds = allByOrganizationOrganizationId.stream()
+					    .map(ServiceTypeConfig::getServiceSourceMaster) // returns ServiceSourceMaster
+					    .map(ServiceSourceMaster::getSourceServiceId) // returns String
+					    .collect(Collectors.toList());
+		        
+		        ServiceSourceMaster byServiceCode = serviceSourceMasterRepository.findByServiceCode("CONVENTIONALCLIENTAPPROVAL");
+		        if(byServiceCode != null) {
+		        	if(!sourceServiceIds.isEmpty() && sourceServiceIds != null && sourceServiceIds.contains(byServiceCode.getSourceServiceId())) {
+		        		vendorDto.setClientApproval(vendorCheck.getClientApproval());
+		        	}else {
+		        		vendorDto.setClientApproval(true);
+		        	}
+		        }
+
 				vendorInitiateDto.add(vendorDto);
 
 				}			
@@ -1310,7 +1449,30 @@ public class UserServiceImpl implements UserService {
         }
         return null;
     }
+	
+//		public static String extractAddress(String response) {
+//	        // Match the address, which is everything after "Address=" and before ", type="
+//	        String pattern = "Address=([^,]+(?:,[^,=]+)*)";
+//	        Pattern p = Pattern.compile(pattern);
+//	        Matcher m = p.matcher(response);
+//	        if (m.find()) {
+//	            String address = m.group(1).trim();
+//	            // Remove trailing commas or non-address parts
+//	            if (address.contains(", type")) {
+//	                address = address.substring(0, address.indexOf(", type"));
+//	            }
+//	            else if(address.contains(", Address")) {
+//	                address = address.substring(0, address.indexOf(", Address"));
+//	            }
+//	            // Trim any trailing square brackets or spaces
+//	            address = address.replaceAll("\\]$", "").trim();
+//	            return address;
+//	        }
+//	        return null;
+//	    }
+	
 
+ // This is for Vendor Dashboard
 	@Override
 	public ServiceOutcome<List<VendorcheckdashbordtDto>> getallVendorCheckDetails(Long vendorId,Map<String, String> dateSearchFilter,int pageNumber, int pageSize, String vendorCheckDashboardStatusCode) {
 		ServiceOutcome<List<VendorcheckdashbordtDto>> svcSearchResult = new ServiceOutcome<List<VendorcheckdashbordtDto>>();
@@ -1348,6 +1510,7 @@ public class UserServiceImpl implements UserService {
 			VendorCheckStatusMaster findByCheckStatusCode = vendorCheckStatusMasterRepository.findByCheckStatusCode(vendorCheckDashboardStatusCode);
 			Long vendorCheckStatusMasterId = findByCheckStatusCode.getVendorCheckStatusMasterId();
 			
+			System.out.println("findByCheckStatusCode : ");
 //			System.out.println("VENDORCHECKSTATUSMASTERID =================== :::::::::"+vendorCheckStatusMasterId);
 			
 			Page<VendorChecks> vendorList = vendorChecksRepository.findAllByVendorId(vendorId,fromDateFormat,toDateFormat,vendorCheckStatusMasterId,pageable);
@@ -1372,6 +1535,12 @@ public class UserServiceImpl implements UserService {
 			            dto.setVendorUploadCheck(vendorUploadChecksRepository.findByVendorChecksVendorcheckId(vendorChecks.getVendorcheckId()));
 			            dto.setDocumentname(vendorChecks.getDocumentname());
 			            dto.setVendorcheckId(vendorChecks.getVendorcheckId());
+			          //  if ("Prodapt Solutions Private Limited".equalsIgnoreCase(vendorChecks.getCandidate().getOrganization().getOrganizationName())) dto.setClientApproval(vendorChecks.getClientApproval());
+			            if ("Prodapt Solutions Private Limited".equalsIgnoreCase(vendorChecks.getCandidate().getOrganization().getOrganizationName())) {
+			                dto.setClientApproval(vendorChecks.getClientApproval());
+			            } else {
+			                dto.setClientApproval(true);
+			            }
 			            return dto;
 			        })
 			        .collect(Collectors.toList());
@@ -2799,10 +2968,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 
+	// This is for Vendor Dashboard Search!
 	@Override
-	public ServiceOutcome<List<VendorChecks>> getAllSearchDataForVendor(SearchAllVendorCheckDTO searchAllVendorCheck) {
+	public ServiceOutcome<List<VendorcheckdashbordtDto>> getAllSearchDataForVendor(SearchAllVendorCheckDTO searchAllVendorCheck) {
 
-		ServiceOutcome<List<VendorChecks>> svcSearchResult = new ServiceOutcome<>();
+		ServiceOutcome<List<VendorcheckdashbordtDto>> svcSearchResult = new ServiceOutcome<>();
 
 		try {
 			Long vendorId = searchAllVendorCheck.getVendor_Id();
@@ -2811,15 +2981,62 @@ public class UserServiceImpl implements UserService {
 
 			List<Long> byCandidateName = candidateRepository.getByApplicantIdAndCandidateName(searchInput);
 			List<Long> applicantIdAndCandidateName = byCandidateName;
+			searchAllVendorChecksByVendorIdAndUserSearchInput =	vendorChecksRepository.searchAllVendorChecksByVendorIdAndUserSearchInputByCandidateName(vendorId, applicantIdAndCandidateName, null,null,null);	
+			if(searchAllVendorChecksByVendorIdAndUserSearchInput.isEmpty()){
+			    String sourceSearchInput = "%" + searchInput + "%";
+			    searchAllVendorChecksByVendorIdAndUserSearchInput = vendorChecksRepository.searchAllVendorChecksByVendorIdAndUserSearchInputBySourceName(vendorId, sourceSearchInput, null,null,null);
+			}
+			if(searchAllVendorChecksByVendorIdAndUserSearchInput.isEmpty()){
+			    String sourceSearchInput = "%" + searchInput + "%";
+			    searchAllVendorChecksByVendorIdAndUserSearchInput = vendorChecksRepository.searchAllVendorChecksByVendorIdAndUserSearchInputByCheckStatus(vendorId, sourceSearchInput, null,null,null);
+			}
+			List<Long> vendorCheckIds = searchAllVendorChecksByVendorIdAndUserSearchInput.stream()
+			        .map(vendorChecks -> vendorChecks.getVendorcheckId()) // Assuming getVendorCheckId() returns Long
+			        .collect(Collectors.toList());
+//			List<Long> vendorCheckIds = searchAllVendorChecksByVendorIdAndUserSearchInput.stream()
+//			        .map(vendorChecks -> vendorChecks.getVendorcheckId()) // Assuming getVendorCheckId() returns Long
+//			        .collect(Collectors.toList());
+						
+			List<VendorUploadChecks> byVendorChecksVendorcheckIds = vendorUploadChecksRepository.findByVendorChecksVendorcheckIds(vendorCheckIds);
+			
+//			List<Object> mergedList = new ArrayList<>(searchAllVendorChecksByVendorIdAndUserSearchInput);
+//			mergedList.addAll(byVendorChecksVendorcheckIds);
+			
+			List<VendorChecks> vendorCheckList = searchAllVendorChecksByVendorIdAndUserSearchInput;
 
-			searchAllVendorChecksByVendorIdAndUserSearchInput =	vendorChecksRepository.searchAllVendorChecksByVendorIdAndUserSearchInputByCandidateName(vendorId, applicantIdAndCandidateName, null,null,null);				
-
+			
+			List<VendorcheckdashbordtDto> vendorCheckList2 = vendorCheckList.stream()
+			        .map(vendorChecks -> {
+			            // Your conversion logic here
+			        	VendorcheckdashbordtDto dto = new VendorcheckdashbordtDto();
+//			            dto.setApplicantId(vendorChecks.getCandidate().getApplicantId());
+//			            dto.setAgentUploadedDocument(vendorChecks.getAgentUploadedDocument());
+//			            dto.setCandidate_name(vendorChecks.getCandidateName());
+			        	dto.setAgentUploadDocumentPathKey(vendorChecks.getAgentUploadDocumentPathKey());
+			        	dto.setCandidate(vendorChecks.getCandidate());
+			            dto.setSource(vendorChecks.getSource());
+			            dto.setCreatedOn(vendorChecks.getCreatedOn());
+			            dto.setAgentAttirbuteValue(vendorChecks.getAgentAttirbuteValue());
+			            dto.setVendorCheckStatusMaster(vendorChecks.getVendorCheckStatusMaster());
+			            dto.setStopCheck(vendorChecks.getStopCheck());
+			            dto.setVendorUploadCheck(vendorUploadChecksRepository.findByVendorChecksVendorcheckId(vendorChecks.getVendorcheckId()));
+			            dto.setDocumentname(vendorChecks.getDocumentname());
+			            dto.setVendorcheckId(vendorChecks.getVendorcheckId());
+			            if ("Prodapt Solutions Private Limited".equalsIgnoreCase(vendorChecks.getCandidate().getOrganization().getOrganizationName())) {
+			                dto.setClientApproval(vendorChecks.getClientApproval());
+			            } else {
+			                dto.setClientApproval(true);
+			            }
+			            return dto;
+			        })
+			        .collect(Collectors.toList());
+			
 			if(applicantIdAndCandidateName.isEmpty()) {
 				User findByEmployeeId = userRepository.findByEmployeeId(searchInput);
 				Source findBySourceName = sourceRepository.findBySourceName(searchInput);
 				if (findByEmployeeId != null) {
 					Long agentId = findByEmployeeId.getUserId();
-					searchAllVendorChecksByVendorIdAndUserSearchInput =	vendorChecksRepository.searchAllVendorChecksByVendorIdAndUserSearchInputByCandidateName(vendorId, applicantIdAndCandidateName, agentId,null,null);				
+					searchAllVendorChecksByVendorIdAndUserSearchInput =	vendorChecksRepository.searchAllVendorChecksByVendorIdAndUserSearchInputByCandidateName(vendorId, applicantIdAndCandidateName, agentId,null,null);
 				}
 				else if(findBySourceName != null) {
 					Long sourceId = findBySourceName.getSourceId();
@@ -2833,7 +3050,9 @@ public class UserServiceImpl implements UserService {
 			}
 
 			if (!searchAllVendorChecksByVendorIdAndUserSearchInput.isEmpty()) {
-				svcSearchResult.setData(searchAllVendorChecksByVendorIdAndUserSearchInput);
+				List<VendorcheckdashbordtDto> newList = new ArrayList<VendorcheckdashbordtDto>();
+				newList.addAll(vendorCheckList2);
+				svcSearchResult.setData(newList);
 				svcSearchResult.setOutcome(true);
 				svcSearchResult.setMessage("SUCCESS");
 			} else {
@@ -3283,16 +3502,23 @@ public class UserServiceImpl implements UserService {
 
 
 	@Override
-	public ServiceOutcome<String> getAgentUploadedDocument(String pathKey) {
+	public ServiceOutcome<String> getAgentUploadedDocument(String pathKey,boolean viewDocument) {
 		String base64String = null;
 		ServiceOutcome<String> svcSearchResult = new ServiceOutcome<>();
 
 		try {
-			if(pathKey != null) {	
-				byte[] getbyteArrayFromS3 = awsUtils.getbyteArrayFromS3(DIGIVERIFIER_DOC_BUCKET_NAME, pathKey);
-				base64String = Base64.getEncoder().encodeToString(getbyteArrayFromS3);
-				svcSearchResult.setMessage(base64String);
-				svcSearchResult.setOutcome(true);
+			if(pathKey != null) {
+				if(viewDocument) {
+					String getUrl = awsUtils.getPresignedUrl(DIGIVERIFIER_DOC_BUCKET_NAME, pathKey);	
+					svcSearchResult.setMessage(getUrl);
+					svcSearchResult.setOutcome(true);	
+				}
+				else {	
+					byte[] getbyteArrayFromS3 = awsUtils.getbyteArrayFromS3(DIGIVERIFIER_DOC_BUCKET_NAME, pathKey);
+					base64String = Base64.getEncoder().encodeToString(getbyteArrayFromS3);
+					svcSearchResult.setMessage(base64String);
+					svcSearchResult.setOutcome(true);
+				}
 			}
 		} catch (Exception e) {
 			log.info("Exception in getAgentUploadedDocument{ }"+e);
@@ -3308,117 +3534,240 @@ public class UserServiceImpl implements UserService {
 			String proofDocumentNew, String addressCheck) {
 		ServiceOutcome<VendorChecks> svcSearchResult = new ServiceOutcome<VendorChecks>();
 		try {
+
 			Long candidateId = null;
 
 			JSONObject jsonObject = new JSONObject(vendorChecks);
-			System.out.println("BLOCK 3");
 
 			if (jsonObject.has("candidateId")) {
-//	        	candidateId = Long.parseLong(jsonObject.getString("candidateId"));
+				//	        	candidateId = Long.parseLong(jsonObject.getString("candidateId"));
 				candidateId = jsonObject.getLong("candidateId");
 			}
+			
+			String addressCheckCleaned = addressCheck.replaceAll("[\\[\\]\"\\\\]", "");
+
+			String addressValue = Arrays.stream(addressCheck.replaceAll("[\\[\\]\"\\\\]", "").split(","))
+					.map(String::trim)
+					.filter(pair -> pair.startsWith("address:"))
+					.map(pair -> pair.substring(pair.indexOf(":") + 1))
+					.findFirst()
+					.orElse(null);
+
+			String cleanedInput = addressCheck.replaceAll("[\\[\\]\"\\\\]", "");
+
+			// Split into individual address pairs
+			List<String> addressPairs = Arrays.stream(cleanedInput.split("},\\{"))
+					.map(pair -> pair.replace("{", "").replace("}", ""))
+					.collect(Collectors.toList());
+
+			// Extract the addresses based on their type
+			//		        Map<String, String> addresses = addressPairs.stream()
+			//		                .map(pair -> pair.split(","))
+			//		                .filter(parts -> parts.length == 2)
+			//		                .collect(Collectors.toMap(
+			//		                        parts -> parts[0].split(":")[1].trim(), // addressType
+			//		                        parts -> parts[1].split(":")[1].trim()  // address
+			//		                ));
+
+			System.out.println("addressPairs : "+addressPairs);
+			Map<String, String> addresses = addressPairs.stream()
+					.map(pair -> {
+						// Use regex to find the addressType and address values
+						String addressType = pair.replaceAll(".*addressType:([^,]+),.*", "$1").trim();
+						String address = pair.replaceAll(".*address:(.*)", "$1").trim();
+						return new String[]{addressType, address};
+					})
+					.filter(parts -> parts.length == 2)
+					.collect(Collectors.toMap(
+							parts -> parts[0], // addressType
+							parts -> parts[1]  // address
+							));
+			
+			Map<String, String> criminal = addressPairs.stream()
+					.map(pair -> {
+						// Use regex to find the addressType and address values
+						String addressType = pair.replaceAll(".*criminal:([^,]+),.*", "$1").trim();
+						String address = pair.replaceAll(".*criminalAddress:(.*)", "$1").trim();
+						return new String[]{addressType, address};
+					})
+					.filter(parts -> parts.length == 2)
+					.collect(Collectors.toMap(
+							parts -> parts[0], // addressType
+							parts -> parts[1]  // address
+							));
+
+			String presentAddress = addresses.getOrDefault("present", null);
+			String permanentAddress = addresses.getOrDefault("permanent", null);
+			
+			String criminalPresentAddress = criminal.getOrDefault("present", null);
+			String criminalPermanentAddress = criminal.getOrDefault("permanent", null);
+
+			// Print the results
+//			System.out.println("Present Address: " + presentAddress);
+//			System.out.println("Permanent Address: " + permanentAddress);
+//			
+//			System.out.println("Criminal Present Address: " + criminalPresentAddress);
+//			System.out.println("Criminal Permanent Address: " + criminalPermanentAddress);
+
+			List<String> keysList = Arrays.stream(proofDocumentNew.split(","))
+					.map(kv -> kv.replaceAll("[\\[\\]\"]", "").trim().split("\\s+")[0])
+					.collect(Collectors.toList());
+			
+//			System.out.println("proofDocumentNew : "+proofDocumentNew);
+			Map<String, String> keyValueMap2 = new HashMap<>();
+			if(proofDocumentNew != null && !proofDocumentNew.isEmpty()) {	
+				String[] parts2 = proofDocumentNew.substring(1, proofDocumentNew.length() - 1).split(",");
+				for (String part : parts2) {
+					String[] keyValue = part.split(":");
+					// Remove quotes from keys and values
+					if (keyValue.length >= 2) {
+			            // Remove quotes from keys and values
+			            String key = keyValue[0].replaceAll("\"", "");
+			            String value = keyValue[1].replaceAll("\"", "");
+			            keyValueMap2.put(key, value);
+			        }
+				}
+
+			}
+
+//			System.out.println("KEYLIST : "+keysList);
+			Candidate byCandidateId2 = candidateRepository.findByCandidateId(candidateId);
+			Orgclientscope byAccountName = orgClientScopeRepository.findByAccountName(byCandidateId2.getAccountName().toLowerCase());
+			//	        List<String> checkList = Arrays.asList(byAccountName.getConventionalCandidateCheck().split(","));
+//			List<String> checkList = Arrays.stream(byAccountName.getConventionalCandidateCheck().split(","))
+//					.filter(s -> !s.trim().equals("Address"))
+//					.collect(Collectors.toList());
+			List<String> checkList = Arrays.stream(byAccountName.getConventionalCandidateCheck().split(","))
+                    .collect(Collectors.toList());
+//FILE VALIDATION START
+				ArrayList<String> remainingChecks = new ArrayList<>(checkList);
+				remainingChecks.removeAll(keysList);
+				if (keyValueMap2 != null && !keyValueMap2.isEmpty() && keyValueMap2.containsKey("Criminal present") && !keyValueMap2.containsKey("Criminal permanent")) {
+//		            System.out.println("criminal permanent");
+		            remainingChecks.add("Criminal permanent");  
+				}
+				if(keyValueMap2 != null && !keyValueMap2.isEmpty() && keyValueMap2.containsKey("ID Aadhar") && !keyValueMap2.containsKey("ID PAN")) {
+		            remainingChecks.add("ID PAN"); 
+				}
+				else if(keyValueMap2 != null && !keyValueMap2.isEmpty() && !keyValueMap2.containsKey("ID Aadhar") && keyValueMap2.containsKey("ID PAN")) {
+		            remainingChecks.add("ID Aadhar"); 
+				}
+				if (byAccountName.getConventionalCandidateCheck().contains("Address")) {
+					if(keyValueMap2 != null && !keyValueMap2.isEmpty() && keyValueMap2.containsKey("Address present") && !keyValueMap2.containsKey("Address permanent")) {
+						remainingChecks.add("Address Permanent"); 
+					}
+				}
+//				System.out.println("Remaining Checks: " + remainingChecks);
+				if(!remainingChecks.isEmpty()) {
+					 String message = remainingChecks + "\nThis Checks Mandatory.";
+						svcSearchResult.setMessage(message);
+						svcSearchResult.setOutcome(false);
+						throw new Exception("Validation failed: Keys mismatch >>>> ");
+				}
+				//FILE VALIDATION END
+
+//	            String message = remainingChecks + "\nThis Checks Mandatory.";
+//				svcSearchResult.setMessage(message);
+//				svcSearchResult.setOutcome(false);
+//				throw new Exception("Validation failed: Keys mismatch >>>> ");
+//			}
+
+				//INPUT VALIDATION FOR ADDRESS AND CRIMINAL START
+			if (byAccountName.getConventionalCandidateCheck().contains("Address")) {
+				//	        	if( addressValue != null && !addressValue.isEmpty() ) {
+				//	        		log.info("Address Check is Not Empty!!!!");
+				//	        	}
+				if (presentAddress != null && !presentAddress.isEmpty() && permanentAddress != null && !permanentAddress.isEmpty()) {
+					log.info("Both present and permanent addresses are available.");
+					// Perform the action here
+				}
+				else {
+					log.info("Address Check is Empty!!!");
+					//	 	            svcSearchResult.setMessage("Both present and permanent addresses Mandatory.");
+					if(permanentAddress.isEmpty() && !keyValueMap2.containsKey("Address permanent")) {	
+						svcSearchResult.setMessage("Address Permanent Upload File and Both Address Inputs Mandatory.");
+					}else {
+						svcSearchResult.setMessage("Both Address Inputs Mandatory.");	
+					}
+					svcSearchResult.setOutcome(false);
+					throw new Exception("Validation failed: Keys mismatch");
+				}
+			}
+			if (byAccountName.getConventionalCandidateCheck().contains("Criminal")) {
+				//	        	if( addressValue != null && !addressValue.isEmpty() ) {
+				//	        		log.info("Address Check is Not Empty!!!!");
+				//	        	}
+				if (criminalPresentAddress != null && !criminalPresentAddress.isEmpty() && criminalPermanentAddress != null && !criminalPermanentAddress.isEmpty()) {
+					log.info("Both Criminal present and Criminal permanent are available.");
+					// Perform the action here
+				}
+				else {
+					log.info("Criminal Check is Empty!!!");
+					//	 	            svcSearchResult.setMessage("Both present and permanent addresses Mandatory.");
+					if(criminalPermanentAddress.isEmpty() && !keyValueMap2.containsKey("Criminal permanent")) {	
+						svcSearchResult.setMessage("Criminal Permanent Upload File and Both Address Inputs Mandatory.");
+					}else {
+						svcSearchResult.setMessage("Both Criminal Inputs Mandatory.");	
+					}
+//					svcSearchResult.setMessage("Criminal Permanent Upload File and Both Criminal Inputs Mandatory.");
+					svcSearchResult.setOutcome(false);
+					throw new Exception("Validation failed: Keys mismatch");
+				}
+			}
+			//INPUT VALIDATION FOR ADDRESS AND CRIMINAL END
 
 			String mergedString = jsonObject.optString("mergedString2");
 			mergedString = mergedString.replaceAll("\\\\", "");
-//			System.out.println("mergedString : "+mergedString);
-
-
-//	        JSONObject jsonObject2 = new JSONObject(mergedString);
-//	        System.out.println("jsonObject2: " + jsonObject2);
 
 			// Create a new JSONObject
 			JSONObject jsonObject2 = new JSONObject();
 
-//	        JSONObject jsonAddressObject = new JSONObject();
+			//	        JSONObject jsonAddressObject = new JSONObject();
 
 			// Parse the mergedString
 			String[] keyValuePairs = mergedString.substring(1, mergedString.length() - 1).split(",\\s*");
 
-			// Iterate through each key-value pair
-//			for (String pair : keyValuePairs) {
-//				System.out.println("BLOCK 8");
-//				// Split the pair into key and value
-//				String[] entry = pair.split(":", 2);
-//				String key = entry[0].replaceAll("\"", "").trim(); // Remove quotes and trim any leading/trailing
-//																	// whitespace
-//				String value = entry[1].replaceAll("\"", "").trim(); // Remove quotes and trim any leading/trailing
-//																		// whitespace
-//
-//				// Remove trailing commas and curly braces from value if they exist
-//				value = value.replaceAll("[,\\}]*$", "");
-//
-//				System.out.println("JSONOBJECT2 : "+jsonObject2);
-//				System.out.println("KEY : "+key);
-//				System.out.println("VALUE : "+value);
-//				
-//				// Check if the key already exists in the JSONObject
-//				if (jsonObject2.has(key)) {
-//					System.out.println("BLOCK 9");
-//					// If key exists, get the existing value and append the new value to it
-//					Object existingValue = jsonObject2.get(key);
-//					if (existingValue instanceof JSONArray) {
-//						((JSONArray) existingValue).put(value);
-//					} else {
-//						JSONArray newArray = new JSONArray();
-//						newArray.put(existingValue);
-//						newArray.put(value);
-//						jsonObject2.put(key, newArray);
-//					}
-//				} else {
-//					System.out.println("BLOCK 10");
-//					// If key does not exist, add the key-value pair to the JSONObject as an array
-//					JSONArray newArray = new JSONArray();
-//					newArray.put(value);
-//					jsonObject2.put(key, newArray);
-//				}
-//			}
-			
+
 			for (String pair : keyValuePairs) {
-			    // Split the pair into key and value
-			    String[] entry = pair.split(":", 2);
-//			    System.out.println("entry : " + Arrays.toString(entry));
-			    // Ensure that the entry has at least two elements before proceeding
-			    if (entry.length >= 2) {
-			        String key = entry[0].replaceAll("\"", "").trim(); // Remove quotes and trim any leading/trailing whitespace
-			        String value = entry[1].replaceAll("\"", "").trim(); // Remove quotes and trim any leading/trailing whitespace
+				// Split the pair into key and value
+				String[] entry = pair.split(":", 2);
+				// Ensure that the entry has at least two elements before proceeding
+				if (entry.length >= 2) {
+					String key = entry[0].replaceAll("\"", "").trim(); // Remove quotes and trim any leading/trailing whitespace
+					String value = entry[1].replaceAll("\"", "").trim(); // Remove quotes and trim any leading/trailing whitespace
 
-			        // Remove trailing commas and curly braces from value if they exist
-			        value = value.replaceAll("[,\\}]*$", "");
+					// Remove trailing commas and curly braces from value if they exist
+					value = value.replaceAll("[,\\}]*$", "");
 
-//			        System.out.println("JSONOBJECT2 : "+jsonObject2);
-//			        System.out.println("KEY : "+key);
-//			        System.out.println("VALUE : "+value);
-
-			        // Check if the key already exists in the JSONObject
-			        if (jsonObject2.has(key)) {
-			            // If key exists, get the existing value and append the new value to it
-			            Object existingValue = jsonObject2.get(key);
-			            if(!key.equals("documents")) {
-			                if (existingValue instanceof JSONArray) {
-			                    ((JSONArray) existingValue).put(value);
-			                } else {
-			                    JSONArray newArray = new JSONArray();
-			                    newArray.put(existingValue);
-			                    newArray.put(value);
-			                    jsonObject2.put(key, newArray);
-			                }
-			            }
-			        } else {
-			            if(!key.equals("documents")) {
-			                // If key does not exist, add the key-value pair to the JSONObject as an array
-			                JSONArray newArray = new JSONArray();
-			                newArray.put(value);
-			                jsonObject2.put(key, newArray);
-			            }
-			        }
-			    } else {
-			        // Handle cases where the entry doesn't have enough elements
-//			        System.err.println("Invalid pair format: " + pair);
-			    }
+					// Check if the key already exists in the JSONObject
+					if (jsonObject2.has(key)) {
+						// If key exists, get the existing value and append the new value to it
+						Object existingValue = jsonObject2.get(key);
+						if(!key.equals("documents")) {
+							if (existingValue instanceof JSONArray) {
+								((JSONArray) existingValue).put(value);
+							} else {
+								JSONArray newArray = new JSONArray();
+								newArray.put(existingValue);
+								newArray.put(value);
+								jsonObject2.put(key, newArray);
+							}
+						}
+					} else {
+						if(!key.equals("documents")) {
+							// If key does not exist, add the key-value pair to the JSONObject as an array
+							JSONArray newArray = new JSONArray();
+							newArray.put(value);
+							jsonObject2.put(key, newArray);
+						}
+					}
+				} else {
+					// Handle cases where the entry doesn't have enough elements
+					//			        System.err.println("Invalid pair format: " + pair);
+				}
 			}
-			
 
-//			System.out.println("proof Doc : "+proofDocumentNew);
+			//			System.out.println("proof Doc : "+proofDocumentNew);
 			String[] parts = proofDocumentNew.substring(1, proofDocumentNew.length() - 1).split(",");
 			Map<String, String> keyValueMap = new HashMap<>();
 			for (String part : parts) {
@@ -3428,7 +3777,13 @@ public class UserServiceImpl implements UserService {
 				String value = keyValue[1].replaceAll("\"", "");
 				keyValueMap.put(key, value);
 			}
-
+			
+			User byUserEmailId = userRepository.findByUserEmailId("digivendor@digiverifier.com");
+			Long vendorId = null;
+			if(byUserEmailId != null) {
+				vendorId = byUserEmailId.getUserId();
+			}
+			
 			if (jsonObject2.has("Education")) {
 				log.info("EDUCATION CHECK =====================");
 				Object educationValue = jsonObject2.get("Education");
@@ -3446,7 +3801,8 @@ public class UserServiceImpl implements UserService {
 					Source source = sourceRepository.findBySourceName("Education");
 					Long sourceId = source.getSourceId();
 					// String education = jsonEducation.getString("Education");
-					jsonEducation.put("vendorId", "254");
+//					jsonEducation.put("vendorId", "254");
+					jsonEducation.put("vendorId", vendorId);
 					jsonEducation.put("sourceId", sourceId);
 					jsonEducation.put("checkType", "Education " + educationType);
 					jsonEducation.put("type", educationType);
@@ -3455,22 +3811,22 @@ public class UserServiceImpl implements UserService {
 
 					String updatedVendorChecks = jsonEducation.toString();
 
-//					System.out.println("updatedVendorChecks : " + updatedVendorChecks);
+					//					System.out.println("updatedVendorChecks : " + updatedVendorChecks);
 
 					for (Map.Entry<String, String> entry : keyValueMap.entrySet()) {
-//						System.out.println("Value for key : " + entry.getKey() + " : " + entry.getValue());
-//						System.out.println("Education: out " + educationType.toString());
-						
-						 if (entry.getKey().contains("Education UG")) {
-//							 System.out.println("INSIDE EDUCATION::");
-//				                System.out.println("Value for key : " + entry.getKey());
-				            }
+						//						System.out.println("Value for key : " + entry.getKey() + " : " + entry.getValue());
+						//						System.out.println("Education: out " + educationType.toString());
+
+//						if (entry.getKey().contains("Education UG")) {
+//							//							 System.out.println("INSIDE EDUCATION::");
+//							//				                System.out.println("Value for key : " + entry.getKey());
+//						}
 
 						if (entry.getKey().contains("Education "+educationType.trim())) {
-//							System.out.println("Education: In " + educationType.toString());
+							//							System.out.println("Education: In " + educationType.toString());
 
 							byte[] bytes = Base64.getDecoder().decode(entry.getValue());
-//		            	        System.out.println("Bytes Array>>"+bytes);
+							//		            	        System.out.println("Bytes Array>>"+bytes);
 							saveInitiateVendorChecks(updatedVendorChecks, null, bytes);
 
 						}
@@ -3498,7 +3854,7 @@ public class UserServiceImpl implements UserService {
 					Source source = sourceRepository.findBySourceName("Employment");
 					Long sourceId = source.getSourceId();
 					// String education = jsonEducation.getString("Education");
-					jsonEmployment.put("vendorId", "254");
+					jsonEmployment.put("vendorId", vendorId);
 					jsonEmployment.put("sourceId", sourceId);
 					jsonEmployment.put("checkType", "Employment " + employmentType);
 					jsonEmployment.put("type", employmentType);
@@ -3506,18 +3862,18 @@ public class UserServiceImpl implements UserService {
 					jsonEmployment.put("candidateId", candidateId);
 
 					String updatedVendorChecks = jsonEmployment.toString();
-//					System.out.println("updatedVendorChecks : " + updatedVendorChecks);
+					//					System.out.println("updatedVendorChecks : " + updatedVendorChecks);
 
 
 					for (Map.Entry<String, String> entry : keyValueMap.entrySet()) {
-//						System.out.println("Value for key : " + entry.getKey() + " : " + entry.getValue());
-//						System.out.println("Employment: out " + employmentType.toString());
+						//						System.out.println("Value for key : " + entry.getKey() + " : " + entry.getValue());
+						//						System.out.println("Employment: out " + employmentType.toString());
 
 						if (entry.getKey().contains("Employment "+employmentType.trim())) {
-//							System.out.println("Employment: IN " + employmentType.toString());
+							//							System.out.println("Employment: IN " + employmentType.toString());
 
 							byte[] bytes = Base64.getDecoder().decode(entry.getValue());
-//		            	        System.out.println("Bytes Array>>"+bytes);
+							//		            	        System.out.println("Bytes Array>>"+bytes);
 							saveInitiateVendorChecks(updatedVendorChecks, null, bytes);
 
 						}
@@ -3538,13 +3894,13 @@ public class UserServiceImpl implements UserService {
 					if (idType.endsWith("}")) {
 						idType = idType.substring(0, idType.length() - 1);
 					}
-//					System.out.println("id: " + idType.toString());
+					//					System.out.println("id: " + idType.toString());
 
 					JSONObject jsonId = new JSONObject();
 					Source source = sourceRepository.findBySourceName("ID Items");
 					Long sourceId = source.getSourceId();
 					// String education = jsonEducation.getString("Education");
-					jsonId.put("vendorId", "254");
+					jsonId.put("vendorId", vendorId);
 					jsonId.put("sourceId", sourceId);
 					jsonId.put("checkType", "ID " + idType);
 					jsonId.put("type", idType);
@@ -3558,7 +3914,7 @@ public class UserServiceImpl implements UserService {
 						if (entry.getKey().equals("ID " + idType)) {
 
 							byte[] bytes = Base64.getDecoder().decode(entry.getValue());
-//		            	        System.out.println("Bytes Array>>"+bytes);
+							//		            	        System.out.println("Bytes Array>>"+bytes);
 							saveInitiateVendorChecks(updatedVendorChecks, null, bytes);
 
 						}
@@ -3573,43 +3929,51 @@ public class UserServiceImpl implements UserService {
 
 			JsonArray jsonArray = new JsonParser().parse(addressCheck).getAsJsonArray();
 
-			// Iterate through the JsonArray and print each JsonObject
-			for (JsonElement element : jsonArray) {
-				JsonObject jsonObject3 = element.getAsJsonObject();
-//				System.out.println("addressType: " + jsonObject3.get("addressType").getAsString());
-//				System.out.println("address: " + jsonObject3.get("address").getAsString());
-			}
-
-			if (addressCheck != null && !addressCheck.isEmpty()) {
-//				System.out.println("AddressCheck IN : ");
+			if (addressCheck != null && !addressCheck.isEmpty() && byAccountName.getConventionalCandidateCheck().contains("Address")) {
+				//				System.out.println("AddressCheck IN : ");
 				JsonArray jsonArrayAddress = new JsonParser().parse(addressCheck).getAsJsonArray();
 
 				// Loop through the JsonArray and extract addressType and address from each
 				// JsonObject
 				for (int i = 0; i < jsonArrayAddress.size(); i++) {
 					JsonObject jsonObjectAddress = jsonArray.get(i).getAsJsonObject();
+		            if (jsonObjectAddress.has("addressType")) {
+		            	
+//		            }
 					String addressType = jsonObjectAddress.get("addressType").getAsString();
 					String address = jsonObjectAddress.get("address").getAsString();
-//					System.out.println("Object " + (i + 1) + ":");
-//					System.out.println("addressType: " + addressType);
-//					System.out.println("address: " + address);
+//										System.out.println("Object " + (i + 1) + ":");
+//										System.out.println("addressType: " + addressType);
+//										System.out.println("address: " + address);
 
 					JSONObject jsonAddress = new JSONObject();
 					Source source = sourceRepository.findBySourceName("Address");
 					Long sourceId = source.getSourceId();
 					// String education = jsonEducation.getString("Education");
-					jsonAddress.put("vendorId", "254");
+					jsonAddress.put("vendorId", vendorId);
 					jsonAddress.put("sourceId", sourceId);
 					jsonAddress.put("checkType", "Address " + addressType);
 					jsonAddress.put("type", addressType);
 					jsonAddress.put("Address", address);
-					jsonAddress.put("documentname", "NA");
+					jsonAddress.put("documentname", "Address " + addressType);
 					jsonAddress.put("candidateId", candidateId);
 
 					String updatedVendorChecks = jsonAddress.toString();
-					saveInitiateVendorChecks(updatedVendorChecks, null, null);
+//					saveInitiateVendorChecks(updatedVendorChecks, null, null);
+					for (Map.Entry<String, String> entry : keyValueMap.entrySet()) {
+						if (entry.getKey().equals("Address " + addressType)) {
+							byte[] bytes = Base64.getDecoder().decode(entry.getValue());
+							//		            	        System.out.println("Bytes Array>>"+bytes);
+							saveInitiateVendorChecks(updatedVendorChecks, null, bytes);
+
+						}
+					}
+					if (!keyValueMap.containsKey("Address present")) {
+						saveInitiateVendorChecks(updatedVendorChecks, null, null);
+					}
 
 				}
+			}
 			}
 
 			if (jsonObject2.has("criminal")) {
@@ -3617,23 +3981,30 @@ public class UserServiceImpl implements UserService {
 				Object criminalValue = jsonObject2.get("criminal");
 
 				JSONArray criminalArray = jsonObject2.getJSONArray("criminal");
+				JsonArray jsonArrayCriminal = new JsonParser().parse(addressCheck).getAsJsonArray();
+				for (int j = 0; j < jsonArrayCriminal.size(); j++) {
 
-				for (int i = 0; i < criminalArray.length(); i++) {
-					// Get the value at index i
-					String criminalType = criminalArray.getString(i);
-					if (criminalType.endsWith("}")) {
-						criminalType = criminalType.substring(0, criminalType.length() - 1);
-					}
+					JsonObject jsonObjectCriminal = jsonArray.get(j).getAsJsonObject();
+					if(jsonObjectCriminal.has("criminal")) {
+						
+//					}
+					String criminalAddress = jsonObjectCriminal.get("criminalAddress").getAsString();
+					
+					String criminalType = jsonObjectCriminal.get("criminal").getAsString();
+//					String address = jsonObjectAddress.get("address").getAsString();
+//				}
+					
 
 					JSONObject jsonCriminal = new JSONObject();
 					Source source = sourceRepository.findBySourceName("Criminal");
 					Long sourceId = source.getSourceId();
 					// String education = jsonEducation.getString("Education");
-					jsonCriminal.put("vendorId", "254");
+					jsonCriminal.put("vendorId", vendorId);
 					jsonCriminal.put("sourceId", sourceId);
 					jsonCriminal.put("checkType", "Criminal " + criminalType);
 					jsonCriminal.put("type", criminalType);
 					jsonCriminal.put("documentname", "Criminal " + criminalType);
+					jsonCriminal.put("criminalAddress",criminalAddress);
 					jsonCriminal.put("candidateId", candidateId);
 
 					String updatedVendorChecks = jsonCriminal.toString();
@@ -3642,21 +4013,26 @@ public class UserServiceImpl implements UserService {
 
 						if (entry.getKey().equals("Criminal " + criminalType)) {
 							byte[] bytes = Base64.getDecoder().decode(entry.getValue());
-//		            	        System.out.println("Bytes Array>>"+bytes);
+							//		            	        System.out.println("Bytes Array>>"+bytes);
 							saveInitiateVendorChecks(updatedVendorChecks, null, bytes);
 
 						}
 					}
+					if (!keyValueMap.containsKey("Criminal present")) {
+						saveInitiateVendorChecks(updatedVendorChecks, null, null);
+					}
 
 				}
-
 			}
+			}
+
+//			}
 			if (keyValueMap.containsKey("Database ")) {
 				log.info("DATABASE");
 				JSONObject jsonDatabase = new JSONObject();
 				Source source = sourceRepository.findBySourceName("Global Database check");
 				Long sourceId = source.getSourceId();
-				jsonDatabase.put("vendorId", "254");
+				jsonDatabase.put("vendorId", vendorId);
 				jsonDatabase.put("sourceId", sourceId);
 				jsonDatabase.put("checkType", source.getSourceName());
 				jsonDatabase.put("type", "NA");
@@ -3670,7 +4046,7 @@ public class UserServiceImpl implements UserService {
 					if (entry.getKey().equals("Database ")) {
 
 						byte[] bytes = Base64.getDecoder().decode(entry.getValue());
-//            	        System.out.println("Bytes Array>>"+bytes);
+						//            	        System.out.println("Bytes Array>>"+bytes);
 						saveInitiateVendorChecks(updatedVendorChecks, null, bytes);
 
 					}
@@ -3690,7 +4066,9 @@ public class UserServiceImpl implements UserService {
 			if (candidateStatus != null) {
 				byCandidateId.setSubmittedOn(new Date());
 				candidateRepository.save(byCandidateId);
-				ConventionalCandidateVerificationState candidateVerificationState = new ConventionalCandidateVerificationState();
+				ConventionalCandidateVerificationState candidateVerificationState = conventionalCandidateVerificationStateRepository.findByCandidateCandidateId(candidateId);
+				if(candidateVerificationState == null)
+					candidateVerificationState = new ConventionalCandidateVerificationState();
 				Date date = new Date();
 				ZonedDateTime zonedDateTime = date.toInstant().atZone(ZoneId.systemDefault());
 				candidateVerificationState.setCandidate(byCandidateId);
@@ -3698,17 +4076,88 @@ public class UserServiceImpl implements UserService {
 				conventionalCandidateVerificationStateRepository.save(candidateVerificationState);
 				emailSentTask.loa(byCandidateId.getCandidateCode());
 				svcSearchResult.setMessage("Thank you Form is Submitted");
-				svcSearchResult.setOutcome(true);
 			}
 
 		} catch (Exception e) {
+			log.info(svcSearchResult.getMessage());
 			log.info("Exception in saveConventionalCandidateChecks{ }" + e.getMessage());
-			svcSearchResult.setMessage("Something went Wrong.");
+			svcSearchResult.setMessage(svcSearchResult.getMessage() != null ? svcSearchResult.getMessage() : "Something went Wrong.");
 			svcSearchResult.setOutcome(false);
 		}
 
 		return svcSearchResult;
 	}
+	
+	public ServiceOutcome<?> getECourtProof(VendorInitiatDto vendorInitiatDto) {
+		ServiceOutcome<?> svcSearchResult = new ServiceOutcome<>();
 
+		try {
+		       RestTemplate restTemplate = new RestTemplate();
+
+		       ECourtRequestDto requestDto = new ECourtRequestDto();
+		        requestDto.setPettitioner(vendorInitiatDto.getCandidateName());
+		        requestDto.setFathername(vendorInitiatDto.getFatherName());
+		        requestDto.setDob(vendorInitiatDto.getDateOfBirth());
+//		        requestDto.setDob(vendorInitiatDto.getAddress());
+		        log.info("E court request body {}", requestDto);
+		        HttpHeaders headers = new HttpHeaders();
+		        headers.set("Content-Type", "application/json");
+
+		        HttpEntity<ECourtRequestDto> requestEntity = new HttpEntity<>(requestDto, headers);
+		        ResponseEntity<String> response = restTemplate.exchange(eCourtURL, HttpMethod.POST, requestEntity, String.class);
+			    
+				JSONObject obj = new JSONObject(response.getBody());
+				JSONObject records = null;
+				String message = "Something went wrong";
+				boolean outcome = false;
+
+				if(obj.has("records"))
+					records = obj.getJSONObject("records");
+				if(records != null) {
+			        ObjectMapper objectMapper = new ObjectMapper();
+			        ECourtProofResponseDto responseDto = objectMapper.readValue(records.toString(), ECourtProofResponseDto.class);
+			        log.info("E court response and fetched for candidate Id {}, {}", responseDto.getStatus(), vendorInitiatDto.getCandidateId());
+
+			        if(responseDto.getStatus() != null)
+				    	  if(responseDto.getStatus().equalsIgnoreCase("Success")) {
+				    	      String path = "Candidate/".concat("Generated".concat("/E_COURT_PROOF").concat(".pdf"));
+				    	      String base64String = responseDto.getPdf();
+				    	      byte[] byteArray = Base64.getDecoder().decode(base64String);
+				    	      awsUtils.uploadFileAndGetPresignedUrl_bytes(DIGIVERIFIER_DOC_BUCKET_NAME, path, byteArray);
+				    	      Content content = new Content();
+				    	      content.setCandidateId(vendorInitiatDto.getCandidateId());
+				    	      content.setContentCategory(ContentCategory.OTHERS);
+//				    	      content.setContentSubCategory(ContentSubCategory.E_COURT_PROOF);
+			
+				    	      content.setFileType(FileType.PDF);
+				    	      content.setContentType(ContentType.ISSUED);
+				    	      content.setBucketName(DIGIVERIFIER_DOC_BUCKET_NAME);
+				    	      content.setPath(path);
+				    	      Content savedObj = contentRepository.save(content);
+				    	      log.info("E court proof saved {}", savedObj);
+				    	      
+				    	      if(savedObj != null) {
+				    				Optional<VendorChecks> vendorCheck = vendorChecksRepository.findById(vendorInitiatDto.getVendorcheckId());
+				    				if(vendorCheck.isPresent()) {
+				    					vendorCheck.get().setECourtProofContentId(savedObj.getContentId());
+				    					vendorChecksRepository.save(vendorCheck.get());
+				    					
+				    					message = savedObj.getContentId().toString();
+				    					outcome = true;
+				    				}
+				    	      }
+				    	  }
+				}
+				
+			svcSearchResult.setOutcome(outcome);
+			svcSearchResult.setMessage(message);
+		} catch (Exception e) {
+			log.error("Exception occured in getECourtProof method in USERSERVICEIMPL --> " + e);
+			svcSearchResult.setOutcome(false);
+			svcSearchResult.setMessage("Something went wrong");
+		}
+	      
+	      return svcSearchResult;
+	}
 
 }

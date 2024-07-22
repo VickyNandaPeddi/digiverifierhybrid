@@ -1,5 +1,6 @@
 package com.aashdit.digiverifier.digilocker.controller;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -551,6 +552,215 @@ public class DigilockerAccessController {
 		ServiceOutcome<Boolean> svcSearchResult=digilockerService.getDLEdudocument(digidetails,res);
 		return new ResponseEntity<ServiceOutcome<Boolean>>(svcSearchResult, HttpStatus.OK);
 
+	}
+	
+	
+	@Operation(summary = "Getting candidate current status")
+	@GetMapping(value = "/getCandidateCurrentStatus/{candidateCode}")
+    public ServiceOutcome<String> getCandidateCurrentStatus(@PathVariable String candidateCode){
+		ServiceOutcome<String> serviceOutcome = new ServiceOutcome<>();
+		String url = "";
+				
+		try {
+			if(candidateCode!=null) {
+				ServiceOutcome<CandidateStatus> candidate = candidateService.getCandidateStatusByCandidateCode(candidateCode);
+				ServiceOutcome<List<String>> configCodes = candidateService.getServiceConfigCodes(candidateCode, null);
+				log.info("ORGANIZATION ALLOWED THE SERVICES LIST IN EMAIL CLICK::{}",configCodes.getData());
+				if(candidate.getData().getStatusMaster().getStatusCode().equals("REINVITE")) {
+					List<CandidateStatusHistory> candidateStatusHistories = candidateStatusHistoryRepository
+							.findAllByCandidateCandidateId(candidate.getData().getCandidate().getCandidateId());
+
+					List<CandidateStatusHistory> filteredList = candidateStatusHistories.stream()
+			                .filter(history -> !history.getStatusMaster().getStatusCode().equals("INVITATIONEXPIRED"))
+			                .filter(history -> !history.getStatusMaster().getStatusCode().equals("REINVITE"))
+			                .collect(Collectors.toList());
+					
+					 CandidateStatusHistory lastElement = filteredList.get(filteredList.size() - 1);
+					 StatusMaster lastStatus = lastElement.getStatusMaster();
+					candidate.getData().setStatusMaster(lastStatus);
+					log.info("REINVITE CASE ==>  REDIRECT FROM LINK TO::{}",lastStatus.getStatusCode());
+				}
+				
+				if(candidate.getOutcome()) {
+					String currentStatus = candidate.getData().getStatusMaster().getStatusCode();
+					Candidate findByCandidateCode = candidate.getData().getCandidate();
+					
+					switch (candidate.getData().getStatusMaster().getStatusCode()) {
+					case "INVITATIONSENT": //case "REINVITE":
+						if(!candidate.getData().getCandidate().getIsLoaAccepted()) {
+							if(findByCandidateCode.getOrganization().getOrganizationName().equalsIgnoreCase("kpmg")) {
+	                            String kpmgpath = environmentVal.getKpmgCrossOrigins()+"/#/candidate/letterAccept/"+candidateCode;
+	                            url = kpmgpath;
+	                        }
+	                        else {
+	                        	url = environmentVal.getLetterAuthPage()+candidateCode;    
+	                        }					
+						}else {
+							if(findByCandidateCode.getOrganization().getOrganizationName().equalsIgnoreCase("kpmg")) {
+	                            String kpmgpath = environmentVal.getKpmgCrossOrigins()+"/#/candidate/itrlogin/"+candidateCode;
+	                            url = kpmgpath;
+							}
+							else {
+								//below condition for the case where some organization does not need digi locker.
+								if(configCodes.getOutcome() && configCodes.getData().contains("DIGILOCKER")) {
+									String responseString = environmentVal.getRedirectAngularToDigilocker()+candidateCode;
+									System.out.println(responseString+"==================================");
+									url = responseString;
+								}else {
+									url = environmentVal.getITRLogin()+candidateCode;
+								}
+							}
+							
+						}
+						
+						break;
+						
+					case "DIGILOCKER":
+						if(candidate.getData().getCandidate().getIsFresher()==null) {
+							if(findByCandidateCode.getOrganization().getOrganizationName().equalsIgnoreCase("kpmg")) {
+	                            String kpmgpath = environmentVal.getKpmgCrossOrigins()+"/#/candidate/cType/"+candidateCode;
+	                            url = kpmgpath;
+	                        }
+	                        else {
+	                        	url = environmentVal.getIsFreshPage()+candidateCode;
+	    						log.info("Is fresher page url {}", environmentVal.getIsFreshPage());                        }
+							
+						}else {
+							if(!candidate.getData().getCandidate().getIsFresher()) {							
+								if(configCodes.getOutcome()) {
+									if(configCodes.getData().contains("ITR") && candidate.getData().getStatusMaster().getStatusCode().equals("DIGILOCKER")) {
+										ServiceOutcome<ServiceSourceMaster> ssm = serviceSource.getServiceSourceMasterByServiceCode("DIGILOCKER");
+										url = environmentVal.getITRLogin()+candidateCode;
+									}else if(configCodes.getData().contains("EPFO") && !candidate.getData().getCandidate().getIsUanSkipped() && (candidate.getData().getStatusMaster().getStatusCode().equals("DIGILOCKER") || candidate.getData().getStatusMaster().getStatusCode().equals("ITR"))) {
+										ServiceOutcome<ServiceSourceMaster> ssm = serviceSource.getServiceSourceMasterByServiceCode("ITR");
+										url = environmentVal.getEPFOLogin()+candidateCode;
+									}else if(configCodes.getData().contains("RELBILLTRUE") && (candidate.getData().getStatusMaster().getStatusCode().equals("DIGILOCKER") || candidate.getData().getStatusMaster().getStatusCode().equals("ITR")|| candidate.getData().getStatusMaster().getStatusCode().equals("EPFO"))) {
+										url = environmentVal.getRelativeBillPage()+candidateCode;
+									}else {
+										url = environmentVal.getCafPage()+candidateCode;
+									}
+								}
+							}else if(candidate.getData().getCandidate().getIsFresher() && configCodes.getData().contains("RELBILLTRUE")) {
+								url = environmentVal.getRelativeBillPage()+candidateCode;
+							}else if(candidate.getData().getCandidate().getIsFresher() && configCodes.getData().contains("RELBILLFALSE")){
+								url = environmentVal.getCafPage()+candidateCode;
+							}
+						}
+						
+						
+						break;
+					case "ITR": 
+						if(configCodes.getOutcome()) {
+							if(configCodes.getData().contains("EPFO") && candidate.getData().getCandidate().getIsUanSkipped()==null) {
+								if(findByCandidateCode.getOrganization().getOrganizationName().equalsIgnoreCase("kpmg")) {
+									 String kpmgpath = environmentVal.getKpmgCrossOrigins()+"/#/candidate/cUanConfirm/"+candidateCode+"/1";
+									 url = kpmgpath;
+								}
+								else {
+									url = environmentVal.getUanConfirmPage()+candidateCode+"/1";	
+								}
+							}else if(configCodes.getData().contains("EPFO") && !candidate.getData().getCandidate().getIsUanSkipped()) {
+								ServiceOutcome<ServiceSourceMaster> ssm = serviceSource.getServiceSourceMasterByServiceCode("ITR");
+								if(findByCandidateCode.getOrganization().getOrganizationName().equalsIgnoreCase("kpmg")) {
+									 String kpmgpath = environmentVal.getKpmgCrossOrigins()+"/#/candidate/epfologin/"+candidateCode;
+									 url = kpmgpath;
+								}
+								else {
+									url = environmentVal.getEPFOLogin()+candidateCode;
+								}
+							}else if(configCodes.getData().contains("EPFO") && candidate.getData().getCandidate().getIsUanSkipped()) {
+								if(configCodes.getData().contains("RELBILLTRUE")) {
+									url = environmentVal.getRelativeBillPage()+candidateCode;
+								}else if(findByCandidateCode.getShowvalidation()) {
+									url = environmentVal.getShowValidation()+candidateCode;
+								}else {
+									url = environmentVal.getCafPage()+candidateCode;
+								}
+							}else {
+								url = environmentVal.getCafPage()+candidateCode;
+							}
+						}
+						break;
+					case "EPFO":
+						
+						if(configCodes.getOutcome()) {
+							if(configCodes.getData().contains("RELBILLTRUE")) {
+								url = environmentVal.getRelativeBillPage()+candidateCode;
+							}else if(findByCandidateCode.getShowvalidation()) {
+								url = environmentVal.getShowValidation()+candidateCode;
+							}else {
+								url = environmentVal.getCafPage()+candidateCode;
+							}
+						}
+						break;
+					case "INVITATIONEXPIRED": case "PROCESSDECLINED":
+						url = environmentVal.getStaticPage()+candidate.getData().getStatusMaster().getStatusCode();
+						break;
+					case "PENDINGAPPROVAL": case "FINALREPORT": case "INTERIMREPORT":
+						if(findByCandidateCode.getOrganization().getOrganizationName().equalsIgnoreCase("kpmg")) {
+							 String kpmgpath = environmentVal.getKpmgCrossOrigins()+"/#/candidate/cStatusMessage/"+"SUBMITTED";
+							 url = kpmgpath;
+						}
+						else {
+							url = environmentVal.getStaticPage()+"SUBMITTED";
+						}			
+						break;
+					case "CANCELLED":
+						url = environmentVal.getCafPage()+"CANCELLED";
+						break;
+					case "RELATIVEADDRESS":
+						url = environmentVal.getCafPage()+candidateCode;
+						break;	
+					}
+					serviceOutcome.setData(url);
+					serviceOutcome.setOutcome(true);
+					serviceOutcome.setMessage("Current status in "+currentStatus);
+				}else{
+					log.error("CANDIDATE ---> Candidate not found --> " + candidateCode);
+					serviceOutcome.setOutcome(false);
+					serviceOutcome.setMessage("Candidate data not found");
+				}
+			}else {
+				log.error("CANDIDATE CODE ---> Candidate code is either empty or null --> " + candidateCode);
+				serviceOutcome.setOutcome(false);
+				serviceOutcome.setMessage("Candidate code is either empty or null");
+			}
+		}catch(Exception e) {
+			log.error("Something went wrong in getCandidateCurrentStatus method --> " + candidateCode ,e);
+			serviceOutcome.setOutcome(false);
+			serviceOutcome.setMessage("Something went wrong.");
+		}
+		return serviceOutcome;
+    }
+	
+	@Operation(summary ="Update Candidate uan skipped or not on cancel click")
+	@GetMapping("/cancelEpfoLogin/{candidateCode}")
+	public ResponseEntity<ServiceOutcome<Candidate>> isUanSkipped(@PathVariable String  candidateCode) {
+		ServiceOutcome<Candidate> svcSearchResult = new ServiceOutcome<Candidate>();
+		try {
+			Candidate candidate = candidateRepository.findByCandidateCode(candidateCode);
+			if (candidate != null) {
+				candidate.setIsUanSkipped(null);
+ 
+				candidate.setLastUpdatedOn(new Date());
+				candidateRepository.save(candidate);
+				svcSearchResult.setData(candidate);
+				svcSearchResult.setOutcome(true);
+				svcSearchResult.setMessage("UAN check saved successfully.");
+			} else {
+				svcSearchResult.setData(null);
+				svcSearchResult.setOutcome(false);
+				svcSearchResult.setMessage("Candidate not found.");
+			}
+ 
+		} catch (Exception e) {
+			log.error("Exception occured in saveIsUanSkipped method in CandidateServiceImpl-->", e);
+			svcSearchResult.setData(null);
+			svcSearchResult.setOutcome(false);
+			svcSearchResult.setMessage("Something went wrong.");
+		}
+ 
+		return new ResponseEntity<ServiceOutcome<Candidate>>(svcSearchResult, HttpStatus.OK);
 	}
 	
 }

@@ -24,9 +24,12 @@
                   <label *ngIf="!vendoruser" for="" class="required">Check Name</label>
                   <h6>{{ vendoruser }}</h6>
                   <select *ngIf="!vendoruser" class="form-control form-control-sm" #b (change)="getsourceid(b.value)"
-                    formControlName="sourceId">
+                    formControlName="sourceId"  [ngStyle]="{
+                      'background-color': hideAddCheckAndVendorTableAndInterimReportButton ? 'lightgray' : '', 
+                      'cursor': hideAddCheckAndVendorTableAndInterimReportButton ? 'not-allowed' : ''
+                    }">
                     <!-- <option [value]="null">--Select--</option> -->
-                    <option *ngFor="let item of getbgv" [value]="item.sourceId">{{ item.sourceName }}</option>
+                    <option [disabled]="hideAddCheckAndVendorTableAndInterimReportButton" *ngFor="let item of getbgv" [value]="item.sourceId">{{ item.sourceName }}</option>
                   </select>
                 </div>
               </div>
@@ -34,11 +37,14 @@
                 <div class="form-group">
                   <label *ngIf="!vendoruser" for="" class="required">Vendor</label>
                   <h6>{{ vendoruser }}</h6>
-                  <select *ngIf="!vendoruser" class="form-control form-control-sm" #b (change)="getvendorid(b.value)"
-                    formControlName="vendorId">
+                  <select *ngIf="!vendoruser"  class="form-control form-control-sm" #b (change)="getvendorid(b.value)"
+                    formControlName="vendorId" [ngStyle]="{
+                      'background-color': hideAddCheckAndVendorTableAndInterimReportButton ? 'lightgray' : '', 
+                      'cursor': hideAddCheckAndVendorTableAndInterimReportButton ? 'not-allowed' : ''
+                    }">
                     <!-- <option [value]="null">--Select--</option> -->
-                    <option [value]="null">NA</option>
-                    <option *ngFor="let item of getVendorID" [value]="item.userId">
+                    <option [disabled]="hideAddCheckAndVendorTableAndInterimReportButton" [value]="null">NA</option>
+                    <option [disabled]="hideAddCheckAndVendorTableAndInterimReportButton"  *ngFor="let item of getVendorID" [value]="item.userId">
                       {{ item.userFirstName }} {{ item.userLastName }} ({{item.employeeId}})
                     </option>
                   </select>
@@ -48,7 +54,12 @@
                 <div class="form-group">
                   <button type="button" class="ms-button btn-primary" #b (change)="getsourceid(b.value)"
                     (click)="opentemplate(tempmodal)"
-                    [disabled]="!vendorlist.controls['sourceId'].value || !vendorlist.controls['vendorId'].value">
+                    [disabled]="!vendorlist.controls['sourceId'].value || !vendorlist.controls['vendorId'].value || hideAddCheckAndVendorTableAndInterimReportButton"
+                    [ngStyle]="{
+                      'background-color': hideAddCheckAndVendorTableAndInterimReportButton ? 'gray' : '', 
+                      'border-color': hideAddCheckAndVendorTableAndInterimReportButton ? 'gray' : '',
+                      'cursor':hideAddCheckAndVendorTableAndInterimReportButton ? 'not-allowed' : ''
+                    }">
                     Add Checks
                   </button>
                 </div>
@@ -57,7 +68,8 @@
               <!--  -->
               <div class="col-md-3 mt-4">
                 <div class="form-group">
-                    <button type="button" (click)="downloadAllDocument()" class="ms-button btn-primary">Download All Document</button>
+                  <button type="button" (click)="downloadAllDocument()" class="ms-button btn-primary">Download All
+                    Document</button>
                 </div>
               </div>
               <!--  -->
@@ -77,153 +89,189 @@
 <span class="line-break"></span>
 <form [formGroup]="formReportApproval">
 
-<div class="container">
-  <div class="card">
-    <div class="card-body">
-      <div class="col-md-12">
-        <div class="table-container">
-          <table class="styled-table">
-            <thead>
-              <tr>
-                <th scope="col">S. No</th>
-                <!-- <th scope="col">Vendor Name</th> -->
-                <th scope="col">Check Name</th>
-                <!-- <th scope="col">Document Name</th>
+  <div class="container">
+    <div class="card">
+      <div class="card-body">
+        <div class="col-md-12">
+          <div class="table-container">
+            <table class="styled-table">
+              <thead>
+                <tr>
+                  <th scope="col">S. No</th>
+                  <!-- <th scope="col">Vendor Name</th> -->
+                  <th scope="col">Check Name</th>
+                  <!-- <th scope="col">Document Name</th>
                 <th scope="col">Initiated On</th> -->
-                <th scope="col">Details</th>
-                <th scope="col">Check Status</th>
-                <th scope="col">Action</th>
-                <th scope="col">Stop Check</th>
-                <th scope="col">Document Download</th>
-                <!-- <th scope="col">Stop Check Initiated on</th>
+                  <th scope="col">Details</th>
+                  <th scope="col">Check Status</th>
+                  <th scope="col">Action</th>
+                  <th scope="col">Stop Check</th>
+                  <th scope="col">Document Download</th>
+                  <th scope="col">Approval <input type="checkbox" [checked]="checkBoxDisable" [disabled]="checkBoxDisable" (click)="selectAll2($event)"></th>
+                  <!-- <th scope="col">Stop Check Initiated on</th>
                 <th scope="col">Raise Insufficiency</th> -->
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of vendorchecksupload; let i = index" [class.stop-check]="item.stopCheck"
-                [style.background-color]="item.stopCheck ? '#D3D3D3' : 'white'">
-                <td>{{ i + 1 }}</td>
-                <!-- <td>{{ item.vendorIds.userFirstName
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of vendorchecksupload; let i = index" [class.stop-check]="item.stopCheck"
+                  [style.background-color]="item.stopCheck ? '#D3D3D3' : 'white'">
+                  <td>{{ i + 1 }}</td>
+                  <!-- <td>{{ item.vendorIds.userFirstName
                   ? item.vendorIds.userFirstName : 'NA' }}</td> -->
-                <td>{{ item.source.sourceName }} - {{item.type}}</td>
-                <!-- <td>{{ item.documentname }}</td>
+                  <td>{{ item.source.sourceName }} - {{item.type}}</td>
+                  <!-- <td>{{ item.documentname }}</td>
                 <td>{{ item.createdOn | date: 'dd-MMM-yyyy'}}</td>
                 <td>{{ item.vendorCheckStatusMaster?.checkStatusName || '' }}</td> -->
-                <td>{{item.details}}</td>
-                <td>{{ (item.vendorCheckStatusMaster?.checkStatusName === 'In Progress') ? 'New Upload' :
-                  (item.vendorCheckStatusMaster?.checkStatusName || '') }}</td>
-                <td>
-                    <span>{{ item.vendorIds && item.vendorIds.userFirstName ? item.vendorIds.userFirstName : 'NA' }}</span>
-                  <button type="button" [disabled]="item.stopCheck === true"
-                    (click)="updateVendorSelectModal(vendorUpdatemodal, item)" class="btn p-0">
-                    <i class='fas fa-edit' style="color: #0078d4; font-size: 1rem;"></i>
-                  </button>
-                </td>
-                <td>
-                  <button type="button" class="btn-stopcheck stopCheck"
-                    [disabled]="item.vendorCheckStatusMaster?.checkStatusName == 'Clear'"
-                    (click)="toggleState(item)">{{item.stopCheck ? 'Continue' : 'Stop Check'}}</button>
-                </td>
-                <td style="cursor: pointer; text-decoration: underline; color: blue;" title="Download Document">
-                  <a href="javascript:void(0);" style="color: inherit; text-decoration: inherit;"
-                  (click)="item.stopCheck ? $event.stopPropagation() : (item.documentname ? downloadPdf(item.agentUploadDocumentPathKey, item.documentname, item.source?.sourceName) : null)">
-                    {{ item.documentname ? item.documentname : 'NA' }}
-                  </a>
-                </td>
-                <!-- <td>{{ item.stopCheckCreatedOn && item.stopCheck ? (item.stopCheckCreatedOn | date:'dd-MMM-yyyy') : '' }}</td>
+                  <!-- <td>{{item.details}}</td> -->
+                  <td>{{ item.details ? item.details : '-' }}
+                    <!-- <button type="button" (click)="downloadPreApprovalReport(item)" class="btn btn-sm btn-primary" title="View E-Court Report">
+                    <i class="fas fa-eye" style="font-size: 12px !important; color: white !important;"></i>
+                  </button> -->
+                  </td>
+                  <td>{{ (item.vendorCheckStatusMaster?.checkStatusName === 'In Progress') ? 'New Upload' :
+                    (item.vendorCheckStatusMaster?.checkStatusName || '') }}</td>
+                  <td>
+                    <span>{{ item.vendorIds && item.vendorIds.userFirstName ? item.vendorIds.userFirstName : 'NA'
+                      }}</span>
+                    <button type="button" [disabled]="item.stopCheck === true || hideAddCheckAndVendorTableAndInterimReportButton || (item.clientApproval == null || item.clientApproval == false)"
+                      (click)="updateVendorSelectModal(vendorUpdatemodal, item)" class="btn p-0" [ngStyle]="{'cursor' : hideAddCheckAndVendorTableAndInterimReportButton || (item.clientApproval == null || item.clientApproval == false) ? 'not-allowed':''}">
+                      <i class='fas fa-edit' style="color: #0078d4; font-size: 1rem;"></i>
+                    </button>
+                  </td>
+                  <td>
+                    <button type="button" class="btn-stopcheck stopCheck"
+                      [disabled]="item.vendorCheckStatusMaster?.checkStatusName == 'Clear' || hideAddCheckAndVendorTableAndInterimReportButton || (item.clientApproval == null || item.clientApproval == false)"
+                      (click)="toggleState(item)" [ngStyle]="{cursor : hideAddCheckAndVendorTableAndInterimReportButton || (item.clientApproval == null || item.clientApproval == false) ?'not-allowed':''}">{{item.stopCheck ? 'Continue' : 'Stop Check'}}</button>
+                  </td>
+                  <td style="cursor: pointer; text-decoration: underline; color: blue;" title="Download Document">
+                    <a href="javascript:void(0);" style="color: inherit; text-decoration: inherit;"  [ngStyle]="{'cursor' : !hideAddCheckAndVendorTableAndInterimReportButton && (item.clientApproval == null || item.clientApproval == false) ? 'not-allowed':''}"
+                    (click)="( !hideAddCheckAndVendorTableAndInterimReportButton && item.clientApproval === null || item.clientApproval === false) ? $event.preventDefault() : (item.stopCheck ? $event.stopPropagation() : (item.documentname ? downloadPdf(item.agentUploadDocumentPathKey, item.documentname, item.source?.sourceName) : null))">
+                      {{ item.agentUploadDocumentPathKey ? item.documentname : 'NA' }}
+                    </a>
+                  </td>
+                  <!-- <td>{{ item.stopCheckCreatedOn && item.stopCheck ? (item.stopCheckCreatedOn | date:'dd-MMM-yyyy') : '' }}</td>
 
               <td>
                   <i class='fas fa-plus' style="color: rgb(240, 8, 8); font-size: 1rem; cursor: pointer;" title="Click to raise insufficiency"
                   (click)="openInsufficiencyModal(insuffmodal,item)"></i>
               </td> -->
-              </tr>
-             
-            </tbody>
-          </table>
-        </div>
+                  <!-- *ngIf="item.conventionalCandidate && item.candidateStatusName === 'Conventional QC Pending'" -->
+                  <td><input type="checkbox"  id="{{item.vendorcheckId}}" value="{{item.vendorcheckId}}" class="childCheck" (change)="childCheck($event)" [checked]="item.clientApproval" [disabled]="item.clientApproval"></td>
+                  <!-- <td>
+                    <input 
+                      type="checkbox"  
+                      id="{{item.vendorcheckId}}" 
+                      value="{{item.vendorcheckId}}" 
+                      class="childCheck" 
+                      (change)="childCheck($event)"
+                      [checked]="item.clientApproval" 
+                      [disabled]="item.clientApproval"
+                      [ngStyle]="getCheckboxStyle(item)">
+                  </td> -->
+                  
+                </tr>
 
+              </tbody>
+            </table>
+          </div>
+          <!-- <div class="col-md-12 mt-4 mb-4 text-center">
+ 
+          <button type="button"  (click)="DocumentApproval()" class="btn btn-primary">Approve Documents</button>
+         
+        </div> -->
+
+          <form [formGroup]="formClientApprove">
+            <input type="hidden" formControlName="vendorCheckId" #vendorCheckId>
+            <!-- <input type="hidden" formControlName="statuscode"> -->
+            <div class="row">
+              <div class="col-md-12 text-center">
+                <!-- <button type="submit" *ngIf="stat_btn_ReInvite && !this.getServiceConfigCodes.includes('PANTOUAN')" (click)="reInvite(candidateReferenceNo)" class="btn btn-sm btn-success ">Re-Invite</button> -->
+                <button *ngIf="documentApprovalPermission" type="button" (click)="DocumentApproval(vendorCheckId)" [disabled]="tmp.length === 0" class="btn btn-primary">Approve
+                  Documents</button>
+
+              </div>
+            </div>
+
+          </form>
+
+        </div>
       </div>
+
     </div>
-    
+
   </div>
 
-</div>
-
-<div class="container mt-2">
-  <div class="card">
-    <div class="card-header py-3 d-flex ">
-      <!-- <div class="col-md-5">
+  <div class="container mt-2" *ngIf="!hideAddCheckAndVendorTableAndInterimReportButton">
+    <div class="card">
+      <div class="card-header py-3 d-flex ">
+        <!-- <div class="col-md-5">
           <h6 class="m-0 font-weight-bold text-primary">
               ANNEXURE - Iv
           </h6>
       </div> -->
-      <div class="ml-4 col-md-12 text-center">
+        <div class="ml-4 col-md-12 text-center">
           <h6 class="m-0 font-weight-bold text-dark">
-              Vendor Proofs
+            Vendor Proofs
           </h6>
+        </div>
       </div>
-  </div>
-    <div class="card-body">
-      <div class="col-md-12">
-        <div class="table-container">
-          <table class=" table table-bordered mt-2" style="
+      <div class="card-body">
+        <div class="col-md-12">
+          <div class="table-container">
+            <table class=" table table-bordered mt-2" style="
                                         border-bottom: 1px solid black;">
-                                            <thead style="display: table-row-group;">
-                                                <tr>
-                                                    <th scope="col">SI#</th>
-                                                    <th scope="col">Check Name</th>
-                                                    <th scope="col">Check Status</th>
-                                                    <th scope="col">vendor name</th>
-                                                    <th scope="col">Document Name</th>
-                                                    <th scope="col">Verified Date</th>
-                                                    <th scope="col">View Document</th>
-                                                    <th scope="col">Result</th>
-                                                    <!-- <th scope="col">Action</th> -->
-                                                  <th scope="col">QC Agent</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr *ngFor="let item of vendorProof; let i=index;">
-                                                    <td>{{i+1}}</td>
-                                                    <td>{{item.checkType}}</td>
-                                                    <td>{{item.checkStatus}}</td>
-                                                    <td>{{item.userFirstName}}</td>
-                                                    <td>{{item.documentname}}</td>
-                                                    <td>{{item.createdOn | date:'dd-MMM-yyyy'}}</td>
-                                                    <td>
-                                                        <button type="button" class="btn btn-sm btn-primary" title="View Document"
-                                                        (click)="viewDocFromS3(modalCertificate, item.documentPathkey)">
-                                                        <i class="fa fa-eye"></i>
-                                                       </button>
-                                                       
-                                                    </td>
-                                                    <td>
-                                                      <span class=" bg-result"
-                                                      [style.color]="
+              <thead style="display: table-row-group;">
+                <tr>
+                  <th scope="col">SI#</th>
+                  <th scope="col">Check Name</th>
+                  <th scope="col">Check Status</th>
+                  <th scope="col">vendor name</th>
+                  <th scope="col">Document Name</th>
+                  <th scope="col">Verified Date</th>
+                  <th scope="col">View Document</th>
+                  <th scope="col">Result</th>
+                  <!-- <th scope="col">Action</th> -->
+                  <th scope="col">QC Agent</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of vendorProof; let i=index;">
+                  <td>{{i+1}}</td>
+                  <td>{{item.checkType}}</td>
+                  <td>{{item.checkStatus}}</td>
+                  <td>{{item.userFirstName}}</td>
+                  <td>{{item.documentname}}</td>
+                  <td>{{item.createdOn | date:'dd-MMM-yyyy'}}</td>
+                  <td>
+                    <button type="button" class="btn btn-sm btn-primary" title="View Document"
+                      (click)="viewDocFromS3(modalCertificate, item.documentPathkey)">
+                      <i class="fa fa-eye"></i>
+                    </button>
+
+                  </td>
+                  <td>
+                    <span class=" bg-result" [style.color]="
                                                       item.checkStatus === 'Clear' ? 'green' :
                                                       (item.checkStatus === 'Major Discrepancy' || item.checkStatus === 'Minor Discrepancy' ? 'red' :
                                                       (item.checkStatus === 'Unable To Verify' || item.checkStatus === 'In Sufficiency' ? '#ff9900' : item.colorHexCode))
-                                                  "> 
-                                                  {{ item.checkStatus === 'Clear' ? 'Green' :
-                                                  (item.checkStatus === 'Major Discrepancy' || item.checkStatus === 'Minor Discrepancy' ? 'Red' :
-                                                  (item.checkStatus === 'Unable To Verify' || item.checkStatus === 'In Sufficiency' ? 'Amber' : item.checkStatus))
-                                               }}
-                                                     </span>
-                                                    </td>
-                                                    
-                                                    <!-- <td>
+                                                  ">
+                      {{ item.checkStatus === 'Clear' ? 'Green' :
+                      (item.checkStatus === 'Major Discrepancy' || item.checkStatus === 'Minor Discrepancy' ? 'Red' :
+                      (item.checkStatus === 'Unable To Verify' || item.checkStatus === 'In Sufficiency' ? 'Amber' :
+                      item.checkStatus))
+                      }}
+                    </span>
+                  </td>
+
+                  <!-- <td>
                                                         <span *ngIf="item.agentColor == 'Green'">No Action</span>
                                                         <button *ngIf="item.agentColor !== 'Green'" class="btn btn-warning btn-sm" title="Edit"
                                                         id="edit{{i}}" (click)="openVendorModal(modalVendor, item.vendorChecks)">
                                                             <i class="fas fa-pen"></i>
                                                         </button>
                                                     </td> -->
-                                                  <td>
-                                                        <button
-                                                          class="btn btn-sm btn-info"
-                                                          data-toggle="tooltip"
-                                                          
-                                                          (click)="
+                  <td>
+                    <button class="btn btn-sm btn-info" data-toggle="tooltip" (click)="
                                                             triggerModal(
                                                               modalCandidate,
                                                               item.documentname,
@@ -233,32 +281,33 @@
                                                               item.checkType,
                                                               i
                                                             )
-                                                          "
-                                                        >
-                                                          Update
-                                                        </button>
-                                                      </td>
-                                                    
-                                                </tr>
-                                               
-                                             
-                                            </tbody>
-                                        </table>
+                                                          ">
+                      Update
+                    </button>
+                  </td>
+
+                </tr>
+
+
+              </tbody>
+            </table>
+          </div>
+
+
+
+
         </div>
-
-        
-
-
       </div>
     </div>
   </div>
-</div>
 
 </form>
 <div class="col-md-12 mt-4 mb-4 text-center">
- 
-  <button type="button" [disabled]="!vendorProofDetails || !conventionalCandidate"  (click)="submitReportApproval(formReportApproval, 'CONVENTIONALINTERIM')" class="btn btn-primary">Generate Conventional Interim Report</button>
- 
+
+  <button *ngIf="!hideAddCheckAndVendorTableAndInterimReportButton" type="button" [disabled]="!vendorProofDetails || !conventionalCandidate"
+    (click)="submitReportApproval(formReportApproval, 'CONVENTIONALINTERIM')" class="btn btn-primary">Generate
+    Conventional Interim Report</button>
+
 </div>
 
 <!-- Update Vendor -->
@@ -271,11 +320,11 @@
     </button>
   </div>
   <div class="modal-body">
-      <div class="row">
-          <div class="col-md-12">
-              <iframe id="viewcandidateCertificate" style="width: 100%;height: 600px;"></iframe>
-          </div>
+    <div class="row">
+      <div class="col-md-12">
+        <iframe id="viewcandidateCertificate" style="width: 100%;height: 600px;"></iframe>
       </div>
+    </div>
   </div>
 </ng-template>
 
@@ -382,8 +431,8 @@
             <ng-container *ngIf="attribute.label !== 'Candidate Name'">
               <input type="text" formControlName="value" class="form-control form-control-sm"
                 [(ngModel)]="attribute.value" />
-                <p *ngIf="isFieldEmpty(attribute)" class="text-danger">{{showMessage}}</p>
-              </ng-container>
+              <p *ngIf="isFieldEmpty(attribute)" class="text-danger">{{showMessage}}</p>
+            </ng-container>
           </div>
         </div>
 
@@ -675,15 +724,12 @@
     </form>
 
 
-            <!-- Address Check -->
+    <!-- Address Check -->
 
-            <form
-            *ngIf="Address"
-            [formGroup]="formAddressCheck"
-            (ngSubmit)="submitForAddressCheck(formAddressCheck)">
-            <input type="hidden" />
-            <div class="row">
-              <!-- <div class="col-md-6">
+    <form *ngIf="Address" [formGroup]="formAddressCheck" (ngSubmit)="submitForAddressCheck(formAddressCheck)">
+      <input type="hidden" />
+      <div class="row">
+        <!-- <div class="col-md-6">
                 <div class="form-group">
                   <label for="" class="required">Name</label>
                   <input
@@ -693,7 +739,7 @@
                   />
                 </div>
               </div> -->
-              <!-- <div class="col-md-6">
+        <!-- <div class="col-md-6">
                 <div class="form-group">
                   <label for="" class="required">Date of Birth</label>
                   <input
@@ -734,105 +780,84 @@
                   />
                 </div>
               </div> -->
-      
-              <div *ngFor="let attribute of agentAttributeListForm" class="col-md-6">
-                <div class="form-group">
-                  <label for="" class="required">{{ attribute.label }}</label>
-                  <!-- <label for="" class="required">{{ attribute.value }}</label> -->
-      
-                  <!-- <input
+
+        <div *ngFor="let attribute of agentAttributeListForm" class="col-md-6">
+          <div class="form-group">
+            <label for="" class="required">{{ attribute.label }}</label>
+            <!-- <label for="" class="required">{{ attribute.value }}</label> -->
+
+            <!-- <input
                     type="text"
                     [formControlName]="attribute.value"
                     value="{{attribute.value}}"
                     class="form-control form-control-sm"
                     required
                   /> -->
-                  <!-- [(ngModel)]="attribute.value" -->
-                  <!-- (input)="updateAttributeValue($event)" -->
-      
-                   <!-- If the label is 'Candidate Name', render a read-only input -->
-          <ng-container *ngIf="attribute.label === 'Candidate Name'">
-            <input
-              type="text"
-              [value]="attribute.value"
-              class="form-control form-control-sm"
-              readonly
-            />
-          </ng-container>
-      
-          <ng-container *ngIf="attribute.label !== 'Candidate Name'">
-            <input
-              type="text"
-              formControlName="value"
-              class="form-control form-control-sm"
-              [(ngModel)]="attribute.value"
-              
-            />
-          </ng-container>
-      
-          <p *ngIf="isFieldEmpty(attribute)" class="text-danger">{{showMessage}}</p>
+            <!-- [(ngModel)]="attribute.value" -->
+            <!-- (input)="updateAttributeValue($event)" -->
+
+            <!-- If the label is 'Candidate Name', render a read-only input -->
+            <ng-container *ngIf="attribute.label === 'Candidate Name'">
+              <input type="text" [value]="attribute.value" class="form-control form-control-sm" readonly />
+            </ng-container>
+
+            <ng-container *ngIf="attribute.label !== 'Candidate Name'">
+              <input type="text" formControlName="value" class="form-control form-control-sm"
+                [(ngModel)]="attribute.value" />
+            </ng-container>
+
+            <p *ngIf="isFieldEmpty(attribute)" class="text-danger">{{showMessage}}</p>
+          </div>
         </div>
-              </div>
-      
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label for="" class="required">Type</label>
-                  <!-- <h6>{{ vendoruser }}</h6> -->
-                  <select class="form-control form-control-sm"
-                    formControlName="type">
-                    <!-- <option value="null">--Select--</option> -->
-                    <option value="Present">Present</option>
-                    <option value="Permanent">Permanent</option>
-                    <option value="Present & Permanent">Present & Permanent</option>
-      
-                    <!-- <option *ngFor="let item of getVendorID" [value]="item.userId">
+
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="" class="required">Type</label>
+            <!-- <h6>{{ vendoruser }}</h6> -->
+            <select class="form-control form-control-sm" formControlName="type">
+              <!-- <option value="null">--Select--</option> -->
+              <option value="Present">Present</option>
+              <option value="Permanent">Permanent</option>
+              <option value="Present & Permanent">Present & Permanent</option>
+
+              <!-- <option *ngFor="let item of getVendorID" [value]="item.userId">
                       {{ item.userFirstName }} {{ item.userLastName }} ({{item.employeeId}})
                     </option> -->
-                  </select>
-                </div>
-              </div>
-      
-              <div class="col-md-12" *ngIf="vendorlist.controls['vendorId'].value == 'null'">
-                <div class="form-group">
-                  <label for="" class="required">Vendor Checks Status</label>
-                  <select
-                    class="form-control"
-                    formControlName="vendorCheckStatusMasterId"
-                  >
-                    <option [ngValue]="null" disabled>--Select--</option>
-                    <option
-                      *ngFor="let item of getVenorcheckStatus"
-                      (change)="getvendorcheckstatuss($event)"
-                      [value]="item.vendorCheckStatusMasterId"
-                    >
-                      <div>{{ item.checkStatusName }}</div>
-                    </option>
-                  </select>
-                </div>
-              </div>
-      
-      
-            </div>
-            <div class="row">
-              <div class="col-md-12 text-center mt-3 pb-3">
-                <button type="submit" class="btn btn-primary btn-sm" [disabled]="formAddressCheck.invalid">Submit</button>
-                <button type="button" class="btn btn-danger btn-sm">Close</button>
-              </div>
-            </div>
-          </form>
-      
+            </select>
+          </div>
+        </div>
+
+        <div class="col-md-12" *ngIf="vendorlist.controls['vendorId'].value == 'null'">
+          <div class="form-group">
+            <label for="" class="required">Vendor Checks Status</label>
+            <select class="form-control" formControlName="vendorCheckStatusMasterId">
+              <option [ngValue]="null" disabled>--Select--</option>
+              <option *ngFor="let item of getVenorcheckStatus" (change)="getvendorcheckstatuss($event)"
+                [value]="item.vendorCheckStatusMasterId">
+                <div>{{ item.checkStatusName }}</div>
+              </option>
+            </select>
+          </div>
+        </div>
 
 
-        <!-- ========================= Drugtest ============================-->
-        <form
-        *ngIf="DrugTest"
-        [formGroup]="forDrugTest"
-        (ngSubmit)="submitDrugTest(forDrugTest)"
-      >
-        <input type="hidden" />
-        <h5 class="modal-title">DrugTest Status :</h5>
-        <div class="row">
-          <!-- <div class="col-md-6">
+      </div>
+      <div class="row">
+        <div class="col-md-12 text-center mt-3 pb-3">
+          <button type="submit" class="btn btn-primary btn-sm" [disabled]="formAddressCheck.invalid">Submit</button>
+          <button type="button" class="btn btn-danger btn-sm">Close</button>
+        </div>
+      </div>
+    </form>
+
+
+
+    <!-- ========================= Drugtest ============================-->
+    <form *ngIf="DrugTest" [formGroup]="forDrugTest" (ngSubmit)="submitDrugTest(forDrugTest)">
+      <input type="hidden" />
+      <h5 class="modal-title">DrugTest Status :</h5>
+      <div class="row">
+        <!-- <div class="col-md-6">
             <div class="form-group">
               <label for="" class="required">Name</label>
               <input
@@ -912,74 +937,44 @@
               />
             </div>
           </div> -->
-          <div *ngFor="let attribute of agentAttributeListForm" class="col-md-6">
-            <div class="form-group">
-              <label for="" class="required">{{ attribute.label }}</label>
-              <ng-container *ngIf="attribute.label === 'Candidate Name'">
-                <input
-                  type="text"
-                  [value]="attribute.value"
-                  class="form-control form-control-sm"
-                  readonly
-                />
-              </ng-container>
-  
-              <ng-container *ngIf="attribute.label.includes('Father')">
-                <input
-                  type="text"
-                  [value]="attribute.value"
-                  class="form-control form-control-sm"
-                  formControlName="fatherName"
-                  [(ngModel)]="attribute.value"
-  
-                />
-              </ng-container>
-  
-              <ng-container *ngIf="attribute.label === 'Date of birth'">
-                <input
-                  type="text"
-                  [value]="attribute.value"
-                  class="form-control form-control-sm"
-                  formControlName="dateOfBirth"
-                  [(ngModel)]="attribute.value"
-                />
-              </ng-container>
-  
-              <ng-container *ngIf="attribute.label === 'Address'">
-                <input
-                  type="text"
-                  [value]="attribute.value"
-                  class="form-control form-control-sm"
-                  formControlName="address"
-                  [(ngModel)]="attribute.value"
-                />
-              </ng-container>
-  
-              <ng-container *ngIf="attribute.label === 'Gender'">
-                <input
-                  type="text"
-                  [value]="attribute.value"
-                  class="form-control form-control-sm"
-                  formControlName="gender"
-                  [(ngModel)]="attribute.value"
-                />
-              </ng-container>
-  
-          
-              <ng-container *ngIf="attribute.label !== 'Candidate Name' && attribute.label !== 'Father\'s name'  && attribute.label !== 'Date of birth' && attribute.label !== 'Address' && attribute.label !== 'Gender' ">
-                <input
-                  type="text"
-                  formControlName="value"
-                  class="form-control form-control-sm"
-                  [(ngModel)]="attribute.value"
-                  required
-                />
-              </ng-container>
-  
-              <p *ngIf="isFieldEmpty(attribute)" class="text-danger">{{showMessage}}</p>
-            </div>
+        <div *ngFor="let attribute of agentAttributeListForm" class="col-md-6">
+          <div class="form-group">
+            <label for="" class="required">{{ attribute.label }}</label>
+            <ng-container *ngIf="attribute.label === 'Candidate Name'">
+              <input type="text" [value]="attribute.value" class="form-control form-control-sm" readonly />
+            </ng-container>
+
+            <ng-container *ngIf="attribute.label.includes('Father')">
+              <input type="text" [value]="attribute.value" class="form-control form-control-sm"
+                formControlName="fatherName" [(ngModel)]="attribute.value" />
+            </ng-container>
+
+            <ng-container *ngIf="attribute.label === 'Date of birth'">
+              <input type="text" [value]="attribute.value" class="form-control form-control-sm"
+                formControlName="dateOfBirth" [(ngModel)]="attribute.value" />
+            </ng-container>
+
+            <ng-container *ngIf="attribute.label === 'Address'">
+              <input type="text" [value]="attribute.value" class="form-control form-control-sm"
+                formControlName="address" [(ngModel)]="attribute.value" />
+            </ng-container>
+
+            <ng-container *ngIf="attribute.label === 'Gender'">
+              <input type="text" [value]="attribute.value" class="form-control form-control-sm" formControlName="gender"
+                [(ngModel)]="attribute.value" />
+            </ng-container>
+
+
+            <ng-container
+              *ngIf="attribute.label !== 'Candidate Name' && attribute.label !== 'Father\'s name'  && attribute.label !== 'Date of birth' && attribute.label !== 'Address' && attribute.label !== 'Gender' ">
+              <input type="text" formControlName="value" class="form-control form-control-sm"
+                [(ngModel)]="attribute.value" required />
+            </ng-container>
+
+            <p *ngIf="isFieldEmpty(attribute)" class="text-danger">{{showMessage}}</p>
           </div>
-          <!-- <div class="col-md-12">
+        </div>
+        <!-- <div class="col-md-12">
             <div class="form-group">
               <label for="" class="required">Verified report</label>
               <input
@@ -992,48 +987,38 @@
               />
             </div>
           </div> -->
-  
-          <div class="col-md-12" *ngIf="vendorlist.controls['vendorId'].value == 'null'">
-            <div class="form-group">
-              <label for="" class="required">Vendor Checks Status</label>
-              <select
-                class="form-control"
-                formControlName="vendorCheckStatusMasterId"
-              >
-                <option [ngValue]="null" disabled>--Select--</option>
-                <option
-                  *ngFor="let item of getVenorcheckStatus"
-                  (change)="getvendorcheckstatuss($event)"
-                  [value]="item.vendorCheckStatusMasterId"
-                >
-                  <div>{{ item.checkStatusName }}</div>
-                </option>
-              </select>
-            </div>
-          </div>
-  
-  
-        </div>
-        <div class="row">
-          <div class="col-md-12 text-center mt-3 pb-3">
-            <button type="submit" class="btn btn-primary btn-sm" [disabled]="forDrugTest.invalid">Submit</button>
-            <button type="button" class="btn btn-danger btn-sm">Close</button>
+
+        <div class="col-md-12" *ngIf="vendorlist.controls['vendorId'].value == 'null'">
+          <div class="form-group">
+            <label for="" class="required">Vendor Checks Status</label>
+            <select class="form-control" formControlName="vendorCheckStatusMasterId">
+              <option [ngValue]="null" disabled>--Select--</option>
+              <option *ngFor="let item of getVenorcheckStatus" (change)="getvendorcheckstatuss($event)"
+                [value]="item.vendorCheckStatusMasterId">
+                <div>{{ item.checkStatusName }}</div>
+              </option>
+            </select>
           </div>
         </div>
-      </form>
 
 
-           <!-- ================IDItems verify -->
-    <form
-    *ngIf="IDItems"
-    [formGroup]="identityCheckForm"
-    (ngSubmit)="submitIdentityCheck(identityCheckForm)"
-  >
-    <input type="hidden" />
-    <h5 class="modal-title text-center mb-3">{{checkName}}</h5>
-    <hr>
-    <div class="row">
-      <!-- <div class="col-md-6">
+      </div>
+      <div class="row">
+        <div class="col-md-12 text-center mt-3 pb-3">
+          <button type="submit" class="btn btn-primary btn-sm" [disabled]="forDrugTest.invalid">Submit</button>
+          <button type="button" class="btn btn-danger btn-sm">Close</button>
+        </div>
+      </div>
+    </form>
+
+
+    <!-- ================IDItems verify -->
+    <form *ngIf="IDItems" [formGroup]="identityCheckForm" (ngSubmit)="submitIdentityCheck(identityCheckForm)">
+      <input type="hidden" />
+      <h5 class="modal-title text-center mb-3">{{checkName}}</h5>
+      <hr>
+      <div class="row">
+        <!-- <div class="col-md-6">
         <div class="form-group">
           <label for="" class="required">Name</label>
           <input
@@ -1043,7 +1028,7 @@
           />
         </div>
       </div> -->
-      <!-- <div class="col-md-6">
+        <!-- <div class="col-md-6">
         <div class="form-group">
           <label for="" class="required">Document Name</label>
           <input
@@ -1053,68 +1038,52 @@
           />
         </div>
       </div> -->
-      <div *ngFor="let attribute of agentAttributeListForm" class="col-md-6">
-        <div class="form-group">
-          <label for="" class="required">{{ attribute.label }}</label>
-          <input
-            type="text"
-            formControlName="value"
-            [(ngModel)]="attribute.value"
-            [value]="attribute.value"
-            class="form-control form-control-sm"
-          />
-          <p *ngIf="isFieldEmpty(attribute)" class="text-danger">{{showMessage}}</p>
+        <div *ngFor="let attribute of agentAttributeListForm" class="col-md-6">
+          <div class="form-group">
+            <label for="" class="required">{{ attribute.label }}</label>
+            <input type="text" formControlName="value" [(ngModel)]="attribute.value" [value]="attribute.value"
+              class="form-control form-control-sm" />
+            <p *ngIf="isFieldEmpty(attribute)" class="text-danger">{{showMessage}}</p>
+          </div>
         </div>
-      </div>
-      <div class="col-md-12">
-        <div class="form-group">
-          <label for="" class="required">Document Upload</label>
-          <input
-            type="file"
-            class="form-control form-control-sm"
-            (change)="uploadGlobalCaseDetails($event)"
-            accept=".pdf"
-          />
+        <div class="col-md-12">
+          <div class="form-group">
+            <label for="" class="required">Document Upload</label>
+            <input type="file" class="form-control form-control-sm" (change)="uploadGlobalCaseDetails($event)"
+              accept=".pdf" />
+          </div>
         </div>
-      </div>
 
-      <div class="col-md-3">
-        <div class="form-group">
-          <label for="" class="required">Type</label>
-          <!-- <h6>{{ vendoruser }}</h6> -->
-          <select class="form-control form-control-sm"
-            formControlName="type">
-            <!-- <option value="null">--Select--</option> -->
-            <option value="PAN">PAN</option>
-            <option value="Aadhar">Aadhar</option>
-            <option value="Passport">Passport</option>
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="" class="required">Type</label>
+            <!-- <h6>{{ vendoruser }}</h6> -->
+            <select class="form-control form-control-sm" formControlName="type">
+              <!-- <option value="null">--Select--</option> -->
+              <option value="PAN">PAN</option>
+              <option value="Aadhar">Aadhar</option>
+              <option value="Passport">Passport</option>
 
-            <!-- <option *ngFor="let item of getVendorID" [value]="item.userId">
+              <!-- <option *ngFor="let item of getVendorID" [value]="item.userId">
               {{ item.userFirstName }} {{ item.userLastName }} ({{item.employeeId}})
             </option> -->
-          </select>
+            </select>
+          </div>
         </div>
-      </div>
 
-      <div class="col-md-12" *ngIf="vendorlist.controls['vendorId'].value == 'null'">
-        <div class="form-group">
-          <label for="" class="required">Vendor Checks Status</label>
-          <select
-            class="form-control"
-            formControlName="vendorCheckStatusMasterId"
-          >
-            <option [ngValue]="null" disabled>--Select--</option>
-            <option
-              *ngFor="let item of getVenorcheckStatus"
-              (change)="getvendorcheckstatuss($event)"
-              [value]="item.vendorCheckStatusMasterId"
-            >
-              <div>{{ item.checkStatusName }}</div>
-            </option>
-          </select>
+        <div class="col-md-12" *ngIf="vendorlist.controls['vendorId'].value == 'null'">
+          <div class="form-group">
+            <label for="" class="required">Vendor Checks Status</label>
+            <select class="form-control" formControlName="vendorCheckStatusMasterId">
+              <option [ngValue]="null" disabled>--Select--</option>
+              <option *ngFor="let item of getVenorcheckStatus" (change)="getvendorcheckstatuss($event)"
+                [value]="item.vendorCheckStatusMasterId">
+                <div>{{ item.checkStatusName }}</div>
+              </option>
+            </select>
+          </div>
         </div>
       </div>
-    </div>
 
 
       <div class="row">
@@ -1123,9 +1092,9 @@
           <button type="button" class="btn btn-danger btn-sm">Close</button>
         </div>
       </div>
-  </form>
-  
-      
+    </form>
+
+
     <!-- ================PassPort verify
     <form *ngIf="IDItems" [formGroup]="formpassport" (ngSubmit)="submitpassport(formpassport)">
       <input type="hidden" />
@@ -1226,15 +1195,10 @@
 <!-- Vendor MODAL -->
 
 <ng-template #modalCandidate let-modal>
-    
+
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">Update</h4>
-    <button
-      type="button"
-      class="close"
-      aria-label="Close"
-      (click)="modal.dismiss('Cross click')"
-    >
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">×</span>
     </button>
   </div>
@@ -1253,11 +1217,7 @@
         <div class="col-md-12">
           <div class="form-group">
             <label for="" class="">Document Name</label>
-            <input
-              type="text"
-              class="form-control form-control-sm"
-              formControlName="documentname"
-            />
+            <input type="text" class="form-control form-control-sm" formControlName="documentname" />
           </div>
         </div>
         <!-- <div class="row">
@@ -1276,94 +1236,62 @@
       </div>
 
       <div class="col-md-12" *ngIf="idItemsCheckType">
+        <div class="form-group">
+          <label for="" class="">{{idItemsPanORAadharORPassport}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'nameAsPerProof'" />
+        </div>
+      </div>
+
+      <div class="col-md-12" *ngIf="idItemsCheckType">
+        <div class="form-group">
+          <label for="" class="">{{idItemsProofName}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'proofName'" />
+        </div>
+      </div>
+
+      <div class="col-md-12" *ngIf="idItemsCheckType">
+        <div class="form-group">
+          <label for="" class="">{{idItemsDateOfBirth}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'dateOfBirth'" />
+        </div>
+      </div>
+
+      <div class="col-md-12" *ngIf="idItemsCheckType">
+        <div class="form-group">
+          <label for="" class="">{{idItemsFatherName}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'fatherName'" />
+        </div>
+      </div>
+
+      <div *ngIf="!globaldataBaseCheck && !idItemsCheckType">
+
+        <div *ngFor="let attribute of venderAttributeValue" class="col-md-12">
           <div class="form-group">
-            <label for="" class="">{{idItemsPanORAadharORPassport}}</label>
-            <input
-              type="text"
-              class="form-control form-control-sm"
-              [formControlName]="'nameAsPerProof'"
-            />
+            <label for="" class="required">{{ attribute.label }}</label>
+
+            <input type="text" formControlName="value" [(ngModel)]="attribute.value"
+              class="form-control form-control-sm" />
+            <!-- <span *ngIf="attribute.value === null" style="color: red;">{{showMessage}}</span> -->
+            <p *ngIf="isFieldEmpty(attribute)" class="text-danger">{{showMessage}}</p>
           </div>
         </div>
-
-        <div class="col-md-12" *ngIf="idItemsCheckType">
-          <div class="form-group">
-            <label for="" class="">{{idItemsProofName}}</label>
-            <input
-              type="text"
-              class="form-control form-control-sm"
-              [formControlName]="'proofName'"
-            />
-          </div>
-        </div>
-
-        <div class="col-md-12" *ngIf="idItemsCheckType">
-          <div class="form-group">
-            <label for="" class="">{{idItemsDateOfBirth}}</label>
-            <input
-              type="text"
-              class="form-control form-control-sm"
-              [formControlName]="'dateOfBirth'"
-            />
-          </div>
-        </div>
-
-        <div class="col-md-12" *ngIf="idItemsCheckType">
-          <div class="form-group">
-            <label for="" class="">{{idItemsFatherName}}</label>
-            <input
-              type="text"
-              class="form-control form-control-sm"
-              [formControlName]="'fatherName'"
-            />
-          </div>
-        </div>
-
-        <div *ngIf="!globaldataBaseCheck && !idItemsCheckType">
-
-          <div *ngFor="let attribute of venderAttributeValue" class="col-md-12">
-          <div class="form-group">
-              <label for="" class="required">{{ attribute.label }}</label>
-  
-              <input
-              type="text"
-              formControlName="value"
-              [(ngModel)]="attribute.value"
-              class="form-control form-control-sm"
-              />
-              <!-- <span *ngIf="attribute.value === null" style="color: red;">{{showMessage}}</span> -->
-              <p *ngIf="isFieldEmpty(attribute)" class="text-danger">{{showMessage}}</p>
-          </div>
-          </div>
-       </div>
+      </div>
 
       <div class="col-md-12">
-          <div class="form-group">
-            <label for="" class="">Remarks</label>
-            <input
-              type="text"
-              class="form-control form-control-sm"
-              formControlName="remarks"
-              value=""
-            />
-          </div>
+        <div class="form-group">
+          <label for="" class="">Remarks</label>
+          <input type="text" class="form-control form-control-sm" formControlName="remarks" value="" />
         </div>
+      </div>
 
       <div class="col-md-12">
         <div class="form-group">
           <label for="" class="required">Vendor Checks Status</label>
           <input type="text" value="{{ checkStatus }}" class="form-control" readonly />
-          <select
-            class="form-control"
-            formControlName="vendorCheckStatusMasterId"
-            required
-          >
+          <select class="form-control" formControlName="vendorCheckStatusMasterId" required>
             <!-- <option [ngValue]="null" disabled>--Select--</option> -->
-            <option
-              *ngFor="let item of getVenorcheckStatus"
-              (change)="getvendorcheckstatuss($event)"
-              [value]="item.vendorCheckStatusMasterId"
-            >
+            <option *ngFor="let item of getVenorcheckStatus" (change)="getvendorcheckstatuss($event)"
+              [value]="item.vendorCheckStatusMasterId">
               <div>{{ item.checkStatusName }}</div>
             </option>
           </select>
@@ -1371,188 +1299,187 @@
       </div>
 
       <div class="col-md-12" *ngIf="drugCheck">
-          <div class="form-group">
-            <label for="" class="required">Drug Test Panel</label>
-            <select class="form-control form-control-sm"
-              formControlName="type" (change)="onPanelChange($event)">
-              <!-- <option value="null">--Select--</option> -->
-              <option value="Panel 5">Panel 5</option>
-              <option value="Panel 6">Panel 6</option>
-              <option value="Panel 7">Panel 7</option>
-              <option value="Panel 8">Panel 8</option>
-              <option value="Panel 9">Panel 9</option>
-              <option value="Panel 10">Panel 10</option>
-              <option value="Panel 11">Panel 11</option>
-              <option value="Panel 12">Panel 12</option>
-            </select>
-          </div>
+        <div class="form-group">
+          <label for="" class="required">Drug Test Panel</label>
+          <select class="form-control form-control-sm" formControlName="type" (change)="onPanelChange($event)">
+            <!-- <option value="null">--Select--</option> -->
+            <option value="Panel 5">Panel 5</option>
+            <option value="Panel 6">Panel 6</option>
+            <option value="Panel 7">Panel 7</option>
+            <option value="Panel 8">Panel 8</option>
+            <option value="Panel 9">Panel 9</option>
+            <option value="Panel 10">Panel 10</option>
+            <option value="Panel 11">Panel 11</option>
+            <option value="Panel 12">Panel 12</option>
+          </select>
         </div>
+      </div>
 
-        <!-- Drug Check -->
-        <div class="col-md-12" *ngIf="selectedLabels">
-          <div class="form-group" *ngFor="let label of selectedLabels; let i=index">
-            <label for="">{{ label.label }}</label>
-            <input type="text" class="form-control" name="{{ label.label }}" [value]="label.value" (input)="updateLabelValue($event, label)" required>
-          </div>
+      <!-- Drug Check -->
+      <div class="col-md-12" *ngIf="selectedLabels">
+        <div class="form-group" *ngFor="let label of selectedLabels; let i=index">
+          <label for="">{{ label.label }}</label>
+          <input type="text" class="form-control" name="{{ label.label }}" [value]="label.value"
+            (input)="updateLabelValue($event, label)" required>
         </div>
+      </div>
       <!-- Drug Check END -->
 
-         <!-- CRIMINAL START HERE -->
+      <!-- CRIMINAL START HERE -->
 
-         <ng-template [ngIf]="isVendorAttributeForm && selectedStatus !== '3' && globaldataBaseCheck===false">
-          <!-- Legal Proceedings Form -->
-          <div formGroupName="legalProcedings" style="width: -webkit-fill-available;">
-              <!-- Civil Proceedings -->
-              <div formArrayName="civilProceedingsList">
-                  <div *ngFor="let civil of civilProceedingsList; let i = index" [formGroupName]="i">
-                <!-- Your civil proceeding form controls go here -->
-                <div class="container my-4">
-                  <div class="row">
-                    <div class="col-md-12 text-center">
-                      <b class="font-weight-bold text-primary">Civil Proceedings - <span> {{ i === 0 ? 'High Court' :
-                          i === 1 ? 'Civil Court' : '' }}</span></b>
+      <ng-template [ngIf]="isVendorAttributeForm && selectedStatus !== '3' && globaldataBaseCheck===false">
+        <!-- Legal Proceedings Form -->
+        <div formGroupName="legalProcedings" style="width: -webkit-fill-available;">
+          <!-- Civil Proceedings -->
+          <div formArrayName="civilProceedingsList">
+            <div *ngFor="let civil of civilProceedingsList; let i = index" [formGroupName]="i">
+              <!-- Your civil proceeding form controls go here -->
+              <div class="container my-4">
+                <div class="row">
+                  <div class="col-md-12 text-center">
+                    <b class="font-weight-bold text-primary">Civil Proceedings - <span> {{ i === 0 ? 'High Court' :
+                        i === 1 ? 'Civil Court' : '' }}</span></b>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mx-auto">
+                    <div class="form-group">
+                      <label>Date of Search</label>
+                      <input type="date" class="form-control form-control-sm" formControlName="dateOfSearch">
                     </div>
                   </div>
-                  <div class="row">
-                    <div class="col-md-6 mx-auto">
-                      <div class="form-group">
-                        <label>Date of Search</label>
-                        <input type="date" class="form-control form-control-sm" formControlName="dateOfSearch">
-                      </div>
-                    </div>
-                    <!-- <div class="col-md-6 mx-auto"> -->
-                    <!-- <div class="form-group"> -->
-                    <!-- <label>Court</label> -->
-                    <!-- <select class="form-control form-control-sm" formControlName="court">
+                  <!-- <div class="col-md-6 mx-auto"> -->
+                  <!-- <div class="form-group"> -->
+                  <!-- <label>Court</label> -->
+                  <!-- <select class="form-control form-control-sm" formControlName="court">
               <option value="">- Select Court-</option>
               <option value="Civil Court">Civil Court</option>
               <option value="High Court">High Court</option>
 
             </select> -->
-                    <!-- </div> -->
-                    <!-- </div> -->
-                    <!-- <div class="col-md-6 mx-auto"> -->
-                    <!-- <div class="form-group"> -->
-                    <!-- <label>Jurisdiction</label> -->
-                    <input type="hidden" class="form-control form-control-sm" formControlName="court">
+                  <!-- </div> -->
+                  <!-- </div> -->
+                  <!-- <div class="col-md-6 mx-auto"> -->
+                  <!-- <div class="form-group"> -->
+                  <!-- <label>Jurisdiction</label> -->
+                  <input type="hidden" class="form-control form-control-sm" formControlName="court">
 
-                    <input type="hidden" class="form-control form-control-sm" formControlName="jurisdiction">
-                    <!-- </div> -->
-                    <!-- </div> -->
-                    <!-- <div class="col-md-6 mx-auto"> -->
-                    <!-- <div class="form-group"> -->
-                    <!-- <label>Name of the Court</label> -->
-                    <input type="hidden" class="form-control form-control-sm" formControlName="nameOfTheCourt">
-                    <!-- </div> -->
-                    <!-- </div> -->
-                    <div class="col-md-6 mx-auto">
-                      <div class="form-group">
-                        <label>Result</label>
-                        <input type="text" class="form-control form-control-sm" formControlName="result">
-                      </div>
+                  <input type="hidden" class="form-control form-control-sm" formControlName="jurisdiction">
+                  <!-- </div> -->
+                  <!-- </div> -->
+                  <!-- <div class="col-md-6 mx-auto"> -->
+                  <!-- <div class="form-group"> -->
+                  <!-- <label>Name of the Court</label> -->
+                  <input type="hidden" class="form-control form-control-sm" formControlName="nameOfTheCourt">
+                  <!-- </div> -->
+                  <!-- </div> -->
+                  <div class="col-md-6 mx-auto">
+                    <div class="form-group">
+                      <label>Result</label>
+                      <input type="text" class="form-control form-control-sm" formControlName="result">
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-
-            <!-- Add button to add new civil proceeding -->
-            <!-- <button type="button" (click)="addCivilProceeding()" [disabled]="civilProceedingsCount >= 2" >Add Civil Proceeding</button> -->
-
-            <div formArrayName="criminalProceedingsList">
-              <div *ngFor="let civil of criminalProceedingsList; let i = index" [formGroupName]="i">
-
-                <div class="container my-4">
-                  <div class="row">
-                    <div class="col-md-12 text-center">
-                      <b class="font-weight-bold text-primary">Criminal Proceedings - <span>{{ i === 0 ? 'Session
-                          Court' : i === 1 ? 'Magistrate Court' : '' }}</span></b>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-md-6 mx-auto">
-                      <div class="form-group">
-                        <label>Date of Search</label>
-                        <input type="date" class="form-control form-control-sm" formControlName="dateOfSearch">
-                      </div>
-                    </div>
-                    <input type="hidden" class="form-control form-control-sm" formControlName="court">
-                    <input type="hidden" class="form-control form-control-sm" formControlName="jurisdiction">
-
-                    <input type="hidden" class="form-control form-control-sm" formControlName="nameOfTheCourt">
-
-                    <div class="col-md-6 mx-auto">
-                      <div class="form-group">
-                        <label>Result</label>
-                        <input type="text" class="form-control form-control-sm" formControlName="result">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- end -->
             </div>
           </div>
-          <!-- Legal Proceedings Form ends-->
-        </ng-template>
 
-        <!-- END OF CRIMINAL -->
+          <!-- Add button to add new civil proceeding -->
+          <!-- <button type="button" (click)="addCivilProceeding()" [disabled]="civilProceedingsCount >= 2" >Add Civil Proceeding</button> -->
+
+          <div formArrayName="criminalProceedingsList">
+            <div *ngFor="let civil of criminalProceedingsList; let i = index" [formGroupName]="i">
+
+              <div class="container my-4">
+                <div class="row">
+                  <div class="col-md-12 text-center">
+                    <b class="font-weight-bold text-primary">Criminal Proceedings - <span>{{ i === 0 ? 'Session
+                        Court' : i === 1 ? 'Magistrate Court' : '' }}</span></b>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mx-auto">
+                    <div class="form-group">
+                      <label>Date of Search</label>
+                      <input type="date" class="form-control form-control-sm" formControlName="dateOfSearch">
+                    </div>
+                  </div>
+                  <input type="hidden" class="form-control form-control-sm" formControlName="court">
+                  <input type="hidden" class="form-control form-control-sm" formControlName="jurisdiction">
+
+                  <input type="hidden" class="form-control form-control-sm" formControlName="nameOfTheCourt">
+
+                  <div class="col-md-6 mx-auto">
+                    <div class="form-group">
+                      <label>Result</label>
+                      <input type="text" class="form-control form-control-sm" formControlName="result">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- end -->
+          </div>
+        </div>
+        <!-- Legal Proceedings Form ends-->
+      </ng-template>
+
+      <!-- END OF CRIMINAL -->
 
 
 
       <div class="container my-4">
-          <div *ngIf="globaldataBaseCheck && selectedStatus !== '3'">
-            <!--            <div class="tab-container">-->
-            <!--              &lt;!&ndash; Global Tab &ndash;&gt;-->
-            <!--              <div class="tab" (click)="selectTab('global')" [class.active]="selectedTab === 'global'">-->
-            <!--                Global-->
-            <!--              </div>-->
-            <!--              &lt;!&ndash; Indian Tab &ndash;&gt;-->
-            <!--              <div class="tab" (click)="selectTab('indian')" [class.active]="selectedTab === 'indian'">-->
-            <!--                Indian-->
-            <!--              </div>-->
-            <!--            </div>-->
-            <!--            <ng-container *ngIf="selectedTab === 'global'">-->
-            <!-- <div class="row"> -->
-              <!--              <div class="tab" (click)="selectTab('global')" [class.active]="selectedTab === 'global'">&ndash;&gt;-->
-              <div class="row">
-                <div class="col-md-12 text-center">
-                  <b class="font-weight-bold text-primary">India Level Database Search</b>
-                </div>
-              </div>
-              <div class="row my-4">
-                <div class="col-md-8  mx-auto">
-                  <select class="form-control form-control-sm" #seleGlobalattr>
-                    <option *ngFor="let attribute of globalAttributeValue" [value]="attribute.label"
-                            [disabled]="isOptionSelectedGlobal(attribute.label)">
-                      {{ attribute.label }}
-                    </option>
-                  </select>
-                </div>
-                <div class="col-md-4 mx-auto">
-                  <button [disabled]="this.disableGlobalOptionButton" class="btn btn-primary btn-sm"
-                          (click)="addSelectedGlobalAttribute(seleGlobalattr.value)">Add Indian Attribute
-                  </button>
-                </div>
-              </div>
-             
-          <div *ngIf="showGlobalCheck">
-              <div *ngFor="let attribute of selectedGlobalAttributeValue; let i = index;">
-                <div class="row">
-                  <div class="col-md-6 mx-auto">
-                    <div class="form-group">
-                      <label class="required">{{ attribute.label }}</label>
-                    </div>
-                  </div>
-                  <div class="col-md-6 mx-auto">
-                    <input type="text" #gloval
-                           class="form-control form-control-sm" [(ngModel)]="attribute.value"
-                           (keyup)="onKeyUpGlobal(gloval.value, attribute.label)">
-                  </div>
-                </div>
-              </div>
+        <div *ngIf="globaldataBaseCheck && selectedStatus !== '3'">
+          <!--            <div class="tab-container">-->
+          <!--              &lt;!&ndash; Global Tab &ndash;&gt;-->
+          <!--              <div class="tab" (click)="selectTab('global')" [class.active]="selectedTab === 'global'">-->
+          <!--                Global-->
+          <!--              </div>-->
+          <!--              &lt;!&ndash; Indian Tab &ndash;&gt;-->
+          <!--              <div class="tab" (click)="selectTab('indian')" [class.active]="selectedTab === 'indian'">-->
+          <!--                Indian-->
+          <!--              </div>-->
+          <!--            </div>-->
+          <!--            <ng-container *ngIf="selectedTab === 'global'">-->
+          <!-- <div class="row"> -->
+          <!--              <div class="tab" (click)="selectTab('global')" [class.active]="selectedTab === 'global'">&ndash;&gt;-->
+          <div class="row">
+            <div class="col-md-12 text-center">
+              <b class="font-weight-bold text-primary">India Level Database Search</b>
+            </div>
           </div>
-              <!-- <div class="row" *ngIf="selectedGlobalAttributeValue.length > 0">
+          <div class="row my-4">
+            <div class="col-md-8  mx-auto">
+              <select class="form-control form-control-sm" #seleGlobalattr>
+                <option *ngFor="let attribute of globalAttributeValue" [value]="attribute.label"
+                  [disabled]="isOptionSelectedGlobal(attribute.label)">
+                  {{ attribute.label }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-4 mx-auto">
+              <button [disabled]="this.disableGlobalOptionButton" class="btn btn-primary btn-sm"
+                (click)="addSelectedGlobalAttribute(seleGlobalattr.value)">Add Indian Attribute
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="showGlobalCheck">
+            <div *ngFor="let attribute of selectedGlobalAttributeValue; let i = index;">
+              <div class="row">
+                <div class="col-md-6 mx-auto">
+                  <div class="form-group">
+                    <label class="required">{{ attribute.label }}</label>
+                  </div>
+                </div>
+                <div class="col-md-6 mx-auto">
+                  <input type="text" #gloval class="form-control form-control-sm" [(ngModel)]="attribute.value"
+                    (keyup)="onKeyUpGlobal(gloval.value, attribute.label)">
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="row" *ngIf="selectedGlobalAttributeValue.length > 0">
                   <div class="col-md-6 mx-auto">
                     <div class="form-group">
                       <label class="required">{{ selectedGlobalAttributeValue[0].label }}</label>
@@ -1563,7 +1490,7 @@
                   </div>
                 </div> -->
 
-                <!-- <div class="row" *ngFor="let attribute of selectedGlobalAttributeValue; let i = index;">
+          <!-- <div class="row" *ngFor="let attribute of selectedGlobalAttributeValue; let i = index;">
                   <div class="col-md-6 mx-auto">
                     <div class="form-group">
                       <label class="required">{{ attribute.label }}</label>
@@ -1574,49 +1501,48 @@
                   </div>
                 </div> -->
 
-              <!--            </ng-container>-->
-              <!--            <ng-container *ngIf="selectedTab === 'indian'">-->
-      
-              <!--              <div class="tab" (click)="selectTab('indian')" [class.active]="selectedTab === 'indian'">-->
-              <div class="row my-4">
-                <div class="col-md-12 text-center">
-                  <b class="font-weight-bold text-primary">Global Level Database Search</b>
-                </div>
-              </div>
-              <div class="row my-4">
-                <div class="col-md-8  mx-auto">
-                  <select class="form-control form-control-sm" #seleattrIndian>
-                    <option *ngFor="let attribute of indiaAttributeValue" [value]="attribute.label"
-                            [disabled]="isOptionSelectedIndian(attribute.label)">
-                      {{ attribute.label}}
-                    </option>
-                  </select>
-                </div>
-                <div class="col-md-4 mx-auto">
-                  <button [disabled]="this.disableIndianOptionButton" class="btn btn-primary btn-sm"
-                          (click)="addSelectedIndianAttribute(seleattrIndian.value)">Add Global Attribute
-                  </button>
-                </div>
-              </div>
+          <!--            </ng-container>-->
+          <!--            <ng-container *ngIf="selectedTab === 'indian'">-->
 
-              <div *ngIf="showGlobalCheck">
-                <div *ngFor="let attribute of selectedIndiaAttributeValue; let i = index;">
-                  <div class="row">
-                    <div class="col-md-6 mx-auto">
-                      <div class="form-group">
-                        <label class="required">{{ attribute.label }}</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6 mx-auto">
-                      <input type="text" #indian
-                             class="form-control form-control-sm" [(ngModel)]="attribute.value"
-                             (keyup)="onKeyUpIndian(indian.value, attribute.label)">
-                    </div>
+          <!--              <div class="tab" (click)="selectTab('indian')" [class.active]="selectedTab === 'indian'">-->
+          <div class="row my-4">
+            <div class="col-md-12 text-center">
+              <b class="font-weight-bold text-primary">Global Level Database Search</b>
+            </div>
+          </div>
+          <div class="row my-4">
+            <div class="col-md-8  mx-auto">
+              <select class="form-control form-control-sm" #seleattrIndian>
+                <option *ngFor="let attribute of indiaAttributeValue" [value]="attribute.label"
+                  [disabled]="isOptionSelectedIndian(attribute.label)">
+                  {{ attribute.label}}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-4 mx-auto">
+              <button [disabled]="this.disableIndianOptionButton" class="btn btn-primary btn-sm"
+                (click)="addSelectedIndianAttribute(seleattrIndian.value)">Add Global Attribute
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="showGlobalCheck">
+            <div *ngFor="let attribute of selectedIndiaAttributeValue; let i = index;">
+              <div class="row">
+                <div class="col-md-6 mx-auto">
+                  <div class="form-group">
+                    <label class="required">{{ attribute.label }}</label>
                   </div>
                 </div>
+                <div class="col-md-6 mx-auto">
+                  <input type="text" #indian class="form-control form-control-sm" [(ngModel)]="attribute.value"
+                    (keyup)="onKeyUpIndian(indian.value, attribute.label)">
                 </div>
+              </div>
+            </div>
+          </div>
 
-                <!-- <div class="row" *ngIf="selectedIndiaAttributeValue.length > 0">
+          <!-- <div class="row" *ngIf="selectedIndiaAttributeValue.length > 0">
                   <div class="col-md-6 mx-auto">
                     <div class="form-group">
                       <label class="required">{{ selectedIndiaAttributeValue[0].label }}</label>
@@ -1627,7 +1553,7 @@
                   </div>
                 </div> -->
 
-                <!-- <div class="row" *ngFor="let attribute of selectedIndiaAttributeValue; let i = index;">
+          <!-- <div class="row" *ngFor="let attribute of selectedIndiaAttributeValue; let i = index;">
                   <div class="col-md-6 mx-auto">
                     <div class="form-group">
                       <label class="required">{{ attribute.label }}</label>
@@ -1637,23 +1563,19 @@
                     <input type="text" #indian class="form-control form-control-sm" [(ngModel)]="selectedIndiaAttributeValue[i].value" (keyup)="onKeyUpIndian(indian.value, attribute.label)">
                   </div>
                 </div> -->
-      
-      
-            <!-- </div> -->
-          <!--            </ng-container>-->
-          </div>
-        </div>
 
-     
+
+          <!-- </div> -->
+          <!--            </ng-container>-->
+        </div>
+      </div>
+
+
 
       <div class="row">
         <div class="col-md-12 text-center mt-3 pb-3">
-          <button
-            type="button"
-            [disabled]="vendorProofForm.invalid"
-            (click)="onSubmit(vendorProofForm)"
-            class="btn btn-success btn-sm"
-          >
+          <button type="button" [disabled]="vendorProofForm.invalid" (click)="onSubmit(vendorProofForm)"
+            class="btn btn-success btn-sm">
             Submit
           </button>
           <button type="button" (click)="modal.dismiss('Cross click')" class="btn btn-danger btn-sm">Close</button>

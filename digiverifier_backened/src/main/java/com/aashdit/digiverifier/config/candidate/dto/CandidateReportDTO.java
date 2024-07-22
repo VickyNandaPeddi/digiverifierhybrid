@@ -189,4 +189,12 @@ public class CandidateReportDTO {
 	private String conventionalCWFCompletedDate;
 	
 	private List<VendorUploadChecksDto> excetiveSummaryDto;
+	
+	private EmploymentTenureVerificationDto currentEmploymentTenureVerification;
+
+	private List<EmploymentTenureVerificationDto> employmentHistoryDNHDBList;
+
+
+	private List<QcRemarksDto> qcRemarksDto;
+
 }

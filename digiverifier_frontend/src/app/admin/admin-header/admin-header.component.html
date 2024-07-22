@@ -46,9 +46,9 @@
           </ul>
     </div>
     <!--Organization Admin-->
-      <div class="collapse navbar-collapse" id="adminNav" *ngIf="authService.roleMatch(['ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR', 'ROLE_AGENTHR', 'ROLE_VENDOR'])">
+      <div class="collapse navbar-collapse" id="adminNav" *ngIf="authService.roleMatch(['ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR', 'ROLE_AGENTHR', 'ROLE_VENDOR', 'ROLE_CLIENTAGENT','ROLE_CLIENTSUPERVISOR'])">
         <ul class="navbar-nav ml-auto">
-          <li class="nav-item" routerLinkActive="active-link" *ngIf="authService.roleMatch(['ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR', 'ROLE_AGENTHR'])" >
+          <li class="nav-item" routerLinkActive="active-link" *ngIf="authService.roleMatch(['ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR', 'ROLE_AGENTHR', 'ROLE_CLIENTAGENT','ROLE_CLIENTSUPERVISOR'])" >
             <a class="nav-link" routerLink="orgadminDashboard"><i class="fas fa-chart-line"></i> Dashboard <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item" routerLinkActive="active-link" *ngIf="authService.roleMatch(['ROLE_VENDOR'])" >
@@ -57,7 +57,7 @@
             <li class="nav-item" routerLinkActive="active-link" *ngIf="authService.roleMatch(['ROLE_ADMIN'])" >
               <a class="nav-link" routerLink="dnh"><i class="fas fa-user-tag"></i>DNH</a>
             </li>
-            <li class="nav-item" routerLinkActive="active-link" *ngIf="authService.roleMatch(['ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR'])" >
+            <li class="nav-item" routerLinkActive="active-link" *ngIf="!this.getServiceConfigCodes.includes('PANTOUAN') && authService.roleMatch(['ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR'])" >
               <a class="nav-link" routerLink="uanSearch"><i class="fas fa-user-tag"></i>UAN-Search</a>
             </li>  
             <li class="nav-item" routerLinkActive="active-link" *ngIf="authService.roleMatch(['ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR'])">
@@ -75,7 +75,7 @@
           <!-- <li class="nav-item" routerLinkActive="active-link" *ngIf="authService.roleMatch(['ROLE_VENDOR'])">
             <a class="nav-link" routerLink="uploadvendorcheck"><i class="fas fa-user-tag"></i>Upload Vendo Check</a>
            </li> -->
-            <li class="nav-item dropdown" routerLinkActive="active-link" *ngIf="!authService.roleMatch(['ROLE_VENDOR'])">
+            <li class="nav-item dropdown" routerLinkActive="active-link" *ngIf="!authService.roleMatch(['ROLE_VENDOR']) && !authService.roleMatch(['ROLE_CLIENTAGENT']) && !authService.roleMatch(['ROLE_CLIENTSUPERVISOR'])">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-list-alt"></i> Reports
               </a>
@@ -85,6 +85,7 @@
                 <a class="dropdown-item" routerLink="vendorUtilization" routerLinkActive="activechild" *ngIf="!authService.roleMatch(['ROLE_VENDOR']) && !this.getServiceConfigCodes.includes('PANTOUAN')">Conventional Utilization Report</a>
                 <a class="dropdown-item" routerLink="tracker"  routerLinkActive="activechild" *ngIf="!authService.roleMatch(['ROLE_VENDOR']) && !this.getServiceConfigCodes.includes('PANTOUAN')">Candidate Tracker Report</a>
                 <a class="dropdown-item" routerLink="EmploymentSheet"  routerLinkActive="activechild" *ngIf="!authService.roleMatch(['ROLE_VENDOR']) && this.getServiceConfigCodes.includes('PANTOUAN')">Employment Sheet</a>
+                <a class="dropdown-item" routerLink="purgedReport"  routerLinkActive="activechild" *ngIf="!authService.roleMatch(['ROLE_VENDOR']) && !this.getServiceConfigCodes.includes('PANTOUAN')">Candidate purged Report</a>
               </div>
             </li>
           </ul>

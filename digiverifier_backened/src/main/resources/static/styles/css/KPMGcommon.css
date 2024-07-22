@@ -45,8 +45,7 @@
 
 
      @bottom-left {
-        content: "© 2023 KPMG, an Indian Registered Partnership and a member firm of the KPMG network of independent member firms affiliated with KPMG International Cooperative (“KPMG International”), a Swiss entity. All rights reserved. The KPMG name and logo are registered trademarks or trademarks of KPMG International.";
-        font-family: sans-serif;
+		content: "© 2024 KPMG Assurance and Consulting Services LLP, an Indian Limited Liability Partnership and a member firm of the KPMG global organization of independent member firms affiliated with KPMG International Limited, a private English company limited by guarantee. All rights reserved.";        font-family: sans-serif;
         font-weight: lighter;
         font-size: 10px;
         max-width : 90%

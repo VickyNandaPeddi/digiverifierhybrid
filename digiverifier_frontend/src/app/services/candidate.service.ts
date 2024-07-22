@@ -3,6 +3,7 @@ import {
   HttpRequest,
   HttpHeaders,
   HttpEvent,
+  HttpParams,
 } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -33,7 +34,7 @@ export class CandidateService {
       data
     );
   }
-  conventionalSaveLtrAccept(data:any){
+  conventionalSaveLtrAccept(data: any) {
     return this.http.post(
       `${environment.apiUrl}/api/allowAll/conventional/conventionalCreateAccessCodeUriForSelf`,
       data
@@ -56,7 +57,7 @@ export class CandidateService {
       `${environment.apiUrl}/api/allowAll/candidateApplicationFormSubmit/${candidateCode}`
     );
   }
-  
+
   getAllSuspectClgList() {
     return this.http.get(
       `${environment.apiUrl}/api/allowAll/getAllSuspectClgList`
@@ -96,6 +97,20 @@ export class CandidateService {
     );
   }
 
+  getepfoLoginCaptcha(candidateCode: any) {
+    return this.http.get(
+      `${environment.apiUrl}/api/allowAll/epfoLoginCaptcha/${candidateCode}`,
+      candidateCode
+    );
+  }
+
+  getepfoOTPScreenCaptcha(data: any) {
+    return this.http.post(
+      `${environment.apiUrl}/api/allowAll/epfoOTPScreenCaptcha`,
+      data
+    );
+  }
+
   getEpfodetail(data: any) {
     return this.http.post(
       `${environment.apiUrl}/api/allowAll/getEpfodetail`,
@@ -107,6 +122,13 @@ export class CandidateService {
     console.log('Callling new API');
     return this.http.post(
       `${environment.apiUrl}/api/allowAll/getEpfodetailNew`,
+      data
+    );
+  }
+
+  getEpfodetailByOTPAndCaptcha(data: any) {
+    return this.http.post(
+      `${environment.apiUrl}/api/allowAll/epfoOTPCaptchaSubmit`,
       data
     );
   }
@@ -197,10 +219,12 @@ export class CandidateService {
     // });
     // return this.http.request(req);
     return this.http.post(
-      `${environment.apiUrl}/api/candidate/resumeParser`, formData, {
-          reportProgress: true,
-          responseType: 'json'
-        }
+      `${environment.apiUrl}/api/candidate/resumeParser`,
+      formData,
+      {
+        reportProgress: true,
+        responseType: 'json',
+      }
     );
   }
 
@@ -211,7 +235,9 @@ export class CandidateService {
     );
   }
 
-  conventionalCandidateApplicationFormApproved(formData: FormData): Observable<any> {
+  conventionalCandidateApplicationFormApproved(
+    formData: FormData
+  ): Observable<any> {
     return this.http.put(
       `${environment.apiUrl}/api/candidate/conventionalCandidateApplicationFormApproved`,
       formData
@@ -364,7 +390,11 @@ export class CandidateService {
     );
   }
 
-  getAllSuspectEmpListtt(organizationId: any, pageNumber: number, pageSize: number) {
+  getAllSuspectEmpListtt(
+    organizationId: any,
+    pageNumber: number,
+    pageSize: number
+  ) {
     console.log(organizationId, '======================............');
     return this.http.get(
       `${environment.apiUrl}/api/candidate/getAllSuspectEmpList/${organizationId}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
@@ -405,16 +435,14 @@ export class CandidateService {
     );
   }
 
-  
-
-  getCandidateDetails(candidateCode:any){
+  getCandidateDetails(candidateCode: any) {
     return this.http.get(
       `${environment.apiUrl}/api/allowAll/getCandidateDetails/${candidateCode}`,
       candidateCode
     );
   }
 
-  getCandidateReportStatus(candidateCode:any){
+  getCandidateReportStatus(candidateCode: any) {
     return this.http.get(
       `${environment.apiUrl}/api/allowAll/getCandidateReportStatus/${candidateCode}`,
       candidateCode
@@ -428,7 +456,7 @@ export class CandidateService {
     );
   }
 
-  getRemittanceRecordsForAllEmployers (candidateCode:any) {
+  getRemittanceRecordsForAllEmployers(candidateCode: any) {
     console.log(candidateCode, 'CALLING REMITTANCE............');
     return this.http.get(
       `${environment.apiUrl}/api/allowAll/remittanceRecords/${candidateCode}?flow=NOTCANDIDATE`,
@@ -478,13 +506,12 @@ export class CandidateService {
     );
   }
 
-
-  removeAllSuspectEmpByOrgId(orgId:any){
-    console.warn("ORGID=========",orgId)
+  removeAllSuspectEmpByOrgId(orgId: any) {
+    console.warn('ORGID=========', orgId);
     return this.http.put(
-      `${environment.apiUrl}/api/candidate/removeAllSuspectEmployerByOrgId/${orgId}`,orgId
-    )
-
+      `${environment.apiUrl}/api/candidate/removeAllSuspectEmployerByOrgId/${orgId}`,
+      orgId
+    );
   }
 
   authLtrDecline(candidateCode: any) {
@@ -500,7 +527,7 @@ export class CandidateService {
     );
   }
 
-  getGSTRecordsForAllEmployers (candidateCode:any) {
+  getGSTRecordsForAllEmployers(candidateCode: any) {
     console.log(candidateCode, 'CALLING GST............');
     return this.http.get(
       `${environment.apiUrl}/api/allowAll/gstRecords/${candidateCode}?flow=NOTCANDIDATE`,
@@ -515,17 +542,47 @@ export class CandidateService {
     );
   }
 
-  saveCaseReinitInfo (candidateCode:any, date : any) {
+  saveCaseReinitInfo(candidateCode: any, date: any) {
     return this.http.get(
       `${environment.apiUrl}/api/candidate/saveCaseReinitDetails/${candidateCode}?caseReinitDate=${date}`,
       candidateCode
     );
   }
+  getQcRemarks(candidateId: any) {
+    return this.http.get(
+      `${environment.apiUrl}/api/candidate/getQcRemarks/${candidateId}`
+    );
+  }
 
-  conventionalCandidate(data:any){
+  saveQcRemarks(data: any) {
+    return this.http.post(
+      `${environment.apiUrl}/api/candidate/addUpdateQcRemarks`,
+      data
+    );
+  }
+  deleteQcremarks(qcRemarksId: any) {
+   return this.http.get(
+      `${environment.apiUrl}/api/candidate/deleteQcRemarks/${qcRemarksId}`
+    );
+  }
+
+  conventionalCandidate(data: any) {
     return this.http.post(
       `${environment.apiUrl}/api/allowAll/conventionalcandidate`,
       data
-    )
+    );
+  }
+
+  getCurrentStatusByCandidateCode(candidateCode: any) {
+    return this.http.get(
+      `${environment.apiUrl}/api/allowAll/getCandidateCurrentStatus/${candidateCode}`
+    );
+  }
+
+  cancelEpfoLogin(candidateCode: any) {
+    return this.http.get(
+      `${environment.apiUrl}/api/allowAll/cancelEpfoLogin/${candidateCode}`,
+      candidateCode
+    );
   }
 }

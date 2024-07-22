@@ -13,6 +13,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -37,6 +38,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
@@ -53,7 +57,9 @@ import com.aashdit.digiverifier.common.model.ServiceOutcome;
 import com.aashdit.digiverifier.common.service.ContentService;
 import com.aashdit.digiverifier.common.util.RandomString;
 import com.aashdit.digiverifier.config.admin.model.User;
+import com.aashdit.digiverifier.config.admin.model.VendorChecks;
 import com.aashdit.digiverifier.config.admin.repository.UserRepository;
+import com.aashdit.digiverifier.config.admin.repository.VendorChecksRepository;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateDetailsDto;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateInvitationSentDto;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateStatusCountDto;
@@ -86,6 +92,7 @@ import com.aashdit.digiverifier.config.candidate.util.ExcelUtil;
 import com.aashdit.digiverifier.config.superadmin.dto.DashboardDto;
 import com.aashdit.digiverifier.config.superadmin.model.Organization;
 import com.aashdit.digiverifier.config.superadmin.model.OrganizationConfig;
+import com.aashdit.digiverifier.config.superadmin.model.ServiceTypeConfig;
 import com.aashdit.digiverifier.config.superadmin.repository.OrganizationConfigRepository;
 import com.aashdit.digiverifier.config.superadmin.repository.OrganizationRepository;
 import com.aashdit.digiverifier.config.superadmin.repository.ServiceTypeConfigRepository;
@@ -132,6 +139,9 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 
 	@Autowired
 	private CommonValidation commonValidation;
+	
+	@Autowired
+	private VendorChecksRepository vendorCheckRepository;
 
 	//	@Autowired
 	//	private CandidateStatusRepository candidateStatusRepository;
@@ -236,7 +246,7 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 
 			if(file != null) {		
 				String originalFilename = file.getOriginalFilename();
-				System.out.println("OrginalFileName::>>>" + originalFilename);
+//				System.out.println("OrginalFileName::>>>" + originalFilename);
 				if (CSVUtil.hasCSVFormat(file)) {
 					candidates = cSVUtil.csvToConventionalCandidateList(file.getInputStream(), originalFilename,
 							organization.getNoYearsToBeVerified());
@@ -437,6 +447,7 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 				int finalReportCount = 0;
 				int conventionalPendingCount = 0;
 				int conventionalInterimReport = 0;
+				int conventionalApprovedCount = 0;
 				List<Object[]> activityList = getConventionalCountsForDashboard(strToDate, strFromDate, dashboardDto.getUserId());
 				for (Object[] activity : activityList) {
 					//				"select newupload,invalid,reinvites,interReport,finalReport,cancelled,invExpired,pendingNow\n");
@@ -447,11 +458,12 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 					//					pendingCount = Integer.parseInt(activity[7].toString());
 					conventionalPendingCount = Integer.parseInt(activity[7].toString());
 					conventionalInterimReport = Integer.parseInt(activity[3].toString());
+					conventionalApprovedCount = Integer.parseInt(activity[8].toString());
 
-					log.info("conventionalPendingCount :"+conventionalPendingCount);
-					log.info("conventionalInterimReport :"+conventionalInterimReport);
-					log.info("processDeclinedCount :"+processDeclinedCount);
-					log.info("finalReportCount :"+finalReportCount);
+//					log.info("conventionalPendingCount :"+conventionalPendingCount);
+//					log.info("conventionalInterimReport :"+conventionalInterimReport);
+//					log.info("processDeclinedCount :"+processDeclinedCount);
+//					log.info("finalReportCount :"+finalReportCount);
 
 				}
 
@@ -465,12 +477,37 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 				StatusMaster finalReport = statusMasterRepository.findByStatusCode("CONVENTIONALFINALREPORT");
 				StatusMaster conventionalPending = statusMasterRepository.findByStatusCode("CONVENTIONALPENDINGAPPROVAL");
 				StatusMaster conventionInterim = statusMasterRepository.findByStatusCode("CONVENTIONALINTERIMREPORT");
-
+				StatusMaster conventionalApprove = statusMasterRepository.findByStatusCode("CONVENTIONALCANDIDATEAPPROVE");
+						
 				// getting user and checking the organization for naming the status
 				User user = userRepository.findById(dashboardDto.getUserId()).get();
 				List<String> orgServices = serviceTypeConfigRepository.getServiceSourceMasterByOrgId(user.getOrganization().getOrganizationId());
-				candidateStatusCountDtoList.add(0,
-						new CandidateStatusCountDto("CWF Completed", conventionalPending.getStatusCode(), conventionalPendingCount));
+				
+				Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	              Object principal = authentication.getPrincipal();
+//	              log.info("principal:: {}",principal.toString());
+	              String username = "";
+	                  username = ((UserDetails) principal).getUsername();
+//	                  log.info("username 2::?? {}",username);
+	                  User findByUserName = userRepository.findByUserName(username);
+//	                  log.info("ORgID::{}",findByUserName.getOrganization().getOrganizationName());	                  
+//	                  log.info(principal.toString());
+	                  
+	                  List<String> serviceSourceMasterByOrgId = serviceTypeConfigRepository.getServiceSourceMasterByOrgId(findByUserName.getOrganization().getOrganizationId());
+						
+						boolean clientApproval = serviceSourceMasterByOrgId.stream()
+							    .anyMatch(serviceCode -> serviceCode.equals("CONVENTIONALCLIENTAPPROVAL"));
+				
+	                  if(clientApproval){
+	                	  candidateStatusCountDtoList.add(0,
+	                			  new CandidateStatusCountDto("Pending Approval", conventionalPending.getStatusCode(), conventionalPendingCount));
+	                	  candidateStatusCountDtoList.add(1,
+	                			  new CandidateStatusCountDto("Approval Completed", conventionalApprove.getStatusCode(), conventionalApprovedCount));	                	  
+	                  }else {
+	                	  candidateStatusCountDtoList.add(0,
+	                			  new CandidateStatusCountDto("CWF Completed", conventionalPending.getStatusCode(), conventionalPendingCount));
+	                  }
+	                  
 				//					}
 
 				candidateStatusCountDtoList.add(1, new CandidateStatusCountDto("Interim Report",
@@ -535,10 +572,10 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 					conventionalInvaliduploadCount = Integer.parseInt(activity[1].toString());
 					conventionalReinviteCount = Integer.parseInt(activity[2].toString());
 
-					log.info("conventionalNewUploadCount :"+conventionalNewUploadCount);
-					log.info("conventionalInvitationexpiredCount :"+conventionalInvitationexpiredCount);
-					log.info("conventionalInvaliduploadCount :"+conventionalInvaliduploadCount);
-					log.info("conventionalReinviteCount :"+conventionalReinviteCount);
+//					log.info("conventionalNewUploadCount :"+conventionalNewUploadCount);
+//					log.info("conventionalInvitationexpiredCount :"+conventionalInvitationexpiredCount);
+//					log.info("conventionalInvaliduploadCount :"+conventionalInvaliduploadCount);
+//					log.info("conventionalReinviteCount :"+conventionalReinviteCount);
 				}
 
 				// finish
@@ -605,7 +642,7 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 			Date endDate = formatter.parse(strToDate + " 23:59:59");
 			User user = userRepository.findById(userId).get();
 			if (user.getRole().getRoleCode().equalsIgnoreCase("ROLE_ADMIN")
-					|| user.getRole().getRoleCode().equalsIgnoreCase("ROLE_PARTNERADMIN")) {
+					|| user.getRole().getRoleCode().equalsIgnoreCase("ROLE_PARTNERADMIN") || user.getRole().getRoleCode().equalsIgnoreCase("ROLE_CLIENTAGENT") || user.getRole().getRoleCode().equalsIgnoreCase("ROLE_CLIENTSUPERVISOR") ) {
 
 				orgId = user.getOrganization().getOrganizationId();
 			}
@@ -625,7 +662,7 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 			// Query Start
 			StringBuilder query = new StringBuilder();
 			query.append(
-					"select newupload,invalid,reinvites,interReport,finalReport,cancelled,invExpired,pendingNow\n");
+					"select newupload,invalid,reinvites,interReport,finalReport,cancelled,invExpired,pendingNow,conventionalApprove\n");
 			query.append("from \n");
 			query.append(
 					"(select count(distinct tdcsh.candidate_id) as newupload from t_dgv_conventional_candidate_status_history tdcsh\n");
@@ -714,10 +751,10 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 				query.append("and bas.created_by IN (:agentIds)\n");
 			}
 			query.append("and tdcsh.last_updated_on between :startDate and :endDate) inve,\n");
-			query.append("(select count(*) as pendingNow from t_dgv_conventional_candidate_status tds\n");
-			query.append("join t_dgv_candidate_basic bas on bas.candidate_id = tds.candidate_id \n");
+			query.append("(select count(*) as pendingNow from t_dgv_conventional_candidate_status tdcsh\n");
+			query.append("join t_dgv_candidate_basic bas on bas.candidate_id = tdcsh.candidate_id \n");
 			query.append("join t_dgv_organization_master org on bas.organization_id = org.organization_id \n");
-			query.append("join t_dgv_status_master mas on mas.status_master_id = tds.status_master_id \n");
+			query.append("join t_dgv_status_master mas on mas.status_master_id = tdcsh.status_master_id \n");
 			query.append("where mas.status_code ='CONVENTIONALPENDINGAPPROVAL'\n");
 			if (orgId != 0) {
 				query.append("and org.organization_id =:orgId\n");
@@ -725,6 +762,20 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 			if (agentIds != null && !agentIds.isEmpty()) {
 				query.append("and bas.created_by IN (:agentIds)\n");
 			}
+			
+			query.append("and tdcsh.last_updated_on between :startDate and :endDate) app,\n");
+			query.append("(select count(*) as conventionalApprove from t_dgv_conventional_candidate_status tds\n");
+			query.append("join t_dgv_candidate_basic bas on bas.candidate_id = tds.candidate_id \n");
+			query.append("join t_dgv_organization_master org on bas.organization_id = org.organization_id \n");
+			query.append("join t_dgv_status_master mas on mas.status_master_id = tds.status_master_id \n");
+			query.append("where mas.status_code ='CONVENTIONALCANDIDATEAPPROVE'\n");
+			if (orgId != 0) {
+				query.append("and org.organization_id =:orgId\n");
+			}
+			if (agentIds != null && !agentIds.isEmpty()) {
+				query.append("and bas.created_by IN (:agentIds)\n");
+			}
+			
 			query.append("and tds.last_updated_on between :startDate and :endDate) pd\n");
 
 			Query resultQuery = entityManager.createNativeQuery(query.toString());
@@ -954,7 +1005,6 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 
 	@Override
 	public ServiceOutcome<DashboardDto> getAllConventionalCandidateList(DashboardDto dashboardDto) {
-		log.info("getAllConventionalCandidateList");
 		ServiceOutcome<DashboardDto> svcSearchResult = new ServiceOutcome<DashboardDto>();
 		List<Candidate> candidateList = new ArrayList<Candidate>();
 		List<CandidateDetailsDto> candidateDtoList = new ArrayList<CandidateDetailsDto>();
@@ -980,7 +1030,7 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 				Date startDate = formatter.parse(strFromDate + " 00:00:00");
 				Date endDate = formatter.parse(strToDate + " 23:59:59");
 				String status = dashboardDto.getStatus();
-				log.info("Conventional Dashboard Status : "+status);
+//				log.info("Conventional Dashboard Status : "+status);
 				if (status.equals("CONVENTIONALPENDINGAPPROVAL")) {
 					status = "CONVENTIONALPENDINGAPPROVAL";
 					statusCodes.add(0, status);
@@ -1008,7 +1058,7 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 				List<Long> statusIds = statusMasterList.stream().map(x -> x.getStatusMasterId())
 						.collect(Collectors.toList());
 				if (user.getRole().getRoleCode().equalsIgnoreCase("ROLE_ADMIN")
-						|| user.getRole().getRoleCode().equalsIgnoreCase("ROLE_PARTNERADMIN")) {
+						|| user.getRole().getRoleCode().equalsIgnoreCase("ROLE_PARTNERADMIN") || user.getRole().getRoleCode().equalsIgnoreCase("ROLE_CLIENTAGENT") || user.getRole().getRoleCode().equalsIgnoreCase("ROLE_CLIENTSUPERVISOR")) {
 					if (status.equals("CONVENTIONALNEWUPLOAD")) {
 						// System.out.println("IF NEWUPLOAD");
 						// System.out.println("STATUS ID::: "+statusIds);
@@ -1017,10 +1067,7 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 									.getPageCandidateListByOrganizationIdAndStatusAndCreatedOnConventional(
 											user.getOrganization().getOrganizationId(), statusIds, startDate, endDate,
 											pageable);
-							System.out.println("candidateList >>"+candidateList.toString());
-							System.out.println("candidateList >>"+candidateList.size());
 						} else {
-							System.out.println("3");
 							candidateList = candidateRepository.getCandidateListByOrganizationIdAndStatusAndCreatedOnConventional(
 									user.getOrganization().getOrganizationId(), statusIds, startDate, endDate);
 						}
@@ -1057,6 +1104,7 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 								statusIds, startDate, endDate);
 					}
 				}
+				
 				for (Candidate candidate : candidateList) {
 //				if(candidate.getConventionalCandidate() != null && candidate.getConventionalCandidate()) {
 					CandidateDetailsDto candidateDto = this.modelMapper.map(candidate, CandidateDetailsDto.class);
@@ -1088,7 +1136,39 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 					//							|| candidateStatus.getStatusMaster().getStatusCode().equals("ITR") && uan) {
 					//						candidateDto.setCandidateStatusName("EPFO Skipped");
 					//					} else {
-					candidateDto.setCandidateStatusName(candidateStatus.getStatusMaster().getStatusName());
+					Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+					Object principal = authentication.getPrincipal();
+//					log.info("principal:: {}",principal.toString());
+					String username = "";
+					username = ((UserDetails) principal).getUsername();
+//					log.info("username 2::?? {}",username);
+					User findByUserName = userRepository.findByUserName(username);
+//					log.info("ORgID::{}",findByUserName.getOrganization().getOrganizationName());	                  
+//					log.info(principal.toString());
+
+					List<String> serviceSourceMasterByOrgId = serviceTypeConfigRepository.getServiceSourceMasterByOrgId(findByUserName.getOrganization().getOrganizationId());
+					
+					boolean clientApproval = serviceSourceMasterByOrgId.stream()
+						    .anyMatch(serviceCode -> serviceCode.equals("CONVENTIONALCLIENTAPPROVAL"));
+					
+//					if(findByUserName.getOrganization().getOrganizationName().equalsIgnoreCase("Prodapt Solutions Private Limited")){
+					if(clientApproval) {
+						String statusName = candidateStatus.getStatusMaster().getStatusName();
+						switch (statusName.toLowerCase()) {
+						    case "conventional qc pending":
+						        candidateDto.setCandidateStatusName("Pending Approval");
+						        break;
+						    case "conventional candidate approve":
+						        candidateDto.setCandidateStatusName("Conventional QC Pending");
+						        break;
+						    default:
+								candidateDto.setCandidateStatusName(candidateStatus.getStatusMaster().getStatusName());
+						        break;
+						}
+					}
+					else {					
+						candidateDto.setCandidateStatusName(candidateStatus.getStatusMaster().getStatusName());
+					}
 					//					}
 					candidateDto.setLastUploadedOn(candidateStatus.getLastUpdatedOn());
 					List<ContentDTO> contentDTOList = contentService
@@ -1225,8 +1305,8 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 					if (candidateStatus.getStatusMaster().getStatusCode().equals("CONVENTIONALINTERIMREPORT")) {
 						ConventionalCandidateStatusHistory candidateStatusHistoryObj = conventionalCandidateStatusHistoryReposiory
 								.findLastStatusHistorytRecord(candidate.getCandidateId());
-						log.info("LAST STATUS HISTORY IS ::{}",
-								candidateStatusHistoryObj.getStatusMaster().getStatusCode());
+//						log.info("LAST STATUS HISTORY IS ::{}",
+//								candidateStatusHistoryObj.getStatusMaster().getStatusCode());
 						candidateStatusHistoryObj.setCreatedOn(new Date());
 						candidateStatusHistoryObj.setCandidateStatusChangeTimestamp(new Date());
 						conventionalCandidateStatusHistoryReposiory.save(candidateStatusHistoryObj);
@@ -1473,7 +1553,31 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 			ConventionalCandidateStatus candidateStatus = conventionalCandidateStatusRepository.findByCandidateCandidateCode(candidate.getCandidateCode());
 //			candidateDto.setCandidateStatusName(candidateStatus.getStatusMaster().getStatusName());
 			if (candidateStatus != null) {
-			    candidateDto.setCandidateStatusName(candidateStatus.getStatusMaster().getStatusName());
+				Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+				Object principal = authentication.getPrincipal();
+				//	              log.info("principal:: {}",principal.toString());
+				String username = "";
+				username = ((UserDetails) principal).getUsername();
+				User findByUserName = userRepository.findByUserName(username);
+
+
+				List<String> serviceSourceMasterByOrgId = serviceTypeConfigRepository.getServiceSourceMasterByOrgId(findByUserName.getOrganization().getOrganizationId());
+
+				boolean clientApproval = serviceSourceMasterByOrgId.stream()
+						.anyMatch(serviceCode -> serviceCode.equals("CONVENTIONALCLIENTAPPROVAL"));
+
+				if(clientApproval) {
+					if(candidateStatus.getStatusMaster().getStatusName().equals("Conventional QC Pending")) {
+						candidateDto.setCandidateStatusName("Pending Approval");
+					}else if(candidateStatus.getStatusMaster().getStatusName().equals("Conventional Candidate Approve")) {
+						candidateDto.setCandidateStatusName("Conventional QC Pending");
+					}else {
+						candidateDto.setCandidateStatusName(candidateStatus.getStatusMaster().getStatusName());
+					}
+				}
+				else {
+					candidateDto.setCandidateStatusName(candidateStatus.getStatusMaster().getStatusName());
+				}
 			}
 
 			List<ContentDTO> contentDTOList = contentService.getContentListByCandidateId(candidate.getCandidateId());
@@ -1542,6 +1646,63 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 			log.error("Exception occured in createCandidateStatusHistory method in CandidateServiceImpl-->", ex);
 		}
 		return candidateStatusHistoryObj;
+	}
+
+	@Override
+	public ServiceOutcome<?> clientApproval(String vendorCheckID) {
+		ServiceOutcome<?> svcSearchResult = new ServiceOutcome<>();
+
+		try {
+			List<Long> vendorCheckIds;
+
+			vendorCheckIds = Arrays.stream(vendorCheckID.split(","))
+					.map(String::trim)
+					.map(Long::parseLong)
+					.collect(Collectors.toList());
+
+			if (vendorCheckIds != null && !vendorCheckIds.isEmpty() && vendorCheckIds.size() > 1) {
+				for (Long vendorCheckId : vendorCheckIds) {
+//		            System.out.println("vendorCheckId : " + vendorCheckId);
+		            VendorChecks byVendorcheckId = vendorCheckRepository.findByVendorcheckId(vendorCheckId);
+//					System.out.println("byVendorcheckId :"+byVendorcheckId);
+					ConventionalCandidateStatus byConventionalCandidateStatus = conventionalCandidateStatusRepository.findByCandidateCandidateId(byVendorcheckId.getCandidate().getCandidateId());
+					if(byConventionalCandidateStatus.getStatusMaster().getStatusName().equals("Conventional QC Pending")) {
+						byConventionalCandidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("CONVENTIONALCANDIDATEAPPROVE"));
+//						System.out.println("byConventionalCandidateStatus : "+byConventionalCandidateStatus.getStatusMaster().getStatusMasterId());
+						conventionalCandidateStatusRepository.save(byConventionalCandidateStatus);
+						conventionalCandidateService.createConventionalCandidateStatusHistory(byConventionalCandidateStatus, "NOTCANDIDATE");
+					}
+					byVendorcheckId.setClientApproval(true);
+					VendorChecks save = vendorCheckRepository.save(byVendorcheckId);
+					if(save != null) {
+						svcSearchResult.setMessage("Documents Approved");;
+					}
+		        }
+			}
+			else {
+				if (vendorCheckIds != null && !vendorCheckIds.isEmpty()) {
+					Long singleVendorCheckId = vendorCheckIds.get(0);
+					VendorChecks byVendorcheckId = vendorCheckRepository.findByVendorcheckId(singleVendorCheckId);
+					ConventionalCandidateStatus byConventionalCandidateStatus = conventionalCandidateStatusRepository.findByCandidateCandidateId(byVendorcheckId.getCandidate().getCandidateId());
+					if(byConventionalCandidateStatus.getStatusMaster().getStatusName().equals("Conventional QC Pending")) {
+						byConventionalCandidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("CONVENTIONALCANDIDATEAPPROVE"));
+						conventionalCandidateStatusRepository.save(byConventionalCandidateStatus);
+						conventionalCandidateService.createConventionalCandidateStatusHistory(byConventionalCandidateStatus, "NOTCANDIDATE");
+					}
+					byVendorcheckId.setClientApproval(true);
+					VendorChecks save = vendorCheckRepository.save(byVendorcheckId);
+					if(save != null) {
+						svcSearchResult.setMessage("Document Approved");
+					}
+				}
+				
+			}
+
+		} catch (Exception e) {
+			log.info("clientApproval Exception : "+e);
+		}
+
+		return svcSearchResult;
 	}
 
 

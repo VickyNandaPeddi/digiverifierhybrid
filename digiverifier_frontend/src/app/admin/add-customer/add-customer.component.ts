@@ -19,6 +19,7 @@ export class AddCustomerComponent implements OnInit {
   public custmodel: Customer = new Customer;
   public logoFile: any = File;
   public showvalid: any;
+  public passwordPolicy: any;
   addCustomers = new FormGroup({
     organizationName: new FormControl('', Validators.required),
     gstNumber: new FormControl('', [Validators.minLength(15), Validators.maxLength(15)]),
@@ -40,6 +41,8 @@ export class AddCustomerComponent implements OnInit {
     noYearsToBeVerified:new FormControl(),
     shipmentAddress: new FormControl(),
     showValidation:new FormControl(),
+    passwordPolicy:new FormControl('',Validators.required),
+    lastPasswords:new FormControl('',Validators.required)
   });
   constructor( private customers:CustomerService, private router: Router) {}
 
@@ -63,8 +66,13 @@ export class AddCustomerComponent implements OnInit {
     console.log( this.showvalid,"-----------------------kkk")
     
   }
+  selectPasswordPolicy(event:any){
+    this.passwordPolicy=event.target.value
+    console.log( this.passwordPolicy,"-----------------------kkk") 
+  }
   onSubmit(addCustomers: FormGroup) {
     console.log(this.showvalid,"----------")
+    console.log("passwordPolicy : ",this.passwordPolicy)
     
     const formData = new FormData();
     formData.append('organization', JSON.stringify(addCustomers.value));

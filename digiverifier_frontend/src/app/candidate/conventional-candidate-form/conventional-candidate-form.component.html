@@ -1,0 +1,766 @@
+<!-- candidate-form.component.html -->
+<!-- <div class="pageHeader">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="pageTitle">Microsoft Form</h2>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<body>
+
+    <div class="container container-md">
+        <form [formGroup]="candidateForm" (ngSubmit)="submitConventionalCandidateForm()">
+            <div class="formHeader">
+                <div class="headerFormContent">
+                    <h3 style="text-transform: uppercase;">{{accountName}}</h3>
+                    <p *ngFor="let item of conventionalCandidateCheck">{{ item }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card" style="margin-bottom: 100px;">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="name" class="required">1. Name</label>
+                                <input type="text" placeholder="Enter the Answer" id="name" class="form-control"
+                                    formControlName="candidateName">
+                            </div>
+                            <div class="form-group">
+                                <label for="contactNumber" class="required">2. Contact Number</label>
+                                <input type="text" placeholder="Enter the Answer" id="contactNumber"
+                                    class="form-control" formControlName="contactNo">
+                            </div>
+                            <div class="form-group">
+                                <label for="email" class="required">3. Email</label>
+                                <input type="email" placeholder="Enter the Answer" id="email" class="form-control"
+                                    formControlName="email">
+                            </div>
+                            <!-- <div class="form-group">
+                                <label for="email" class="required">3. Education </label>
+                                <select id="education" class="form-control" formControlName="education">
+                                    <option value="10TH">10TH</option>
+                                    <option value="12TH">12TH</option>
+                                    <option value="UG">UG</option>
+                                    <option value="PG">PG</option>
+                                </select> 
+                                <input type="file" (change)="uploadFile($event, 'education')" class="form-control">
+                            </div>
+                          <div class="form-group">
+                            <label for="email" class="required">4. Employment </label>
+                            <select id="education" class="form-control" formControlName="employment">
+                                <option value="EMP1">EMP1</option>
+                                <option value="EMP2">EMP2</option>
+                                <option value="EMP3">EMP3</option>
+                            </select> 
+                            <input type="file" (change)="uploadFile($event, 'employment')" class="form-control">
+                            </div> -->
+                            <div *ngFor="let attribute of agentAttributeListForm; let i = index">
+                                <div class="form-group">
+                                    <!-- <ng-container *ngIf="attribute.label != 'Employment' && attribute.label != 'Database' && attribute.label != 'Criminal'">
+                                    <label for="" class="required">{{ i + 4 }}. {{ attribute.label }}</label>
+                                </ng-container> -->
+
+                                    <!-- <ng-container *ngIf="attribute.label == 'Employment' && attribute.label != 'Database'">
+                                        <label for="" class="required" >{{i + 4}}. {{ attribute.label }} (Last Two Employment)</label>
+                                    </ng-container> -->
+
+                                    <!-- <ng-container *ngIf="attribute.label == 'Criminal' && attribute.label != 'Database'">
+                                        <label for="" class="required" >{{i + 4}}. {{ attribute.label }} & Database</label>
+                                    </ng-container> -->
+
+                                    <ng-container *ngIf="attribute.label != 'Employment' && attribute.label != 'ID' && attribute.label != 'Database' && attribute.label != 'Address'">
+                                        <label for="" class="required">{{ i + 4 }}. {{ attribute.label }}</label>
+                                    </ng-container>
+
+                                    <ng-container *ngIf="attribute.label == 'Employment'">
+                                        <label for="" class="required">{{i + 4}}. {{ attribute.label }} (Last Two
+                                            Employment)</label>
+                                    </ng-container>
+
+                                    <ng-container *ngIf="attribute.label == 'ID'">
+                                        <label for="" class="required">{{i + 4}}. {{ attribute.label }} (Aadhar &
+                                            Pan)</label>
+                                    </ng-container>
+
+                                    <ng-container *ngIf="attribute.label == 'Database'">
+                                        <label for="" class="required">{{i + 4}}. {{ attribute.label }} (Aadhar Only)</label>
+                                    </ng-container>
+
+                                    <ng-container *ngIf="attribute.label == 'Address'">
+                                        <label for="" class="required">{{i + 4}}. {{ attribute.label }} (Enter Full Address)</label>
+                                    </ng-container>
+
+                                    <!-- <ng-container>
+                                        <label for="" class="required">{{ i + 4 }}. {{ attribute.label }}</label>
+                                    </ng-container> -->
+                                    <!-- <ng-container *ngIf="attribute.label == 'Education'">
+                                        <select formControlName="value" class="form-control"
+                                            [(ngModel)]="attribute.value">
+                                            <option value="10TH">10TH</option>
+                                            <option value="12TH">12TH</option>
+                                            <option value="UG">UG</option>
+                                            <option value="PG">PG</option>
+                                            <option value="DIPLOMA">DIPLOMA</option>
+                                        </select>
+                                       
+                                                <input type="file" name="educationFiles" (change)="uploadFile($event, attribute.label)" class="form-control" required multiple>
+                                                <div *ngIf="educationSelectedFiles.length > 0">
+                                                    <ul>
+                                                      <li *ngFor="let file of educationSelectedFiles">{{ file.name }}
+                                                        <button (click)="removeFile('education', file)">&#10006;</button>
+                                                    </li>
+                                                    </ul>
+                                                  </div>
+                                            <p style="color: gray;padding-top: 4px;"> File size limit: 10MB Allowed file types:  PDF, Image, zip. </p>
+                                    </ng-container> -->
+
+                                    <!-- BHavani code -->
+                                    <ng-container *ngIf="attribute.label == 'Education'">
+                                        <div class="col-md-12">
+                                            <div class="form-group row mb-3">
+                                                <label class="d-flex justify-content-between align-items-center">
+                                                    <button type="button" class="btn btn-sm btn-primary"
+                                                        (click)="addCheck()"><b>Add Check</b></button>
+                                                </label>
+                                            </div>
+                                            <form>
+                                                <div *ngFor="let check of checks; let i = index"
+                                                    class="form-group row mb-3">
+                                                    <div class="col-md-12 d-flex flex-row align-items-center">
+                                                        <select id="educationLevel{{i}}" [(ngModel)]="check.Education"
+                                                            name="educationLevel{{i}}" class="form-control mr-2"
+                                                            required
+                                                            (focus)="previousEducationLevel = check.Education"
+                                                            (ngModelChange)="updateEducationDocuments($event, check)">
+                                                            <option value="" *ngIf="check.Education" disabled selected>{{ check.Education }}</option>
+                                                            <option value="" disabled selected>--Select--</option>
+                                                            <option *ngFor="let level of educationLevels"
+                                                                [value]="level">{{ level }}</option>
+                                                        </select>
+                                                        <button type="button" class="btn btn-sm btn-primary"
+                                                            [disabled]="!check.Education"
+                                                            (click)="addDocumnentForEducation(check)">Add
+                                                            Document</button>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            (click)="removeCheck(i,check.Education)">&#10006;</button>
+                                                    </div>
+                                                    <div *ngFor="let doc of check.documents; let j = index"
+                                                        class="form-group row mb-3">
+                                                        <div class="col-md-12 d-flex flex-row align-items-center mt-4">
+                                                            <div class="col-md-4">
+                                                                <!-- <select id="educationDocument{{j}}" [(ngModel)]="doc.EducationDoc"
+                                name="educationDocument{{j}}" class="form-control mr-2" required>
+                                <option value="" disabled selected>--Select--</option>
+                                <option *ngFor="let level of filteredEducationDocuments" [value]="level">{{ level }}</option>
+                            </select> -->
+                                                                <select id="educationDocument{{i}}_{{j}}"
+                                                                    [(ngModel)]="doc.EducationDoc"
+                                                                    name="educationDocument{{i}}_{{j}}"
+                                                                    class="form-control mr-2" required>
+                                                                    <option value="" *ngIf="doc.EducationDoc" disabled selected>{{ doc.EducationDoc }}</option>
+                                                                    <option value="" disabled selected>--Select--
+                                                                    </option>
+                                                                    <option
+                                                                        *ngFor="let level of allEducationDocuments[check.Education]"
+                                                                        [value]="level">{{ level }}</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <input type="file" id="document{{j}}"
+                                                                    [disabled]="!doc.EducationDoc"
+                                                                    (change)="uploadFile($event, 'Education', check.Education, doc.EducationDoc)"
+                                                                    class="form-control mr-2" required multiple />
+                                                            </div>      
+                                                            <button type="button"
+                                                            class="btn btn-sm btn-outline-danger"
+                                                            (click)="removeEducationDoc(check,'Education '+check.Education+' '+doc.EducationDoc, j,'Education '+check.Education,check.Education)">&#10006;</button>
+                                     
+                                                        </div>
+                                                        <div *ngIf="educationSelectedFiles.length > 0">
+                                                            <p style="margin: 20px;">{{check.Education}}</p>
+                                                            <!-- <ul>
+                      <li *ngFor="let file of educationSelectedFiles">{{ file.file.name }}
+                        <button (click)="removeFile('education',check.Education, file.file)">&#10006;</button>
+                    </li>
+                    </ul> -->
+                                                            <ul>
+                                                                <ng-container
+                                                                    *ngFor="let fileObj of educationSelectedFiles; let k = index">
+                                                                    <ng-container
+                                                                        *ngIf="fileObj.key === 'Education '+ check.Education+' '+doc.EducationDoc">
+                                                                        <li>{{ fileObj.file.name }}
+                                                                            <button
+                                                                                (click)="removeFile('education', check.Education, fileObj.file,i, j, k)">&#10006;</button>
+                                                                        </li>
+                                                                    </ng-container>
+                                                                </ng-container>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                            <p class="text-muted">File size limit: 10MB. Allowed file types: PDF, Image,
+                                                zip.</p>
+                                        </div>
+                                    </ng-container>
+
+                                    <!-- 
+                                    <ng-container *ngIf="attribute.label == 'Employment'">
+                                        <select formControlName="value" class="form-control"
+                                            [(ngModel)]="attribute.value">
+                                            <option value="EMP1">EMP1</option>
+                                            <option value="EMP2">EMP2</option>
+                                            <option value="EMP3">EMP3</option>
+                                        </select>
+                                        <div *ngIf="attribute.value">
+                                            <select class="form-control" formControlName="employmentSubType" required>
+                                                <option value="OL">Offer Letter</option>
+                                                <option value="RS">Reliving Letter</option>
+                                                <option value="PS">Pay Slip</option>
+                                                <option value="EL">Experience Letter</option>
+                                            </select>
+                                        </div>
+                                        <input type="file" name="employmentFiles" (change)="uploadFile($event, attribute.label,'employment')"
+                                            class="form-control" required multiple>
+                                            <div *ngIf="employmentSelectedFiles.length > 0">
+                                                <ul>
+                                                  <li *ngFor="let file of employmentSelectedFiles">{{ file.name }}
+                                                    <button (click)="removeFile('employment', file)">&#10006;</button>
+                                                  </li>
+                                                </ul>
+                                              </div>
+                                            <p style="color: gray;padding-top: 4px;"> File size limit: 10MB Allowed file types:  PDF, Image, zip. </p>
+                                    </ng-container> -->
+
+                                    <ng-container *ngIf="attribute.label == 'Employment'">
+                                        <div class="col-md-12">
+                                            <div class="form-group row mb-3">
+                                                <label class="d-flex justify-content-between align-items-center">
+                                                    <button type="button" class="btn btn-sm btn-primary" (click)="addEmploymentCheck()"><b>Add Check</b></button>
+                                                </label>
+                                            </div>
+                                            <form>
+                                                <div *ngFor="let employmentCheck of employmentChecks; let i = index" class="form-group row mb-3">
+                                                    <div class="col-md-12 d-flex flex-row align-items-center">
+                                                        <select id="employment{{i}}" [(ngModel)]="employmentCheck.Employment" (focus)="previousEmploymentLevel = employmentCheck.Employment" (ngModelChange)="updateEmploymentDocuments($event, employmentCheck)" name="employment{{i}}"
+                                                            class="form-control mr-2" required>
+                                                            <option value="" *ngIf="employmentCheck.Employment" disabled selected>{{ employmentCheck.Employment }}</option>
+                                                            <option value="" disabled selected>--Select--</option>
+                                                            <!-- <option value="EMP1">EMP1</option>
+                                                            <option value="EMP2">EMP2</option>
+                                                            <option value="EMP3">EMP3</option> -->
+                                                            <option *ngFor="let level of employmentLevels"
+                                                            [value]="level">{{ level }}</option>
+                                                        </select>
+                                                        <button type="button" class="btn btn-sm btn-primary" [disabled]="!employmentCheck.Employment"
+                                                            (click)="addDocumentForEmployment(employmentCheck)">Add Document</button>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            (click)="removeEmploymentCheck(i,employmentCheck.Employment)">&#10006;</button>
+                                                    </div>
+                                    
+                                                    <div *ngFor="let doc of employmentCheck.documents; let j = index" class="form-group row mb-3">
+                                                        <div class="col-md-12 d-flex flex-row align-items-center mt-4">
+                                                            <div class="col-md-6">
+                                                                <select id="employmentDocument{{i}}_{{j}}" [(ngModel)]="doc.EmploymentDoc"
+                                                                    name="employmentDocument{{i}}_{{j}}" class="form-control mr-2" required>
+                                                                    <option value="" *ngIf="doc.EmploymentDoc" disabled selected>{{ doc.EmploymentDoc }}</option>
+                                                                    <option value="" disabled selected>--Select--</option>
+                                                                    <option *ngFor="let level of employmentDocument" [value]="level">{{ level }}</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <input type="file" id="employmentDocument{{i}}_{{j}}" [disabled]="!doc.EmploymentDoc"
+                                                                    (change)="uploadFile($event, 'Employment', employmentCheck.Employment, doc.EmploymentDoc)"
+                                                                    class="form-control mr-2" required multiple />
+                                                            </div>
+                                                            <button type="button"
+                                                            class="btn btn-sm btn-outline-danger"
+                                                            (click)="removeEmploymentDoc(employmentCheck,'Employment '+employmentCheck.Employment+' '+doc.EmploymentDoc, j,'Employment '+employmentCheck.Employment,employmentCheck.Employment)">&#10006;</button>
+                                                        </div>
+                                                        <div *ngIf="employmentSelectedFiles.length > 0">
+                                                            <p style="margin: 20px;">{{employmentCheck.Employment}}</p>
+                                                            <!-- <ul>
+                                                          <li *ngFor="let file of employmentSelectedFiles">{{ file.name }}
+                                                            <button (click)="removeFile('employment', file)">&#10006;</button>
+                                                          </li>
+                                                        </ul> -->
+                                                            <ul>
+                                                                <ng-container
+                                                                    *ngFor="let fileObj of employmentSelectedFiles; let k = index">
+                                                                    <ng-container
+                                                                        *ngIf="fileObj.key === 'Employment '+ employmentCheck.Employment+' '+doc.EmploymentDoc">
+                                                                        <li>{{ fileObj.file.name }}
+                                                                            <button
+                                                                                (click)="removeFile('employment', employmentCheck.Employment, fileObj.file,i, j, k)">&#10006;</button>
+                                                                        </li>
+                                                                    </ng-container>
+                                                                </ng-container>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                    
+                                                    <!-- <div *ngIf="employmentCheck.documents.length > 0">
+                                                        <div *ngFor="let doc of employmentCheck.documents" class="form-group row mb-3">
+                                                            <div class="col-md-12">
+                                                                <p>{{ employmentCheck.Employment }}</p>
+                                                                <ul>
+                                                                    <li *ngFor="let file of doc.selectedFiles">{{ file.name }}</li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div> -->
+                                                    
+                                                </div>
+                                            </form>
+                                            <p class="text-muted">File size limit: 10MB. Allowed file types: PDF, Image, zip.</p>
+                                        </div>
+                                    </ng-container>
+
+                                    
+                                    <!-- <ng-container *ngIf="attribute.label == 'ID'">
+                                        <select formControlName="value" class="form-control"
+                                            [(ngModel)]="attribute.value">
+                                            <option value="Aadhar">Aadhar</option>
+                                            <option value="PAN">PAN</option>
+                                        </select>
+                                        <input type="file"  name="idFiles"  (change)="uploadFile($event, attribute.label,'id')"
+                                            class="form-control" required multiple>
+                                            <div *ngIf="idSelectedFiles.length > 0">
+                                                <ul>
+                                                  <li *ngFor="let file of idSelectedFiles">{{ file.name }}
+                                                    <button (click)="removeFile('id', file)">&#10006;</button>
+                                                </li>
+                                                </ul>
+                                              </div>
+                                            <p style="color: gray;padding-top: 4px;"> File size limit: 10MB Allowed file types:  PDF, Image, zip. </p>
+                                    </ng-container> -->
+
+                                    <ng-container *ngIf="attribute.label == 'ID'">
+                                        <div class="col-md-12">
+                                            <div class="form-group row mb-3">
+                                                <label class="d-flex justify-content-between align-items-center">
+                                                    <button type="button" class="btn btn-sm btn-primary"
+                                                        (click)="addIdCheck()"><b>Add Check</b></button>
+                                                </label>
+                                            </div>
+
+                                            <ng-container formArrayName="idItems">
+                                                <ng-container *ngFor="let id of idItems.controls; let i = index">
+                                                    <div class="form-group row mb-3" [formGroupName]="i">
+                                                        <div class="col-md-12 d-flex flex-row align-items-center">
+                                                            <select id="idType{{i}}" name="idType{{i}}" class="form-control mr-2" formControlName="idType">
+                                                                <option value="" disabled selected>--Select--</option>
+                                                                <option *ngFor="let level of idLevels" [value]="level">{{
+                                                                    level }}</option>
+                                                            </select>
+                                                            <input type="file" id="documents{{i}}" formControlName="documents" [disabled]="!idItems.controls[i].get('idType')?.value"
+                                                            class="form-control mr-2"  (change)="onFileChange($event)" multiple />
+                                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            (click)="deleteEducation(i)">&#10006;</button>
+                                                        </div>
+                                                        <div *ngIf="idItems.controls[i].get('idType')?.value && idItems.controls[i].get('documents')?.value">  
+                                                            <p style="margin: 20px;">{{idItems.controls[i].get('idType')?.value}}</p>
+
+                                                            <ul *ngIf="idItemsFiles?.length > 0">
+                                                                <ng-container *ngFor="let file of idItemsFiles; let k = index">
+                                                                  <li>{{ file.name }} <button>&#10006;</button></li>
+                                                                </ng-container>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </ng-container>
+                                            </ng-container>
+
+                                            <form>
+                                                <div *ngFor="let idChecks of idChecks; let i = index"
+                                                    class="form-group row mb-3">
+                                                    <div class="col-md-12 d-flex flex-row align-items-center">
+                                                        <select id="idLevels{{i}}" [(ngModel)]="idChecks.id" (focus)="previousIDLevel = idChecks.id" (ngModelChange)="updateIDDocuments($event, idChecks)"
+                                                            name="idLevels{{i}}" class="form-control mr-2" required>
+                                                            <option value="" *ngIf="idChecks.id" disabled selected>{{ idChecks.id }}</option>
+                                                            <option value="" disabled selected>--Select--</option>
+                                                            <option *ngFor="let level of idLevels" [value]="level">{{
+                                                                level }}</option>
+                                                        </select>
+                                                        <input type="file" id="document{{i}}" [disabled]="!idChecks.id"
+                                                            (change)="uploadFile($event, 'ID', idChecks.id,idChecks.id)"
+                                                            class="form-control mr-2" required multiple />
+                                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            (click)="removeIDCheck(i,idChecks.id)">&#10006;</button>
+                                                    </div>
+                                                    <div *ngIf="idSelectedFiles.length > 0">
+                                                        <p style="margin: 20px;">{{idChecks.id}}</p>
+                                                        <!-- <ul>
+                                                          <li *ngFor="let file of idSelectedFiles">{{ file.name }}
+                                                            <button (click)="removeFile('id', file)">&#10006;</button>
+                                                        </li>
+                                                        </ul> -->
+                                                        <ul>
+                                                            <ng-container *ngFor="let fileObj of idSelectedFiles; let k = index">
+                                                                <ng-container
+                                                                    *ngIf="fileObj.key === 'ID '+ idChecks.id">
+                                                                    <li>{{ fileObj.file.name }}
+                                                                        <button
+                                                                            (click)="removeFile('ID', idChecks.id, fileObj.file,0,0,k)">&#10006;</button>
+                                                                    </li>
+                                                                </ng-container>
+                                                            </ng-container>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                            <p class="text-muted">File size limit: 10MB. Allowed file types: PDF, Image,
+                                                zip.</p>
+                                        </div>
+                                    </ng-container>
+
+                                    <!-- <ng-container *ngIf="attribute.label == 'Address'">
+                                        <select  formControlName="addressType" class="form-control" required>
+                                            <option value="Present">Present</option>
+                                            <option value="Permanent">Permanent</option>
+                                          </select>
+                                        <input type="text" formControlName="value"  class="form-control form-control-sm"
+                                            [(ngModel)]="attribute.value" />
+                                    </ng-container> -->
+
+                                    <ng-container *ngIf="attribute.label == 'Address'">
+                                        <div class="col-md-12">
+                                            <div class="form-group row mb-3">
+                                                <label class="d-flex justify-content-between align-items-center">
+                                                    <button type="button" class="btn btn-sm btn-primary"
+                                                        (click)="addAddressCheck()"><b>Add Check</b></button>
+                                                </label>
+                                            </div>
+                                            <form>
+                                                <div *ngFor="let address of addressCheck; let i = index"
+                                                    class="form-group row mb-3">
+                                                    <div class="col-md-12 d-flex flex-row align-items-center">
+                                                        <select id="addressLevels{{i}}"
+                                                            [(ngModel)]="address.addressType" name="addressLevels{{i}}"
+                                                            class="form-control mr-2" required>
+                                                            <option value="" *ngIf="address.addressType" disabled selected>{{ address.addressType }}</option>
+                                                            <option value="" disabled selected>--Select--</option>
+                                                            <option *ngFor="let level of addressLevels" [value]="level">
+                                                                {{ level }}</option>
+                                                        </select>
+                                                        <!-- <input type="text" name="idFiles" id="document{{i}}" (change)="uploadFile($event, 'Id', idChecks.id)"
+                                                            class="form-control mr-2" required multiple /> -->
+
+                                                        <input type="text" [disabled]="!address.addressType"
+                                                            class="form-control form-control-sm"
+                                                            [(ngModel)]="address.address" name="address{{i}}" />
+ 
+                                                        <!-- <input *ngIf="address.address" type="text" [disabled]="!address.addressType"
+                                                            class="form-control form-control-sm"
+                                                            [value]="address.address" name="address{{i}}" /> -->
+                                                        <!-- 
+                                                            <input type="text" class="form-control form-control-sm"
+                                                            [value]="address.address" /> -->
+
+                                                        <!-- <div *ngFor="let address of addressCheck; let i = index">
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                       [(ngModel)]="address[i].address" />
+                                                            </div> -->
+
+                                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            (click)="removeAddressCheck(i)">&#10006;</button>
+                                                    </div>
+                                                </div>
+                                                <div *ngIf="idSelectedFiles.length > 0">
+                                                    <!-- <ul>
+                                                      <li *ngFor="let file of idSelectedFiles">{{ file.name }}
+                                                        <button (click)="removeFile('id', file)">&#10006;</button>
+                                                    </li>
+                                                    </ul> -->
+                                                </div>
+                                            </form>
+                                            <p class="text-muted">File size limit: 10MB. Allowed file types: PDF, Image,
+                                                zip.</p>
+                                        </div>
+                                    </ng-container>
+
+
+                                    <!-- <ng-container *ngIf="attribute.label == 'Criminal'">
+                                        <select formControlName="value" class="form-control"
+                                            [(ngModel)]="attribute.value">
+                                            <option value="Present">Present</option>
+                                            <option value="Permanent">Permanent</option>
+                                        </select>
+                                        <input type="file" name="criminalFiles" (change)="uploadFile($event, attribute.label,'criminal')"
+                                            class="form-control" required multiple>
+                                            <div *ngIf="criminalSelectedFiles.length > 0">
+                                                <ul>
+                                                  <li *ngFor="let file of criminalSelectedFiles">{{ file.name }}
+                                                    <button (click)="removeFile('criminal', file)">&#10006;</button>
+                                                  </li>
+                                                </ul>
+                                              </div>
+                                            <p style="color: gray;padding-top: 4px;"> File size limit: 10MB Allowed file types:  PDF, Image, zip. </p>
+                                    </ng-container> -->
+
+                                    <ng-container *ngIf="attribute.label == 'Criminal'">
+                                        <div class="col-md-12">
+                                            <div class="form-group row mb-3">
+                                                <label class="d-flex justify-content-between align-items-center">
+                                                    <button type="button" class="btn btn-sm btn-primary"
+                                                        (click)="addCriminalCheck()"><b>Add Check</b></button>
+                                                </label>
+                                            </div>
+                                            <form>
+                                                <div *ngFor="let criminalCheck of criminalCheck; let i = index"
+                                                    class="form-group row mb-3">
+                                                    <div class="col-md-12 d-flex flex-row align-items-center">
+                                                        <select id="idLevels{{i}}" [(ngModel)]="criminalCheck.criminal" (focus)="previousCriminalLevel = criminalCheck.criminal" (ngModelChange)="updateCriminalDocuments($event, criminalCheck)"
+                                                            name="criminalLevels{{i}}" class="form-control mr-2"
+                                                            required>
+                                                            <option value="" *ngIf="criminalCheck.criminal" disabled selected>{{ criminalCheck.criminal }}</option>
+                                                            <option value="" disabled selected>--Select--</option>
+                                                            <option *ngFor="let level of criminalLevels"
+                                                                [value]="level">{{ level }}</option>
+                                                        </select>
+                                                        <input type="file" id="document{{i}}"
+                                                            [disabled]="!criminalCheck.criminal"
+                                                            (change)="uploadFile($event, 'Criminal', criminalCheck.criminal,'null')"
+                                                            class="form-control mr-2" required multiple />
+                                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            (click)="removeCriminalCheck(i,criminalCheck.criminal)">&#10006;</button>
+                                                    </div>
+                                                    <div *ngIf="criminalSelectedFiles.length > 0">
+                                                        <p style="margin: 20px;">{{criminalCheck.criminal}}</p>
+                                                        <!-- <ul>
+                                                          <li *ngFor="let file of criminalSelectedFiles">{{ file.name }}
+                                                            <button (click)="removeFile('criminal', file)">&#10006;</button>
+                                                          </li>
+                                                        </ul> -->
+                                                        <ul>
+                                                            <ng-container *ngFor="let fileObj of criminalSelectedFiles; let k = index">
+                                                                <ng-container
+                                                                    *ngIf="fileObj.key === 'Criminal '+ criminalCheck.criminal">
+                                                                    <li>{{ fileObj.file.name }}
+                                                                        <button
+                                                                            (click)="removeFile('criminal', criminalCheck.criminal, fileObj.file,0,0,k)">&#10006;</button>
+                                                                    </li>
+                                                                </ng-container>
+                                                            </ng-container>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                            <p class="text-muted">File size limit: 10MB. Allowed file types: PDF, Image,
+                                                zip.</p>
+                                        </div>
+                                    </ng-container>
+
+
+
+                                    <!-- <ng-container *ngIf="attribute.label == 'Database'">
+                                        <input type="file" name="databaseFiles" (change)="uploadFile($event, attribute.label,'database')"
+                                            class="form-control" required multiple>
+                                            <div *ngIf="databaseSelectedFiles.length > 0">
+                                                <ul>
+                                                <ng-container *ngFor="let fileObj of criminalSelectedFiles">
+                                                    <ng-container *ngIf="fileObj.key === 'Criminal '+ criminalCheck.criminal">
+                                                      <li>{{ fileObj.file.name }}
+                                                        <button (click)="removeFile('criminal', criminalCheck.criminal, fileObj.file)">&#10006;</button>
+                                                      </li>
+                                                    </ng-container>
+                                                  </ng-container>
+                                                </ul>
+                                              </div>
+                                            <p style="color: gray;padding-top: 4px;"> File size limit: 10MB Allowed file types:  PDF, Image, zip. </p>
+                                    </ng-container> -->
+
+
+                                    <!-- Database with Type -->
+                                    <!-- <ng-container *ngIf="attribute.label == 'Database'">
+                                        <div class="col-md-12">
+                                            <div class="form-group row mb-3">
+                                                <label class="col-md-12 d-flex justify-content-between align-items-center">
+                                                    <button type="button" class="btn btn-sm btn-primary" (click)="addDatabaseCheck()"><b>Add Check</b></button>
+                                                </label>
+                                            </div>
+                                            <form>
+                                                <div *ngFor="let databaseCheck of databaseCheck; let i = index" class="form-group row mb-3">
+                                                    <div class="col-md-12 d-flex flex-row align-items-center">
+                                                        <select id="databaseLevels{{i}}" [(ngModel)]="databaseCheck.database" name="databaseLevels{{i}}"
+                                                            class="form-control mr-2" required>
+                                                            <option value="" disabled selected>--Select--</option>
+                                                            <option *ngFor="let level of databaseLevels" [value]="level">{{ level }}</option>
+                                                        </select>
+                                                        <input type="file" name="databaseFiles" id="document{{i}}" (change)="uploadFile($event, 'Database', databaseCheck.database)"
+                                                            class="form-control mr-2" required multiple />
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeCheck(i)">&#10006;</button>
+                                                    </div>
+                                                    <div *ngIf="databaseSelectedFiles.length > 0">
+                                                        <p>{{databaseCheck.database}}</p>
+                                                        <ul>
+                                                            <ng-container *ngFor="let fileObj of databaseSelectedFiles">
+                                                              <ng-container *ngIf="fileObj.key === 'Database '+ databaseCheck.database">
+                                                                <li>{{ fileObj.file.name }}
+                                                                  <button (click)="removeFile('database', databaseCheck.database, fileObj.file)">&#10006;</button>
+                                                                </li>
+                                                              </ng-container>
+                                                            </ng-container>
+                                                          </ul>
+                                                      </div>
+                                                </div>
+                                            </form>
+                                            <p class="text-muted">File size limit: 10MB. Allowed file types: PDF, Image, zip.</p>
+                                        </div>
+                                    </ng-container> -->
+
+                                    <!-- Database without Type -->
+
+                                    <ng-container *ngIf="attribute.label == 'Database'">
+                                        <div class="col-md-12">
+                                            <div class="form-group row mb-3">
+                                                <label class="d-flex justify-content-between align-items-center">
+                                                    <button type="button" class="btn btn-sm btn-primary"
+                                                        (click)="addDatabaseCheck()"><b>Add Check</b></button>
+                                                </label>
+                                            </div>
+                                            <form>
+                                                <div *ngFor="let databaseCheck of databaseCheck; let i = index"
+                                                    class="form-group row mb-3">
+                                                    <div class="col-md-12 d-flex flex-row align-items-center">
+                                                        <!-- <select id="databaseLevels{{i}}" [(ngModel)]="databaseCheck.database" name="databaseLevels{{i}}"
+                                                            class="form-control mr-2" required>
+                                                            <option value="" disabled selected>--Select--</option>
+                                                            <option *ngFor="let level of databaseLevels" [value]="level">{{ level }}</option>
+                                                        </select> -->
+                                                        <input type="file" id="document{{i}}"
+                                                            (change)="uploadFile($event, 'Database', databaseCheck.database,'null')"
+                                                            class="form-control mr-2" required multiple />
+                                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            (click)="removeDatabaseCheck(i,databaseCheck.database)">&#10006;</button>
+                                                    </div>
+                                                    <div *ngIf="databaseSelectedFiles.length > 0">
+                                                        <p style="margin: 20px;">{{databaseCheck.database}}</p>
+                                                        <!-- <ul>
+                                                          <li *ngFor="let file of criminalSelectedFiles">{{ file.name }}
+                                                            <button (click)="removeFile('criminal', file)">&#10006;</button>
+                                                          </li>
+                                                        </ul> -->
+                                                        <ul>
+                                                            <ng-container *ngFor="let fileObj of databaseSelectedFiles; let k = index">
+                                                                <ng-container
+                                                                    *ngIf="fileObj.key === 'Database '+ databaseCheck.database">
+                                                                    <li>{{ fileObj.file.name }}
+                                                                        <button
+                                                                            (click)="removeFile('database', databaseCheck.database, fileObj.file,0,0,k)">&#10006;</button>
+                                                                    </li>
+                                                                </ng-container>
+                                                            </ng-container>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                            <p class="text-muted">File size limit: 10MB. Allowed file types: PDF, Image,
+                                                zip.</p>
+                                        </div>
+                                    </ng-container>
+
+
+                                </div>
+                            </div>
+                            <!-- <p *ngIf="isFieldEmpty(attribute)" class="text-danger">{{showMessage}}</p> -->
+                            <div class="row my-4">
+                                <div class="col-md-12 text-center">
+                                    <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <ng-container formArrayName="education">
+                <ng-container *ngFor="let edu of candidateForm.controls; let i = index">
+                    <div class="lesson-form-row" [formGroup]="educationForm">
+                        <div class="form-group">
+                            <label for="title-{{i}}">Lesson title</label>
+                            <input
+                                type="text"
+                                id="title-{{i}}"
+                                formControlName="title"
+                                placeholder="Lesson title"
+                                class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="level-{{i}}">Lesson level</label>
+                            <select id="level-{{i}}" formControlName="level" class="form-control">
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                            </select>
+                        </div>
+                        <button type="button" class="delete-btn" (click)="deleteEducation(i)">Delete</button>
+                    </div>
+                </ng-container>                
+            </ng-container>
+          
+            <button (click)="addEducation()">
+                add check
+            </button> -->
+
+            <ng-container formArrayName="education">
+                <ng-container *ngFor="let edu of education.controls; let i = index">
+                    <div class="lesson-form-row" [formGroupName]="i">
+                        <div class="form-field">
+                            <label for="title-{{i}}">Lesson title</label>
+                            <input id="title-{{i}}" formControlName="title" placeholder="Lesson title">
+                        </div>
+                        <div class="form-field">
+                            <label for="level-{{i}}">Lesson level</label>
+                            <select id="level-{{i}}" formControlName="level">
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                            </select>
+                        </div>
+                        <button class="delete-btn" type="button" (click)="deleteEducation(i)">
+                            Delete
+                        </button>
+                    </div>
+                </ng-container>
+            </ng-container>            
+
+            <button (click)="addEducation()">
+                add check
+            </button>
+        </form>
+    </div>
+
+    <!-- <form [formGroup]="form">
+        <ng-container formArrayName="lessons">
+            <ng-container *ngFor="let lessonForm of lessons.controls; let i = index">
+                <div class="lesson-form-row" [formGroupName]="i">
+                    <div class="form-field">
+                        <label for="title-{{i}}">Lesson title</label>
+                        <input id="title-{{i}}" formControlName="title" placeholder="Lesson title">
+                    </div>
+                    <div class="form-field">
+                        <label for="level-{{i}}">Lesson level</label>
+                        <select id="level-{{i}}" formControlName="level">
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                    <button class="delete-btn" type="button" (click)="deleteLesson(i)">
+                        Delete
+                    </button>
+                </div>
+            </ng-container>
+        </ng-container>            
+
+        <button (click)="addLesson()">
+            add check
+        </button>
+    </form> -->
+
+
+</body>

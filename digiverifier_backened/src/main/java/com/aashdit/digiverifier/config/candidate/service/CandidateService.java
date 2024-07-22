@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import com.aashdit.digiverifier.config.candidate.dto.*;
 import com.aashdit.digiverifier.config.candidate.model.*;
 import org.json.JSONArray;
 import org.springframework.core.io.Resource;
@@ -36,6 +37,7 @@ import com.aashdit.digiverifier.config.candidate.dto.SuspectEmpMasterDto;
 import com.aashdit.digiverifier.config.candidate.dto.UanSearchDashboardFilterDTO;
 import com.aashdit.digiverifier.config.candidate.dto.UanSearchDataDTO;
 import com.aashdit.digiverifier.config.candidate.dto.UanSearchEpfoDTO;
+import com.aashdit.digiverifier.itr.model.ITRData;
 public interface CandidateService {
 
 	ServiceOutcome<List> saveCandidateInformation(MultipartFile file);
@@ -215,4 +217,18 @@ public interface CandidateService {
 	ServiceOutcome<List<CandidateDetailsDtoForPanToUan>> getFailedPanToUanCandidateList(DashboardDto dashboardDto);
 
 	ServiceOutcome<String> setPanToUanResponse(CandidateDetailsDtoForPanToUan candidateDetails);
+
+	ServiceOutcome<Boolean> reFetchPANTOUANDataForAvailableUANs();
+
+	//method to calculate tenuer gap
+		long calculateTenuerGap(CandidateCafExperience candidateCafExperience,List<CandidateCafExperience> candidateCafExperiences);
+
+		//method to calculate ITR filing gap
+		long calculateITRFilingGap(List<ITRData> itrList);
+
+	ServiceOutcome<QcRemarksDto> addUpdateQcRemarks(QcRemarksDto requestBody);
+
+	public ServiceOutcome<List<QcRemarksDto>> getQcRemarks(String candidateCode);
+
+	ServiceOutcome<String> deleteQcRemarkByQcRemarksId(Long qcRemarksID);
 }

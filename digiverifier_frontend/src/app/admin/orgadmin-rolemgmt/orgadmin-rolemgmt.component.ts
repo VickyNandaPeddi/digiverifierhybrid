@@ -3,6 +3,7 @@ import { OrgadminService } from 'src/app/services/orgadmin.service';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
 import DOMPurify from 'dompurify';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-orgadmin-rolemgmt',
   templateUrl: './orgadmin-rolemgmt.component.html',
@@ -14,6 +15,7 @@ export class OrgadminRolemgmtComponent implements OnInit {
   orgID: any;
   getAllRolePermission: any=[];
   getRoleMgmtStat: any=[];
+  selectedManagement: any;
   orgRoleMgmt = new FormGroup({
     permissionId: new FormControl('', Validators.required),
     roleId: new FormControl('', Validators.required)
@@ -24,7 +26,7 @@ export class OrgadminRolemgmtComponent implements OnInit {
       roleId: this.getroleId
 		});
 	}
-  constructor(private orgadmin:OrgadminService) { 
+  constructor(private orgadmin:OrgadminService,private modalService: NgbModal) { 
     this.orgadmin.getRoleDropdown().subscribe((data: any)=>{
       this.getRoleDropdown=data.data;
       console.log(this.getRoleDropdown);
@@ -35,6 +37,23 @@ export class OrgadminRolemgmtComponent implements OnInit {
       console.log(this.getAllRolePermission);
     });
     
+  }
+
+  addPermissionComponent = new FormGroup({
+    permissionHeadName: new FormControl('',Validators.required),
+    newPermissionHeadName: new FormControl(''),
+    permissionName: new FormControl('',Validators.required)
+  });
+
+  onManagementChange(event: Event) {
+    const value = (event.target as HTMLSelectElement).value;
+    this.selectedManagement = value;
+    console.log("this.selectedManagement : ",this.selectedManagement)
+    // if (value === 'addNew') {
+    //   this.addPermissionComponent.addControl('newManagementName', new FormControl('', Validators.required));
+    // }else {
+    //   this.addPermissionComponent.removeControl('newManagementName');
+    // }
   }
 
   ngOnInit(): void {
@@ -129,6 +148,43 @@ export class OrgadminRolemgmtComponent implements OnInit {
       billrpp.checked = true;
       });
     });
+  }
+
+  submitRolePermission(addPermissionComponent:any){
+    console.log(addPermissionComponent.value)
+    if(addPermissionComponent.valid){
+      this.orgadmin.roleManagementAndRolePermission(this.addPermissionComponent.value).subscribe((result:any)=>{
+        if(result.outcome === true){
+          Swal.fire({
+            title: result.message,
+            icon: 'success'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.reload();
+            }
+          });
+        }else{
+          Swal.fire({
+            title: result.message,
+            icon: 'warning'
+          })
+        }
+      })
+    }else{
+      Swal.fire({
+        title: "Please enter the required information",
+        icon: 'warning'
+      })
+    }
+  }
+
+
+  openModal(modalData:any){
+    this.modalService.open(modalData, {
+     centered: true,
+     backdrop: 'static'
+    });
+
   }
   
 

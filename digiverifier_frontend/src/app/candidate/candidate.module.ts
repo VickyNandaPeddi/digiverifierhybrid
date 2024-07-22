@@ -25,6 +25,8 @@ import { DigidocumentComponent } from './digidocument/digidocument.component';
 import { AadharMessageComponent } from './aadhar-message/aadhar-message.component';
 import { ConventionalCandidateUploadComponent } from './conventional-candidate-upload/conventional-candidate-upload.component';
 import { ConventionLetterAcceptComponent } from './convention-letter-accept/convention-letter-accept.component';
+import { ConventionalCandidateFormComponent } from './conventional-candidate-form/conventional-candidate-form.component';
+import { EpfoOtpCaptchaComponent } from './epfo-otp-captcha/epfo-otp-captcha.component';
 
 @NgModule({
   declarations: [
@@ -47,7 +49,9 @@ import { ConventionLetterAcceptComponent } from './convention-letter-accept/conv
     DigidocumentComponent,
     AadharMessageComponent,
     ConventionalCandidateUploadComponent,
-    ConventionLetterAcceptComponent
+    ConventionLetterAcceptComponent,
+    ConventionalCandidateFormComponent,
+    EpfoOtpCaptchaComponent
   ],
   imports: [
     CommonModule,

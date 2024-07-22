@@ -89,7 +89,10 @@ public class JwtFilter extends OncePerRequestFilter {
 			skipThis = true;
 			filterChain.doFilter(httpServletRequest, httpServletResponse);
 		} else {
-			if (httpServletRequest.getRequestURI().contains("/api") && skipThis == false) {
+			if (httpServletRequest.getRequestURI()==null) {
+				log.warn("httpServletRequest.getRequestURI() in If jWT filter::{}",httpServletRequest.getRequestURI()!= null ? httpServletRequest.getRequestURI() : "NO ENDPOINT");
+			}
+			if (httpServletRequest.getRequestURI().contains("/api") && Boolean.FALSE.equals(skipThis)) {
 				String authorizationHeader = httpServletRequest.getHeader("Authorization");
 				String token = null;
 				String userName = null;
@@ -152,6 +155,7 @@ public class JwtFilter extends OncePerRequestFilter {
 				}
 
 			} else {
+				log.warn("httpServletRequest.getRequestURI() in else jWT filter::{}",httpServletRequest.getRequestURI());
 				filterChain.doFilter(httpServletRequest, httpServletResponse);
 			}
 		}

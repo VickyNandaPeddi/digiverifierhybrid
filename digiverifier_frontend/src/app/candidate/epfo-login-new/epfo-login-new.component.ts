@@ -20,8 +20,8 @@ export class EpfoLoginNewComponent implements OnInit {
       console.log("epfo login New")
       this.candidateCode = this.router.snapshot.paramMap.get('candidateCode');
       //EPFO Captcha
-      this.candidateService.getepfoCaptcha(this.candidateCode).subscribe((data: any)=>{
-        console.log("data.data.captcha", data)
+      this.candidateService.getepfoLoginCaptcha(this.candidateCode).subscribe((data: any)=>{
+        // console.log("data.data.captcha", data)
         if(data.outcome === true){
           this.captchaSrc="data:image/png;base64,"+data.data.captcha;
           this.transactionid=data.data.transactionid;
@@ -29,7 +29,11 @@ export class EpfoLoginNewComponent implements OnInit {
         Swal.fire({
           title: data.message,
           icon: 'warning'
-        })
+        }).then((sresult) => {
+          if (sresult.isConfirmed) {
+            window.location.reload();
+          }
+        });
       }
 
       })
@@ -55,18 +59,26 @@ export class EpfoLoginNewComponent implements OnInit {
     this.patchUserValues();
     if (this.formEPFOlogin.valid) {
         console.log('this.formEPFOlogin.value',this.formEPFOlogin.value);
-        this.candidateService.getEpfodetailNew(this.formEPFOlogin.value).subscribe((result:any)=>{
+        // this.candidateService.getEpfodetailNew(this.formEPFOlogin.value).subscribe((result:any)=>{
+          this.candidateService.getepfoOTPScreenCaptcha(this.formEPFOlogin.value).subscribe((result:any)=>{
           //console.log(result);
           if(result.outcome === true){
-              const navURL = 'candidate/cUanConfirm/'+this.candidateCode+'/2';
-              this.navRouter.navigate([navURL]);
+              console.log("OTP CAPTCHA data.data.captcha", result.data.captcha)
+              const hiddenParam = result.data.captcha;
+              const navURL = 'candidate/epfootpcaptcha/'+this.candidateCode;
+              this.navRouter.navigate([navURL], { state: { hiddenParam: hiddenParam ,tId:this.transactionid} });
+              // this.navRouter.navigate([navURL]);
           }else{
             Swal.fire({
               title: result.message,
               icon: 'warning'
-            })
+            }).then((sresult) => {
+            if (sresult.isConfirmed) {
+                  window.location.reload();
+                }
+              });
           }
-      });
+        });
     }else{
       Swal.fire({
         title: "Please enter the required information",

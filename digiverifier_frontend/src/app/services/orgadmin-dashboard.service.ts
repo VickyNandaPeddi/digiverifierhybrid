@@ -189,8 +189,12 @@ export class OrgadminDashboardService {
     return this.http.post(`${environment.apiUrl}/api/candidate/reFetchPanToUANData`, data);
   } 
 
-  downloadAgentUploadedDocument(documentPathKey:any){
-    return this.http.post(`${environment.apiUrl}/api/user/getAgentUploadedProof`,documentPathKey)
+  downloadAgentUploadedDocument(documentPathKey:any,viewDocument:any){
+    return this.http.post(`${environment.apiUrl}/api/user/getAgentUploadedProof/${viewDocument}`,documentPathKey);
+  }
+
+  clientApprove(vendorCheckId:any){
+    return this.http.post(`${environment.apiUrl}/api/user/clientApprove`,vendorCheckId);
   }
 
   getServiceConfigForOrg(orgId: any) {
@@ -215,5 +219,9 @@ export class OrgadminDashboardService {
           responseType: 'json'
         }
     );
+  }
+
+  getEcourtProof(searchData: any) {
+    return this.http.post(`${environment.apiUrl}/api/user/getECourtProof`, searchData);
   }
 }

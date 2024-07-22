@@ -240,7 +240,49 @@
                                     
                                 </div>
                                 
+                         
+
                             </div>
+                            <div class="ml-3">
+                                <div>
+                                    <label><b>Password Policy (90Days):</b></label>
+                                    <div class="showvalid">
+                                        <div class="checkbox">
+                                            <span class="space"></span>
+                                            <span class="space"></span>
+                                            <span class="space"></span>
+                                            <span>
+                                                <label class="checkbox-label">Yes</label>
+                                            </span>
+                                            <span>
+                                                <input type="radio" class="inputcheckbox"
+                                                    (click)="selectPasswordPolicy($event)" formControlName="passwordPolicy"
+                                                    value="true">
+                                            </span>
+                                            <span class="space"></span>
+                                            <span>
+                                                <label class="checkbox-label">NO</label>
+                                            </span>
+                                            <span>
+                                                <input type="radio" class="inputcheckbox"
+                                                    (click)="selectPasswordPolicy($event)" formControlName="passwordPolicy"
+                                                    value="false">
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>  
+                            <div class="form-group ml-3">
+                                <div class="col-md-12">
+                                    <label for="options">last number password:</label>
+                                    <select id="options" name="options" formControlName="lastPasswords">
+                                        <option value="" selected disabled>Select an option</option>
+                                        <option value="3">Last 3 Passwords</option>
+                                        <option value="6">Last 6 Passwords</option>
+                                        <option value="8">Last 8 Passwords</option>
+                                    </select>
+                                </div>
+                            </div> 
                     </div>
                         <div class="row">
                             <div class="col-md-12 text-center mt-3 pb-3">
