@@ -85,7 +85,6 @@
                 <a class="dropdown-item" routerLink="vendorUtilization" routerLinkActive="activechild" *ngIf="!authService.roleMatch(['ROLE_VENDOR']) && !this.getServiceConfigCodes.includes('PANTOUAN')">Conventional Utilization Report</a>
                 <a class="dropdown-item" routerLink="tracker"  routerLinkActive="activechild" *ngIf="!authService.roleMatch(['ROLE_VENDOR']) && !this.getServiceConfigCodes.includes('PANTOUAN')">Candidate Tracker Report</a>
                 <a class="dropdown-item" routerLink="EmploymentSheet"  routerLinkActive="activechild" *ngIf="!authService.roleMatch(['ROLE_VENDOR']) && this.getServiceConfigCodes.includes('PANTOUAN')">Employment Sheet</a>
-                <a class="dropdown-item" routerLink="purgedReport"  routerLinkActive="activechild" *ngIf="!authService.roleMatch(['ROLE_VENDOR']) && !this.getServiceConfigCodes.includes('PANTOUAN')">Candidate purged Report</a>
               </div>
             </li>
           </ul>

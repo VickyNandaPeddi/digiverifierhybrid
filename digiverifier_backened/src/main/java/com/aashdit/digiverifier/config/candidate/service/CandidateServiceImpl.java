@@ -27,16 +27,28 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.aashdit.digiverifier.config.candidate.dto.*;
-import com.aashdit.digiverifier.config.candidate.model.*;
-import com.aashdit.digiverifier.config.candidate.repository.*;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.io.IOUtils;
@@ -103,6 +115,84 @@ import com.aashdit.digiverifier.config.admin.repository.RoleRepository;
 import com.aashdit.digiverifier.config.admin.repository.UserRepository;
 import com.aashdit.digiverifier.config.admin.repository.VendorChecksRepository;
 import com.aashdit.digiverifier.config.admin.repository.VendorUploadChecksRepository;
+import com.aashdit.digiverifier.config.candidate.dto.ApprovalStatusRemarkDto;
+import com.aashdit.digiverifier.config.candidate.dto.BulkPanToUanDTO;
+import com.aashdit.digiverifier.config.candidate.dto.BulkUanDTO;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateCafAddressDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateCafEducationDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateCafExperienceDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateCafRelationshipDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateCaseDetailsDTO;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateDetailsDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateDetailsDtoForPanToUan;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateFileDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateInvitationSentDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateStatusCountDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidationApplicationFormDto;
+import com.aashdit.digiverifier.config.candidate.dto.ContentFileDto;
+import com.aashdit.digiverifier.config.candidate.dto.EmploymentDetailsDto;
+import com.aashdit.digiverifier.config.candidate.dto.EmploymentResultUpdateReqDto;
+import com.aashdit.digiverifier.config.candidate.dto.ExecutiveSummaryDto;
+import com.aashdit.digiverifier.config.candidate.dto.IdItemsDto;
+import com.aashdit.digiverifier.config.candidate.dto.SearchAllCandidateDTO;
+import com.aashdit.digiverifier.config.candidate.dto.SuspectEmpMasterDto;
+import com.aashdit.digiverifier.config.candidate.dto.UanSearchDashboardFilterDTO;
+import com.aashdit.digiverifier.config.candidate.dto.UanSearchDataDTO;
+import com.aashdit.digiverifier.config.candidate.dto.UanSearchEpfoDTO;
+import com.aashdit.digiverifier.config.candidate.model.Candidate;
+import com.aashdit.digiverifier.config.candidate.model.CandidateAddComments;
+import com.aashdit.digiverifier.config.candidate.model.CandidateAdressVerification;
+import com.aashdit.digiverifier.config.candidate.model.CandidateCafAddress;
+import com.aashdit.digiverifier.config.candidate.model.CandidateCafEducation;
+import com.aashdit.digiverifier.config.candidate.model.CandidateCafExperience;
+import com.aashdit.digiverifier.config.candidate.model.CandidateCafRelationship;
+import com.aashdit.digiverifier.config.candidate.model.CandidateCaseDetails;
+import com.aashdit.digiverifier.config.candidate.model.CandidateEmailStatus;
+import com.aashdit.digiverifier.config.candidate.model.CandidateIdItems;
+import com.aashdit.digiverifier.config.candidate.model.CandidateResumeUpload;
+import com.aashdit.digiverifier.config.candidate.model.CandidateSampleCsvXlsMaster;
+import com.aashdit.digiverifier.config.candidate.model.CandidateStatus;
+import com.aashdit.digiverifier.config.candidate.model.CandidateStatusHistory;
+import com.aashdit.digiverifier.config.candidate.model.CandidateVerificationState;
+import com.aashdit.digiverifier.config.candidate.model.ConventionalCandidateEmailStatus;
+import com.aashdit.digiverifier.config.candidate.model.ConventionalCandidateStatus;
+import com.aashdit.digiverifier.config.candidate.model.ConventionalCandidateVerificationState;
+import com.aashdit.digiverifier.config.candidate.model.ConventionalLoaConsentMaster;
+import com.aashdit.digiverifier.config.candidate.model.LoaConsentMaster;
+import com.aashdit.digiverifier.config.candidate.model.OrganisationScope;
+import com.aashdit.digiverifier.config.candidate.model.QualificationMaster;
+import com.aashdit.digiverifier.config.candidate.model.RemarkMaster;
+import com.aashdit.digiverifier.config.candidate.model.StatusMaster;
+import com.aashdit.digiverifier.config.candidate.model.SuspectClgMaster;
+import com.aashdit.digiverifier.config.candidate.model.SuspectEmpMaster;
+import com.aashdit.digiverifier.config.candidate.model.UanSearchData;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateAddCommentRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateAdressVerificationRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateCafAddressRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateCafEducationRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateCafExperienceRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateCafRelationshipRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateCaseDetailsRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateEmailStatusRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateIdItemsRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateResumeUploadRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateSampleCsvXlsMasterRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateStatusHistoryRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateStatusRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateVerificationStateRepository;
+import com.aashdit.digiverifier.config.candidate.repository.ConventionalCandidateEmailStatusRepository;
+import com.aashdit.digiverifier.config.candidate.repository.ConventionalCandidateStatusRepository;
+import com.aashdit.digiverifier.config.candidate.repository.ConventionalCandidateVerificationStateRepository;
+import com.aashdit.digiverifier.config.candidate.repository.ConventionalLoaConsentRepository;
+import com.aashdit.digiverifier.config.candidate.repository.LoaConsentMasterRepository;
+import com.aashdit.digiverifier.config.candidate.repository.OrganisationScopeRepository;
+import com.aashdit.digiverifier.config.candidate.repository.QualificationMasterRepository;
+import com.aashdit.digiverifier.config.candidate.repository.RemarkMasterRepository;
+import com.aashdit.digiverifier.config.candidate.repository.StatusMasterRepository;
+import com.aashdit.digiverifier.config.candidate.repository.SuspectClgMasterRepository;
+import com.aashdit.digiverifier.config.candidate.repository.SuspectEmpMasterRepository;
+import com.aashdit.digiverifier.config.candidate.repository.UanSearchDataRepository;
 import com.aashdit.digiverifier.config.candidate.util.CSVUtil;
 import com.aashdit.digiverifier.config.candidate.util.ExcelUtil;
 import com.aashdit.digiverifier.config.superadmin.Enum.ReportType;
@@ -196,9 +286,6 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 	@Autowired
 	@Lazy
 	private CandidateEPFOResponseRepository candidateEPFOResponseRepository;
-
-	@Autowired
-	QcRemarksRepository qcRemarksRepository;
 
 	@Autowired
 	private RoleRepository roleRepository;
@@ -443,134 +530,18 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 		return svcSearchResult;
 	}
 
-    @Transactional
-    public ServiceOutcome<QcRemarksDto> addUpdateQcRemarks(QcRemarksDto requestBody) {
-        ServiceOutcome<QcRemarksDto> outcome = new ServiceOutcome<>();
-        try {
-            if (requestBody.getQcRemarksId() == null || requestBody.getQcRemarksId().isEmpty() || requestBody.getQcRemarksId().isBlank()) {
-                // Create new QcRemarks entity for addition
-                QcRemarks qcRemarks = new QcRemarks();
-                qcRemarks.setQcRemarks(requestBody.getQcRemarks());
-                qcRemarks.setCandidateCode(requestBody.getCandidateCode() != null ? requestBody.getCandidateCode() : null);
-                Candidate byCandidateCode = candidateRepository.findByCandidateCode(requestBody.getCandidateCode());
-                qcRemarks.setCandidateId(byCandidateCode.getCandidateId());
-                qcRemarks.setCreatedOn(new Date());
-                qcRemarks.setCreatedBy(SecurityHelper.getCurrentUser().getUserName());
-
-                // Save the new QcRemarks entity
-                QcRemarks savedQcRemarks = qcRemarksRepository.save(qcRemarks);
-
-                // Prepare outcome for addition
-                outcome.setOutcome(true);
-                outcome.setMessage("Added Remarks Successfully");
-            } else {
-                // Update existing QcRemarks entity
-                Optional<QcRemarks> optionalQcRemarks = qcRemarksRepository.findById(Long.valueOf(requestBody.getQcRemarksId()));
-                if (optionalQcRemarks.isPresent()) {
-                    QcRemarks qcRemarks = optionalQcRemarks.get();
-                    qcRemarks.setQcRemarks(requestBody.getQcRemarks());
-                    qcRemarks.setCandidateCode(requestBody.getCandidateCode() != null ? requestBody.getCandidateCode() : null);
-                    Candidate byCandidateCode = candidateRepository.findByCandidateCode(requestBody.getCandidateCode());
-                    qcRemarks.setCandidateId(byCandidateCode.getCandidateId());
-                    qcRemarks.setLastUpdatedOn(new Date());
-                    qcRemarks.setLastUpdatedBy(SecurityHelper.getCurrentUser().getUserName());
-
-                    // Save the updated QcRemarks entity
-                    QcRemarks savedQcRemarks = qcRemarksRepository.save(qcRemarks);
-
-                    // Prepare outcome for update
-                    outcome.setOutcome(true);
-                    outcome.setMessage("Updated Remarks Successfully");
-                } else {
-                    outcome.setOutcome(false);
-                    outcome.setMessage("QcRemarks with ID " + requestBody.getQcRemarksId() + " not found");
-                }
-            }
-        } catch (NumberFormatException e) {
-            outcome.setOutcome(false);
-            outcome.setMessage("Invalid candidate ID format: " + requestBody.getCandidateCode());
-        } catch (Exception e) {
-            outcome.setOutcome(false);
-            outcome.setMessage("Something Went Wrong: " + e.getMessage());
-        }
-        return outcome;
-    }
-
-
-    public ServiceOutcome<List<QcRemarksDto>> getQcRemarks(String candidateCode) {
-        ServiceOutcome<List<QcRemarksDto>> outcome = new ServiceOutcome<>();
-        try {
-            if (candidateCode != null) {
-                List<QcRemarks> qcRemarksList = qcRemarksRepository.findByCandidateCode(candidateCode);
-
-                // Map QcRemarks entities to QcRemarksDto objects using streams
-                List<QcRemarksDto> qcRemarksDtoList = qcRemarksList.stream()
-                        .map(qcRemarks -> {
-                            QcRemarksDto dto = new QcRemarksDto();
-                            dto.setCandidateCode(qcRemarks.getCandidateCode() != null ? String.valueOf(qcRemarks.getCandidateCode()) : null);
-                            dto.setQcRemarksId(qcRemarks.getQcRemarksId() != null ? String.valueOf(qcRemarks.getQcRemarksId()) : null);
-                            dto.setQcRemarks(qcRemarks.getQcRemarks());
-                            return dto;
-                        })
-                        .collect(Collectors.toList());
-
-                outcome.setData(qcRemarksDtoList);
-                outcome.setOutcome(true);
-                outcome.setMessage("Successfully retrieved QcRemarks for candidateId: " + candidateCode);
-            } else {
-                outcome.setData(null);
-                outcome.setOutcome(false);
-                outcome.setMessage("Candidate ID cannot be null");
-            }
-        } catch (NullPointerException e) {
-            outcome.setData(null);
-            outcome.setOutcome(false);
-            outcome.setMessage("Null pointer exception occurred: " + e.getMessage());
-        } catch (Exception e) {
-            outcome.setData(null);
-            outcome.setOutcome(false);
-            outcome.setMessage("Error occurred: " + e.getMessage());
-        }
-        return outcome;
-    }
-
-    public ServiceOutcome<String> deleteQcRemarkByQcRemarksId(Long qcRemarksId) {
-        String response = "";
-        ServiceOutcome<String> outcome=new ServiceOutcome<>();
-        try {
-            Optional<QcRemarks> optionalQcRemarks = qcRemarksRepository.findById(qcRemarksId);
-            if (optionalQcRemarks.isPresent()) {
-                qcRemarksRepository.deleteById(qcRemarksId);
-                response = "Deleted Successfully";
-                outcome.setMessage(response);
-                outcome.setOutcome(true);
-            } else {
-                response = "QcRemarks not found";
-                outcome.setMessage(response);
-                outcome.setOutcome(false);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            response = "Something Went Wrong";
-            outcome.setMessage(response);
-            outcome.setOutcome(false);
-        }
-        return outcome;
-    }
-
-
-    @Transactional
-    @Override
-    public ServiceOutcome<List> saveCandidateInformation(MultipartFile file) {
-        ServiceOutcome<List> svcSearchResult = new ServiceOutcome<List>();
-        String originalFilename = file.getOriginalFilename();
-        System.out.println("OrginalFileName::>>>" + originalFilename);
-        try {
-            User user = SecurityHelper.getCurrentUser();
-            Organization organization = organizationRepository.findById(user.getOrganization().getOrganizationId())
-                    .get();
-
-            Date linkExpireDate = getExpireDate(organization.getOrganizationId());
+	@Transactional
+	@Override
+	public ServiceOutcome<List> saveCandidateInformation(MultipartFile file) {
+		ServiceOutcome<List> svcSearchResult = new ServiceOutcome<List>();
+		String originalFilename = file.getOriginalFilename();
+		System.out.println("OrginalFileName::>>>" + originalFilename);
+		try {
+			User user = SecurityHelper.getCurrentUser();
+			Organization organization = organizationRepository.findById(user.getOrganization().getOrganizationId())
+					.get();
+			
+	        Date linkExpireDate = getExpireDate(organization.getOrganizationId());
 
 			RandomString rd = null;
 			List<Candidate> candidates = null;
@@ -2030,7 +2001,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				if (candidateCafExperiences.isEmpty()) {
 					candidateCafExperiences = getCandidateExperienceFromItrAndEpfoByCandidateId(
 							candidate.getCandidateId(), false);
-					log.info("No. of Exp records after adjudication :: {} {}", candidateCafExperiences.size(), candidate.getCandidateCode());
+					System.out.println(candidateCafExperiences.size() + "getting");
 					candidateCafExperienceRepository.saveAll(candidateCafExperiences);
 				}
 				
@@ -2071,7 +2042,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 									candidateCafExperience.getInputDateOfExit() != null
 											? candidateCafExperience.getInputDateOfExit()
 											: new Date());
-//							log.info("Checking the Tenuer duration::{}", dateDifference);
+							log.info("Checking the Tenuer duration::{}", dateDifference);
 							// adding the experience in list only when tenuer not less then 1 and should not
 							// have ITR data
 //							if(candidateCafExperience.getServiceSourceMaster() != null
@@ -2749,8 +2720,8 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				if (candidateStatus.getStatusMaster().getStatusCode().equals("INTERIMREPORT")) {
 					CandidateStatusHistory candidateStatusHistoryObj = candidateStatusHistoryRepository
 							.findLastStatusHistorytRecord(candidate.getCandidateId());
-//					log.info("LAST STATUS HISTORY IS ::{}",
-//							candidateStatusHistoryObj.getStatusMaster().getStatusCode());
+					log.info("LAST STATUS HISTORY IS ::{}",
+							candidateStatusHistoryObj.getStatusMaster().getStatusCode());
 					candidateStatusHistoryObj.setCreatedOn(new Date());
 					candidateStatusHistoryObj.setCandidateStatusChangeTimestamp(new Date());
 					candidateStatusHistoryRepository.save(candidateStatusHistoryObj);
@@ -3449,7 +3420,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 							Calendar cal = Calendar.getInstance();
 							cal.setTime(doj);
 							Date dateWith1Days = cal.getTime();
-//							log.info("EPFOdoj ::{}", dateWith1Days);
+							log.info("EPFOdoj ::{}", dateWith1Days);
 							epfoDataFromApiDto.setDoj(dateWith1Days != null ? sdf.format(dateWith1Days) : null);
 
 						}
@@ -3458,7 +3429,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 							Calendar cal = Calendar.getInstance();
 							cal.setTime(doe);
 							Date doee = cal.getTime();
-//							log.info("EPFOdoee ::{}", doee);
+							log.info("EPFOdoee ::{}", doee);
 							epfoDataFromApiDto.setDoe(doee != null ? sdf.format(doee) : null);
 						}
 
@@ -3503,27 +3474,35 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 //				}else {
 //					candidationApplicationFormDto.setRemittanceProofImagesData(null);
 //				}
-
-                if (dataDTOList != null && !dataDTOList.isEmpty()) {
-                    Map<String, List<RemittanceDataFromApiDto>> groupedAndSorted = dataDTOList.stream()
-                            .sorted(Comparator.comparing(RemittanceDataFromApiDto::getCreatedOn))
-                            .collect(Collectors.groupingBy(
-                                    RemittanceDataFromApiDto::getCompany,
-                                    () -> new LinkedHashMap<>(), // Preserve insertion order
-                                    Collectors.toList()
-                            ));
-
-                    List<RemittanceDataFromApiDto> finalSortedList = groupedAndSorted.values().stream()
-                            .flatMap(list -> list.stream()
-                                    .sorted(Comparator.comparing(dto -> LocalDate.parse("01-" + dto.getYear(),
-                                            DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH))))
-                            )
-                            .collect(Collectors.toList());
-
-                    candidationApplicationFormDto.setRemittanceProofImagesData(!finalSortedList.isEmpty() ? finalSortedList : null);
-                } else {
-                    candidationApplicationFormDto.setRemittanceProofImagesData(null);
-                }
+				
+				if (dataDTOList != null && !dataDTOList.isEmpty()) {
+				    // Step 1: Sort by createdOn
+				    List<RemittanceDataFromApiDto> sortedList = dataDTOList.stream()
+				          .sorted(Comparator.comparing(RemittanceDataFromApiDto::getCreatedOn))
+				          .collect(Collectors.toList());
+				    // Step 2: Group by company
+				    Map<String, List<RemittanceDataFromApiDto>> groupedByCompany = sortedList.stream()
+				          .collect(Collectors.groupingBy(RemittanceDataFromApiDto::getCompany));
+				    // Step 3: Sort each group by year and remove duplicates
+				    groupedByCompany.forEach((company, list) -> {
+				       Set<String> seenYears = new LinkedHashSet<>();
+				       List<RemittanceDataFromApiDto> distinctList = list.stream()
+				             .sorted(Comparator.comparing(dto -> {
+				                String yearString = dto.getYear();
+				                return LocalDate.parse("01-" + yearString, DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH));
+				             }))
+				             .filter(dto -> seenYears.add(dto.getYear()))
+				             .collect(Collectors.toList());
+				       groupedByCompany.put(company, distinctList);
+				    });
+				    // Step 3: Flatten the grouped data into a single list
+				    List<RemittanceDataFromApiDto> finalSortedList = groupedByCompany.values().stream()
+				          .flatMap(List::stream)
+				          .collect(Collectors.toList());
+				    candidationApplicationFormDto.setRemittanceProofImagesData(!finalSortedList.isEmpty() ? finalSortedList : null);
+				} else {
+				    candidationApplicationFormDto.setRemittanceProofImagesData(null);
+				}
 				
 				
 				//adding gst images in report
@@ -4619,7 +4598,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		org.joda.time.format.DateTimeFormatter formatter = org.joda.time.format.DateTimeFormat.forPattern("yyyy-MM-dd");
-//		System.out.println("enter new" + formatEpfoDate);
+		System.out.println("enter new" + formatEpfoDate);
 		Candidate candidate = candidateRepository.findById(candidateId)
 				.orElseThrow(() -> new RuntimeException("invalid candidate id"));
 		List<String> orgServices = serviceTypeConfigRepository.getServiceSourceMasterByOrgId(candidate.getOrganization().getOrganizationId());
@@ -4633,7 +4612,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 		Date doe = null;
 		ToleranceConfig toleranceConfig = toleranceConfigRepository
 				.findByOrganizationOrganizationId(candidate.getOrganization().getOrganizationId());
-//		log.info("moonlighting tolerance in days {}", toleranceConfig.getDualEmployment());
+		log.info("moonlighting tolerance in days {}", toleranceConfig.getDualEmployment());
 		if (uan.isEmpty()) {
 			if (!iTRDataList.isEmpty()) {
 //				int j = 0;
@@ -4778,7 +4757,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				        LocalDate epfoDataDoe = epfoData.getDoe() != null ? epfoData.getDoe().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 		                
 		                if ((formattedYearMonth.isAfter(YearMonth.from(epfoDataDoj)) || formattedYearMonth.equals(YearMonth.from(epfoDataDoj))) && (formattedYearMonth.isBefore(YearMonth.from(epfoDataDoe)) || formattedYearMonth.equals(YearMonth.from(epfoDataDoe)))  && CommonUtils.checkStringSimilarity(iTRDataList.get(i).getDeductor(), epfoData.getCompany()) > 0.90) {
-//		                	log.info("filtered out record {} {} {}", iTRDataList.get(i).getDeductor(), formattedYearMonth, candidate.getCandidateCode());
+		                	log.info("filtered out record {} {} {}", iTRDataList.get(i).getDeductor(), formattedYearMonth, candidate.getCandidateCode());
 		                	epfoIndex = j;
 		                    break;
 		                }
@@ -4838,8 +4817,8 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 								&& epfoDataFromApiDto.getDoj()
 										.after(epfoDataFromApiDto.getDoe() != null ? epfoDataFromApiDto.getDoe()
 												: new Date())) {
-//					log.info("getDoj() after doe then dates and taken from itr for {}",
-//							epfoDataFromApiDto.getCompany());
+					log.info("getDoj() after doe then dates and taken from itr for {}",
+							epfoDataFromApiDto.getCompany());
 //						map.keySet().forEach(itrMapKey -> {
 					List<ITRData> itrList = map.get(epfoDataFromApiDto.getCompany());
 
@@ -4873,7 +4852,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 //						});
 
 				} else {
-//					log.info("Doj Doe dates taken from epfo for {}", epfoDataFromApiDto.getCompany());
+					log.info("Doj Doe dates taken from epfo for {}", epfoDataFromApiDto.getCompany());
 //						Date doj = epfoDataFromApiDto.getDoj() != null ? epfoDataFromApiDto.getDoj() : new Date();
 					if (epfoDataFromApiDto.getDoj() != null && epfoDataFromApiDto.getDoj()
 							.after(epfoDataFromApiDto.getDoe() != null ? epfoDataFromApiDto.getDoe() : new Date())) {
@@ -5029,7 +5008,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 									.parse(itrList.get(itrList.size() - 1).getDate()));
 						}
 						
-//						log.info("taking itr record for caf exp {} {} {}", itrDataFromApiDto.getDeductor(), candidateCafExperience.getOutputDateOfJoining(), candidateCafExperience.getOutputDateOfExit());
+						log.info("taking itr record for caf exp {} {} {}", itrDataFromApiDto.getDeductor(), candidateCafExperience.getOutputDateOfJoining(), candidateCafExperience.getOutputDateOfExit());
 
 					} catch (Exception e) {
 						log.error(
@@ -5972,7 +5951,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 //				suspectEmpMaster = suspectEmpMasterRepository
 //						.getByOrganizationIdAndSuspectCompanyName(orgid, searchEmployer + "%");
 //			}
-//			log.info("no of iterations done and for emp {}", wordCount);
+			log.info("no of iterations done and for emp {}", wordCount);
 
 			if (!suspectEmpMaster.isEmpty()) {
 				int i = 0;
@@ -5983,7 +5962,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				List<String> partialMatches = new ArrayList<>();
 
 				if (suspectEmpMaster.size() == 1) {
-//					log.info("SUSPECT ONE MATCHING ONLY :{}");
+					log.info("SUSPECT ONE MATCHING ONLY :{}");
 					String suspectEmployer = extractMainEmployerName(suspectEmpMaster.get(0).getSuspectCompanyName())
 							.trim();
 					svcSearchResult.setData("RED");
@@ -6019,7 +5998,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 							if (!wordMatchCheckList.contains(false)) {
 								j++;
 								matchedFromDBWith = SuspectEmp.getSuspectCompanyName();
-//								log.info("exact match {}", matchedFromDBWith);
+								log.info("exact match {}", matchedFromDBWith);
 							}
 						} else {
 							searchEmployer = getSubString(enteredEmp, enteredEmp.length);
@@ -6037,7 +6016,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 								if (!wordMatchCheckList.contains(false)) {
 									j++;
 									matchedFromDBWith = SuspectEmp.getSuspectCompanyName();
-//									log.info("exact match in else block {}", matchedFromDBWith);
+									log.info("exact match in else block {}", matchedFromDBWith);
 								}
 							}
 						}
@@ -7076,12 +7055,12 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 					.findByCandidateCandidateId(findByCandidateCode.getCandidateId());
 			if (candidateVerificationState != null && candidateVerificationState.getInterimColorCodeStatus() != null) {
 				statusColor = candidateVerificationState.getInterimColorCodeStatus();
-//				log.info("candidateReportStatus FOR INTERIM REPORT::{}", statusColor);
+				log.info("candidateReportStatus FOR INTERIM REPORT::{}", statusColor);
 
 			}
 			if (candidateVerificationState != null && candidateVerificationState.getFinalColorCodeStatus() != null) {
 				statusColor = candidateVerificationState.getFinalColorCodeStatus();
-//				log.info("candidateReportStatus FOR FINAL REPORT::{}", statusColor);
+				log.info("candidateReportStatus FOR FINAL REPORT::{}", statusColor);
 			}
 			sv.setData(statusColor);
 			sv.setOutcome(true);

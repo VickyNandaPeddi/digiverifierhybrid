@@ -95,7 +95,7 @@ public class GstServiceImpl implements GstService{
 					//call the GST API for getting images..
 					
 					String res =getGstImagesData(gstTID, candidate.getItrPanNumber());
-		            log.info("gst getGstImagesData {}", res + candidate.getItrPanNumber());
+					
 					dataDTOList = saveGstData(res, candidate);
 				}
 			}
@@ -209,13 +209,11 @@ public class GstServiceImpl implements GstService{
 //	        if (gstResponse.getStatusCode() == HttpStatus.FOUND) {
 	            // Extract the redirect URL from the Location header
 	            String redirectUrl = gstResponse.getHeaders().getLocation().toString();
-	            log.info("gst redirectUrl {}", redirectUrl + panNumber);
 
 	            // Make a new request to the redirect URL
 	            ResponseEntity<String> redirectResponse = restTemplate.exchange(redirectUrl, HttpMethod.POST, requestEntity, String.class);
 	            message = redirectResponse.getBody();
-	            log.info("gst redirectResponse {}", redirectResponse + panNumber);
-
+	            
 //	        }
 			
 		

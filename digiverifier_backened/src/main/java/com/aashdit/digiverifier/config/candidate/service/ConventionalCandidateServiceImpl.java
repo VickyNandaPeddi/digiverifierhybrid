@@ -1305,8 +1305,8 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 					if (candidateStatus.getStatusMaster().getStatusCode().equals("CONVENTIONALINTERIMREPORT")) {
 						ConventionalCandidateStatusHistory candidateStatusHistoryObj = conventionalCandidateStatusHistoryReposiory
 								.findLastStatusHistorytRecord(candidate.getCandidateId());
-//						log.info("LAST STATUS HISTORY IS ::{}",
-//								candidateStatusHistoryObj.getStatusMaster().getStatusCode());
+						log.info("LAST STATUS HISTORY IS ::{}",
+								candidateStatusHistoryObj.getStatusMaster().getStatusCode());
 						candidateStatusHistoryObj.setCreatedOn(new Date());
 						candidateStatusHistoryObj.setCandidateStatusChangeTimestamp(new Date());
 						conventionalCandidateStatusHistoryReposiory.save(candidateStatusHistoryObj);

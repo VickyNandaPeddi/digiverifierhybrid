@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -569,46 +568,26 @@ public class OrganizationServiceImpl implements OrganizationService{
 						log.error("Exception occured in organizationConfig save inside saveOrganizationServiceConfiguration method in OrganizationServiceImpl-->" + e);
 					}
 		    	}
-				List<OrganizationExecutive> organizationExecutiveByOrganizationId = organizationExecutiveRepository
-						.findAllByOrganizationIdAndOrderByWeightDesc(serviceConfigurationDto.getOrganizationId());
-		    	if(organizationExecutiveByOrganizationId.isEmpty()) {
-					OrganizationExecutive organizationExecutive = new OrganizationExecutive();
-					organizationExecutive.setOrganizationId(serviceConfigurationDto.getOrganizationId());
-					organizationExecutive.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(0));
-					organizationExecutive.setWeight(serviceConfigurationDto.getWeight().get(0));
-					organizationExecutiveRepository.save(organizationExecutive);
-					OrganizationExecutive organizationExecutivee = new OrganizationExecutive();
-					organizationExecutivee.setOrganizationId(serviceConfigurationDto.getOrganizationId());
-					organizationExecutivee.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(1));
-					organizationExecutivee.setWeight(serviceConfigurationDto.getWeight().get(1));
-					organizationExecutiveRepository.save(organizationExecutivee);
-					OrganizationExecutive organizationExecutiveee = new OrganizationExecutive();
-					organizationExecutiveee.setOrganizationId(serviceConfigurationDto.getOrganizationId());
-					organizationExecutiveee.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(2));
-					organizationExecutiveee.setWeight(serviceConfigurationDto.getWeight().get(2));
-					organizationExecutiveRepository.save(organizationExecutiveee);
-					OrganizationExecutive organizationExecutiveeee = new OrganizationExecutive();
-					organizationExecutiveeee.setOrganizationId(serviceConfigurationDto.getOrganizationId());
-					organizationExecutiveeee.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(3));
-					organizationExecutiveeee.setWeight(serviceConfigurationDto.getWeight().get(3));
-					organizationExecutiveRepository.save(organizationExecutiveeee);
-		    	} else {
-		    	    List<OrganizationExecutive> updatedExecutives = IntStream.range(0, serviceConfigurationDto.getExecutiveId().size())
-		    	            .mapToObj(i -> {
-		    	                Long executiveId = serviceConfigurationDto.getExecutiveId().get(i);
-		    	                OrganizationExecutive organizationExecutive = organizationExecutiveByOrganizationId.stream()
-		    	                    .filter(exec -> exec.getExecutiveId().equals(executiveId))
-		    	                    .findFirst()
-		    	                    .orElse(new OrganizationExecutive());
-		    	                organizationExecutive.setOrganizationId(serviceConfigurationDto.getOrganizationId());
-		    	                organizationExecutive.setExecutiveId(executiveId);
-		    	                organizationExecutive.setWeight(serviceConfigurationDto.getWeight().get(i));
-		    	                return organizationExecutive;
-		    	            })
-		    	            .collect(Collectors.toList());
-
-		    	        organizationExecutiveRepository.saveAll(updatedExecutives);
-		    	}
+				OrganizationExecutive organizationExecutive = new OrganizationExecutive();
+				organizationExecutive.setOrganizationId(serviceConfigurationDto.getOrganizationId());
+				organizationExecutive.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(0));
+				organizationExecutive.setWeight(serviceConfigurationDto.getWeight().get(0));
+				organizationExecutiveRepository.save(organizationExecutive);
+				OrganizationExecutive organizationExecutivee = new OrganizationExecutive();
+				organizationExecutivee.setOrganizationId(serviceConfigurationDto.getOrganizationId());
+				organizationExecutivee.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(1));
+				organizationExecutivee.setWeight(serviceConfigurationDto.getWeight().get(1));
+				organizationExecutiveRepository.save(organizationExecutivee);
+				OrganizationExecutive organizationExecutiveee = new OrganizationExecutive();
+				organizationExecutiveee.setOrganizationId(serviceConfigurationDto.getOrganizationId());
+				organizationExecutiveee.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(2));
+				organizationExecutiveee.setWeight(serviceConfigurationDto.getWeight().get(2));
+				organizationExecutiveRepository.save(organizationExecutiveee);
+				OrganizationExecutive organizationExecutiveeee = new OrganizationExecutive();
+				organizationExecutiveeee.setOrganizationId(serviceConfigurationDto.getOrganizationId());
+				organizationExecutiveeee.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(3));
+				organizationExecutiveeee.setWeight(serviceConfigurationDto.getWeight().get(3));
+				organizationExecutiveRepository.save(organizationExecutiveeee);
 					
 		    	svcSearchResult.setData(serviceConfigurationDtoObj);
 		    	svcSearchResult.setOutcome(true);

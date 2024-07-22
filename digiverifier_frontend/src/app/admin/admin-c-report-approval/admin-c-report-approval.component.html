@@ -10,7 +10,7 @@
 
 <div class="container-fluid">
     <form [formGroup]="formReportApproval">
-
+        
     <div class="row" style="margin: 0 25px;">
         <div class="col-xl-6">
             <div class="card shadow mb-4 stat_cards">
@@ -30,13 +30,13 @@
                                     <!-- <div style="float: right;">
                                         <strong>Status:</strong>
                                         <span class=" bg-result" [style.color]="reportStatusHexCode">{{ reportStatus }}</span>
-                                        <button type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit"
+                                        <button type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit" 
                                                 (click)="openReportStatusModal(modalReportStatus)">
                                                 <i class="fas fa-edit"></i>
                                         </button>
                                     </div> -->
                                 </span>
-
+                                
                             </p>
                         </div>
                     </div>
@@ -67,7 +67,7 @@
 
                                 </button>
 
-                                </span>
+                                </span>                              
 
                             </p>
 
@@ -103,10 +103,10 @@
                             <div class="col-md-12">
                                 <label style="text-align: center;" class="mb-1 font-weight-bold" for="caseReinitiationDate">Case Reinitiation Date</label>
                                 <div class="input-group ml-3">
-                                    <input type="date" name="caseReinitiationDate" formControlName="caseReinitiationDate" #inputDate (click)="fetchjoinDateSelected()" >
+                                    <input type="date" name="caseReinitiationDate" formControlName="caseReinitiationDate" #inputDate (click)="fetchjoinDateSelected()" >                                  
                                     <button type="button" class="btn btn-success btn-sm ml-2" (click)="submitDate(inputDate.value)">
                                     Add Date</button>
-                                </div>
+                                </div>                                  
                             </div>
                         </div>
                     </div>
@@ -154,7 +154,7 @@
                                         <td><span class=" bg-result" [style.color]="item.colorColorHexCode">{{ item.colorColorName }}</span></td>
                                         <td class="btngroup">
                                             <!-- <span *ngIf="item.colorColorName == 'Green'">No Action</span> -->
-                                            <button type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit"
+                                            <button type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit" 
                                             id="edit{{i}}" (click)="openEducationModal(modalEducation, item.candidateCafEducationId,
                                             item.qualificationId,item.qualificationName,item.schoolOrCollegeName,
                                                                 item.boardOrUniversityName,item.yearOfPassing,item.percentage, item.colorColorCode, item.customRemark)">
@@ -174,17 +174,17 @@
                 <!-- Card Header -->
                 <div
                     class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-
+                    
                     <h6 class="m-0 font-weight-bold text-primary" *ngIf="!splitEmployment">
                         Employment Details
                     </h6>
                     <h6 class="m-0 font-weight-bold text-primary" *ngIf="splitEmployment">
                         Employment Details From EPFO/ITR
                     </h6>
-
+                    
                     <button type="button" class="btn btn-sm btn-success float-right" (click)="openAddExperienceModal(modalExperience)">
                         Add Employment Details</button>
-
+                    
                 </div>
                 <!-- Card Body -->
                 <div class="card-body">
@@ -232,7 +232,7 @@
                                         </td> -->
                                         <td>
                                             <!-- <span *ngIf="item.colorColorName == 'Green'">No Action</span> -->
-                                            <button type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit"
+                                            <button type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit" 
                                             id="edit{{i}}" (click)="openExperienceModal(modalExperience, item.candidateCafExperienceId,
                                             item.candidateEmployerName, item.inputDateOfJoining, item.inputDateOfExit, item.colorColorCode, item.customRemark, item.undisclosed,
                                             item.outputDateOfExit, item.customRemark)">
@@ -242,9 +242,9 @@
                                         </td>
                                         <td *ngIf="!this.getServiceConfigCodes.includes('SECONDARY_SOURCE_DNHDB')">{{item.customRemark == null?'Not Available' : item.customRemark}}</td>
                                         <td *ngIf="this.getServiceConfigCodes.includes('SECONDARY_SOURCE_DNHDB')">
-                                            {{ (item.secondaryServiceName == null ? '' : item.secondaryServiceName) +
+                                            {{ (item.secondaryServiceName == null ? '' : item.secondaryServiceName) + 
                                             (item.serviceName == null ? '' : item.secondaryServiceName == null ? item.serviceName : ', ' + item.serviceName) }}
-                                        </td>
+                                        </td>                                   
                                     </tr>
                                 </tbody>
 
@@ -272,7 +272,7 @@
                                         </td> -->
                                         <td>
                                             <!-- <span *ngIf="item.colorColorName == 'Green'">No Action</span> -->
-                                            <button type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit"
+                                            <button type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit" 
                                             id="edit{{i}}" (click)="openExperienceModal(modalExperience, item.candidateCafExperienceId,
                                             item.candidateEmployerName, item.inputDateOfJoining, item.inputDateOfExit, item.colorColorCode, item.customRemark, item.undisclosed,
                                             item.outputDateOfExit, item.customRemark)">
@@ -300,7 +300,7 @@
                     </h6>
                     <button type="button" class="btn btn-sm btn-success float-right" (click)="openAddExperienceModal(modalExperience)">
                         Add Employment Details</button>
-
+                    
                 </div>
                 <!-- Card Body -->
                 <div class="card-body">
@@ -348,7 +348,7 @@
                                         </td> -->
                                         <td>
                                             <!-- <span *ngIf="item.colorColorName == 'Green'">No Action</span> -->
-                                            <button type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit"
+                                            <button type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit" 
                                             id="edit{{i}}" (click)="openExperienceModal(modalExperience, item.candidateCafExperienceId,
                                             item.candidateEmployerName, item.inputDateOfJoining, item.inputDateOfExit, item.colorColorCode, item.customRemark, item.undisclosed,
                                             item.outputDateOfExit, item.customRemark)">
@@ -412,7 +412,7 @@
                                         </td>
                                         <td>{{ item.candidateAddress }}</td>
                                         <td>{{ item.serviceName }}</td>
-                                        <td>
+                                        <td> 
                                             <!-- <i class="fas customColors customIcon customIcon"></i></td> -->
                                             <i class="fas customColors customIcon customIcon{{ item.isAssetDeliveryAddress }}"></i></td>
                                         <td><i class="fas customColors customIcon customIcon{{ item.isPermanentAddress }}"></i></td>
@@ -474,7 +474,7 @@
                                                     <th rowspan="2">Employer Name</th>
                                                     <th colspan="3" style="text-align: center;">Tenure</th>
                                                 </tr>
-
+            
                                                 <tr>
                                                     <th style="text-align: center;"> EPFO DOJ</th>
                                                     <th style="text-align: center;">EPFO LWD</th>
@@ -486,7 +486,7 @@
                                                     <td *ngIf="item.serviceName == 'EPFO'">{{ item.candidateEmployerName }}</td>
                                                     <td *ngIf="item.serviceName == 'EPFO'">{{ item.outputDateOfJoining }}</td>
                                                     <td *ngIf="item.serviceName == 'EPFO'">{{ i==0 && item.outputDateOfExit == null?'Not-Available': item.outputDateOfExit}}</td>
-                                                </tr> -->
+                                                </tr> --> 
                                                 <tr *ngFor="let item of candidateEPFOData; let i=index;">
                                                     <td>{{ item.company }}</td>
                                                     <td>{{ item.doj }}</td>
@@ -498,20 +498,20 @@
                                                     </td>
                                                 </tr>
                                             </tbody>
-
+                                            
                                         </table>
                                     </div>
-
+            
                                 </div>
                             </div>
                         </div>
-
+            
                         <!-- ANNEXURE – II Ends -->
                         <!-- ANNEXURE – III Start -->
                         <div class="card shadow mb-4" *ngIf="gstFound">
                             <!-- Card Header -->
                             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-
+                                
                                 <div class="col-md-5">
                                     <h6 *ngIf="gstFound" class="m-0 font-weight-bold text-primary">
                                         ANNEXURE – III
@@ -522,7 +522,7 @@
                                         GST Verification Details
                                     </h6>
                                 </div>
-
+                                
                             </div>
                             <!-- Card Body -->
                             <div class="card-body">
@@ -552,7 +552,7 @@
                                                     <td>{{ candidateUniqueGSTData[i].gstNumber}}</td>
                                                     <td><span class=" bg-result" [style.color]="candidateUniqueGSTData[i].colorHexCode">{{ candidateUniqueGSTData[i].color }}</span></td>
                                                     <!-- <td>
-                                                        <button type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit"
+                                                        <button type="button" data-toggle="tooltip" class="btn btn-warning btn-sm" title="Edit" 
                                                         id="edit{{i}}" (click)="openExperienceModal(modalExperience, item.candidateCafExperienceId,
                                                         item.candidateEmployerName, item.inputDateOfJoining, item.inputDateOfExit, item.colorColorCode, item.customRemark, item.undisclosed,
                                                         item.outputDateOfExit, item.customRemark)">
@@ -564,9 +564,9 @@
                                                 </tr>
                                             </tbody>
                                         </table>
-
+            
                                     </div>
-
+            
                                 </div>
                             </div>
                             <div *ngFor="let item of candidateGSTData" style="text-align: center; margin-bottom: 20px;">
@@ -577,16 +577,16 @@
                                     <div class="col-md-6 mt-1">
                                         <b>pan: <span class="text-success">{{item.panNumber}}</span></b>
                                         <div class="col-md-6 mt-1" style="margin-left: auto;">
-                                            <button type="button" (click)="inactiveGST(item.gstId)"
+                                            <button type="button" (click)="inactiveGST(item.gstId)" 
                                             class="btn btn-danger btn-sm" data-toggle="tooltip"><i class="fas fa-times"></i></button>
-                                        </div>
+                                        </div> 
                                     </div>
                                     <!-- <div class="col-md-6 mt-1" style="margin-left: auto;">
                                         <button type="button" (click)="inactiveRemittance(item.company,item.memberId,
                                         item.year)" class="btn btn-danger btn-sm" data-toggle="tooltip"><i class="fas fa-times"></i></button>
                                     </div> -->
                                 </div>
-
+                        
                                 <img [src]="'data:image/png;base64,' + item.image" alt="Image" style="width: 1000px; height: 400px;">
                             </div>
                         </div>
@@ -599,7 +599,7 @@
                                     <h6 *ngIf="!gstFound" class="m-0 font-weight-bold text-primary">
                                         ANNEXURE – III
                                     </h6>
-
+                                
                                     <h6 *ngIf="gstFound" class="m-0 font-weight-bold text-primary">
                                         ANNEXURE - Iv
                                     </h6>
@@ -617,7 +617,7 @@
                                         <div class="col-md-12 mt-1">
                                             <b>PAN : <span class="text-success">{{panNumber}}</span></b>
                                         </div>
-
+            
                                         <table class=" table table-bordered mt-2" style="
                                         border-bottom: 1px solid black;">
                                             <thead style="display: table-row-group;">
@@ -644,13 +644,13 @@
                                             </tbody>
                                         </table>
                                     </div>
-
+            
                                 </div>
                             </div>
                         </div>
                         <!-- ANNEXURE – III End -->
                         <div class="card shadow mb-2" *ngIf="employ">
-
+                           
                             <div class="card-header py-3 d-flex ">
                                 <div class="col-md-5">
                                     <h6 class="m-0 font-weight-bold text-primary">
@@ -663,11 +663,11 @@
                                     </h6>
                                 </div>
                             </div>
-
+                           
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-12">
-
+            
                                         <table class=" table table-bordered mt-2" style="
                                         border-bottom: 1px solid black;">
                                             <thead style="display: table-row-group;">
@@ -708,7 +708,7 @@
                                                         item.checkStatus === 'Clear' ? 'green' :
                                                         (item.checkStatus === 'Major Discrepancy' || item.checkStatus === 'Minor Discrepancy' ? 'red' :
                                                         (item.checkStatus === 'Unable To Verify' || item.checkStatus === 'In Sufficiency' ? '#ff9900' : item.colorHexCode))
-                                                    ">
+                                                    "> 
                                                     {{ item.checkStatus === 'Clear' ? 'Green' :
                                                     (item.checkStatus === 'Major Discrepancy' || item.checkStatus === 'Minor Discrepancy' ? 'Red' :
                                                     (item.checkStatus === 'Unable To Verify' || item.checkStatus === 'In Sufficiency' ? 'Amber' : item.checkStatus))
@@ -726,7 +726,7 @@
                                                         <button
                                                           class="btn btn-sm btn-info"
                                                           data-toggle="tooltip"
-
+                                                          
                                                           (click)="
                                                             triggerModal(
                                                               modalCandidate,
@@ -742,14 +742,14 @@
                                                           Update
                                                         </button>
                                                       </td>
-
+                                                    
                                                 </tr>
-
-
+                                               
+                                             
                                             </tbody>
                                         </table>
                                     </div>
-
+            
                                 </div>
                             </div>
                         </div>
@@ -774,7 +774,7 @@
                                     </h6>
                                 </div>
                             </div>
-
+                           
                             <div *ngFor="let item of candidateRemittanceData" style="text-align: center; margin-bottom: 20px;">
                                 <div class="row">
                                     <div class="col-md-6 mt-1">
@@ -788,13 +788,13 @@
                                         item.year)" class="btn btn-danger btn-sm" data-toggle="tooltip"><i class="fas fa-times"></i></button>
                                     </div>
                                 </div>
-
+                        
                                 <img [src]="'data:image/png;base64,' + item.image" alt="Image" style="width: 1000px; height: 400px;">
                             </div>
                         </div>
             <!-- start -->
             <div class="card shadow mb-2" *ngIf="this.getServiceConfigCodes.includes('EPFO') || this.getServiceConfigCodes.includes('ITR')">
-
+                           
                 <div class="card-header py-3 d-flex ">
                     <div class="col-md-5">
                         <h6 *ngIf="!employ && !remittanceFound && !gstFound"class="m-0 font-weight-bold text-primary">
@@ -824,47 +824,8 @@
                         </h6>
                     </div>
                 </div>
-<!--              capg card starts-->
-              <div class="card shadow mb-2">
-                <div *ngIf="getServiceConfigCodes.includes('EPFO') && !getServiceConfigCodes.includes('ITR') && !getServiceConfigCodes.includes('DIGILOCKER') && !getServiceConfigCodes.includes('PANTOUAN')" class="card-body">
-                  <!-- Table -->
-                  <div class="table-responsive" style="max-height: 500px; overflow: hidden;">
-                    <table class="table table-bordered">
-                      <thead class="thead-light">
-                      <tr>
-                        <th style="width: 80%;">Remark</th>
-                        <th style="width: 20%;" class="text-center">Action</th>
-                      </tr>
-                      </thead>
-                      <tbody>
-                      <tr *ngFor="let remark of qcRemarksList">
-                        <td>{{ remark.qcRemarks }}</td>
-                        <td class="text-center">
-                          <button class="btn btn-warning btn-sm" (click)="openQcRemarksModal(qcremarks, remark.qcRemarks, remark.qcRemarksId)">
-                            <i class="fa fa-bars"></i> Edit
-                          </button>
-                          <button class="btn btn-danger btn-sm" (click)="deleteRemark(remark.qcRemarksId)">
-                            <i class="fa fa-times"></i> Delete
-                          </button>
-                          <button class="btn btn-secondary btn-sm">
-                            <i class="fa fa-bars"></i> Another Action
-                          </button>
-                        </td>
-                      </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <!-- Footer -->
-                  <div class="row mt-3">
-                    <div class="col text-right">
-                      <button class="btn btn-success" (click)="openQcRemarksModal(qcremarks,'','')">Add remarks</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- capg card ends -->
-                <div *ngIf="!(getServiceConfigCodes.includes('EPFO') && !getServiceConfigCodes.includes('ITR') && !getServiceConfigCodes.includes('DIGILOCKER') && !getServiceConfigCodes.includes('PANTOUAN'))" class="card-body">
+               
+                <div class="card-body">
                     <div class="row">
                         <div class="col-md-12">
 
@@ -938,7 +899,7 @@
                                         <td style="width: 10%; text-align: center;">
                                             <button class="btn btn-warning btn-sm" title="Edit"
                                             id="edit3" (click)="openOrgScopeModal(modalOrgScope, 'DNH DB')">
-
+                                            
                                                 <i class="fas fa-pen"></i>
                                             </button>
                                         </td>
@@ -1022,7 +983,7 @@
                                         <td colspan="1" style="width: 10%; text-align: center;">
                                             <button class="btn btn-warning btn-sm" title="Edit"
                                             id="edit3" (click)="openOrgScopeModal(modalOrgScope, 'DNH DB')">
-
+                                            
                                                 <i class="fas fa-pen"></i>
                                             </button>
                                         </td>
@@ -1053,7 +1014,7 @@
                                                 <i class="fas fa-pen"></i>
                                             </button>
                                         </td>
-                                    </tr>
+                                    </tr>                                 
                                 </tbody>
                             </table>
                         </div>
@@ -1121,7 +1082,7 @@
                     </div>
                 </div>
             </div>
-
+        
             <div class="col-md-12 mt-4 mb-4 text-center">
                 <button *ngIf="this.getServiceConfigCodes.includes('GST') && !gstFound" type="button" (click)="openFetchGSTModal(modalFetchGST)" class="btn btn-primary">Fetch GST</button>
                 <button type="button" (click)="openAddcommentModal(modalAddcomments)" class="btn btn-primary">Add Comments</button>
@@ -1172,7 +1133,7 @@
                             <option [ngValue]="null" disabled>--Select--</option>
                             <option *ngFor="let item of QualificationList" [value]="item.qualificationId">{{ item.qualificationName }}</option>
                         </select>
-
+                    
                         </div>
                 </div>
         <div class="col-md-12">
@@ -1181,25 +1142,25 @@
                 <input type="text" class="form-control form-control-sm" formControlName="schoolOrCollegeName">
             </div>
         </div>
-
+            
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="" class="">University/Board</label>
-                        <input type="text"   formControlName="boardOrUniversityName"
+                        <input type="text"   formControlName="boardOrUniversityName" 
                             class="form-control form-control-sm">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="" class="">Year of Passing</label>
-                        <input type="text"  formControlName="yearOfPassing"
+                        <input type="text"  formControlName="yearOfPassing" 
                             class="form-control form-control-sm">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="" class="">% or CGPA</label>
-                        <input type="text" formControlName="percentage"
+                        <input type="text" formControlName="percentage" 
                             class="form-control form-control-sm">
                     </div>
                 </div>
@@ -1245,7 +1206,7 @@
             <form [formGroup]="formEditDOC" (ngSubmit)="submitEditDOC()">
             <input type="hidden"  formControlName="id">
             <div class="row " >
-
+              
                 <div class="col-md-10">
                     <div class="form-group">
                         <label for="" class="required">Result</label>
@@ -1256,7 +1217,7 @@
                         </select>
                     </div>
                 </div>
-
+              
             </div>
             <div class="row">
                 <div class="col-md-12 text-center mt-3 pb-3">
@@ -1294,7 +1255,7 @@
 
             <div class="col-md-8 offset-2">
                 <div class="form-group">
-                    <label for="" class="required">Remarks</label>
+                    <label for="" class="required">Remarks</label> 
                     <textarea type="text" style="white-space: pre-wrap;" class="form-control form-control-sm" formControlName="customRemark"> </textarea>
                 </div>
             </div>
@@ -1307,37 +1268,6 @@
             </div>
         </form>
     </div>
-</ng-template>
-
-<ng-template #qcremarks let-modal>
-  <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">Qc Remarks</h4>
-    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-      <span aria-hidden="true">×</span>
-    </button>
-  </div>
-  <div class="modal-body">
-    <!-- <form > -->
-    <form [formGroup]="formEditScope" (ngSubmit)="addUpdateRemark()">
-      <input type="hidden" formControlName="colorId">
-
-      <div class="col-md-8 offset-2">
-        <div class="form-group">
-          <label for="" class="required"> {{ isUpdateMode ? 'Update Remarks' : 'Add Remarks' }}</label>
-          <textarea type="text" style="white-space: pre-wrap;" class="form-control form-control-sm"
-                    formControlName="customRemark"> </textarea>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-12 text-center mt-3 pb-3">
-          <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-          <button type="button" class="btn btn-danger btn-sm"
-                  (click)="modal.close('Save click')">Close</button>
-        </div>
-      </div>
-    </form>
-  </div>
 </ng-template>
 
 
@@ -1364,28 +1294,28 @@
                     </div>
                 </div>
                 <div class="col-md-10">
-                     <div class="form-group">
+                     <div class="form-group"> 
                         <label for="" class="required">DOJ</label>
-                        <div class="input-group">
+                        <div class="input-group"> 
                             <input type="date" formControlName="inputDateOfJoining" (click)="fetchjoinDateSelected()">
-                         </div>
-                    </div>
+                         </div> 
+                    </div> 
                 </div>
-                <div class="col-md-10">
+                <div class="col-md-10"> 
                     <div class="form-group">
                         <label for="" class="required">DOE</label>
                         <div class="input-group">
                             <input type="date" formControlName="inputDateOfExit"(click)="fetchexitDateSelected()">
-                        </div>
+                        </div> 
                     </div>
                 </div>
                 <!-- below field enable when outPutDOEEnabled flag will enable-->
-                <div class="col-md-10" *ngIf="outPutDOEEnabled">
+                <div class="col-md-10" *ngIf="outPutDOEEnabled"> 
                     <div class="form-group">
                         <label>OutPut DOE</label>
                         <div class="input-group">
                             <input type="date" formControlName="outputDateOfExit"(click)="fetchexitDateSelected()">
-                        </div>
+                        </div> 
                     </div>
                 </div>
                 <div class="col-md-10" *ngIf="outPutDOEEnabled">
@@ -1396,7 +1326,7 @@
                             <option value="Remittance">Remittance</option>
                             <option value="Reliving letter">Reliving letter</option>
                         </select>
-
+                        
                     </div>
                 </div>
 
@@ -1558,7 +1488,7 @@
                         <input type="text" class="form-control form-control-sm">
                     </div>
                 </div>
-
+                    
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="" class="required">University/Board</label>
@@ -1610,18 +1540,18 @@
             <input type="hidden"  formControlName="id">
             <div class="row " >
 
-
+               
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="" class="col-md-12">Comments:
                             </label>
                             <div class="col-md-50">
-                                <textarea
+                                <textarea  
                                     formControlName="addComments" style="font-family:sans-serif;font-size:2.1em;" >
                                 </textarea>
                             </div>
                         </div>
-                    </div>
+                    </div> 
             </div>
             <div class="row">
                 <div class="col-md-12 text-center mt-3 pb-3">
@@ -1644,7 +1574,7 @@
             <input type="hidden"  formControlName="id">
             <div class="row " >
 
-
+               
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="" class="col-md-12">Pan:
@@ -1652,10 +1582,10 @@
                             <div class="col-md-50">
                                 <input type="text"
                                     formControlName="panNumber" style="font-family:sans-serif;font-size:2.1em;" >
-
+                                
                             </div>
                         </div>
-                    </div>
+                    </div> 
             </div>
             <div class="row">
                 <div class="col-md-12 text-center mt-3 pb-3">
@@ -1688,7 +1618,7 @@
                     <div class="form-group">
                         <label for="" class="required">Result</label>
                         <select class="form-control form-control-sm" formControlName="colorId">
-
+                           
                             <option [ngValue]="null">NA</option>
                             <option *ngFor="let item of getAllColor" [value]="item.colorId" >{{ item.colorName }}</option>
                         </select>
@@ -1722,7 +1652,7 @@
                     <div class="form-group">
                         <label for="" class="required">Result</label>
                         <select class="form-control form-control-sm" formControlName="colorId">
-
+                           
                             <option [ngValue]="null" disabled>--Select--</option>
                             <option *ngFor="let item of getAllColor" [value]="item.colorId" >{{ item.colorName }}</option>
                         </select>
@@ -1740,7 +1670,7 @@
 
         </form>
     </div>
-
+    
 </ng-template>
 <ng-template #modalRemittance let-modal>
     <div class="modal-header">
@@ -1760,30 +1690,30 @@
                     </div>
                 </div>
                 <div class="col-md-10">
-                     <div class="form-group">
+                     <div class="form-group"> 
                         <label for="" class="required">Remittance Dates</label>
-                        <div class="input-group">
+                        <div class="input-group"> 
                             <input type="text" formControlName="remittanceDates">
-                         </div>
+                         </div> 
                          <div>
                             <p>NOTE: Please insert comma separated dates to fetch records in MMM-YYYY format, eg: Nov-2023, Dec-2023</p>
                         </div>
-                    </div>
+                    </div> 
                 </div>
 
                 <div *ngIf="remittanceCaptchaEnabled" class="col-md-10">
                     <div class="form-group">
                         <!-- <label for="" class="required">Image</label> -->
                         <img *ngIf="remittanceCaptchaImage" [src]="remittanceCaptchaImage" alt="Image">
-                        <div class="input-group">
+                        <div class="input-group"> 
                             <input type="text" formControlName="remittanceCaptchaText">
-                         </div>
+                         </div> 
                          <div>
                             <p>Plese enter the above Captcha text</p>
                         </div>
                     </div>
                 </div>
-
+               
             </div>
             <div class="row">
                 <div class="col-md-12 text-center mt-3 pb-3">
@@ -1798,7 +1728,7 @@
 
 
 <ng-template #modalCandidate let-modal>
-
+    
     <div class="modal-header">
       <h4 class="modal-title" id="modal-basic-title">Update</h4>
       <button
@@ -1890,13 +1820,13 @@
               />
             </div>
           </div>
-
+  
           <div *ngIf="!globaldataBaseCheck && !idItemsCheckType">
 
             <div *ngFor="let attribute of venderAttributeValue" class="col-md-12">
             <div class="form-group">
                 <label for="" class="required">{{ attribute.label }}</label>
-
+    
                 <input
                 type="text"
                 formControlName="value"
@@ -1920,7 +1850,7 @@
               />
             </div>
           </div>
-
+  
         <div class="col-md-12">
           <div class="form-group">
             <label for="" class="required">Vendor Checks Status</label>
@@ -2107,7 +2037,7 @@
                     </button>
                   </div>
                 </div>
-
+               
             <div *ngIf="showGlobalCheck">
                 <div *ngFor="let attribute of selectedGlobalAttributeValue; let i = index;">
                   <div class="row">
@@ -2148,7 +2078,7 @@
 
                 <!--            </ng-container>-->
                 <!--            <ng-container *ngIf="selectedTab === 'indian'">-->
-
+        
                 <!--              <div class="tab" (click)="selectTab('indian')" [class.active]="selectedTab === 'indian'">-->
                 <div class="row my-4">
                   <div class="col-md-12 text-center">
@@ -2209,15 +2139,15 @@
                       <input type="text" #indian class="form-control form-control-sm" [(ngModel)]="selectedIndiaAttributeValue[i].value" (keyup)="onKeyUpIndian(indian.value, attribute.label)">
                     </div>
                   </div> -->
-
-
+        
+        
               <!-- </div> -->
             <!--            </ng-container>-->
             </div>
           </div>
 
-
-
+       
+  
         <div class="row">
           <div class="col-md-12 text-center mt-3 pb-3">
             <button

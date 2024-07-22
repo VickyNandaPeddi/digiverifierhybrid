@@ -809,7 +809,7 @@ span {
 				<td class="grey-text text-center"
 					th:text="${root.employmentTenureVerificationDtoList[0].customRemark}"></td>
 			</tr> -->
-
+			
 			<tr class="text-center" th:if="${root.currentEmploymentTenureVerification}">
 				<td class="grey-text text-center">Employment Verification -
 					current</td>
@@ -825,7 +825,7 @@ span {
 					<span class="grey-text" th:case="'OUTOFSCOPE'">OUT OF SCOPE</span>
 					<span class="invalid-status" style="font-size: 12px" th:case="*">INVALID</span>
 				</td>
-
+ 
 				<td class="grey-text text-center"
 					th:if="${#strings.equalsIgnoreCase(root.project, 'Wipro')}"
 					th:switch="${root.currentEmploymentTenureVerification.verificationStatus.name()}">
@@ -1656,10 +1656,9 @@ span {
 			<!-- content -->
 		</div>
 		<p class="td-heading text-center" style="color: #605f5f; font-size: 17px;">Remittance Proofs</p>
-		<span class="line-break">
 		<div th:each="image, iterStat : ${root.remittanceProofImagesData}" style="page-break-inside: avoid;">
-				<span class="inline-block left output-data grey-text" style="font-size: 15px; float: left;"
-				th:text="'Company: '+ ${image.company}+ '/' + ${image.memberId}"></span>
+				<span class="inline-block left output-data grey-text" style="font-size: 15px; float: left;" 
+				th:text="'Company: '+ ${image.company}+ '/' + ${image.memberId}"></span> 
 				<!--<span
 					style="margin-right: 300px; font-size: 10px"
 					th:text="${image.company}+ '/' + ${image.memberId}" class="grey-text"></span>-->

@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.aashdit.digiverifier.config.candidate.dto.CandidateStatusDto;
-import com.aashdit.digiverifier.config.candidate.dto.candidatePurgedReportDto;
 import com.aashdit.digiverifier.config.candidate.model.CandidateStatus;
 
 @Repository
@@ -640,83 +639,5 @@ public interface CandidateStatusRepository extends JpaRepository<CandidateStatus
 
 	@Query("select(candidateStatusId) FROM CandidateStatus  WHERE candidate.candidateId IN :candidateId")
 	List<Long> getCandidateStatusIdByCandidateId(List<Long> candidateId);
-	
-	@Query(value = "SELECT \r\n"
-			+ "    CB.applicant_id AS applicantId,\r\n"
-			+ "    CB.candidate_name AS candidateName,\r\n"
-			+ "    CB.date_of_birth AS dateOfBirth,\r\n"
-			+ "    u.user_first_name AS createdByUserFirstName,\r\n"
-			+ "    u.user_last_name AS createdByUserLastName,\r\n"
-			+ "    o.organization_name AS organizationName,\r\n"
-			+ "	(SELECT \r\n"
-			+ "            DATE_FORMAT(csh.created_on, '%d-%m-%Y %H:%i')\r\n"
-			+ "        FROM\r\n"
-			+ "            t_dgv_candidate_status_history csh\r\n"
-			+ "        WHERE\r\n"
-			+ "            csh.candidate_id = CB.candidate_id\r\n"
-			+ "                AND csh.status_master_id = 1\r\n"
-			+ "        LIMIT 1) AS uploadedDate,\r\n"
-			+ "	(SELECT \r\n"
-			+ "            DATE_FORMAT(csh.created_on, '%d-%m-%Y %H:%i')\r\n"
-			+ "        FROM\r\n"
-			+ "            t_dgv_candidate_status_history csh\r\n"
-			+ "        WHERE\r\n"
-			+ "            csh.candidate_id = CB.candidate_id\r\n"
-			+ "                AND csh.status_master_id = 3\r\n"
-			+ "        LIMIT 1) AS inviteSentDate,\r\n"
-			+ "    (SELECT \r\n"
-			+ "            DATE_FORMAT(csh.created_on, '%d-%m-%Y %H:%i')\r\n"
-			+ "        FROM\r\n"
-			+ "            t_dgv_candidate_status_history csh\r\n"
-			+ "        WHERE\r\n"
-			+ "            csh.candidate_id = CB.candidate_id\r\n"
-			+ "                AND csh.status_master_id = 7\r\n"
-			+ "        LIMIT 1) AS qcCreatedOn,\r\n"
-			+ "    (SELECT \r\n"
-			+ "            DATE_FORMAT(csh.created_on, '%d-%m-%Y %H:%i')\r\n"
-			+ "        FROM\r\n"
-			+ "            t_dgv_candidate_status_history csh\r\n"
-			+ "        WHERE\r\n"
-			+ "            csh.candidate_id = CB.candidate_id\r\n"
-			+ "                AND csh.status_master_id = 13\r\n"
-			+ "        LIMIT 1) AS interimDate,\r\n"
-			+ "    (SELECT \r\n"
-			+ "            DATE_FORMAT(csh.created_on, '%d-%m-%Y %H:%i')\r\n"
-			+ "        FROM\r\n"
-			+ "            t_dgv_candidate_status_history csh\r\n"
-			+ "        WHERE\r\n"
-			+ "            csh.candidate_id = CB.candidate_id\r\n"
-			+ "                AND csh.status_master_id = 18\r\n"
-			+ "        LIMIT 1) AS purgedDate,\r\n"
-			+ "    (SELECT \r\n"
-			+ "            DATE_FORMAT(csh.created_on, '%d-%m-%Y %H:%i')\r\n"
-			+ "        FROM\r\n"
-			+ "            t_dgv_candidate_status_history csh\r\n"
-			+ "        WHERE\r\n"
-			+ "            csh.candidate_id = CB.candidate_id\r\n"
-			+ "                AND csh.status_master_id = 12\r\n"
-			+ "        LIMIT 1) AS processDeclinedDate,\r\n"
-			+ "    (SELECT \r\n"
-			+ "            DATE_FORMAT(csh.created_on, '%d-%m-%Y %H:%i')\r\n"
-			+ "        FROM\r\n"
-			+ "            t_dgv_candidate_status_history csh\r\n"
-			+ "        WHERE\r\n"
-			+ "            csh.candidate_id = CB.candidate_id\r\n"
-			+ "                AND csh.status_master_id = 4\r\n"
-			+ "        LIMIT 1) AS invitationExpiredDate\r\n"
-			+ "FROM\r\n"
-			+ "    t_dgv_candidate_status_history CS\r\n"
-			+ "        LEFT JOIN\r\n"
-			+ "    t_dgv_candidate_basic CB ON CS.candidate_id = CB.candidate_id\r\n"
-			+ "        LEFT JOIN\r\n"
-			+ "    t_dgv_status_master SM ON SM.status_master_id = CS.status_master_id\r\n"
-			+ "        LEFT JOIN\r\n"
-			+ "    t_dgv_user_master AS u ON u.user_id = CB.created_by\r\n"
-			+ "        LEFT JOIN\r\n"
-			+ "    t_dgv_organization_master o ON o.organization_id = u.orgainzation_id\r\n"
-			+ "WHERE\r\n"
-			+ "	CS.candidate_status_change_timestamp between ?1 and ?2 and o.organization_id in (?3) and SM.status_code In (?4) GROUP BY CB.candidate_id", nativeQuery = true)
-	List<candidatePurgedReportDto> findPurgedCandidateByOrganizationIdAndStatus(Date startDate,
-			Date endDate, List<Long> organizationIds, List<String> statusList);
 }
  

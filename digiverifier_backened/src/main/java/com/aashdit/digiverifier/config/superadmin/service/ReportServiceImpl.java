@@ -1,5 +1,76 @@
 package com.aashdit.digiverifier.config.superadmin.service;
 
+import static com.aashdit.digiverifier.digilocker.service.DigilockerServiceImpl.DIGIVERIFIER_DOC_BUCKET_NAME;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.security.SecureRandom;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.poi.util.TempFile;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.repository.query.Param;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
+
 import com.aashdit.digiverifier.common.ContentRepository;
 import com.aashdit.digiverifier.common.enums.ContentCategory;
 import com.aashdit.digiverifier.common.enums.ContentSubCategory;
@@ -14,12 +85,62 @@ import com.aashdit.digiverifier.config.admin.model.CriminalCheck;
 import com.aashdit.digiverifier.config.admin.model.User;
 import com.aashdit.digiverifier.config.admin.model.VendorChecks;
 import com.aashdit.digiverifier.config.admin.model.VendorUploadChecks;
-import com.aashdit.digiverifier.config.admin.repository.*;
+import com.aashdit.digiverifier.config.admin.repository.ConventionalAttributesMasterRepository;
+import com.aashdit.digiverifier.config.admin.repository.CriminalCheckRepository;
+import com.aashdit.digiverifier.config.admin.repository.UserRepository;
+import com.aashdit.digiverifier.config.admin.repository.VendorChecksRepository;
+import com.aashdit.digiverifier.config.admin.repository.VendorUploadChecksRepository;
 import com.aashdit.digiverifier.config.candidate.Enum.CandidateStatusEnum;
 import com.aashdit.digiverifier.config.candidate.Enum.IDtype;
-import com.aashdit.digiverifier.config.candidate.dto.*;
-import com.aashdit.digiverifier.config.candidate.model.*;
-import com.aashdit.digiverifier.config.candidate.repository.*;
+import com.aashdit.digiverifier.config.candidate.dto.AadharVerificationDTO;
+import com.aashdit.digiverifier.config.candidate.dto.AddressVerificationDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateCafAddressDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateCafEducationDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateCafExperienceDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateFileDto;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateReportDTO;
+import com.aashdit.digiverifier.config.candidate.dto.CandidateStatusDto;
+import com.aashdit.digiverifier.config.candidate.dto.EPFODataDto;
+import com.aashdit.digiverifier.config.candidate.dto.EducationVerificationDTO;
+import com.aashdit.digiverifier.config.candidate.dto.EmploymentTenureVerificationDto;
+import com.aashdit.digiverifier.config.candidate.dto.EmploymentVerificationDto;
+import com.aashdit.digiverifier.config.candidate.dto.EpfoDataResDTO;
+import com.aashdit.digiverifier.config.candidate.dto.ExecutiveSummaryDto;
+import com.aashdit.digiverifier.config.candidate.dto.FinalReportDto;
+import com.aashdit.digiverifier.config.candidate.dto.IDVerificationDTO;
+import com.aashdit.digiverifier.config.candidate.dto.ITRDataDto;
+import com.aashdit.digiverifier.config.candidate.dto.ItrEpfoHeaderDetails;
+import com.aashdit.digiverifier.config.candidate.dto.PanCardVerificationDto;
+import com.aashdit.digiverifier.config.candidate.dto.ServiceHistory;
+import com.aashdit.digiverifier.config.candidate.model.Candidate;
+import com.aashdit.digiverifier.config.candidate.model.CandidateAddComments;
+import com.aashdit.digiverifier.config.candidate.model.CandidateCafExperience;
+import com.aashdit.digiverifier.config.candidate.model.CandidateCaseDetails;
+import com.aashdit.digiverifier.config.candidate.model.CandidateEmailStatus;
+import com.aashdit.digiverifier.config.candidate.model.CandidateStatus;
+import com.aashdit.digiverifier.config.candidate.model.CandidateStatusHistory;
+import com.aashdit.digiverifier.config.candidate.model.CandidateVerificationState;
+import com.aashdit.digiverifier.config.candidate.model.ConventionalCandidateStatus;
+import com.aashdit.digiverifier.config.candidate.model.ConventionalCandidateVerificationState;
+import com.aashdit.digiverifier.config.candidate.model.LoaConsentMaster;
+import com.aashdit.digiverifier.config.candidate.model.StatusMaster;
+import com.aashdit.digiverifier.config.candidate.model.UanSearchData;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateAddCommentRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateCafAddressRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateCafExperienceRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateCaseDetailsRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateEmailStatusRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateIdItemsRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateStatusHistoryRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateStatusRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateVerificationStateRepository;
+import com.aashdit.digiverifier.config.candidate.repository.ConventionalCandidateStatusRepository;
+import com.aashdit.digiverifier.config.candidate.repository.ConventionalCandidateVerificationStateRepository;
+import com.aashdit.digiverifier.config.candidate.repository.LoaConsentMasterRepository;
+import com.aashdit.digiverifier.config.candidate.repository.OrganisationScopeRepository;
+import com.aashdit.digiverifier.config.candidate.repository.StatusMasterRepository;
+import com.aashdit.digiverifier.config.candidate.repository.UanSearchDataRepository;
 import com.aashdit.digiverifier.config.candidate.service.CandidateService;
 import com.aashdit.digiverifier.config.candidate.service.ConventionalCandidateService;
 import com.aashdit.digiverifier.config.candidate.util.ExcelUtil;
@@ -27,11 +148,23 @@ import com.aashdit.digiverifier.config.superadmin.Enum.ExecutiveName;
 import com.aashdit.digiverifier.config.superadmin.Enum.ReportType;
 import com.aashdit.digiverifier.config.superadmin.Enum.SourceEnum;
 import com.aashdit.digiverifier.config.superadmin.Enum.VerificationStatus;
-import com.aashdit.digiverifier.config.superadmin.dto.*;
+import com.aashdit.digiverifier.config.superadmin.dto.CandidateDetailsForReport;
+import com.aashdit.digiverifier.config.superadmin.dto.CheckAttributeAndValueDTO;
+import com.aashdit.digiverifier.config.superadmin.dto.DateRange;
+import com.aashdit.digiverifier.config.superadmin.dto.OrganizationDto;
+import com.aashdit.digiverifier.config.superadmin.dto.ReportResponseDto;
+import com.aashdit.digiverifier.config.superadmin.dto.ReportSearchDto;
+import com.aashdit.digiverifier.config.superadmin.dto.VendorSearchDto;
+import com.aashdit.digiverifier.config.superadmin.dto.VendorUtilizationReportDto;
 import com.aashdit.digiverifier.config.superadmin.model.Organization;
 import com.aashdit.digiverifier.config.superadmin.model.OrganizationExecutive;
+import com.aashdit.digiverifier.config.superadmin.model.Source;
 import com.aashdit.digiverifier.config.superadmin.model.ToleranceConfig;
-import com.aashdit.digiverifier.config.superadmin.repository.*;
+import com.aashdit.digiverifier.config.superadmin.repository.ColorRepository;
+import com.aashdit.digiverifier.config.superadmin.repository.OrganizationRepository;
+import com.aashdit.digiverifier.config.superadmin.repository.ServiceSourceMasterRepository;
+import com.aashdit.digiverifier.config.superadmin.repository.ServiceTypeConfigRepository;
+import com.aashdit.digiverifier.config.superadmin.repository.SourceRepository;
 import com.aashdit.digiverifier.email.dto.Email;
 import com.aashdit.digiverifier.email.dto.EmailProperties;
 import com.aashdit.digiverifier.epfo.model.CandidateEPFOResponse;
@@ -47,49 +180,38 @@ import com.aashdit.digiverifier.gst.repository.GstRepository;
 import com.aashdit.digiverifier.itr.model.ITRData;
 import com.aashdit.digiverifier.itr.repository.CanditateItrEpfoResponseRepository;
 import com.aashdit.digiverifier.itr.repository.ITRDataRepository;
-import com.aashdit.digiverifier.utils.*;
+import com.aashdit.digiverifier.utils.ApplicationDateUtils;
+import com.aashdit.digiverifier.utils.AwsUtils;
+import com.aashdit.digiverifier.utils.CommonUtils;
+import com.aashdit.digiverifier.utils.DateDifference;
+import com.aashdit.digiverifier.utils.DateUtil;
+import com.aashdit.digiverifier.utils.EmailSentTask;
+import com.aashdit.digiverifier.utils.FileUtil;
+import com.aashdit.digiverifier.utils.PdfUtil;
+import com.aashdit.digiverifier.utils.SecurityHelper;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.WriterProperties;
+import com.itextpdf.kernel.pdf.filespec.PdfFileSpec;
+
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.FlushModeType;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+
+import com.aashdit.digiverifier.epfo.dto.EpfoDataFromDetailsDto;
+
+
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
-import java.io.*;
-import java.lang.reflect.Type;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static com.aashdit.digiverifier.digilocker.service.DigilockerServiceImpl.DIGIVERIFIER_DOC_BUCKET_NAME;
+import java.time.Instant;
 
 @Service
 @Slf4j
@@ -104,8 +226,6 @@ public class ReportServiceImpl implements ReportService {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	@Autowired
-	private QcRemarksRepository qcRemarksRepository;
 	@Autowired
 	private CandidateStatusRepository candidateStatusRepository;
 
@@ -1282,7 +1402,7 @@ public class ReportServiceImpl implements ReportService {
 					isdigilocker[0] =false;
 				}
 				
-//				log.info("REPORT FOR DIGILOCKER::{}",isdigilocker[0]);
+				log.info("REPORT FOR DIGILOCKER::{}",isdigilocker[0]);
 				// candidate Basic detail
 				CandidateReportDTO candidateReportDTO = new CandidateReportDTO();
 				candidateReportDTO.setOrgServices(orgServices);
@@ -1401,17 +1521,11 @@ public class ReportServiceImpl implements ReportService {
 //						DateUtil.convertToString(candidateVerificationState.getCaseInitiationTime()));
 				// executive summary
 				Long organizationId = organization.getOrganizationId();
-//				List<OrganizationExecutive> organizationExecutiveByOrganizationId = organizationService
-//						.getOrganizationExecutiveByOrganizationId(organizationId);
+				List<OrganizationExecutive> organizationExecutiveByOrganizationId = organizationService
+						.getOrganizationExecutiveByOrganizationId(organizationId);
 				List<ExecutiveSummaryDto> executiveSummaryDtos = new ArrayList<>();
-				
-		        List<ExecutiveName> executiveNames = Arrays.asList(ExecutiveName.EDUCATION, ExecutiveName.EMPLOYMENT,
-		                ExecutiveName.IDENTITY, ExecutiveName.ADDRESS);
-				
-//				organizationExecutiveByOrganizationId.stream().forEach(organizationExecutive -> {
-//					switch (organizationExecutive.getExecutive().getName()) {
-		        executiveNames.forEach(organizationExecutive -> {
-					switch (organizationExecutive) {
+				organizationExecutiveByOrganizationId.stream().forEach(organizationExecutive -> {
+					switch (organizationExecutive.getExecutive().getName()) {
 
 					// System.out.println(organizationExecutive.getExecutive());
 					case EDUCATION:
@@ -1518,16 +1632,16 @@ public class ReportServiceImpl implements ReportService {
 						panIdVerificationDTO.setSourceEnum(SourceEnum.DIGILOCKER);
 						panIdVerificationDTO.setVerificationStatus(VerificationStatus.GREEN);
 						idVerificationDTOList.add(panIdVerificationDTO);
-
+						
 						//Below is for Aadhar linked with Pan
-						if(candidate.getAadharLinked() != null && candidate.getAadharLinked().equals(true)) {
+						if(candidate.getAadharLinked() != null && candidate.getAadharLinked().equals(true)) {		
 							IDVerificationDTO ALPIdVerficationDTO = new IDVerificationDTO();
 							ALPIdVerficationDTO.setName(candidate.getPanName());
 							ALPIdVerficationDTO.setIdNo(candidate.getMaskedAadhar());
 							ALPIdVerficationDTO.setIDtype(IDtype.ALP.name());
 							ALPIdVerficationDTO.setSourceEnum(SourceEnum.ITR);
 							ALPIdVerficationDTO.setVerificationStatus(VerificationStatus.GREEN);
-							idVerificationDTOList.add(ALPIdVerficationDTO);
+							idVerificationDTOList.add(ALPIdVerficationDTO);						
 						}
 						if(candidate.getAadharLinked() != null && candidate.getAadharLinked().equals(false)) {
 							IDVerificationDTO ALPIdVerficationDTO = new IDVerificationDTO();
@@ -1536,7 +1650,7 @@ public class ReportServiceImpl implements ReportService {
 							ALPIdVerficationDTO.setIDtype(IDtype.ALP.name());
 							ALPIdVerficationDTO.setSourceEnum(SourceEnum.ITR);
 							ALPIdVerficationDTO.setVerificationStatus(VerificationStatus.RED);
-							idVerificationDTOList.add(ALPIdVerficationDTO);
+							idVerificationDTOList.add(ALPIdVerficationDTO);		
 						}
 
 						ItrEpfoHeaderDetails itrEpfoHeaderDetails = new ItrEpfoHeaderDetails();
@@ -1658,12 +1772,7 @@ public class ReportServiceImpl implements ReportService {
 						List<CandidateCafExperience> candidateCafExperienceList = candidateService
 								.getCandidateExperienceByCandidateId(candidate.getCandidateId());
 						List<CandidateCafExperienceDto> employementDetailsDTOlist = new ArrayList<>();
-
-						List<Long> filteredList = candidateCafExperienceList.stream()
-								.filter(caf -> caf.getOutputDateOfExit() == null && caf.getInputDateOfExit() == null)
-								.map(CandidateCafExperience::getCandidateCafExperienceId)
-								.collect(Collectors.toList());
-						if (!candidateCafExperienceList.isEmpty()) {
+						if (!candidateCafExperienceList.isEmpty()) { 
 //							Date dateWith1Days = null;
 //							Date doee = null;
 
@@ -1748,43 +1857,6 @@ public class ReportServiceImpl implements ReportService {
 					            }
 					        });
 					        Collections.reverse(employementDetailsDTOlist);
-
-							//adding logic for fetching current employer
-
-							List<CandidateCafExperienceDto> filteredLatestEmpList = employementDetailsDTOlist.stream()
-									.filter(dto -> filteredList.contains(dto.getCandidateCafExperienceId()))
-									.collect(Collectors.toList());
-
-							if(filteredLatestEmpList!=null && !filteredLatestEmpList.isEmpty() && filteredLatestEmpList.size()>=1){
-
-								Collections.sort(filteredLatestEmpList, new Comparator<CandidateCafExperienceDto>() {
-
-									@Override
-									public int compare(CandidateCafExperienceDto s1, CandidateCafExperienceDto s2) {
-						            	LocalDate date1 = null;
-						            	if(s1.getInputDateOfJoining() != null && !s1.getInputDateOfJoining().equals("NOT_AVAILABLE"))
-						            		date1 = LocalDate.parse(s1.getInputDateOfJoining(), formatter2);
-						            	else
-						            		date1 = LocalDate.now();
-						            	LocalDate date2 = null;
-						            	if(s2.getInputDateOfJoining() != null && !s2.getInputDateOfJoining().equals("NOT_AVAILABLE"))
-						            		date2 = LocalDate.parse(s2.getInputDateOfJoining(), formatter2);
-						            	else
-						            		date2 = LocalDate.now();
-										return date1.compareTo(date2);
-									}
-								});
-								Collections.reverse(filteredLatestEmpList);
-
-
-								int currentIndex = employementDetailsDTOlist.indexOf(filteredLatestEmpList.get(0));
-								if (currentIndex > 0) {
-									employementDetailsDTOlist.remove(currentIndex);
-									employementDetailsDTOlist.add(0, filteredLatestEmpList.get(0));
-								}
-
-							}
-
 							candidateReportDTO.setEmployementDetailsDTOlist(employementDetailsDTOlist);
 
 						}
@@ -1978,90 +2050,30 @@ public class ReportServiceImpl implements ReportService {
 								} 
 							});
 							Collections.reverse(employmentTenureDtoList);
-
-							//adding logic for fetching current employer
-							List<CandidateCafExperience> listForCurrentExperience =candidateService
-									.getCandidateExperienceByCandidateId(candidate.getCandidateId());
-//							List<Long> filteredList = listForCurrentExperience.stream()
-//									.filter(caf -> caf.getOutputDateOfExit() == null && caf.getInputDateOfExit() == null)
-//									.map(CandidateCafExperience::getCandidateCafExperienceId)
-//									.collect(Collectors.toList());
-//							log.info("Current employer filteredList for DOE NULL::{}",filteredList);
-
-//							List<EmploymentTenureVerificationDto> filteredLatestEmpList = employmentTenureDtoList.stream()
-//									.filter(dto -> filteredList.contains(dto.getCandidateCafExperienceId()))
-//									.collect(Collectors.toList());
-
-							if(filteredLatestEmpList!=null && !filteredLatestEmpList.isEmpty() && filteredLatestEmpList.size()>=1){
-
-								Collections.sort(filteredLatestEmpList, new Comparator<EmploymentTenureVerificationDto>() {
-
-									@Override
-									public int compare(EmploymentTenureVerificationDto o1, EmploymentTenureVerificationDto o2) {
-										Date doj1 = null;
-										if(o1.getDoj() != null && !o1.getDoj().equals("NOT_AVAILABLE"))
-											doj1 = o1.getDoj();
-										else
-											doj1 = new Date();
-										Date doj2 = null;
-										if(o2.getDoj() != null && !o2.getDoj().equals("NOT_AVAILABLE"))
-											doj2 = o2.getDoj();
-										else
-											doj2 = new Date();
-										return doj1.compareTo(doj2);
-									}
-								});
-								Collections.reverse(filteredLatestEmpList);
-
-
-								int currentIndex = employmentTenureDtoList.indexOf(filteredLatestEmpList.get(0));
-								if (currentIndex > 0) {
-									employmentTenureDtoList.remove(currentIndex);
-									employmentTenureDtoList.add(0, filteredLatestEmpList.get(0));
-								}
-
-							}
-							candidateReportDTO.setEmploymentTenureVerificationDtoList(employmentTenureDtoList);
-
-							if(candidateReportDTO.getProject().contains("LTIMindtree")) {
-								List<EmploymentTenureVerificationDto> employmentHistoryDNHDBList = employmentTenureDtoList.stream()
-										.filter(emp -> SourceEnum.DNHDB.equals(emp.getSource()) || SourceEnum.DNHDB.equals(emp.getSecondarySource())).collect(Collectors.toList());
-
-						        employmentHistoryDNHDBList.stream().forEach(temp -> {
-						            ServiceOutcome<String> suspectResponse = candidateService.suspectEmpMasterCheck(temp.getEmployerName(),
-						                                                         candidate.getOrganization().getOrganizationId());
-						            String message = suspectResponse.getMessage();
-						            if (message.contains("Match found")) {
-						                message = message.replace("Match found", "").trim();
-							            temp.setOutputEmployerName(message);
-						            }
-						        });
-								candidateReportDTO.setEmploymentHistoryDNHDBList(employmentHistoryDNHDBList);
-							}
-
+							
 							candidateReportDTO.setEmploymentTenureVerificationDtoList(employmentTenureDtoList);
 							//adding logic for fetching current employer
 							List<CandidateCafExperience> listForCurrentExperience =candidateService
 									.getCandidateExperienceByCandidateId(candidate.getCandidateId());
-//							List<Long> filteredList = listForCurrentExperience.stream()
-//									.filter(caf -> caf.getOutputDateOfExit() == null && caf.getInputDateOfExit() == null)
-//									.map(CandidateCafExperience::getCandidateCafExperienceId)
-//									.collect(Collectors.toList());
-//							log.info("Current employer filteredList for DOE NULL::{}",filteredList);
+							List<Long> filteredList = listForCurrentExperience.stream()
+									.filter(caf -> caf.getOutputDateOfExit() == null && caf.getInputDateOfExit() == null)
+									.map(CandidateCafExperience::getCandidateCafExperienceId)
+									.collect(Collectors.toList());
+							log.info("Current employer filteredList for DOE NULL::{}",filteredList);
 
-//							List<EmploymentTenureVerificationDto> filteredLatestEmpList = employmentTenureDtoList.stream()
-//									.filter(dto -> filteredList.contains(dto.getCandidateCafExperienceId()))
-//									.collect(Collectors.toList());
+							List<EmploymentTenureVerificationDto> filteredLatestEmpList = employmentTenureDtoList.stream()
+									.filter(dto -> filteredList.contains(dto.getCandidateCafExperienceId()))
+									.collect(Collectors.toList());
 
 							if(filteredLatestEmpList!=null && !filteredLatestEmpList.isEmpty()){
 
 								EmploymentTenureVerificationDto currentEmployer= null;
 								if(filteredLatestEmpList.size()==1){
-//									log.info("Current employer as per new logic...with single DOE Not Available");
+									log.info("Current employer as per new logic...with single DOE Not Available");
 									currentEmployer = filteredLatestEmpList.get(0);
 
 								}else {
-//									log.info("Current employer as per new logic...with multiple DOE Not Available");
+									log.info("Current employer as per new logic...with multiple DOE Not Available");
 									Collections.sort(filteredLatestEmpList, new Comparator<EmploymentTenureVerificationDto>() {
 
 										@Override
@@ -2536,27 +2548,6 @@ public class ReportServiceImpl implements ReportService {
 							});
 							Collections.reverse(candidateReportDTO.getServiceHistory());
 
-							if(filteredLatestEmpList!=null && !filteredLatestEmpList.isEmpty() && filteredLatestEmpList.size()>=1) {
-						        SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
-								EmploymentTenureVerificationDto currentEmployer = filteredLatestEmpList.get(0);
-						        String currentEmployerDoj = sdf.format(currentEmployer.getDoj());
-
-						        List<ServiceHistory> filteredCandidateRecords = cafExperiences.stream()
-						                .filter(record -> currentEmployer.getEmployerName().equals(record.getCandidateEmployerName()) &&
-						                		currentEmployerDoj.equals(record.getInputDateOfJoining()) &&
-						                		currentEmployer.getSource().equals(SourceEnum.valueOf(record.getServiceName())))
-				                .collect(Collectors.toList());
-								if(filteredCandidateRecords!=null && !filteredCandidateRecords.isEmpty() && filteredCandidateRecords.size()>0) {
-									int currentIndex = cafExperiences.indexOf(filteredCandidateRecords.get(0));
-									if (currentIndex > 0) {
-										cafExperiences.remove(currentIndex);
-										cafExperiences.add(0, filteredCandidateRecords.get(0));
-									}
-
-									candidateReportDTO.setServiceHistory(cafExperiences);
-								}
-							}
-
 							// end
 
 							// System.out.println(candidateReportDTO.getEmploymentVerificationDtoList()+"candidateReportDTO");
@@ -2587,7 +2578,7 @@ public class ReportServiceImpl implements ReportService {
 										
 //										experienceCountExecutiveSummary += tempExpValue;
 									} else if(employmentVerificationDto.getDoe() != null) {
-//										log.info("Doe check for no. of years to be verified :: {}", employmentVerificationDto.getDoe());
+										log.info("Doe check for no. of years to be verified :: {}", employmentVerificationDto.getDoe());
 										instant = employmentVerificationDto.getDoe().toInstant();
 								        localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate();
 								        subYear = ("" + localDate.getYear()).substring(2);
@@ -2846,7 +2837,8 @@ public class ReportServiceImpl implements ReportService {
 								vendorChecksss.getAgentColor().getColorHexCode(), null,null,vendorChecksss.getCreatedOn(),null,null,null,null,null);
 
 //						ArrayList<String> combinedList = new ArrayList<>(vendorChecks.getAgentAttirbuteValue());
-//						System.out.println("vendorChecks.getAgentAttirbuteValue() : "+vendorChecks.getAgentAttirbuteValue());
+						System.out.println("vendorChecks.getAgentAttirbuteValue() : "+vendorChecks.getAgentAttirbuteValue());
+						
 						ArrayList<String> combinedList = new ArrayList<>();
 						combinedList.addAll(vendorChecksss.getVendorAttirbuteValue());
 						if(vendorChecks.getSource().getSourceName().equalsIgnoreCase("Address") || vendorChecks.getSource().getSourceName().equalsIgnoreCase("Criminal") ||
@@ -2854,7 +2846,7 @@ public class ReportServiceImpl implements ReportService {
 							String address = extractAddress(vendorChecks.getAgentAttirbuteValue());
 							combinedList.add("Address="+address);
 						}
-
+						
 						if (vendorChecks.getCheckType() != null && vendorChecks.getCheckType().trim().toLowerCase().contains("education".toLowerCase())) {
 							combinedList = new ArrayList<>();
 							combinedList.addAll(vendorChecksss.getVendorAttirbuteValue());
@@ -2904,7 +2896,7 @@ public class ReportServiceImpl implements ReportService {
 	                            }
 	                            else {
 	                            	 criminalCheckListMap.put(String.valueOf(vendorChecks.getCheckType()), legalProceedingsDTO);
-//	 	                            log.info("criminal check data" + criminalCheckListMap);
+	 	                            log.info("criminal check data" + criminalCheckListMap);
 	                            }
 	                           
 						}
@@ -2922,8 +2914,8 @@ public class ReportServiceImpl implements ReportService {
 					        }else if(vendorChecks.getSource().getSourceName().equalsIgnoreCase("Education")) {
 //					        	checkAttributeAndValueDto.setCheckDetails(qualification);
 					        	VendorUploadChecks byVendorChecksVendorcheckId = vendorUploadChecksRepository.findByVendorChecksVendorcheckId(vendorChecks.getVendorcheckId());
-								if(byVendorChecksVendorcheckId != null) {
-									if(qualification != null) {
+								if(byVendorChecksVendorcheckId != null) {	
+									if(qualification != null) {	
 										checkAttributeAndValueDto.setCheckDetails(qualification);
 									}else {
 										String prodaptQualification = extractValue(byVendorChecksVendorcheckId.toString(),"Complete Name of Qualification/ Degree Attained");
@@ -2933,6 +2925,7 @@ public class ReportServiceImpl implements ReportService {
 					        }else if(vendorChecks.getSource().getSourceName().equalsIgnoreCase("Address") ||
 					        		vendorChecks.getSource().getSourceName().equalsIgnoreCase("Criminal") ||
 					        		vendorChecks.getSource().getSourceName().equalsIgnoreCase("Global Database check")) {
+					        	System.out.println("address :  "+address);
 					        	checkAttributeAndValueDto.setCheckDetails(address);
 					        }
 					        else if(vendorChecks.getSource().getSourceName().equalsIgnoreCase("ID Items")) {
@@ -2960,7 +2953,7 @@ public class ReportServiceImpl implements ReportService {
 					        
 					        checkAttributeAndValueDto.setCheckStatus(vendorChecks.getVendorCheckStatusMaster().getCheckStatusCode());
 					        String remarks = extractValue(combinedList.toString(), "remarks");
-
+					        
 //					        String remarks = extractValue(combinedList.toString(), "remarks");
 					        String remarks2 = null;
 					        if (!dataList.isEmpty()) {
@@ -2986,7 +2979,7 @@ public class ReportServiceImpl implements ReportService {
 					        } else {
 					        	log.info("dataList is empty.");
 					        }
-
+					        						        
 					        if (remarks2 != null && (vendorChecks.getSource().getSourceName().equalsIgnoreCase("GLOBAL DATABASE CHECK") || vendorChecks.getSource().getSourceName().toLowerCase().contains("database"))) {
 								log.info("global remarks2 : "+remarks2);
 								checkAttributeAndValueDto.setCheckRemarks(remarks2);
@@ -2997,7 +2990,7 @@ public class ReportServiceImpl implements ReportService {
 							}
 
 //						checkAttributeAndValueDto.setCheckRemarks(remarks);
-						checkAttributeAndValueDto.setAttributeAndValue(combinedList);
+						checkAttributeAndValueDto.setAttributeAndValue(combinedList);				
 						individualValuesList.add(checkAttributeAndValueDto);
 						vendorUploadChecksDto.setVendorAttirbuteValue(individualValuesList);
 
@@ -3010,25 +3003,13 @@ public class ReportServiceImpl implements ReportService {
 				candidateReportDTO.setDataList(dataList);
                 candidateReportDTO.setCriminalCheckList(criminalCheckListMap);
 
-			candidateReportDTO.setOrganisationScope(
+				candidateReportDTO.setOrganisationScope(
 						organisationScopeRepository.findByCandidateId(candidate.getCandidateId()));
-				List<QcRemarks> qcRemarksList = qcRemarksRepository.findByCandidateId(candidate.getCandidateId());
-
-				List<QcRemarksDto> qcRemarksDtoList = qcRemarksList.stream()
-						.map(qcRemarks -> {
-							QcRemarksDto dto = new QcRemarksDto();
-							dto.setCandidateCode(qcRemarks.getCandidateCode() != null ? String.valueOf(qcRemarks.getCandidateCode()) : null);
-							dto.setQcRemarksId(qcRemarks.getQcRemarksId() != null ? String.valueOf(qcRemarks.getQcRemarksId()) : null);
-							dto.setQcRemarks(qcRemarks.getQcRemarks());
-							return dto;
-						})
-						.collect(Collectors.toList());
-				candidateReportDTO.setQcRemarksDto(qcRemarksDtoList);
 
 //				List<Long> vendorCheckIds = vendorList.stream()
 //						.map(VendorChecks::getVendorcheckId)
 //						.collect(Collectors.toList());
-
+				
 				List<Long> vendorCheckIds = vendorList.stream()
 					    .filter(vendorChecks ->
 					        vendorChecks.getVendorCheckStatusMaster() != null &&
@@ -3095,10 +3076,10 @@ public class ReportServiceImpl implements ReportService {
 
 					Long checkId = vendorUploadCheck.getVendorChecks().getVendorcheckId();
 					String sourceName = vendorUploadCheck.getVendorChecks().getSource().getSourceName();
-//					log.info("Vendor sourceName ===== {}"+ sourceName);
-//
-//					log.info("Size of checkName: {}", checkName.size());
-//					log.info(" ReportServiceImpl CandidateId : "+vendorUploadCheck.getVendorChecks().getCandidate().getCandidateId()+" | Unique CheckID In upload Vendor proof : "+checkId+" | CheckStatus : "+vendorUploadCheck.getVendorChecks().getVendorCheckStatusMaster().getCheckStatusName());
+					log.info("Vendor sourceName ===== {}"+ sourceName);
+
+					log.info("Size of checkName: {}", checkName.size());
+					log.info(" ReportServiceImpl CandidateId : "+vendorUploadCheck.getVendorChecks().getCandidate().getCandidateId()+" | Unique CheckID In upload Vendor proof : "+checkId+" | CheckStatus : "+vendorUploadCheck.getVendorChecks().getVendorCheckStatusMaster().getCheckStatusName());
 
 
 					if (checkName != null && !checkName.isEmpty()) {
@@ -3119,7 +3100,7 @@ public class ReportServiceImpl implements ReportService {
 						String documentPresicedUrl = null;
 //                      log.info("Vendor Upload Documents ====== {}" + vendorUploadCheck.getVendorUploadedDocument());
                       if (vendorUploadCheck.getVendorUploadDocumentPathKey() != null ||vendorUploadCheck.getVendorUploadDocumentPathKey()!=null) {
-//                          log.info("inside the aws path key retival for the check    --"+sourceName);
+                          log.info("inside the aws path key retival for the check    --"+sourceName);
                           try {
 							documentBytes = awsUtils.getbyteArrayFromS3(DIGIVERIFIER_DOC_BUCKET_NAME, vendorUploadCheck.getVendorUploadDocumentPathKey());
 							ObjectMetadata metadataDocumentContentType = new ObjectMetadata();
@@ -3134,7 +3115,7 @@ public class ReportServiceImpl implements ReportService {
 		                        // Use the original document
 		                        // For example:
 		                    	documentPresicedUrl = vendorUploadCheck.getVendorUploadDocumentPathKey();
-//		                        log.info("Original Document URL: " + documentPresicedUrl);
+		                        log.info("Original Document URL: " + documentPresicedUrl);
 		                    }
 
 							vendorUploadedImages = new String(documentPresicedUrl);
@@ -3169,7 +3150,7 @@ public class ReportServiceImpl implements ReportService {
 								// Loop through each image byte array and encode it to Base64
 								List<String> encodedImagesForDocument = new ArrayList<>();
 
-//								log.info("encodedImagesForDocument::::: {}"+encodedImagesForDocument.size());
+								log.info("encodedImagesForDocument::::: {}"+encodedImagesForDocument.size());
 								
 								encodedImageMap.put(nameOfCheck, allEncodedImages);
 //								 for (Map.Entry<String, List<String>> entry : encodedImageMap.entrySet()) {
@@ -3199,7 +3180,7 @@ public class ReportServiceImpl implements ReportService {
 							//
 							//	           	    	}
 							else {
-//								log.info("Vendor uploaded document is null {}");
+								log.info("Vendor uploaded document is null {}");
 								encodedImageMap.put(nameOfCheck, null);
 
 							}
@@ -3210,13 +3191,13 @@ public class ReportServiceImpl implements ReportService {
 	                        	CandidateReportDTO testConventionalCandidateReportDto = null;
 	                            if (vendorUploadedImages != null) {
 	                                if (isBase64Encoded(documentPresicedUrl)) {
-//	                                    log.info("BASE64 IMG for " + nameOfCheck + " entry");
+	                                    log.info("BASE64 IMG for " + nameOfCheck + " entry");
 	                                    List<Map<String, List<String>>> dynamicEncodedImagesList = new ArrayList<>();
 	                                    // Generate table for this education entry
 	                                    File allcheckDynamicReport = FileUtil.createUniqueTempFile(byId.getVendorChecks().getCheckType(), ".pdf");
 	                                    String templateName;
 	                                    if (nameOfCheck.toLowerCase().contains("education".toLowerCase())) {
-//	                                    	System.out.println("this is true : ");
+	                                    	System.out.println("this is true : ");
 	                                        templateName = "Conventional/EducationCheck-pdf";
 	                                    }
 	                                    else if (nameOfCheck.toLowerCase().contains("employment".toLowerCase())) {
@@ -3268,7 +3249,7 @@ public class ReportServiceImpl implements ReportService {
 //													vendorUpload.setVendorAttirbuteValue(filteredAttributes);
 //													return vendorUpload;
 //												}).collect(Collectors.toList());
-
+										
 										List<VendorUploadChecksDto> finalFilteredVendorProofs = filteredVendorProofs
 											    .stream()
 											    .map(vendorUpload -> {
@@ -3300,7 +3281,7 @@ public class ReportServiceImpl implements ReportService {
 	                                    
 //	                                    testConventionalCandidateReportDto.setVendorProofDetails(filteredVendorProofs);
 	                                    testConventionalCandidateReportDto.setVendorProofDetails(finalFilteredVendorProofs);
-
+	                                    
 	                                    Map<String, LegalProceedingsDTO> filteredCriminalCheckList = candidateReportDTO.getCriminalCheckList()
 	                                            .entrySet()
 	                                            .stream()
@@ -3367,8 +3348,8 @@ public class ReportServiceImpl implements ReportService {
 											}
 											testConventionalCandidateReportDto.setCriminalCheckList(modifiedMap);
 										}
-
-
+	                                    
+	                                    
 //	                                    testConventionalCandidateReportDto.setCriminalCheckList(filteredCriminalCheckList);
 	                                    testConventionalCandidateReportDto.setDataList(candidateReportDTO.getDataList());
 	                                    dynamicEncodedImagesList.add(encodedImageMap);
@@ -3381,7 +3362,7 @@ public class ReportServiceImpl implements ReportService {
 //	                                    educationProof.add(new FileInputStream(fileFromS3));
 	                                    collect2.addAll(educationProof);
 	                                } else {
-//	                                    log.info("Fetching the PDF Proof for :" + nameOfCheck);
+	                                    log.info("Fetching the PDF Proof for :" + nameOfCheck);
 	                                    // Fetch the PDF file from S3
 	                                    File fileFromS3 = awsUtils.getFileFromS3(DIGIVERIFIER_DOC_BUCKET_NAME, documentPresicedUrl);
 	                                    // Generate table for this education entry
@@ -3394,7 +3375,7 @@ public class ReportServiceImpl implements ReportService {
 	                                    else if (nameOfCheck.toLowerCase().contains("employment".toLowerCase())) {
 	                                        templateName = "Conventional/EmploymentCheck-pdf";
 	                                    } else if (nameOfCheck.toLowerCase().contains("criminal".toLowerCase())) {
-//	                                    	System.out.println("This is for criminal");
+	                                    	System.out.println("This is for criminal");
 	                                        templateName = "Conventional/CriminalCheck-pdf";
 	                                    } else if (nameOfCheck.toLowerCase().contains("global".toLowerCase())) {
 	                                        templateName = "Conventional/GlobalCheck-pdf";
@@ -3434,7 +3415,7 @@ public class ReportServiceImpl implements ReportService {
 //													vendorUpload.setVendorAttirbuteValue(filteredAttributes);
 //													return vendorUpload;
 //												}).collect(Collectors.toList());
-
+										
 										List<VendorUploadChecksDto> finalFilteredVendorProofs = filteredVendorProofs
 											    .stream()
 											    .map(vendorUpload -> {
@@ -3476,6 +3457,8 @@ public class ReportServiceImpl implements ReportService {
 	                                    
 	                                    if (nameOfCheck.equalsIgnoreCase("Criminal present")) {
 											Map<String, LegalProceedingsDTO> modifiedMap = new HashMap<>();
+											System.out.println("modifiedMap before : "+modifiedMap.toString());
+
 											for (Map.Entry<String, LegalProceedingsDTO> entry : criminalCheckListMap
 													.entrySet()) {
 												// Get the key and value from the map entry
@@ -3515,7 +3498,7 @@ public class ReportServiceImpl implements ReportService {
 //												}else if(!originalKey.equals("Criminal Present & Permanent")) {
 //													modifiedMap.put(originalKey, value);
 //												}
-
+												
 												if (originalKey.equals("Criminal Permanent")) {
 													// Put the key and value into the new map
 													modifiedMap.put(originalKey, value);
@@ -3542,7 +3525,7 @@ public class ReportServiceImpl implements ReportService {
 												}
 											}
 											testConventionalCandidateReportDto.setCriminalCheckList(modifiedMap);
-										}
+										}  
 	                                    
 //	                                    System.out.println("testConventionalCandidateReportDto.getCriminal : "+testConventionalCandidateReportDto.getCriminalCheckList().toString());
 
@@ -3595,7 +3578,7 @@ public class ReportServiceImpl implements ReportService {
 		            dataDTOList.add(remittanceDataFromApiDto);
 				}
 //        if(dataDTOList!=null && !dataDTOList.isEmpty()) {
-//					//sorting remittance
+//					//sorting remittance 
 //					List<RemittanceDataFromApiDto> sortedList = dataDTOList.stream()
 //			                .sorted(Comparator.comparing(dto -> {
 //			                    // Parsing the "year" string to LocalDate
@@ -3603,32 +3586,42 @@ public class ReportServiceImpl implements ReportService {
 //			                    return LocalDate.parse("01-" + yearString, DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH));
 //			                }))
 //			                .toList();
-//
+// 
 //					candidateReportDTO.setRemittanceProofImagesData(sortedList!=null && !sortedList.isEmpty() ? sortedList : null);
 //					//end
 //				} else {
 //					candidateReportDTO.setRemittanceProofImagesData(null);
 //				}
 				if (dataDTOList != null && !dataDTOList.isEmpty()) {
-					Map<String, List<RemittanceDataFromApiDto>> groupedAndSorted = dataDTOList.stream()
+				    // Step 1: Sort by createdOn
+				    List<RemittanceDataFromApiDto> sortedList = dataDTOList.stream()
 				            .sorted(Comparator.comparing(RemittanceDataFromApiDto::getCreatedOn))
-							.collect(Collectors.groupingBy(
-									RemittanceDataFromApiDto::getCompany,
-									() -> new LinkedHashMap<>(), // Preserve insertion order
-									Collectors.toList()
-							));
-
-					List<RemittanceDataFromApiDto> finalSortedList = groupedAndSorted.values().stream()
-							.flatMap(list -> list.stream()
-									.sorted(Comparator.comparing(dto -> LocalDate.parse("01-" + dto.getYear(),
-											DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH))))
-							)
+				            .collect(Collectors.toList());
+				    // Step 2: Group by company
+				    Map<String, List<RemittanceDataFromApiDto>> groupedByCompany = sortedList.stream()
+				            .collect(Collectors.groupingBy(RemittanceDataFromApiDto::getCompany));
+				    // Step 3: Sort each group by year and remove duplicates
+				    // Step 3: Sort each group by year and remove duplicates
+				    groupedByCompany.forEach((company, list) -> {
+				        Set<String> seenYears = new LinkedHashSet<>();
+				        List<RemittanceDataFromApiDto> distinctList = list.stream()
+				                .sorted(Comparator.comparing(dto -> {
+				                    String yearString = dto.getYear();
+				                    return LocalDate.parse("01-" + yearString, DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH));
+				                }))
+				                .filter(dto -> seenYears.add(dto.getYear()))
 				                .collect(Collectors.toList());
-
+				        groupedByCompany.put(company, distinctList);
+				    });
+				    // Step 4: Flatten the grouped data into a single list
+				    List<RemittanceDataFromApiDto> finalSortedList = groupedByCompany.values().stream()
+				            .flatMap(List::stream)
+				            .collect(Collectors.toList());
 				    candidateReportDTO.setRemittanceProofImagesData(!finalSortedList.isEmpty() ? finalSortedList : null);
 				} else {
 				    candidateReportDTO.setRemittanceProofImagesData(null);
 				}
+				//end
 				//adding gst images in report
 				List<GstData> gstRecords = gstRepository.findAllByCandidateCandidateCode(candidateCode);
 				List<GstDataFromApiDto> gstDataDTOList = new ArrayList<>();
@@ -3740,8 +3733,7 @@ public class ReportServiceImpl implements ReportService {
 //				}).collect(Collectors.toList());
 //			
 				try {
-//					System.out.println("entry to generate try*************************");
-					log.info("entry to generate try*************************", candidateCode);
+					System.out.println("entry to generate try*************************");
 					File mergedFile = FileUtil.createUniqueTempFile(candidateCode, ".pdf");
 					List<InputStream> collect = new ArrayList<>();
 
@@ -4412,7 +4404,7 @@ public class ReportServiceImpl implements ReportService {
 						        }else if(vendorChecks.getSource().getSourceName().equalsIgnoreCase("Address") ||
 						        		vendorChecks.getSource().getSourceName().equalsIgnoreCase("Criminal") ||
 						        		vendorChecks.getSource().getSourceName().equalsIgnoreCase("Global Database check")) {
-						        	System.out.println("address : "+address);
+//						        	System.out.println("address : "+address);
 						        	checkAttributeAndValueDto.setCheckDetails(address);
 						        }
 						        else if(vendorChecks.getSource().getSourceName().equalsIgnoreCase("ID Items")) {
@@ -5308,7 +5300,7 @@ public class ReportServiceImpl implements ReportService {
 //
 //	        return null;
 //	    }
-
+	 
 	 private static String extractValue(String response, String key) {
 	        String pattern = key + "=([^,\\]]+)";
 	        java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
@@ -6576,7 +6568,7 @@ public class ReportServiceImpl implements ReportService {
 						
 						dateDifferenceOutPut = DateUtil.getPreodDifference(tempcandidateCafExperience.get(0).getOutputDateOfJoining(),
 								tempcandidateCafExperience.get(0).getOutputDateOfExit() != null ? tempcandidateCafExperience.get(0).getOutputDateOfExit() : new Date());
-//						log.info("NEW YEAR MONTH FOR OUTPUT ::{}",dateDifferenceOutPut.getYears() +"::"+dateDifferenceOutPut.getMonths());
+						log.info("NEW YEAR MONTH FOR OUTPUT ::{}",dateDifferenceOutPut.getYears() +"::"+dateDifferenceOutPut.getMonths());
 						Integer outPutTenureMonths = dateDifferenceOutPut.getMonths();
 						if(tempcandidateCafExperience.get(0).getServiceSourceMaster() != null && tempcandidateCafExperience.get(0).getServiceSourceMaster().getServiceCode().equalsIgnoreCase("ITR")) {
 							outPutTenureMonths += 1;
@@ -7218,441 +7210,4 @@ public class ReportServiceImpl implements ReportService {
 	          return 4;
 	    }
 	}
-    @Override
-    public ServiceOutcome<CandidatePurgedReportResponseDto> getPurgedCanididateDetailsByStatus(ReportSearchDto reportSearchDto) {
-        ServiceOutcome<CandidatePurgedReportResponseDto> svcSearchResult = new ServiceOutcome<CandidatePurgedReportResponseDto>();
-        List<CandidateDetailsForPurgedReport> candidateDetailsDtoList = new ArrayList<CandidateDetailsForPurgedReport>();
-        List<candidatePurgedReportDto> candidateStatusList = null;
-        String pdfUrl = null;
-
-        try {
-            if (StringUtils.isNotBlank(reportSearchDto.getStatusCode())
-                    && StringUtils.isNotBlank(reportSearchDto.getFromDate())
-                    && StringUtils.isNotBlank(reportSearchDto.getToDate())
-                    && reportSearchDto.getOrganizationIds() != null
-                    && !reportSearchDto.getOrganizationIds().isEmpty()) {
-                User user = SecurityHelper.getCurrentUser();
-                Date startDate = format.parse(reportSearchDto.getFromDate() + " 00:00:00");
-                Date endDate = format.parse(reportSearchDto.getToDate() + " 23:59:59");
-                List<String> statusList = null;
-                if(reportSearchDto.getStatusCode().equals("PURGED")) {
-
-                    statusList = new ArrayList<>();
-                    Collections.addAll(statusList, "PURGED");
-
-                    candidateStatusList = candidateStatusRepository
-                            .findPurgedCandidateByOrganizationIdAndStatus(startDate, endDate,
-                                    reportSearchDto.getOrganizationIds(), statusList);
-
-                    // Initialize counters
-                    int qcCreatedCount = 0;
-                    int processDeclinedCount = 0;
-                    int invitationExpiredCount = 0;
-
-                    List<CandidateDetailsForPurgedReport> reportDeliveredList = new ArrayList<>();
-                    List<CandidateDetailsForPurgedReport> processDeclinedList = new ArrayList<>();
-                    List<CandidateDetailsForPurgedReport> invitationExpiredList = new ArrayList<>();
-
-                    String htmlStr = null;
-                    CandidatePurgedPDFReportDto candidatePurgedPDFReportDto = new CandidatePurgedPDFReportDto();
-                    File purgeReport = FileUtil.createUniqueTempFile("purgeReport", ".pdf");
-
-                    if (!candidateStatusList.isEmpty()) {
-
-                        candidateDetailsDtoList = candidateStatusList.stream()
-                                .map(candidateStatus -> {
-                                    CandidateDetailsForPurgedReport report = modelMapper.map(candidateStatus, CandidateDetailsForPurgedReport.class);
-                                    // Convert UTC date to IST
-
-                                    ZoneId istZone = ZoneId.of("Asia/Kolkata");
-                                    if(candidateStatus.getQcCreatedOn() != null) {
-                                        // Parse string date into LocalDateTime
-                                        LocalDateTime utcDateTime = LocalDateTime.parse(candidateStatus.getQcCreatedOn() , DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
-                                        // Convert LocalDateTime to ZonedDateTime with UTC timezone
-                                        ZonedDateTime utcZonedDateTime = ZonedDateTime.of(utcDateTime, ZoneId.of("UTC"));
-                                        // Convert ZonedDateTime from UTC to IST
-                                        ZonedDateTime istZonedDateTime = utcZonedDateTime.withZoneSameInstant(istZone);
-                                        String istDateString = istZonedDateTime.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
-                                        report.setQcCreatedOn(istDateString);
-                                    }
-
-                                    //for interim
-                                    if(candidateStatus.getInterimDate() !=null && !candidateStatus.getInterimDate().isEmpty()) {
-                                        LocalDateTime utcInterimDateTime = LocalDateTime.parse(candidateStatus.getInterimDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
-                                        ZonedDateTime utcInterimZonedDateTime = ZonedDateTime.of(utcInterimDateTime, ZoneId.of("UTC"));
-                                        ZonedDateTime istInterimZonedDateTime = utcInterimZonedDateTime.withZoneSameInstant(istZone);
-                                        String istInterimDateString = istInterimZonedDateTime.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"));
-//										report.setInterimCreatedOn(istInterimDateString);
-                                    }
-                                    return report;
-                                })
-//								.sorted(Comparator.comparing(CandidateDetailsForPurgedReport::getQcCreatedOn))
-                                .collect(Collectors.toList());
-
-                        // Initialize a map to group counts by user name
-                        Map<String, Counts> userCountsMap = new HashMap<>();
-
-                        for (CandidateDetailsForPurgedReport candidateStatus : candidateDetailsDtoList) {
-
-                            if (candidateStatus.getQcCreatedOn() != null) {
-                                qcCreatedCount++;
-                                reportDeliveredList.add(candidateStatus);
-                            }else if (candidateStatus.getProcessDeclinedDate() != null) {
-                                processDeclinedCount++;
-                                processDeclinedList.add(candidateStatus);
-                            }else if (candidateStatus.getInvitationExpiredDate() != null) {
-                                invitationExpiredCount++;
-                                invitationExpiredList.add(candidateStatus);
-                            }
-
-                            String userNameKey = candidateStatus.getCreatedByUserFirstName();
-                            if(candidateStatus.getCreatedByUserLastName() != null)
-                                userNameKey = candidateStatus.getCreatedByUserFirstName() + " " + candidateStatus.getCreatedByUserLastName();
-
-                            Counts counts = userCountsMap.getOrDefault(userNameKey, new Counts());
-
-                            if (candidateStatus.getQcCreatedOn() != null) {
-                                counts.setQcCreatedCount(counts.getQcCreatedCount() + 1);
-                            }else if (candidateStatus.getProcessDeclinedDate() != null) {
-                                counts.setProcessDeclinedCount(counts.getProcessDeclinedCount() + 1);
-                            }else if (candidateStatus.getInvitationExpiredDate() != null) {
-                                counts.setInvitationExpiredCount(counts.getInvitationExpiredCount() + 1);
-                            }
-
-                            userCountsMap.put(userNameKey, counts);
-
-                        }
-
-                        candidatePurgedPDFReportDto.setReportDeliveredList(reportDeliveredList);
-                        candidatePurgedPDFReportDto.setProcessDeclinedList(processDeclinedList);
-                        candidatePurgedPDFReportDto.setInvitationExpiredList(invitationExpiredList);
-
-                        List<ReportResponseDto> pwdvMprReportDtoList = new ArrayList<ReportResponseDto>();
-                        ReportResponseDto reportResponseDto = new ReportResponseDto(user.getOrganization().getOrganizationId(),
-                                user.getOrganization().getOrganizationName(), Integer.valueOf(String.valueOf(0)), user.getOrganization().getBillingAddress(),
-                                Integer.valueOf(0), "REINVITE",
-                                Integer.valueOf(0), "FINALREPORT",
-                                Integer.valueOf(qcCreatedCount), "PENDINGAPPROVAL",
-                                Integer.valueOf(0), "PENDINGNOW",
-                                Integer.valueOf(processDeclinedCount), "PROCESSDECLINED",
-                                Integer.valueOf(invitationExpiredCount), "INVITATIONEXPIRED",
-                                Integer.valueOf(0));
-                        pwdvMprReportDtoList.add(reportResponseDto);
-
-                        ReportResponseDto reportResponseDtoTotal = new ReportResponseDto(0l, "TOTAL",
-                                pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getNewuploadcount()).sum(),
-                                "NEWUPLOADTOTAL", pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getReinvitecount()).sum(),
-                                "REINVITETOTAL",
-                                pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getFinalreportCount()).sum(),
-                                "FINALREPORTTOTAL",
-                                pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getInterimReportCount()).sum(),
-                                "PENDINGAPPROVALTOTAL",
-                                pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getPendingCount()).sum(), "PENDINGNOWTOTAL",
-                                pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getProcessDeclinedCount()).sum(),
-                                "PROCESSDECLINEDTOTAL",
-                                pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getInvitationExpireCount()).sum(),
-                                "INVITATIONEXPIREDTOTAL",
-                                pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getAgentCount()).sum());
-//						pwdvMprReportDtoList.add(reportResponseDtoTotal);
-                        candidatePurgedPDFReportDto.setSummaryCompanyWiseTotal(reportResponseDtoTotal);
-                        candidatePurgedPDFReportDto.setSummaryCompanyWiseGrandTotal(reportResponseDtoTotal.getInterimReportCount()+reportResponseDtoTotal.getProcessDeclinedCount()+reportResponseDtoTotal.getInvitationExpireCount());
-
-                        candidatePurgedPDFReportDto.setOrgName(user.getOrganization().getOrganizationName());
-                        candidatePurgedPDFReportDto.setBillingAddress(user.getOrganization().getBillingAddress());
-
-                        candidatePurgedPDFReportDto.setPwdvMprReportDtoList(pwdvMprReportDtoList);
-
-
-                        List<ReportResponseDto> pwdvMprReportDtoAgentList = new ArrayList<ReportResponseDto>();
-
-                        // Output the counts
-                        for (Map.Entry<String, Counts> entry : userCountsMap.entrySet()) {
-                            String userName = entry.getKey();
-                            Counts counts = entry.getValue();
-
-                            ReportResponseDto reportResponseAgentDto = new ReportResponseDto(
-                                    Long.valueOf(0),
-                                    userName,
-                                    Integer.valueOf(0), "NEWUPLOAD",
-                                    Integer.valueOf(0), "REINVITE",
-                                    Integer.valueOf(0), "FINALREPORT",
-                                    Integer.valueOf(counts.getQcCreatedCount()), "PENDINGAPPROVAL",
-                                    Integer.valueOf(0), "PENDINGNOW",
-                                    Integer.valueOf(counts.getProcessDeclinedCount()), "PROCESSDECLINED",
-                                    Integer.valueOf(counts.getInvitationExpiredCount()), "INVITATIONEXPIRED", 0);
-                            pwdvMprReportDtoAgentList.add(reportResponseAgentDto);
-                        }
-                        ReportResponseDto reportResponseAgentDtoTotal = new ReportResponseDto(0l, "TOTAL",
-                                pwdvMprReportDtoAgentList.stream().mapToInt(pojo -> pojo.getNewuploadcount()).sum(),
-                                "NEWUPLOADTOTAL",
-                                pwdvMprReportDtoAgentList.stream().mapToInt(pojo -> pojo.getReinvitecount()).sum(),
-                                "REINVITETOTAL",
-                                pwdvMprReportDtoAgentList.stream().mapToInt(pojo -> pojo.getFinalreportCount()).sum(),
-                                "FINALREPORTTOTAL",
-                                pwdvMprReportDtoAgentList.stream().mapToInt(pojo -> pojo.getInterimReportCount()).sum(),
-                                "PENDINGAPPROVALTOTAL",
-                                pwdvMprReportDtoAgentList.stream().mapToInt(pojo -> pojo.getPendingCount()).sum(),
-                                "PENDINGNOWTOTAL",
-                                pwdvMprReportDtoAgentList.stream().mapToInt(pojo -> pojo.getProcessDeclinedCount()).sum(),
-                                "PROCESSDECLINEDTOTAL",
-                                pwdvMprReportDtoAgentList.stream().mapToInt(pojo -> pojo.getInvitationExpireCount()).sum(),
-                                "INVITATIONEXPIREDTOTAL",
-                                pwdvMprReportDtoAgentList.stream().mapToInt(pojo -> pojo.getAgentCount()).sum());
-//						pwdvMprReportDtoAgentList.add(reportResponseAgentDtoTotal);
-                        candidatePurgedPDFReportDto.setSummaryAgentWiseTotal(reportResponseAgentDtoTotal);
-                        candidatePurgedPDFReportDto.setSummaryAgentWiseGrandTotal(reportResponseAgentDtoTotal.getInterimReportCount()+reportResponseAgentDtoTotal.getProcessDeclinedCount()+reportResponseAgentDtoTotal.getInvitationExpireCount());
-
-                        candidatePurgedPDFReportDto.setPwdvMprReportDtoAgentList(pwdvMprReportDtoAgentList);
-
-                        candidatePurgedPDFReportDto.setStrFromDate(reportSearchDto.getFromDate());
-                        candidatePurgedPDFReportDto.setStrToDate(reportSearchDto.getToDate());
-
-                        htmlStr = pdfService.parseThymeleafTemplate("PurgedReport", candidatePurgedPDFReportDto);
-                        pdfService.generatePdfFromHtml(htmlStr, purgeReport);
-
-                        List<InputStream> onlyForThymeleafToPdf = new ArrayList<>();
-                        File thymeleafContentPdfFile = FileUtil.createUniqueTempFile(user.getOrganization().getOrganizationName(), ".pdf");
-                        onlyForThymeleafToPdf.add(FileUtil.convertToInputStream(purgeReport));
-                        PdfUtil.mergePurgedPdfFiles(onlyForThymeleafToPdf, new FileOutputStream(thymeleafContentPdfFile.getPath()));
-
-                        pdfUrl = awsUtils.uploadFileAndGetPresignedUrl(DIGIVERIFIER_DOC_BUCKET_NAME, "purgedReport/"+ user.getOrganization().getOrganizationName()+ ".pdf",
-                                thymeleafContentPdfFile);
-                    }
-                }
-            }
-            CandidatePurgedReportResponseDto reportSearchDtoObj = new CandidatePurgedReportResponseDto();
-            reportSearchDtoObj.setFromDate(reportSearchDto.getFromDate());
-            reportSearchDtoObj.setToDate(reportSearchDto.getToDate());
-            reportSearchDtoObj.setStatusCode(reportSearchDto.getStatusCode());
-            reportSearchDtoObj.setOrganizationIds(reportSearchDto.getOrganizationIds());
-            if (reportSearchDto.getOrganizationIds() != null && reportSearchDto.getOrganizationIds().get(0) != 0) {
-                reportSearchDtoObj.setOrganizationName(organizationRepository
-                        .findById(reportSearchDto.getOrganizationIds().get(0)).get().getOrganizationName());
-            }
-//			List<CandidateDetailsForReport> sortedList = candidateDetailsDtoList.stream()
-//					.sorted((o1, o2) -> o1.getCandidateName().compareTo(o2.getCandidateName()))
-//					.collect(Collectors.toList());
-
-
-            reportSearchDtoObj.setCandidateDetailsDto(candidateDetailsDtoList);
-            svcSearchResult.setData(reportSearchDtoObj);
-            svcSearchResult.setOutcome(true);
-            svcSearchResult.setMessage(pdfUrl);
-        } catch (Exception ex) {
-            log.error("Exception occured in getCanididateDetailsByStatus method in ReportServiceImpl-->", ex);
-            svcSearchResult.setData(null);
-            svcSearchResult.setOutcome(false);
-            svcSearchResult.setMessage("Something Went Wrong, Please Try After Sometimes.");
-        }
-        return svcSearchResult;
-    }
-
-    @Override
-    public ServiceOutcome<ReportSearchDto> getCandidatePurgedReport(ReportSearchDto reportSearchDto) {
-        ServiceOutcome<ReportSearchDto> svcSearchResult = new ServiceOutcome<ReportSearchDto>();
-        User user = SecurityHelper.getCurrentUser();
-        String strToDate = "";
-        String strFromDate = "";
-        List<Long> orgIds = new ArrayList<Long>();
-        ReportSearchDto reportSearchDtoObj = null;
-        List<candidatePurgedReportDto> candidateStatusList = null;
-
-        try {
-            if (reportSearchDto == null) {
-                strToDate = ApplicationDateUtils.getStringTodayAsDDMMYYYY();
-                strFromDate = ApplicationDateUtils
-                        .subtractNoOfDaysFromDateAsDDMMYYYY(new SimpleDateFormat("dd/MM/yyyy").parse(strToDate), 30);
-                if (user.getRole().getRoleCode().equals("ROLE_CBADMIN")) {
-                    orgIds.add(0, 0l);
-                } else {
-                    Long orgIdLong = user.getOrganization().getOrganizationId();
-                    orgIds.add(orgIdLong);
-                    reportSearchDto = new ReportSearchDto();
-                    reportSearchDto.setOrganizationIds(orgIds);
-                }
-
-            } else {
-                strToDate = reportSearchDto.getToDate();
-                strFromDate = reportSearchDto.getFromDate();
-                orgIds.addAll(reportSearchDto.getOrganizationIds());
-            }
-            Date startDate = format.parse(strFromDate + " 00:00:00");
-            Date endDate = format.parse(strToDate + " 23:59:59");
-
-            List<String> statusList = new ArrayList<>();
-            Collections.addAll(statusList, "PURGED");
-
-            StringBuilder query = new StringBuilder();
-            candidateStatusList = candidateStatusRepository
-                    .findPurgedCandidateByOrganizationIdAndStatus(startDate, endDate,
-                            reportSearchDto.getOrganizationIds(), statusList);
-
-            // Initialize counters
-            int qcCreatedCount = 0;
-            int processDeclinedCount = 0;
-            int invitationExpiredCount = 0;
-
-            if (candidateStatusList != null && candidateStatusList.size() > 0) {
-                // Iterate through the list and update counts based on the specified date fields
-                for (candidatePurgedReportDto candidateStatus : candidateStatusList) {
-
-                    if (candidateStatus.getQcCreatedOn() != null) {
-                        qcCreatedCount++;
-                    }else if (candidateStatus.getProcessDeclinedDate() != null) {
-                        processDeclinedCount++;
-                    }else if (candidateStatus.getInvitationExpiredDate() != null) {
-                        invitationExpiredCount++;
-                    }
-
-                }
-
-                List<ReportResponseDto> pwdvMprReportDtoList = new ArrayList<ReportResponseDto>();
-                ReportResponseDto reportResponseDto = new ReportResponseDto(user.getOrganization().getOrganizationId(),
-                        user.getOrganization().getOrganizationName(), Integer.valueOf(String.valueOf(0)), user.getOrganization().getBillingAddress(),
-                        Integer.valueOf(0), "REINVITE",
-                        Integer.valueOf(0), "FINALREPORT",
-                        Integer.valueOf(qcCreatedCount), "PENDINGAPPROVAL",
-                        Integer.valueOf(0), "PENDINGNOW",
-                        Integer.valueOf(processDeclinedCount), "PROCESSDECLINED",
-                        Integer.valueOf(invitationExpiredCount), "INVITATIONEXPIRED",
-                        Integer.valueOf(0));
-                pwdvMprReportDtoList.add(reportResponseDto);
-
-                ReportResponseDto reportResponseDtoTotal = new ReportResponseDto(0l, "TOTAL",
-                        pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getNewuploadcount()).sum(),
-                        "NEWUPLOADTOTAL", pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getReinvitecount()).sum(),
-                        "REINVITETOTAL",
-                        pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getFinalreportCount()).sum(),
-                        "FINALREPORTTOTAL",
-                        pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getInterimReportCount()).sum(),
-                        "PENDINGAPPROVALTOTAL",
-                        pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getPendingCount()).sum(), "PENDINGNOWTOTAL",
-                        pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getProcessDeclinedCount()).sum(),
-                        "PROCESSDECLINEDTOTAL",
-                        pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getInvitationExpireCount()).sum(),
-                        "INVITATIONEXPIREDTOTAL",
-                        pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getAgentCount()).sum());
-                pwdvMprReportDtoList.add(reportResponseDtoTotal);
-                reportSearchDtoObj = new ReportSearchDto(strFromDate, strToDate, orgIds, pwdvMprReportDtoList, null);
-                svcSearchResult.setData(reportSearchDtoObj);
-                svcSearchResult.setOutcome(true);
-                svcSearchResult.setMessage("Candidate Purged Report Data generated...");
-
-            } else {
-                reportSearchDtoObj = new ReportSearchDto(strFromDate, strToDate, orgIds, null, null);
-                svcSearchResult.setData(reportSearchDtoObj);
-                svcSearchResult.setOutcome(false);
-                svcSearchResult.setMessage("NO RECORD FOUND");
-            }
-        } catch (Exception ex) {
-            log.error("Exception occured in getCandidatePurgedReport method in ReportServiceImpl-->", ex);
-            svcSearchResult.setData(null);
-            svcSearchResult.setOutcome(false);
-            svcSearchResult.setMessage("Something Went Wrong, Please Try After Sometimes.");
-        }
-        return svcSearchResult;
-    }
-
-    @Override
-    public ServiceOutcome<ReportSearchDto> getCandidatePurgedReportByAgent(ReportSearchDto reportSearchDto) {
-        ServiceOutcome<ReportSearchDto> svcSearchResult = new ServiceOutcome<ReportSearchDto>();
-        List<Object[]> resultList = null;
-        ReportSearchDto reportSearchDtoObj = null;
-        List<candidatePurgedReportDto> candidateStatusList = null;
-
-        try {
-            if (reportSearchDto != null) {
-                Date startDate = format.parse(reportSearchDto.getFromDate() + " 00:00:00");
-                Date endDate = format.parse(reportSearchDto.getToDate() + " 23:59:59");
-
-                List<String> statusList = new ArrayList<>();
-                Collections.addAll(statusList, "PURGED");
-
-                StringBuilder query = new StringBuilder();
-                candidateStatusList = candidateStatusRepository
-                        .findPurgedCandidateByOrganizationIdAndStatus(startDate, endDate,
-                                reportSearchDto.getOrganizationIds(), statusList);
-
-                if (candidateStatusList != null && candidateStatusList.size() > 0) {
-
-                    // Initialize a map to group counts by user name
-                    Map<String, Counts> userCountsMap = new HashMap<>();
-
-                    // Iterate through the list and update counts based on the specified date fields
-                    for (candidatePurgedReportDto candidateStatus : candidateStatusList) {
-                        String userNameKey = candidateStatus.getCreatedByUserFirstName();
-                        if(candidateStatus.getCreatedByUserLastName() != null)
-                            userNameKey = candidateStatus.getCreatedByUserFirstName() + " " + candidateStatus.getCreatedByUserLastName();
-
-                        Counts counts = userCountsMap.getOrDefault(userNameKey, new Counts());
-
-                        if (candidateStatus.getQcCreatedOn() != null) {
-                            counts.setQcCreatedCount(counts.getQcCreatedCount() + 1);
-                        }else if (candidateStatus.getProcessDeclinedDate() != null) {
-                            counts.setProcessDeclinedCount(counts.getProcessDeclinedCount() + 1);
-                        }else if (candidateStatus.getInvitationExpiredDate() != null) {
-                            counts.setInvitationExpiredCount(counts.getInvitationExpiredCount() + 1);
-                        }
-
-                        userCountsMap.put(userNameKey, counts);
-                    }
-
-                    List<ReportResponseDto> pwdvMprReportDtoList = new ArrayList<ReportResponseDto>();
-
-                    // Output the counts
-                    for (Map.Entry<String, Counts> entry : userCountsMap.entrySet()) {
-                        String userName = entry.getKey();
-                        Counts counts = entry.getValue();
-
-                        ReportResponseDto reportResponseDto = new ReportResponseDto(
-                                Long.valueOf(0),
-                                userName,
-                                Integer.valueOf(0), "NEWUPLOAD",
-                                Integer.valueOf(0), "REINVITE",
-                                Integer.valueOf(0), "FINALREPORT",
-                                Integer.valueOf(counts.getQcCreatedCount()), "PENDINGAPPROVAL",
-                                Integer.valueOf(0), "PENDINGNOW",
-                                Integer.valueOf(counts.getProcessDeclinedCount()), "PROCESSDECLINED",
-                                Integer.valueOf(counts.getInvitationExpiredCount()), "INVITATIONEXPIRED", 0);
-                        pwdvMprReportDtoList.add(reportResponseDto);
-                    }
-                    ReportResponseDto reportResponseDtoTotal = new ReportResponseDto(0l, "TOTAL",
-                            pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getNewuploadcount()).sum(),
-                            "NEWUPLOADTOTAL",
-                            pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getReinvitecount()).sum(),
-                            "REINVITETOTAL",
-                            pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getFinalreportCount()).sum(),
-                            "FINALREPORTTOTAL",
-                            pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getInterimReportCount()).sum(),
-                            "PENDINGAPPROVALTOTAL",
-                            pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getPendingCount()).sum(),
-                            "PENDINGNOWTOTAL",
-                            pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getProcessDeclinedCount()).sum(),
-                            "PROCESSDECLINEDTOTAL",
-                            pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getInvitationExpireCount()).sum(),
-                            "INVITATIONEXPIREDTOTAL",
-                            pwdvMprReportDtoList.stream().mapToInt(pojo -> pojo.getAgentCount()).sum());
-                    pwdvMprReportDtoList.add(reportResponseDtoTotal);
-                    reportSearchDtoObj = new ReportSearchDto(reportSearchDto.getFromDate(), reportSearchDto.getToDate(),
-                            reportSearchDto.getOrganizationIds(), pwdvMprReportDtoList, reportSearchDto.getAgentIds());
-                    svcSearchResult.setData(reportSearchDtoObj);
-                    svcSearchResult.setOutcome(true);
-                    svcSearchResult.setMessage("Candidate Purged Report Data By Agent generated...");
-
-                } else {
-                    reportSearchDtoObj = new ReportSearchDto(reportSearchDto.getFromDate(), reportSearchDto.getToDate(),
-                            reportSearchDto.getOrganizationIds(), null, reportSearchDto.getAgentIds());
-                    svcSearchResult.setData(reportSearchDtoObj);
-                    svcSearchResult.setOutcome(false);
-                    svcSearchResult.setMessage("NO RECORD FOUND");
-                }
-            }
-        } catch (Exception ex) {
-            log.error("Exception occured in getCandidatePurgedReportByAgent method in ReportServiceImpl-->", ex);
-            svcSearchResult.setData(null);
-            svcSearchResult.setOutcome(false);
-            svcSearchResult.setMessage("Something Went Wrong, Please Try After Sometimes.");
-        }
-        return svcSearchResult;
-    }
 }

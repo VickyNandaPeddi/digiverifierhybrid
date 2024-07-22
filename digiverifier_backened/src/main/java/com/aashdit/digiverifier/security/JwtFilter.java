@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -70,11 +69,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
 		httpServletResponse.setHeader("Access-Control-Allow-Headers",
 				"Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With, No-Auth");
-		httpServletResponse.setHeader(HttpHeaders.CACHE_CONTROL, "no-store, no-cache, must-revalidate, proxy-revalidate");
-		httpServletResponse.setHeader(HttpHeaders.PRAGMA, "no-cache");
-		httpServletResponse.setHeader(HttpHeaders.EXPIRES, "0");
+
 		httpServletResponse.setHeader("X-Frame-Options", "SAMEORIGIN");
-		httpServletResponse.setHeader("X-Permitted-Cross-Domain-Policies", "none");
+
 		httpServletResponse.setHeader("Content-Security-Policy", "frame-ancestors 'self'");
 		httpServletResponse.setHeader("X-Xss-Protection", "1; mode=block");
 		httpServletResponse.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");

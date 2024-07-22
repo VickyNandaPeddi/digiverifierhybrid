@@ -1,6 +1,5 @@
 package com.aashdit.digiverifier.config.superadmin.service;
 
-import com.aashdit.digiverifier.config.candidate.dto.CandidatePurgedPDFReportDto;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateReportDTO;
 import com.aashdit.digiverifier.config.candidate.dto.FinalReportDto;
 import com.aashdit.digiverifier.globalConfig.EnvironmentVal;
@@ -100,37 +99,5 @@ public class PdfServiceImpl implements PdfService{
 		context.setVariable("root",variable);
 		IContext context1 = context;
 		return templateEngine.process(templateName, context1);
-	}
-
-	@Override
-	public String parseThymeleafTemplate(String templateName, CandidatePurgedPDFReportDto variable) {
-		try {
-			ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
-	//		templateResolver.setSuffix(".html");
-			templateResolver.setTemplateMode(TemplateMode.HTML);
-			Context context = new Context();
-//			context.setVariable("panCardVerification", variable.getPanCardVerification());
-//			context.setVariable("name", variable.getName());
-			context.setVariable("root",variable);
-			// Get the backend.host property value
-		    String backendHost = envirnoment.getBackendHost();
-		    System.out.println("BACKEND HOST::::"+backendHost);
-		    // Determine the CSS path based on the backend.host value
-		    String cssPath;
-		    if ("localhost".equalsIgnoreCase(backendHost)) {
-		        cssPath = envirnoment.getCssPathLocal();
-		        System.out.println("CSSPATH::::"+cssPath);
-		    } else {
-		        cssPath = envirnoment.getCssPathServer();
-		        System.out.println("CSSPATH::::"+cssPath);
-		    }
-		    // Add the CSS path variable to the Thymeleaf context
-		    context.setVariable("cssPath", cssPath);
-			IContext context1 = context;
-			return templateEngine.process(templateName, context1);
-		}catch(Exception e) {
-			log.info("ERROR in GENERATING PDF ::{}", e);
-		}
-		return "";
 	}
 }

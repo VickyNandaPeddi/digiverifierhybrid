@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import com.aashdit.digiverifier.config.candidate.dto.*;
 import com.aashdit.digiverifier.config.candidate.model.*;
 import org.json.JSONArray;
 import org.springframework.core.io.Resource;
@@ -219,16 +218,10 @@ public interface CandidateService {
 	ServiceOutcome<String> setPanToUanResponse(CandidateDetailsDtoForPanToUan candidateDetails);
 
 	ServiceOutcome<Boolean> reFetchPANTOUANDataForAvailableUANs();
-
+	
 	//method to calculate tenuer gap
 		long calculateTenuerGap(CandidateCafExperience candidateCafExperience,List<CandidateCafExperience> candidateCafExperiences);
-
+		
 		//method to calculate ITR filing gap
 		long calculateITRFilingGap(List<ITRData> itrList);
-
-	ServiceOutcome<QcRemarksDto> addUpdateQcRemarks(QcRemarksDto requestBody);
-
-	public ServiceOutcome<List<QcRemarksDto>> getQcRemarks(String candidateCode);
-
-	ServiceOutcome<String> deleteQcRemarkByQcRemarksId(Long qcRemarksID);
 }

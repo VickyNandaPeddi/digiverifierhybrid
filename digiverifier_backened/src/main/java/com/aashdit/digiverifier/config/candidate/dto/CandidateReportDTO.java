@@ -191,10 +191,7 @@ public class CandidateReportDTO {
 	private List<VendorUploadChecksDto> excetiveSummaryDto;
 	
 	private EmploymentTenureVerificationDto currentEmploymentTenureVerification;
-
+	
 	private List<EmploymentTenureVerificationDto> employmentHistoryDNHDBList;
-
-
-	private List<QcRemarksDto> qcRemarksDto;
 
 }

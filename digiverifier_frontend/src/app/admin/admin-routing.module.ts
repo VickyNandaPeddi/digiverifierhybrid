@@ -35,7 +35,6 @@ import { AddCheckComponent } from './add-check/add-check.component';
 import { CandidateTrackerComponent } from './candidate-tracker/candidate-tracker.component';
 import { CustomerScopeConfigComponent } from './customer-scope-config/customer-scope-config.component';
 import { EmploymentTrackerSheetComponent } from './employment-tracker-sheet/employment-tracker-sheet.component';
-import { PurgedReportComponent } from './purged-report/purged-report.component';
 
 
 const routes: Routes = [
@@ -49,7 +48,6 @@ const routes: Routes = [
     { path: 'vendormgmt', component: VendorMgmtComponent, canActivate: [AdminGuard], data:{roles:['ROLE_ADMIN']}},
     { path: 'addvendor', component: AddVendorComponent, canActivate: [AdminGuard], data:{roles:['ROLE_ADMIN','ROLE_PARTNERADMIN']}},
     { path: 'customerUtilization', component: CustomerUtilizationComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},
-    { path: 'purgedReport', component: PurgedReportComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},
     { path: 'customerUtilizationAgent', component: CustomerUtilAgentComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},
     { path: 'customerUtilizationCandidate', component: CustomerUtilCandidatesComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},
     { path: 'ekycReport', component: EkycreportComponent, canActivate: [AdminGuard], data:{roles:['ROLE_CBADMIN','ROLE_ADMIN','ROLE_PARTNERADMIN','ROLE_AGENTSUPERVISOR','ROLE_AGENTHR']}},

@@ -57,7 +57,6 @@ export class ReportDeliveryDetailsComponent implements OnInit {
 
   emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
   PANTOUAN: boolean = false;
-  CAPGSCOPE: boolean = false;
 
   emailValidator(control: AbstractControl): { [key: string]: any } | null {
     if (control.value) {
@@ -95,30 +94,30 @@ export class ReportDeliveryDetailsComponent implements OnInit {
       this.orgadmin.getChartDetails(filterData).subscribe((data: any)=>{
         this.CharReportDelivery=data.data.candidateDtoList;
         // this.CharReportDelivery=data.data.candidateDtoList.reverse();
-
+        
         for(let i=0; i<this.CharReportDelivery.length; i++) {
           // let index = _.findIndex(this.CharReportDelivery[i].contentDTOList, {contentSubCategory: 'PRE_APPROVAL'});
           // this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
 
           let final = this.CharReportDelivery[i].contentDTOList;
           let interim = this.CharReportDelivery[i].candidateStatusName;
-
+          
           for (let i=0; i<final.length; i++){
             if(final[i].contentSubCategory=="FINAL" && filterData.status == 'FINALREPORT'){
-              this.finalreport = true
+              this.finalreport = true 
             }
-          }
+          } 
 
           if(interim == 'Interim Report' && filterData.status == 'INTERIMREPORT') {
             this.interimreport = true;
           }
-
+         
         }
 
         // this.CharReportDelivery.sort((a: any, b: any) => {
         //   const dateA = new Date(a.lastUploadedOn);
         //   const dateB = new Date(b.lastUploadedOn);
-
+          
         //   return dateB.getTime() - dateA.getTime();
         // });
 
@@ -127,7 +126,7 @@ export class ReportDeliveryDetailsComponent implements OnInit {
         //console.log(data);
         const startIndex = this.currentPageIndex * this.pageSize;
         const endIndex = startIndex + this.pageSize;
-        return this.CharReportDelivery.slice(startIndex, endIndex);
+        return this.CharReportDelivery.slice(startIndex, endIndex); 
       });
 
       this.orgadmin
@@ -135,7 +134,7 @@ export class ReportDeliveryDetailsComponent implements OnInit {
         .subscribe((result: any) => {
           this.getServiceConfigCodes = result.data;
           console.log("ORG SERVICES::{}", this.getServiceConfigCodes);
-        });
+        }); 
     }
 
     // Conventional
@@ -241,10 +240,6 @@ export class ReportDeliveryDetailsComponent implements OnInit {
         if(result.data.includes('PANTOUAN'))
           this.PANTOUAN = true;
 
-          if (result.data.includes('EPFO') && !result.data.includes('ITR') && !result.data.includes('DIGILOCKER'))
-            this.CAPGSCOPE = true;
-
-
         this.orgadmin.getReportDeliveryDetails(filterData).subscribe((uploadinfo: any)=>{
           this.CharReportDeliveryData=uploadinfo.data.candidateStatusCountDto;
           //console.log(this.CharReportDeliveryData);
@@ -256,20 +251,7 @@ export class ReportDeliveryDetailsComponent implements OnInit {
               if(this.CharReportDeliveryData[i].statusName != 'Interim Report' && this.CharReportDeliveryData[i].statusName != 'Final Report' && this.CharReportDeliveryData[i].statusName != 'Process Declined') {
                 if(this.CharReportDeliveryData[i].statusName == 'QC Pending')
                   this.CharReportDeliveryData[i].statusName = 'Reports'
-                  data.push({
-                    name: this.CharReportDeliveryData[i].statusName,
-                    value: this.CharReportDeliveryData[i].count,
-                    statcode: this.CharReportDeliveryData[i].statusCode
-                  });
-                }
-              } else if (this.PANTOUAN === false && this.CAPGSCOPE === true) {
-                if (this.CharReportDeliveryData[i].statusName !== 'Process Declined') {
-                  data.push({
-                    name: this.CharReportDeliveryData[i].statusName,
-                    value: this.CharReportDeliveryData[i].count,
-                    statcode: this.CharReportDeliveryData[i].statusCode
-                  });
-
+                data.push({name: this.CharReportDeliveryData[i].statusName, value: this.CharReportDeliveryData[i].count, statcode: this.CharReportDeliveryData[i].statusCode });
               }
             } else {
               data.push({name: this.CharReportDeliveryData[i].statusName, value: this.CharReportDeliveryData[i].count, statcode: this.CharReportDeliveryData[i].statusCode });
@@ -279,7 +261,7 @@ export class ReportDeliveryDetailsComponent implements OnInit {
         });
       });
 
-
+      
 
 // Add and configure Series
 let pieSeries = chart.series.push(new am4charts.PieSeries());
@@ -474,14 +456,14 @@ selectAll(e:any){
     $.each(cboxRolesinput,function(idx,elem) {
       arrNumber.push($(this).val());
     });
-
+    
     this.tmp = arrNumber;
     console.log(this.tmp)
   } else {
     $(".childCheck").prop('checked', false);
     this.tmp = [];
   }
-
+  
 }
 
 formSendInvitation = new FormGroup({
@@ -583,7 +565,7 @@ conventionalSearch(){
   // }
 
 }
-
+ 
   ngOnInit(): void {
     const isCBadminVal = this.authService.getRoles();
     this.orgadmin
@@ -634,7 +616,7 @@ conventionalSearch(){
         }else{
           this.isCBadmin = false;
         }
-
+      
       }
 
       if (this.getConventionalReportDeliveryStatCodes) {
@@ -683,7 +665,7 @@ conventionalSearch(){
           this.isCBadmin = false;
         }
       }
-
+  
 
 
     });
@@ -705,9 +687,9 @@ conventionalSearch(){
       this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
       // console.log('Lavanyafinal',index)
       this.startpredownload=true
-
+     
     }
-
+    
     if(this.startpredownload==true){
       if(candidate.pre_approval_content_id != -1) {
         console.log(candidate,"-----if--------");
@@ -728,16 +710,16 @@ conventionalSearch(){
           let pre_approval_content_id= url.data;
           console.log(pre_approval_content_id,"Content Id for ::");
           this.orgadmin.getSignedURLForContent(pre_approval_content_id).subscribe((url: any)=>{
-
+           
             window.open(url.data, '_blank');
           });
         }
-
+        
       });
     }
   }
 
-  downloadFinalReport(candidate: any, reportType: any) {
+  downloadFinalReport(candidate: any, reportType: any) { 
     console.log(reportType,"-----if--------");
     if(candidate.candidateStatusName == 'Final Report') {
       for(let i=0; i<this.CharReportDelivery.length; i++) {
@@ -745,7 +727,7 @@ conventionalSearch(){
         this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
         console.log('Lavanyafinal',index)
         this.startdownload=true
-
+       
       }
     } else if(candidate.candidateStatusName == 'Interim Report') {
       for(let i=0; i<this.CharReportDelivery.length; i++) {
@@ -754,7 +736,7 @@ conventionalSearch(){
         this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
         console.log('interim',index)
         this.startdownload=true
-
+       
       }
     }else if (candidate.candidateStatusName == 'Conventional Interim Report') {
       for (let i = 0; i < this.CharReportDelivery.length; i++) {
@@ -776,13 +758,13 @@ conventionalSearch(){
         });
       }
     }
-  }
+  } 
 
-  downloadInterimReport(candidate: any,reportStatus: any) {
-    // let interimContentDto = candidate.contentDTOList.find((dto: any) => dto.path.includes('INTERIM.pdf'));
-
+  downloadInterimReport(candidate: any,reportStatus: any) { 
+    // let interimContentDto = candidate.contentDTOList.find((dto: any) => dto.path.includes('INTERIM.pdf')); 
+    
     if(candidate.candidateCode) {
-      this.orgadmin.getPreSignedUrlByCandidateCode(candidate.candidateCode,reportStatus).subscribe((url: any)=>{
+      this.orgadmin.getPreSignedUrlByCandidateCode(candidate.candidateCode,reportStatus).subscribe((url: any)=>{ 
         window.open(url.data, '_blank');
       });
     }
@@ -796,19 +778,19 @@ conventionalSearch(){
 
   onPageChange(page: number): void {
     this.currentPageIndex = page;
-
+ 
     if (this.getReportDeliveryStatCodes) {
         var userId: any = localStorage.getItem('userId');
         var fromDate: any = localStorage.getItem('dbFromDate');
         var toDate: any = localStorage.getItem('dbToDate');
-
+ 
         let filterData = {
             'fromDate': fromDate,
             'toDate': toDate,
             'status': this.getReportDeliveryStatCodes,
             'pageNumber': this.currentPageIndex
         };
-
+ 
         this.orgadmin.getChartDetails(filterData).subscribe((data: any) => {
             this.CharReportDelivery = data.data.candidateDtoList;
             console.log("After : ", this.CharReportDelivery);
@@ -833,29 +815,29 @@ conventionalSearch(){
       });
     }
   }
-
+ 
   // Modify your goToNextPage and goToPrevPage methods like this
   goToNextPage(): void {
     if (this.currentPageIndex < this.totalPages - 1) {
         this.onPageChange(this.currentPageIndex + 1);
     }
   }
-
+ 
   goToPrevPage(): void {
     if (this.currentPageIndex > 0) {
         this.onPageChange(this.currentPageIndex - 1);
     }
   }
-
+ 
     getDisplayedPages(): number[] {
       const displayedPages: number[] = [];
       const startPage = Math.max(0, this.currentPageIndex - 2);
       const endPage = Math.min(this.totalPages - 1, startPage + 4);
-
+ 
       for (let i = startPage; i <= endPage; i++) {
           displayedPages.push(i);
       }
-
+ 
       return displayedPages;
   }
 
@@ -879,28 +861,28 @@ conventionalSearch(){
   //         this.orgadmin.getChartDetails(filterData).subscribe((data: any)=>{
   //           this.CharReportDelivery=data.data.candidateDtoList;
   //           // this.CharReportDelivery=data.data.candidateDtoList.reverse();
-
+            
   //           for(let i=0; i<this.CharReportDelivery.length; i++) {
-
+              
   //             let final = this.CharReportDelivery[i].contentDTOList;
   //             let interim = this.CharReportDelivery[i].candidateStatusName;
-
+              
   //             for (let i=0; i<final.length; i++){
   //               if(final[i].contentSubCategory=="FINAL" && filterData.status == 'FINALREPORT'){
-  //                 this.finalreport = true
+  //                 this.finalreport = true 
   //               }
-  //             }
+  //             } 
 
   //             if(interim == 'Interim Report' && filterData.status == 'INTERIMREPORT') {
   //               this.interimreport = true;
   //             }
-
+            
   //           }
 
   //           // this.CharReportDelivery.sort((a: any, b: any) => {
   //           //   const dateA = new Date(a.lastUploadedOn);
   //           //   const dateB = new Date(b.lastUploadedOn);
-
+              
   //           //   return dateB.getTime() - dateA.getTime();
   //           // });
 
@@ -909,7 +891,7 @@ conventionalSearch(){
   //           //console.log(data);
   //           const startIndex = this.currentPageIndex * this.pageSize;
   //           const endIndex = startIndex + this.pageSize;
-  //           return this.CharReportDelivery.slice(startIndex, endIndex);
+  //           return this.CharReportDelivery.slice(startIndex, endIndex); 
   //         });
 
   //       }
@@ -936,28 +918,28 @@ conventionalSearch(){
   //         this.orgadmin.getChartDetails(filterData).subscribe((data: any)=>{
   //           this.CharReportDelivery=data.data.candidateDtoList;
   //           // this.CharReportDelivery=data.data.candidateDtoList.reverse();
-
+            
   //           for(let i=0; i<this.CharReportDelivery.length; i++) {
-
+              
   //             let final = this.CharReportDelivery[i].contentDTOList;
   //             let interim = this.CharReportDelivery[i].candidateStatusName;
-
+              
   //             for (let i=0; i<final.length; i++){
   //               if(final[i].contentSubCategory=="FINAL" && filterData.status == 'FINALREPORT'){
-  //                 this.finalreport = true
+  //                 this.finalreport = true 
   //               }
-  //             }
+  //             } 
 
   //             if(interim == 'Interim Report' && filterData.status == 'INTERIMREPORT') {
   //               this.interimreport = true;
   //             }
-
+            
   //           }
 
   //           // this.CharReportDelivery.sort((a: any, b: any) => {
   //           //   const dateA = new Date(a.lastUploadedOn);
   //           //   const dateB = new Date(b.lastUploadedOn);
-
+              
   //           //   return dateB.getTime() - dateA.getTime();
   //           // });
 
@@ -966,7 +948,7 @@ conventionalSearch(){
   //           //console.log(data);
   //           const startIndex = this.currentPageIndex * this.pageSize;
   //           const endIndex = startIndex + this.pageSize;
-  //           return this.CharReportDelivery.slice(startIndex, endIndex);
+  //           return this.CharReportDelivery.slice(startIndex, endIndex); 
   //         });
 
   //       }
@@ -1004,17 +986,17 @@ conventionalSearch(){
       const emailId = item.emailId?.toLowerCase();
       const contactNumber = item.contactNumber?.toLowerCase();
       const applicantId = item.applicantId?.toLowerCase();
-
+  
       return candidateName?.includes(searchText.toLowerCase()) ||
              emailId?.includes(searchText.toLowerCase()) ||
              contactNumber?.includes(searchText.toLowerCase()) ||
              applicantId?.includes(searchText.toLowerCase());
   }
 
-  downloadFinalReportDirectFromQC(candidate: any,reportStatus: any) {
-
+  downloadFinalReportDirectFromQC(candidate: any,reportStatus: any) { 
+    
     if(candidate.candidateCode) {
-      this.orgadmin.getPreSignedUrlByCandidateCodeForFinal(candidate.candidateCode,reportStatus).subscribe((url: any)=>{
+      this.orgadmin.getPreSignedUrlByCandidateCodeForFinal(candidate.candidateCode,reportStatus).subscribe((url: any)=>{ 
         window.open(url.data, '_blank');
       });
     }

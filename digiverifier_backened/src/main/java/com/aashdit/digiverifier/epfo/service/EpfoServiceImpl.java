@@ -786,7 +786,7 @@ public class EpfoServiceImpl implements EpfoService {
 		        	//updating CAF table
 								List<CandidateCafExperience> candidateCafExperiences = candidateService.getCandidateExperienceFromItrAndEpfoByCandidateId(
 							        		candidate.getCandidateId(), false);
-//							        log.info("CAFEXPEROEINCE FOR BULK UAN ::{}", candidateCafExperiences.size());
+							        log.info("CAFEXPEROEINCE FOR BULK UAN ::{}", candidateCafExperiences.size());
 							     // Reattach detached entities to the current session
 							        List<CandidateCafExperience> attachedExperiences = new ArrayList<>();
 							        for (CandidateCafExperience experience : candidateCafExperiences) {

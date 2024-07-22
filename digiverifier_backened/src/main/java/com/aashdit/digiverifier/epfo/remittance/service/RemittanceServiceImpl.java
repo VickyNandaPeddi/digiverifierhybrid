@@ -870,11 +870,14 @@ public class RemittanceServiceImpl implements RemittanceService{
 			//with single emp experience
 			if (candidateCafExperienceList!=null && candidateCafExperienceList.size() == 1
 					&& Objects.isNull(candidateCafExperienceList.get(0).getInputDateOfExit())) {
+				entityManager.detach(candidateCafExperienceList.get(0));
+				
 				candidateCafExperienceList.get(0).setInputDateOfExit(new Date());
 			}
 	 
 			if (candidateCafExperienceList!=null && candidateCafExperienceList.size() > 1) {
 				for (int i = 0; i < candidateCafExperienceList.size(); i++) {
+					entityManager.detach(candidateCafExperienceList.get(i));
 					//setting doe to the current null doe employer
 					if(i==0 && Objects.isNull(candidateCafExperienceList.get(0).getInputDateOfExit())) {
 						candidateCafExperienceList.get(0).setInputDateOfExit(new Date());

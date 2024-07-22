@@ -154,7 +154,7 @@ public class CSVUtil {
 	        	    				) {
 	        	    			  String experienceFromFile= csvRecord.get(rb.getString("com.dgv.candidate.candidateNoYExp"));
 	        	    			  Float floatExpFromFile=7f;
-//	        	    			  log.info("experience form file::{}",experienceFromFile);
+	        	    			  log.info("experience form file::{}",experienceFromFile);
 	        	    			  if (candidateNoYExpIndex != -1) {
 
 	        	    				    if (!experienceFromFile.equals("") && isCMDValidator(experienceFromFile)) {
@@ -290,7 +290,7 @@ public class CSVUtil {
 	            Pattern pattern = Pattern.compile(cmdRegex);
 	            Matcher matcher = pattern.matcher(cellValue);
 	            boolean containsInjection = matcher.find();
-//	            log.info("Contains potential Excel formula injection: {}" + containsInjection);
+	            log.info("Contains potential Excel formula injection: {}" + containsInjection);
 	            return !containsInjection;
 	 		}
 	 		
@@ -484,7 +484,7 @@ public class CSVUtil {
 
 	 								Float floatExpFromFile=7f;
 
-//	 								log.info("experience form file::{}",experienceFromFile);
+	 								log.info("experience form file::{}",experienceFromFile);
 
 	 								if (candidateNoYExpIndex != -1) {
 
