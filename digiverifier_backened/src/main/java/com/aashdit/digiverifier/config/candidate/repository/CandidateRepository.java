@@ -92,8 +92,8 @@ List<Candidate> searchAllCandidateByAgent(
 //	 @Param("startDate") Date startDate,
 //	 @Param("endDate") String endDate);
 	 
-	 
-		@Query(value = "DELETE ccaf, ccad, ccae, ccea, ccd, cces, ccepfo, ccepfor, cci, ccitr, ccitrres, ccru, ccst, ccsth, ccvs, cc\r\n"
+	    @Modifying
+		@Query(value = "DELETE ccaf, ccad, ccae, ccea, ccd, cces, ccepfo, ccepfor, cci, ccitr, ccitrres, ccru, ccst, ccsth, ccvs, cc, crm\r\n"
 				+ "FROM t_dgv_candidate_caf_addcomments AS ccaf\r\n"
 				+ "LEFT JOIN t_dgv_candidate_basic AS cb ON ccaf.candidate_id = cb.candidate_id\r\n"
 				+ "LEFT JOIN t_dgv_candidate_caf_address AS ccad ON ccaf.candidate_id = ccad.candidate_id\r\n"
@@ -112,9 +112,14 @@ List<Candidate> searchAllCandidateByAgent(
 				+ "LEFT JOIN t_dgv_candidate_verification_state AS ccvs ON ccaf.candidate_id = ccvs.candidate_id\r\n"
 				+ "LEFT JOIN t_dgv_content AS cc ON ccaf.candidate_id = cc.candidate_id\r\n"
 				+ "LEFT JOIN t_dgv_vendor_checks AS cvc ON ccaf.candidate_id = cvc.candidate_id\r\n"
-				+ "WHERE cb.organization_id = ?1;\r\n", nativeQuery = true) 
-		void deleteAllByOrgId(Long orgId);
+				+ "LEFT JOIN t_dgv_candidate_remittance AS crm ON ccaf.candidate_id = crm.candidate_id\r\n"
+				+ "WHERE cb.candidate_id IN ?1", nativeQuery = true) 
+		void deleteAllByOrgId(List<Long> candidateIds);
+	    
+		@Query("SELECT c.candidateId FROM Candidate c WHERE c.organization.organizationId =:orgId")
+	    List<Long> findCandidateIdsByOrgId(@Param("orgId") Long orgId);
 		
+	    @Modifying
 		@Query(value="Delete from t_dgv_candidate_basic where organization_id = ?1", nativeQuery = true)
 		void deleteByOrgId(Long orgId);
 	 
@@ -283,4 +288,8 @@ List<Candidate> searchAllCandidateByAgent(
 		@Query("SELECT c.candidateCode FROM Candidate c WHERE c.candidateId IN :candidateIds AND c.candidateId NOT IN "
 				+ "(SELECT ed.candidate.candidateId FROM EpfoData ed)")
 	    List<String> findCandidateCodesNotInEpfo(@Param("candidateIds") List<Long> candidateIds);
+		
+		@Query(value="select candidate_code from t_dgv_candidate_basic where candidate_id "
+				+ "in (select candidate_id from t_dgv_candidate_status where status_master_id = :statusId) and organization_id=:orgId",nativeQuery=true) 
+	    List<String> findCandidateCodesForUanRefetchForSchedular(@Param("orgId")Long orgId, @Param("statusId") Long statusId);
 }

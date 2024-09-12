@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders ,HttpParams } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
 
@@ -139,6 +139,13 @@ export class CustomerService {
     );
   }
 
+  getCandidatePurgedReport(data: any) {
+    return this.http.post(
+      `${environment.apiUrl}/api/report/getCandidatePurgedReport`,
+      data
+    );
+  }
+
   getCustomerUtilizationReportByAgent(data: any) {
     return this.http.post(
       `${environment.apiUrl}/api/report/getCustomerUtilizationReportByAgent`,
@@ -146,9 +153,23 @@ export class CustomerService {
     );
   }
 
+  getCandidatePurgedReportByAgent(data: any) {
+    return this.http.post(
+      `${environment.apiUrl}/api/report/getCandidatePurgedReportByAgent`,
+      data
+    );
+  }
+
   getCanididateDetailsByStatus(data: any) {
     return this.http.post(
       `${environment.apiUrl}/api/report/getCanididateDetailsByStatus`,
+      data
+    );
+  }
+
+  getPurgedCanididateDetailsByStatus(data: any) {
+    return this.http.post(
+      `${environment.apiUrl}/api/report/getPurgedCanididateDetailsByStatus`,
       data
     );
   }
@@ -210,8 +231,17 @@ export class CustomerService {
   }
 
   getAgentAttributes(checkId: any) {
+    // const params = new HttpParams().set('type', 'TECHM');
+    console.log("SOURCE ID : ",checkId)
     return this.http.get(
       `${environment.apiUrl}/api/user/getConventionalAttributesMaster/${checkId}`
+    );
+  }
+
+  getAgentAttributesForTECHM(checkId: any) {
+    const params = new HttpParams().set('type', 'TECHM');
+    return this.http.get(
+      `${environment.apiUrl}/api/user/getConventionalAttributesMaster/${checkId}`, { params: params }
     );
   }
 
@@ -246,7 +276,15 @@ export class CustomerService {
         data
       );
     }
-   
+
+    saveCustomersEmailTemplates1(data: any, custId: any, emailTemplateId:any) {
+      return this.http.post(
+        `${environment.apiUrl}/api/organization/saveAndUpdateOrgEmailTemplates/${custId}/${emailTemplateId}`,
+        data
+      );
+    }
+    
+
     getCustomerEmailTemplates(custId: any) {
       return this.http.get(
         `${environment.apiUrl}/api/organization/getOrgEmailTemplates/${custId}`
@@ -319,5 +357,40 @@ export class CustomerService {
 
     getVendorReportAttributes(sourceID: any,type:any) {
       return this.http.get(`${environment.apiUrl}/api/user/getConventionalAttributesMaster/${sourceID}?type=${type}`);
+      }
+
+      getVendorReportAttributesForTECHM(sourceID: any,type:any) {
+        return this.http.get(`${environment.apiUrl}/api/user/getConventionalAttributesMaster/${sourceID}?type=${'TECHM'}`);
+        }
+
+      getProfile(userId:any) {
+        return this.http.get(`${environment.apiUrl}/api/allowAll/getProfile/${userId}`);
+      }
+
+      updatePassword(data: any) {
+        return this.http.post(
+          `${environment.apiUrl}/api/allowAll/updatePassword`,
+          data
+        );
+      }
+
+      resetPassword(data:any){
+        return this.http.post(
+          `${environment.apiUrl}/api/allowAll/forgotPassword`,
+          data
+        )
+      }
+
+      getPasswordPolicyDayFromConfig() {
+        return this.http.get(
+          `${environment.apiUrl}/api/organization/getPasswordPolicyDayFromConfig`,
+        );
+      }
+
+      getCustomerUtilizationDBCounts(data: any) {
+        return this.http.post(
+          `${environment.apiUrl}/api/report/getCustomerUtilizationDashboardCounts`,
+          data
+        );
       }
 }

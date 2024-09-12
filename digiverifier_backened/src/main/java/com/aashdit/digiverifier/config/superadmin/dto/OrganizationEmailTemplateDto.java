@@ -1,6 +1,9 @@
 package com.aashdit.digiverifier.config.superadmin.dto;
 
+import java.io.File;
 import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import com.aashdit.digiverifier.config.candidate.dto.CandidateDetailsDto;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateStatusCountDto;
@@ -20,4 +23,8 @@ public class OrganizationEmailTemplateDto {
 	private String inviteMailContent;
 	private String loaMailSub;
 	private String loaMailContent;
+	private String cwfCopyright;
+	private String cwflogo;
+	
+	
 }

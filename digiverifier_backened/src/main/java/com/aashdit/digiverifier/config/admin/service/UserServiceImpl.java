@@ -308,13 +308,15 @@ public class UserServiceImpl implements UserService {
 			User result = null;
 			log.debug("User object is-->" + user);
 			//this  IF object will update the user
+			User loggedInUser = SecurityHelper.getCurrentUser();
+		if(loggedInUser != null) {
 			if (user.getUserId() != null && !user.getUserId().equals(0l) && user.getUserEmailId() != null) {
 //					User findUserEmail = userRepository.findByUserEmailId(user.getUserEmailId());
 				User findUserById = userRepository.findByUserId(user.getUserId());
 				System.out.println("findUserEmail:::" + findUserById);
 				
 				//validating login user with the user whose details is updating here
-				User loggedInUser = SecurityHelper.getCurrentUser();
+//				User loggedInUser = SecurityHelper.getCurrentUser();
 				Optional<Role> updateUserRole = roleRepository.findById(user.getRoleId());
 				List<User> roleWiseUsers = userRepository.findAllByRoleRoleIdAndIsActiveTrue(user.getRoleId());
 				boolean roleWiseUsersHavingOrgId = roleWiseUsers.stream().anyMatch(u -> u.getOrganization()!=null &&
@@ -359,19 +361,36 @@ public class UserServiceImpl implements UserService {
 							String oldPassword = user.getOldPassword().trim();						
 							boolean passwordVerificationForPlainTextAndEncodedPassword = bCryptPasswordEncoder.matches(user.getOldPassword(), oldEncodePasswordDB);
 							log.info("Password matches: {}" + passwordVerificationForPlainTextAndEncodedPassword);
-							boolean passwordVerificationEncodedPasswordVsEncodedPassword = oldPassword.equals(oldEncodePasswordDB);						
-							String[] existingPasswordCount = findUserById.getLastPasswords().split(",");
+							boolean passwordVerificationEncodedPasswordVsEncodedPassword = oldPassword.equals(oldEncodePasswordDB);	
+							String[] existingPasswordCount = null;
+							boolean passwordMatches = false;
+							int lastPasswordCounts = 0;
 							String password = user.getPassword();
+							if(findUserById.getLastPasswords() != null) {	
+								 existingPasswordCount = findUserById.getLastPasswords().split(",");
+//								for (String password1 : existingPasswordCount) {
+//									System.out.println(password1);
+//								}
+//								System.out.println("existingPasswordCount : "+existingPasswordCount.toString());
+								 passwordMatches = Arrays.asList(existingPasswordCount).contains(password);
+								 lastPasswordCounts = existingPasswordCount.length;
+
+							}
+//							String[] existingPasswordCount = findUserById.getLastPasswords().split(",");
+//							String password = user.getPassword();
 							String confirmPassword = user.getConfirmPassword();
 //							System.out.println("NEW PASSWORD : "+password);
 //							System.out.println("Confirm PASSWORD : "+confirmPassword);
-							boolean passwordMatches = Arrays.asList(existingPasswordCount).contains(password);
+//							boolean passwordMatches = Arrays.asList(existingPasswordCount).contains(password);
 							boolean newPasswordAndConfirmPassword = password.equals(confirmPassword);
-							int lastPasswordCounts = existingPasswordCount.length;
-							int orgPasswordLimit = Integer.parseInt(getExistingPassByUserID.get().getOrganization().getLastPasswords());
+							boolean oldPasswordAndNewPassword = findUserById.getAddlPassword().equals(password);
+							Integer orgPasswordLimit = null;
+							if(getExistingPassByUserID.get().getOrganization().getLastPasswords() != null) {
+								 orgPasswordLimit = Integer.parseInt(getExistingPassByUserID.get().getOrganization().getLastPasswords());
+							}
 							if(passwordVerificationForPlainTextAndEncodedPassword || passwordVerificationEncodedPasswordVsEncodedPassword) {
 								String passwoString = getExistingPassByUserID.get().getPassword();
-								if (!passwordMatches && newPasswordAndConfirmPassword) {
+								if (!passwordMatches && newPasswordAndConfirmPassword && !oldPasswordAndNewPassword) {
 //									System.out.println("Password does not match.:::");
 								findUserById.setUserFirstName(user.getUserFirstName());
 								findUserById.setUserMobileNum(user.getUserMobileNum());
@@ -382,18 +401,37 @@ public class UserServiceImpl implements UserService {
 //						        System.out.println("existingPasswordCount: " + Arrays.toString(existingPasswordCount));
 //								System.out.println("lastPasswordCounts : "+lastPasswordCounts);
 //								System.out.println("orgPasswordLimit : "+orgPasswordLimit);
-								if(orgPasswordLimit >= lastPasswordCounts) {
+								if(orgPasswordLimit != null && orgPasswordLimit >= lastPasswordCounts) {
 //									System.out.println("Count Matches..");
-									if(existingPasswordCount.length > 0) {
-										 String[] newValues = new String[existingPasswordCount.length - 1];
-							             System.arraycopy(existingPasswordCount, 0, newValues, 0, existingPasswordCount.length - 1);
-							                String remainingLastPasswords = String.join(",", newValues);
-//							                System.out.println("remainingLastPasswords : "+remainingLastPasswords);
-										 findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+remainingLastPasswords);
+//									if(existingPasswordCount.length > 0) {
+//										 String[] newValues = new String[existingPasswordCount.length - 1];
+//							             System.arraycopy(existingPasswordCount, 0, newValues, 0, existingPasswordCount.length - 1);
+//							                String remainingLastPasswords = String.join(",", newValues);
+////							                System.out.println("remainingLastPasswords : "+remainingLastPasswords);
+//										 findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+remainingLastPasswords);
+//									}
+									if(existingPasswordCount != null && existingPasswordCount.length > 0) {
+										//										String remainingLastPasswords = null;
+										if (existingPasswordCount.length == 1) {
+											String singlePassword = String.join(",", existingPasswordCount);
+											findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+singlePassword);
+										}
+										else if(existingPasswordCount.length >= orgPasswordLimit){
+											String[] newValues = new String[existingPasswordCount.length - 1];
+											System.arraycopy(existingPasswordCount, 0, newValues, 0, existingPasswordCount.length - 1);
+											String remainingLastPasswords = String.join(",", newValues);
+											findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+remainingLastPasswords);
+										}else {
+											String singlePassword = String.join(",", existingPasswordCount);
+											findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+singlePassword);
+										}
 									}
-									
+									else {
+										findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword());
+									}
+
 								}else {	
-									findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+getExistingPassByUserID.get().getLastPasswords());
+//									findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+getExistingPassByUserID.get().getLastPasswords());
 								}
 								if (!password.equals("")) {
 									findUserById.setPassword(bCryptPasswordEncoder.encode(password));
@@ -422,6 +460,10 @@ public class UserServiceImpl implements UserService {
 										svcSearchResult.setOutcome(false);
 										svcSearchResult.setMessage("New password and confirm password do not match.");
 									}
+									else if(oldPasswordAndNewPassword) {
+										svcSearchResult.setOutcome(false);
+										svcSearchResult.setMessage("Current password and New password should not be the same.");
+									}
 								}
 							}
 							else {
@@ -449,6 +491,7 @@ public class UserServiceImpl implements UserService {
 							findUserById.setUserMobileNum(user.getUserMobileNum());
 							findUserById.setLocation(user.getLocation());
 							findUserById.setRole(roleRepository.findById(user.getRoleId()).get());
+							findUserById.setLastUpdatedPassword(new Date());
 							result = userRepository.save(findUserById);							
 							BeanUtils.copyProperties(result, userDto);
 							
@@ -486,6 +529,7 @@ public class UserServiceImpl implements UserService {
 						userObj1.setUserEmailId(user.getUserEmailId());
 						userObj1.setLastUpdatedOn(new Date());
 						userObj1.setLastUpdatedBy(SecurityHelper.getCurrentUser());
+						userObj1.setLastUpdatedPassword(new Date());
 						userObj1.setIsActive(user.getIsActive() != null ? user.getIsActive() : userObj1.getIsActive());
 						if (SecurityHelper.getCurrentUser().getRole().getRoleCode().equals("ROLE_AGENTSUPERVISOR")) {
 							userObj1.setAgentSupervisor(SecurityHelper.getCurrentUser());
@@ -547,6 +591,7 @@ public class UserServiceImpl implements UserService {
 										: null);
 							}
 							saveNewUser.setCreatedBy(SecurityHelper.getCurrentUser());
+							saveNewUser.setLastUpdatedPassword(new Date());
 							log.debug("User username is-->" + saveNewUser.getUserName());
 							result = userRepository.save(saveNewUser);
 
@@ -560,6 +605,240 @@ public class UserServiceImpl implements UserService {
 					}
 				}
 			}
+		}
+		// Below is for Reset Password
+		else if(loggedInUser == null && user.getResetPassword() != null && user.getResetPassword()) {
+			if (user.getEncryptUserId() != null && !user.getEncryptUserId().isEmpty()){
+		        String decodedUserId = new String(Base64.getDecoder().decode(user.getEncryptUserId()));
+		        long decodedUserIdLong = Long.parseLong(decodedUserId);
+				User findUserById = userRepository.findByUserId(decodedUserIdLong);
+				String[] existingPasswordCount = null;
+				boolean passwordMatches = false;
+				int lastPasswordCounts = 0;
+				String password = user.getPassword();
+				if(findUserById.getLastPasswords() != null) {	
+					existingPasswordCount = findUserById.getLastPasswords().split(",");
+					passwordMatches = Arrays.asList(existingPasswordCount).contains(password);
+					lastPasswordCounts = existingPasswordCount.length;
+
+				}
+				String confirmPassword = user.getConfirmPassword();
+				boolean newPasswordAndConfirmPassword = password.equals(confirmPassword);
+				Optional<User> getExistingPassByUserID = userRepository.findById(decodedUserIdLong);
+				Integer orgPasswordLimit = null;
+				if(getExistingPassByUserID.get().getOrganization().getLastPasswords() != null) {
+					 orgPasswordLimit = Integer.parseInt(getExistingPassByUserID.get().getOrganization().getLastPasswords());
+				}
+				String passwoString = getExistingPassByUserID.get().getPassword();
+				boolean oldPasswordAndNewPassword = findUserById.getAddlPassword().equals(password);
+				if (!passwordMatches && newPasswordAndConfirmPassword && !oldPasswordAndNewPassword) {
+					findUserById.setLastUpdatedPassword(new Date());
+					if(orgPasswordLimit != null && orgPasswordLimit >= lastPasswordCounts) {
+						if(existingPasswordCount != null && existingPasswordCount.length > 0) {
+							//String remainingLastPasswords = null;
+							if (existingPasswordCount.length == 1) {
+								String singlePassword = String.join(",", existingPasswordCount);
+								findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+singlePassword);
+							}
+							else if(existingPasswordCount.length >= orgPasswordLimit){
+								String[] newValues = new String[existingPasswordCount.length - 1];
+								System.arraycopy(existingPasswordCount, 0, newValues, 0, existingPasswordCount.length - 1);
+								String remainingLastPasswords = String.join(",", newValues);
+								findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+remainingLastPasswords);
+							}
+							else {
+								String singlePassword = String.join(",", existingPasswordCount);
+								findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+singlePassword);
+							}
+						}
+						else {
+							findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword());
+						}
+					}else {	
+//						findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+getExistingPassByUserID.get().getLastPasswords());
+					}
+					if (!password.equals("")) {
+						findUserById.setPassword(bCryptPasswordEncoder.encode(password));
+						findUserById.setAddlPassword(password);
+					} else {
+						findUserById.setPassword(passwoString);
+					}
+					result = userRepository.save(findUserById);	
+
+					BeanUtils.copyProperties(result, userDto);
+
+					setSomeUserDataInDTO(userDto, result);
+
+					svcSearchResult.setData(userDto);
+					svcSearchResult.setOutcome(true);
+					svcSearchResult.setMessage("Password Updated successfully, Click OK To login");
+					svcSearchResult.setStatus("Password Changed");
+				}else {
+					if(passwordMatches) {
+						//								System.out.println("Password match.");
+						svcSearchResult.setOutcome(false);
+						svcSearchResult.setMessage("New password should not be the same as the last "+orgPasswordLimit+" password.");
+					}
+					else if(!newPasswordAndConfirmPassword) {
+						//								System.out.println("New Password And ConfirmPasssword NOT matches.");
+						svcSearchResult.setOutcome(false);
+						svcSearchResult.setMessage("New password and confirm password do not match.");
+					}else if(oldPasswordAndNewPassword) {
+						svcSearchResult.setOutcome(false);
+						svcSearchResult.setMessage("Current password and New password should not be the same.");
+					}else {
+						svcSearchResult.setOutcome(false);
+						svcSearchResult.setMessage("Something went wrong try again!");
+					}
+				}
+			}
+		}
+		else {
+			if (user.getUserId() != null && !user.getUserId().equals(0l) && user.getUserEmailId() != null) {
+				User findUserById = userRepository.findByUserId(user.getUserId());
+				if (findUserById != null) {
+
+					Optional<User> getExistingPassByUserID = userRepository.findById(user.getUserId());					
+					if (user.getPassword() != null && !user.getPassword().trim().isEmpty() &&
+							user.getOldPassword() != null && !user.getOldPassword().trim().isEmpty()) {
+						String oldEncodePasswordDB = findUserById.getPassword().trim();						
+						String oldPassword = user.getOldPassword().trim();						
+						boolean passwordVerificationForPlainTextAndEncodedPassword = bCryptPasswordEncoder.matches(user.getOldPassword(), oldEncodePasswordDB);
+						log.info("Password matches: {}" + passwordVerificationForPlainTextAndEncodedPassword);
+						boolean passwordVerificationEncodedPasswordVsEncodedPassword = oldPassword.equals(oldEncodePasswordDB);
+						String[] existingPasswordCount = null;
+						boolean passwordMatches = false;
+						int lastPasswordCounts = 0;
+						String password = user.getPassword();
+						if(findUserById.getLastPasswords() != null) {	
+							 existingPasswordCount = findUserById.getLastPasswords().split(",");
+							 passwordMatches = Arrays.asList(existingPasswordCount).contains(password);
+							 lastPasswordCounts = existingPasswordCount.length;
+
+						}
+						String confirmPassword = user.getConfirmPassword();
+
+//						boolean passwordMatches = Arrays.asList(existingPasswordCount).contains(password);
+						boolean newPasswordAndConfirmPassword = password.equals(confirmPassword);
+						boolean oldPasswordAndNewPassword = findUserById.getAddlPassword().equals(password);
+						
+//						int lastPasswordCounts = existingPasswordCount.length;
+//						int orgPasswordLimit = Integer.parseInt(getExistingPassByUserID.get().getOrganization().getLastPasswords());
+						Integer orgPasswordLimit = null;
+						if(getExistingPassByUserID.get().getOrganization().getLastPasswords() != null) {
+							 orgPasswordLimit = Integer.parseInt(getExistingPassByUserID.get().getOrganization().getLastPasswords());
+						}
+						if(passwordVerificationForPlainTextAndEncodedPassword || passwordVerificationEncodedPasswordVsEncodedPassword) {
+							String passwoString = getExistingPassByUserID.get().getPassword();
+							if (!passwordMatches && newPasswordAndConfirmPassword && !oldPasswordAndNewPassword) {
+								//							System.out.println("Password does not match.:::");
+								findUserById.setUserFirstName(user.getUserFirstName());
+								findUserById.setUserMobileNum(user.getUserMobileNum());
+								findUserById.setLocation(user.getLocation());
+								findUserById.setRole(roleRepository.findById(user.getRoleId()).get());
+								//						System.out.println("Last Password in OrgScope : "+getExistingPassByUserID.get().getOrganization().getLastPasswords());
+								findUserById.setLastUpdatedPassword(new Date());
+								//				        System.out.println("existingPasswordCount: " + Arrays.toString(existingPasswordCount));
+								//						System.out.println("lastPasswordCounts : "+lastPasswordCounts);
+								//						System.out.println("orgPasswordLimit : "+orgPasswordLimit);
+								if(orgPasswordLimit != null && orgPasswordLimit >= lastPasswordCounts) {
+									if(existingPasswordCount != null && existingPasswordCount.length > 0) {
+//										String remainingLastPasswords = null;
+										if (existingPasswordCount.length == 1) {
+									        String singlePassword = String.join(",", existingPasswordCount);
+											findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+singlePassword);
+									    }
+										else if(existingPasswordCount.length >= orgPasswordLimit){
+											String[] newValues = new String[existingPasswordCount.length - 1];
+											
+											System.arraycopy(existingPasswordCount, 0, newValues, 0, existingPasswordCount.length - 1);
+											String remainingLastPasswords = String.join(",", newValues);
+											
+											findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+remainingLastPasswords);
+										}else {
+									        String singlePassword = String.join(",", existingPasswordCount);
+											findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+singlePassword);
+										}
+									}
+									else {
+										findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword());
+									}
+
+								}else {	
+//									findUserById.setLastPasswords(getExistingPassByUserID.get().getAddlPassword()+","+getExistingPassByUserID.get().getLastPasswords());
+								}
+								if (!password.equals("")) {
+									findUserById.setPassword(bCryptPasswordEncoder.encode(password));
+									findUserById.setAddlPassword(password);
+								} else {
+									findUserById.setPassword(passwoString);
+								}
+								result = userRepository.save(findUserById);	
+								
+								BeanUtils.copyProperties(result, userDto);
+
+								setSomeUserDataInDTO(userDto, result);
+
+								svcSearchResult.setData(userDto);
+								svcSearchResult.setOutcome(true);
+								svcSearchResult.setMessage("User information Updated successfully, Click OK To Relogin");
+								svcSearchResult.setStatus("Password Changed");
+
+							}else {
+								if(passwordMatches) {
+									//								System.out.println("Password match.");
+									svcSearchResult.setOutcome(false);
+									svcSearchResult.setMessage("New password should not be the same as the last "+orgPasswordLimit+" password.");
+								}
+								else if(!newPasswordAndConfirmPassword) {
+									//								System.out.println("New Password And ConfirmPasssword NOT matches.");
+									svcSearchResult.setOutcome(false);
+									svcSearchResult.setMessage("New password and confirm password do not match.");
+								}else if(oldPasswordAndNewPassword) {
+									svcSearchResult.setOutcome(false);
+									svcSearchResult.setMessage("Current password and New password should not be the same.");
+								}
+							}
+						}
+						else {
+							if(!passwordVerificationForPlainTextAndEncodedPassword) {	
+								svcSearchResult.setOutcome(false);
+								svcSearchResult.setMessage("Old Password Invalid. ");
+							}
+							//						else if(passwordMatches) {
+							//							System.out.println("Password match.");
+							//							svcSearchResult.setOutcome(false);
+							//							svcSearchResult.setMessage("Password Not Should be Same has old Password. ");
+							//						}
+							else {
+								svcSearchResult.setOutcome(false);
+								svcSearchResult.setMessage("Something went Wrong.");
+							}
+						}
+
+					}else {
+						String passwoString = getExistingPassByUserID.get().getPassword();							
+						String userEmailId = getExistingPassByUserID.get().getUserEmailId();							
+						findUserById.setUserFirstName(user.getUserFirstName());
+						//					findUserEmail.setUserLastName(user.getUserLastName());
+						//					findUserEmail.setUserEmailId(user.getUserEmailId());
+						findUserById.setUserMobileNum(user.getUserMobileNum());
+						findUserById.setLocation(user.getLocation());
+						findUserById.setRole(roleRepository.findById(user.getRoleId()).get());
+						findUserById.setLastUpdatedPassword(new Date());
+						result = userRepository.save(findUserById);							
+						BeanUtils.copyProperties(result, userDto);
+
+						setSomeUserDataInDTO(userDto, result);
+
+						svcSearchResult.setData(userDto);
+						svcSearchResult.setOutcome(true);
+						svcSearchResult.setMessage("User information Updated successfully");
+
+					}
+				}
+			}
+		}
 		} catch (Exception ex) {
 			log.error("Exception occured in saveUser method in UserServiceImpl-->", ex);
 			svcSearchResult.setData(null);
@@ -4158,6 +4437,37 @@ public class UserServiceImpl implements UserService {
 		}
 	      
 	      return svcSearchResult;
+	}
+
+
+	@Override
+	public ServiceOutcome<String> forgotPassword(String emailId) {
+		ServiceOutcome<String> svcSearchResult = new ServiceOutcome<>();
+		try {
+			if(emailId != null) {
+				User byUserEmailId = userRepository.findByUserEmailId(emailId);
+				if(byUserEmailId != null) {
+					boolean resetPassword = emailSentTask.resetPassword(byUserEmailId.getUserEmailId(), byUserEmailId.getUserId(), byUserEmailId.getUserFirstName());
+					if(resetPassword) {
+						svcSearchResult.setMessage("Reset Password Link Sent to mail");
+						svcSearchResult.setOutcome(true);
+					}else {
+						svcSearchResult.setMessage("Try after Sometime!");
+						svcSearchResult.setOutcome(false);
+					}
+				}else {
+					svcSearchResult.setMessage("User not Found!");
+					svcSearchResult.setOutcome(false);
+				}
+			}
+			
+		} catch (Exception e) {
+			log.error("Exception occured in resetPassword method in USERSERVICEIMPL --> " + e);
+			svcSearchResult.setMessage("Something went wrong.!");
+			svcSearchResult.setOutcome(false);
+		}
+		
+		return svcSearchResult;
 	}
 
 }

@@ -1,6 +1,8 @@
 package com.aashdit.digiverifier.globalConfig;
 
 import lombok.Getter;
+import lombok.val;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -175,5 +177,14 @@ public class EnvironmentVal {
 	
 	@Value("${CONVENTIONALLETTERAUTHPAGE}")
 	private String conventionalLOA;
+	
+	@Value("${REDIRECT.ANGULAR.EPFO.EMPLOYEE.LOGIN}")
+	private String epfoEmployeeLogin;
+	
+	@Value("${RESETPASSWORD}")
+	private String resetPassword;
+	
+	@Value("${PASSWORD.POLICY}")
+	private Long passwordPolicyDay;
 	
 }

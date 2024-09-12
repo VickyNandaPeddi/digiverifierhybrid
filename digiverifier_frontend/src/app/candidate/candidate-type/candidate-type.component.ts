@@ -33,7 +33,7 @@ export class CandidateTypeComponent implements OnInit {
     this.candidateCode = this.router.snapshot.paramMap.get('candidateCode');
     this.candidateService.getCurrentStatusByCandidateCode(this.candidateCode).subscribe((result:any)=>{
       if(result.outcome==true){
-        console.log(result.data)
+//         console.log(result.data)
         const navURL = result.data.split('#/')[1];
         this.navRouter.navigate([navURL]);
       } else {
@@ -45,7 +45,7 @@ export class CandidateTypeComponent implements OnInit {
     });
     this.orgid= this.authService.getOrgID();
     this.role= this.authService.getroleName();
-    console.log(this.orgid,"----------------",this.role)
+//     console.log(this.orgid,"----------------",this.role)
     this.candidateService.getServiceConfigCodes(this.candidateCode).subscribe((result:any)=>{
       this.getServiceConfigCodes = result.data;
       
@@ -66,13 +66,16 @@ export class CandidateTypeComponent implements OnInit {
     });
   }
   fresherClick(event:any, isFresher:any){
-    console.log(isFresher)
+//     console.log(isFresher)
     const btnStat = event.target.id;
-    console.log(btnStat);
+//     console.log(btnStat);
     const formData = new FormData();
     formData.append('candidateCode', this.candidateCode);
     formData.append('isFresher', isFresher);
     return this.candidateService.postIsFresher(formData).subscribe((result:any)=>{
+          result.data = this.candidateService.decryptData(result.data);
+          // Parse the decrypted JSON string into an object
+          result.data = JSON.parse(result.data);
           if(result.outcome === true){
             if(result.data.isFresher == true){
               if(this.getServiceConfigCodes){

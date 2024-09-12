@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import com.aashdit.digiverifier.config.candidate.dto.*;
 import com.aashdit.digiverifier.config.candidate.model.*;
 import org.json.JSONArray;
 import org.springframework.core.io.Resource;
@@ -13,11 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.aashdit.digiverifier.config.admin.dto.UserDto;
 
 import com.aashdit.digiverifier.common.model.ServiceOutcome;
-import com.aashdit.digiverifier.config.candidate.dto.DigidocDetailsDto;
 import com.aashdit.digiverifier.config.candidate.dto.EmploymentResultUpdateReqDto;
 import com.aashdit.digiverifier.config.candidate.dto.SearchAllCandidateDTO;
 import com.aashdit.digiverifier.config.candidate.dto.ApprovalStatusRemarkDto;
-import com.aashdit.digiverifier.config.candidate.dto.BulkUanDTO;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateCafAddressDto;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateCafEducationDto;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateCafExperienceDto;
@@ -92,7 +91,7 @@ public interface CandidateService {
 
 	ServiceOutcome<Boolean> updateCandidateAddressStatusAndRemark(ApprovalStatusRemarkDto approvalStatusRemarkDto);
 
-	ServiceOutcome<Boolean> candidateApplicationFormApproved(String candidateCode, MultipartFile criminalVerificationDocument,Long criminalVerificationColorId, MultipartFile globalDatabseCaseDetailsDocument, Long globalDatabseCaseDetailsColorId, String reportType);
+	ServiceOutcome<Boolean> candidateApplicationFormApproved(String candidateCode, MultipartFile[] criminalVerificationDocument,Long criminalVerificationColorId, MultipartFile globalDatabseCaseDetailsDocument, Long globalDatabseCaseDetailsColorId, String reportType);
 
 	ServiceOutcome<List<SuspectClgMaster>> getAllSuspectClgList();
 
@@ -193,7 +192,7 @@ public interface CandidateService {
 
 	ServiceOutcome<String> getAuthLetterContent(String candidateCode);
 
-	void postStatusToOrganization(String candidateCode);
+	ServiceOutcome<Boolean> postStatusToOrganization(String candidateCode);
 
 	ServiceOutcome<String> getCandidateLOAFile(String candidateCode,String dashboardStatus);
 
@@ -218,10 +217,23 @@ public interface CandidateService {
 	ServiceOutcome<String> setPanToUanResponse(CandidateDetailsDtoForPanToUan candidateDetails);
 
 	ServiceOutcome<Boolean> reFetchPANTOUANDataForAvailableUANs();
-	
+
 	//method to calculate tenuer gap
 		long calculateTenuerGap(CandidateCafExperience candidateCafExperience,List<CandidateCafExperience> candidateCafExperiences);
-		
+
 		//method to calculate ITR filing gap
 		long calculateITRFilingGap(List<ITRData> itrList);
+
+	ServiceOutcome<QcRemarksDto> addUpdateQcRemarks(QcRemarksDto requestBody);
+
+	public ServiceOutcome<List<QcRemarksDto>> getQcRemarks(String candidateCode);
+
+	ServiceOutcome<String> deleteQcRemarkByQcRemarksId(Long qcRemarksID);
+	
+	ServiceOutcome<UserDto> userProfile(Long userId);
+
+	ServiceOutcome<String> updateITRDetails(UpdateITRDto updateITRDto);
+	
+	ServiceOutcome<Map<String, String>> getOrgNameByCandidateCode(String candidateCode);
+
 }

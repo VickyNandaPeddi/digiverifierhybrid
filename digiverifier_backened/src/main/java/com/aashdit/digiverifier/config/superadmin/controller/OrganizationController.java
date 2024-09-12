@@ -35,6 +35,7 @@ import com.aashdit.digiverifier.config.superadmin.model.ServiceTypeConfig;
 import com.aashdit.digiverifier.config.superadmin.model.Source;
 import com.aashdit.digiverifier.config.superadmin.model.ToleranceConfig;
 import com.aashdit.digiverifier.config.superadmin.service.OrganizationService;
+import com.aashdit.digiverifier.globalConfig.EnvironmentVal;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -60,6 +61,9 @@ public class OrganizationController {
 	
 	@Autowired
 	private OrganizationConfigRepository organizationConfigRepository;
+	
+	@Autowired
+	private EnvironmentVal envirnmentVal;
 
 	@Operation(summary ="Save And Update Organization Information")
 	@PostMapping(path = "/saveOrganization",consumes = { MediaType.APPLICATION_JSON_VALUE,MediaType.MULTIPART_FORM_DATA_VALUE })
@@ -90,7 +94,7 @@ public class OrganizationController {
 	@Operation(summary ="Get Organization Information By Id")
 	@GetMapping("/getOrganizationById/{organizationId}")
 	public ResponseEntity<?> getOrganizationById(@PathVariable Long organizationId,@RequestHeader("Authorization") String authorization) {
-		ServiceOutcome<Organization> svcSearchResult = organizationService.getOrganizationById(organizationId);
+		ServiceOutcome<OrgDto> svcSearchResult = organizationService.getOrganizationById(organizationId);
 		return new ResponseEntity<>(svcSearchResult, HttpStatus.OK);
 	}
 	
@@ -279,4 +283,16 @@ public class OrganizationController {
 		return new ResponseEntity<>(svcSearchResult, HttpStatus.OK);
 
 	}
+	
+	@Operation(summary ="PassowordPolicyDay")
+	@GetMapping("/getPasswordPolicyDayFromConfig")
+	public ResponseEntity<ServiceOutcome<Long>> getPasswordPolicyDayFromConfig(@RequestHeader("Authorization") String authorization) {
+		Long passwordPolicyDay = envirnmentVal.getPasswordPolicyDay();
+		ServiceOutcome<Long> svcSearchResult= new ServiceOutcome<Long>();
+		svcSearchResult.setData(passwordPolicyDay);
+		svcSearchResult.setMessage("success");		
+		return new ResponseEntity<ServiceOutcome<Long>>(svcSearchResult, HttpStatus.OK);
+	}
+	
+	
 }

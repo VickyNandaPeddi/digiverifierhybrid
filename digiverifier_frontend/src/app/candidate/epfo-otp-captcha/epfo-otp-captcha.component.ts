@@ -25,11 +25,11 @@ export class EpfoOtpCaptchaComponent implements OnInit {
 
 
   constructor(private candidateService: CandidateService,private router: ActivatedRoute,private navRouter: Router,
-    private location: Location) { 
-    //   history.pushState(null, "", document.URL);
-    // window.addEventListener('popstate', function () {
-    //   history.pushState(null, "", document.URL);
-    // });
+    private location: Location) {
+      history.pushState(null, "", document.URL);
+    window.addEventListener('popstate', function () {
+      history.pushState(null, "", document.URL);
+    });
     this.candidateCode = this.router.snapshot.paramMap.get('candidateCode');
     const navigation = this.navRouter.getCurrentNavigation();
     if (navigation?.extras.state) {
@@ -58,14 +58,17 @@ export class EpfoOtpCaptchaComponent implements OnInit {
     //   //getting candidate details
       this.candidateService.getCandidateDetails(this.candidateCode)
       .subscribe((data: any) => {
+        data.data = this.candidateService.decryptData(data.data);
+        // Parse the decrypted JSON string into an object
+        data.data = JSON.parse(data.data);
         if (data.outcome === true) {
           if(data.data.showvalidation){
 
             this.showvalidation = data.data.showvalidation;
           }
           this.uanusername= data.data.uan;
-          console.log("uanusername::{}",this.uanusername);
-          console.log("IS SHOW VALIDATION::{}",this.showvalidation);
+//           console.log("uanusername::{}",this.uanusername);
+//           console.log("IS SHOW VALIDATION::{}",this.showvalidation);
         } else {
           Swal.fire({
             title: data.message,
@@ -97,8 +100,12 @@ export class EpfoOtpCaptchaComponent implements OnInit {
 
   onSubmit() {
     this.patchUserValues();
-    console.log('this.formEPFOlogin.value', this.formEPFOlogin.value);
-    if (this.formEPFOlogin.valid) {
+//     console.log('this.formEPFOlogin.value', this.formEPFOlogin.value);
+    const otpValue = this.formEPFOlogin.get('otp')?.value;
+//     console.log("otpValue : ",otpValue)
+//     console.log("otpValue length : ",otpValue.length)
+
+    if (this.formEPFOlogin.valid && otpValue.length == 6) {
 
       this.candidateService
         .getEpfodetailByOTPAndCaptcha(this.formEPFOlogin.value)
@@ -112,7 +119,7 @@ export class EpfoOtpCaptchaComponent implements OnInit {
 
               this.navRouter.navigate([navURL]);
             } else if (this.showvalidation== true) {
-              console.log("GOING TO Candidate FORM::");
+//               console.log("GOING TO Candidate FORM::");
               const navURL = 'candidate/cForm/' + this.candidateCode;
 
               this.navRouter.navigate([navURL]);
@@ -137,11 +144,18 @@ export class EpfoOtpCaptchaComponent implements OnInit {
           }
         });
     } else {
-      Swal.fire({
-        title: 'Please enter the required information',
-
-        icon: 'warning',
-      });
+      if(otpValue.length < 6){
+        Swal.fire({
+          title: ' OTP must be exactly 6 digits long.',
+          icon: 'warning',
+        });
+      }
+      else {
+        Swal.fire({
+          title: 'Please enter the required information',
+          icon: 'warning',
+        });
+      }
     }
   }
 

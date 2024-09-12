@@ -79,6 +79,23 @@ private String applicantId;
     private String agentUploadDocumentPathKey;
 	
 	private Boolean clientApproval; 
+	
+	//TECHM
+	private String nameAsPerProofRemarks;
+	private String proof;
+	private String proofRemarks;
+	private String dateOfBirthRemarks;
+	private String modeOfVerification;
+	private String verifiedDate;
+	private String additionalComments;
+	private String annexureDetails;
+	private String dateOfIssue;
+	private String placeOfIssue;
+	private String dateOfExpiry;
+	private String dateOfIssueRemarks;
+	private String placeOfIssueRemarks;
+	private String dateOfExpiryRemarks;
+	
 
 	// private Long VendorCheckStatusId;
 

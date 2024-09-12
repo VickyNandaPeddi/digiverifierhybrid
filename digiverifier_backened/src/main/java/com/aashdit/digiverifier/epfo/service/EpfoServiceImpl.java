@@ -380,10 +380,21 @@ public class EpfoServiceImpl implements EpfoService {
 			
 	        try {
 				System.out.println("____________________epfoDetails.getUanusername()"+epfoDetails);
-	        	request.put(EPFOConstants.EPFO_USR,epfoDetails.getUanusername());
 				
-				request.put(EPFOConstants.EPFO_PWD,' ');
-				request.put(EPFOConstants.EPFO_UAN,epfoDetails.getUanusername());
+				//old api
+//	        	request.put(EPFOConstants.EPFO_USR,epfoDetails.getUanusername());
+//				
+//				request.put(EPFOConstants.EPFO_PWD,' ');
+//				request.put(EPFOConstants.EPFO_UAN,epfoDetails.getUanusername());
+				
+				// old api
+				
+				//new Api
+				List<String> uanNumbers = new ArrayList<>();
+				uanNumbers.add(epfoDetails.getUanusername()); // Add UANs to the list
+				request.put("uan_list", uanNumbers);
+
+				 
 				//request.put(EPFOConstants.EPFO_PARAM_H,"string");
 //				epfo_param_c_array.put(
 //						new JSONObject()
@@ -402,15 +413,45 @@ public class EpfoServiceImpl implements EpfoService {
 				HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
 				System.out.println("\n------epfoSecurityConfig ------ "+epfoSecurityConfig.getFinalSubmitPostUrl());
 				System.out.println("\n------epfoDetails ------ "+epfoDetails.getTransactionid());
-				response = restTemplate.exchange(epfoSecurityConfig.getFinalSubmitPostUrl()+epfoDetails.getTransactionid(), HttpMethod.POST, entity, String.class);
+				
+				// Old Api
+//				response = restTemplate.exchange(epfoSecurityConfig.getFinalSubmitPostUrl()+epfoDetails.getTransactionid(), HttpMethod.POST, entity, String.class);
+				
+				// New Api
+				response = restTemplate.exchange(epfoSecurityConfig.getEpfoBulkUanUrl(),HttpMethod.POST, entity, String.class);
+				
 				String responseBody=response.getBody();
 				JSONObject obj = new JSONObject(responseBody);
-				JSONArray messagee = obj.getBoolean("success") ? obj.getJSONArray("message") : new JSONArray();
+								
+				JSONObject messageObj = obj.getJSONObject("message");
+				String dynamicKey = messageObj.keys().next();
+
+				JSONObject uanData = messageObj.getJSONObject(dynamicKey);
+								
+//				JSONArray messagee = obj.getBoolean("success") ? obj.getJSONArray("message") : new JSONArray();
+				
+				//NEW CODE CHANGE START
+	            JSONArray messagee = null;
+//	            JSONArray messagee = uanData.getBoolean("success") ? uanData.getJSONArray("message") : new JSONArray();
+				if (uanData.getBoolean("success") && uanData.has("message") && uanData.get("message") instanceof JSONArray) {
+				    JSONArray messageArray = uanData.getJSONArray("message");    
+					messagee = messageArray;
+				}
+				else if(uanData.get("message") instanceof String) {
+			        Object messageOb = uanData.get("message");
+			        String messageString = (String) messageOb;
+			        message = messageString;
+				}
+				//NEW CODE CHANGE END
+				
 				System.out.println("\n--------obj --------- "+epfoDetails.getCandidateCode()+obj);
 				ServiceOutcome<CandidateDetailsDto> candidateByCandidateCode = candidateService.getCandidateByCandidateCode(
 					epfoDetails.getCandidateCode());
 				System.out.println("\n--------candidateByCandidateCode --------- "+candidateByCandidateCode);
-				String resMsg = obj.toString();
+//				String resMsg = obj.toString();
+//				new code start
+				String resMsg = uanData.toString();
+//				new code end
 				System.out.println("\n--------resMsg --------- "+resMsg);
 				System.out.println("\n--------resMsg --------- "+epfoDetails.getUanusername());
 				System.out.println("\n--------resMsg --------- "+candidateByCandidateCode.getData().getCandidateId());
@@ -433,7 +474,8 @@ public class EpfoServiceImpl implements EpfoService {
 				candidateEPFOResponseRepository.save(candidateEPFOResponse);
 				System.out.println("\n____________________after candidateEPFOResponse "+candidateByCandidateCode.getData().getCandidateId()+candidateEPFOResponse);
 				if(!obj.getString("code").equals("fail")){
-					JSONArray epfoData = obj.getJSONArray("message");
+//					JSONArray epfoData = obj.getJSONArray("message");
+				    JSONArray epfoData = uanData.getJSONArray("message");    
 			        final ObjectMapper objectMapper = new ObjectMapper();
 			        EpfoDataFromApiDto[] epfoDataFromApiDto = objectMapper.readValue(epfoData.toString(), EpfoDataFromApiDto[].class);
 			        List<EpfoDataFromApiDto> epfoList = new ArrayList(Arrays.asList(epfoDataFromApiDto));
@@ -536,7 +578,8 @@ public class EpfoServiceImpl implements EpfoService {
 	        }catch (Exception ex) {
 	        	outcome.setData(response!=null?response.getStatusCode().toString():"");
 				outcome.setOutcome(outcomeBoolean);
-				outcome.setMessage("Unable to get epfo details.");
+//				outcome.setMessage("Unable to get epfo details.");
+				outcome.setMessage(message != null ? message : "Unable to get epfo details.");
 	        	log.error("Exception occured in getEpfodetail:",ex); // Add the Proper logging Message here
 			}
 		}
@@ -786,7 +829,7 @@ public class EpfoServiceImpl implements EpfoService {
 		        	//updating CAF table
 								List<CandidateCafExperience> candidateCafExperiences = candidateService.getCandidateExperienceFromItrAndEpfoByCandidateId(
 							        		candidate.getCandidateId(), false);
-							        log.info("CAFEXPEROEINCE FOR BULK UAN ::{}", candidateCafExperiences.size());
+//							        log.info("CAFEXPEROEINCE FOR BULK UAN ::{}", candidateCafExperiences.size());
 							     // Reattach detached entities to the current session
 							        List<CandidateCafExperience> attachedExperiences = new ArrayList<>();
 							        for (CandidateCafExperience experience : candidateCafExperiences) {
@@ -890,7 +933,8 @@ public class EpfoServiceImpl implements EpfoService {
 	        	try {
 					String captchamessage=response.getBody();
 					JSONObject captchaobj = new JSONObject(captchamessage);
-					log.info("Response from EPFO captchaobj API - obj:{} ",captchaobj);
+//					log.info("Response from EPFO captchaobj API - obj:{} ",captchaobj);
+					log.info("Response from EPFO captchaobj API - obj: {} {}", captchaobj.getBoolean("success"), candidateCode);
 					if(captchaobj.getBoolean("success")) {
 						String captchaString = captchaobj.getString("captcha");
 						
@@ -905,6 +949,7 @@ public class EpfoServiceImpl implements EpfoService {
 					}else {
 						
 					    String error = captchaobj.getString("error");
+						log.info("Error in Response from EPFO captchaobj API: {} {}", captchaobj.getString("error"), candidateCode);
 					    svcOutcome.setData(null);
 		        		svcOutcome.setMessage(error);
 		        		svcOutcome.setOutcome(false);
@@ -961,28 +1006,46 @@ public class EpfoServiceImpl implements EpfoService {
 					JSONObject captchaobj = new JSONObject(captchamessage);
 					log.info("Response from EPFO epfoOTPScreenCaptcha API - obj:{} ",captchaobj);
 					if(captchaobj.getBoolean("success")) {
-						String captchaString = captchaobj.getString("captcha");
+//						String captchaString = captchaobj.getString("captcha");
+					    Object captcha = captchaobj.get("captcha");
+					    String captchaString;
+					    if (captcha instanceof String) {
+					        captchaString = (String) captcha;
+					        epfoDetails.setCaptcha(captchaString);
+							
+							svcOutcome.setData(epfoDetails);
+			        		svcOutcome.setMessage("OTP Captcha retrived successfully..");
+			        		svcOutcome.setOutcome(true);
+					    } else if (captcha instanceof JSONObject) {
+					        JSONObject captchaJson = (JSONObject) captcha;
+					        captchaString = captchaJson.getString("inner_text");
+			        		svcOutcome.setMessage(captchaString);
+			        		svcOutcome.setOutcome(false);
+					    }
+					    else {
+					        throw new JSONException("Unexpected type for 'captcha'");
+					    }
 						
 //						EpfoDetailsDto epfoDetails = new EpfoDetailsDto();
 //						epfoDetails.setCandidateCode(candidateCode);
 //						epfoDetails.setTransactionid(tID);
-						epfoDetails.setCaptcha(captchaString);
-						
-						svcOutcome.setData(epfoDetails);
-		        		svcOutcome.setMessage("OTP Captcha retrived successfully..");
-		        		svcOutcome.setOutcome(true);
+//						epfoDetails.setCaptcha(captchaString);
+//						
+//						svcOutcome.setData(epfoDetails);
+//		        		svcOutcome.setMessage("OTP Captcha retrived successfully..");
+//		        		svcOutcome.setOutcome(true);
 					}else {
 						
 					    String error = captchaobj.getString("error");
 					    log.info("OTP CAPTCHA ERROR ::{}",error);
 					    svcOutcome.setData(null);
-		        		svcOutcome.setMessage("Please enter the correct and valid captcha..!");
+		        		svcOutcome.setMessage("Something went wrong.!");
 		        		svcOutcome.setOutcome(false);
 					}
 				} catch (JSONException e) {
 					log.error("Json Exception occured inn TID..",e);
 					svcOutcome.setData(null);
-		    		svcOutcome.setMessage("Please checked the entered captcha is correct..!");
+		    		svcOutcome.setMessage("Something went wrong.!");
 		    		svcOutcome.setOutcome(false);
 				}
         	}else {
@@ -1120,7 +1183,16 @@ public class EpfoServiceImpl implements EpfoService {
 		        		}
 			        }
 		        
-	        	}else if(response.getStatusCode() == HttpStatus.OK && obj.getString("code").equals("fail")) {
+	        	}else if(response.getStatusCode() == HttpStatus.OK && obj.getString("code").equals("Failure")) {
+	        	 Object	errorMessage = obj.get("message");
+			     if (errorMessage instanceof JSONObject) {
+			    	 JSONObject captchaJson = (JSONObject) errorMessage;
+			    	 message = captchaJson.getString("error");
+			    	 log.error(message+" "+candidateByCandidateCode.getData().getCandidateId());	 
+			     }
+			     outcomeBoolean=false;
+	        	}
+				else if(response.getStatusCode() == HttpStatus.OK && obj.getString("code").equals("fail")) {
 	        		message = obj.getString("message");
 	        		if(message.equals("Epfo site is Busy,pls make the request again")) {
 	        			message = "EPFO site is down, Please try after 7 PM or late night, If you don’t have UAN skip and complete the verification.";

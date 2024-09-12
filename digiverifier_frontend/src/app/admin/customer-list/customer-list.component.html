@@ -46,7 +46,7 @@
                                                 <button type="button" (click)="inactiveCust(item.organizationId, item.isActive)" class="{{ item.isActive ? 'ms-Button-danger' : 'ms-Button' }}" data-toggle="tooltip" title="{{ item.isActive ? 'Inactive' : 'Active' }}">
                                                     <i class="fas" [ngClass]="item.isActive ? 'fa-user-slash' : 'fa-user-check'"></i>
                                                 </button>
-                                                <button type="button" (click)="deleteCust(item.organizationId)" class="ms-Button-danger" data-toggle="tooltip" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                                                <!-- <button type="button" (click)="deleteCust(item.organizationId)" class="ms-Button-danger" data-toggle="tooltip" title="Delete"><i class="fas fa-trash-alt"></i></button> -->
                                                 </div>
                                             </td>
                                         </tr>

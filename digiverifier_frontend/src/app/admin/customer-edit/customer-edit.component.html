@@ -204,6 +204,39 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12">Token Url For Status Callback:
+                                    </label>
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control form-control-sm"
+                                        formControlName="tokenUrlForCallBack">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12">User For Token Url For Status Callback:
+                                    </label>
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control form-control-sm"
+                                        formControlName="callBackUrlUser">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12">Password For Token Url For Status Callback:
+                                    </label>
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control form-control-sm"
+                                        formControlName="callBackUrlPassword">
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-md-3">
                                 <div >
                                     <label><b>Show validation form to candidate:</b></label>
@@ -245,7 +278,7 @@
                             </div>
                             <div class="ml-3">
                                 <div>
-                                    <label><b>Password Policy (90Days):</b></label>
+                                    <label><b>Password Policy ({{passwordPolicyDay}} Days):</b></label>
                                     <div class="showvalid">
                                         <div class="checkbox">
                                             <span class="space"></span>
@@ -281,6 +314,36 @@
                                         <option value="6">Last 6 Passwords</option>
                                         <option value="8">Last 8 Passwords</option>
                                     </select>
+                                </div>
+                            </div> 
+
+                            <div class="ml-3">
+                                <div>
+                                    <label><b>Multi-factor authentication (MFA):</b></label>
+                                    <div class="showvalid">
+                                        <div class="checkbox">
+                                            <span class="space"></span>
+                                            <span class="space"></span>
+                                            <span class="space"></span>
+                                            <span>
+                                                <label class="checkbox-label">Yes</label>
+                                            </span>
+                                            <span>
+                                                <input type="radio" class="inputcheckbox"
+                                                    (click)="selectMFA($event)" formControlName="isMFA"
+                                                    value="true">
+                                            </span>
+                                            <span class="space"></span>
+                                            <span>
+                                                <label class="checkbox-label">NO</label>
+                                            </span>
+                                            <span>
+                                                <input type="radio" class="inputcheckbox"
+                                                    (click)="selectMFA($event)" formControlName="isMFA"
+                                                    value="false">
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div> 
                     </div>

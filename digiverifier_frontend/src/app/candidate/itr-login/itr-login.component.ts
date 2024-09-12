@@ -23,7 +23,7 @@ export class ItrLoginComponent implements OnInit {
     this.candidateCode = this.router.snapshot.paramMap.get('candidateCode');
     this.candidateService.getCurrentStatusByCandidateCode(this.candidateCode).subscribe((result:any)=>{
       if(result.outcome==true){
-        console.log(result.data)
+//         console.log(result.data)
         const navURL = result.data.split('#/')[1];
         this.navRouter.navigate([navURL]);
       } else {
@@ -54,17 +54,21 @@ export class ItrLoginComponent implements OnInit {
 
   updateITRPanNumber() {
     this.candidateService.getCandidateDetails(this.candidateCode).subscribe((result: any) => {
-      console.warn("CandidateData In ITR:::", result);
+
+      result.data = this.candidateService.decryptData(result.data);
+      result.data = JSON.parse(result.data);
+      // Parse the decrypted JSON string into an object
+      //@ts-ignore
       this.itrPanNumber = result.data.itrPanNumber;
-      console.warn("ITRPANNUMBER::: ", this.itrPanNumber);
+//       console.warn("ITRPANNUMBER::: ", this.itrPanNumber);
       this.uan = result.data.uan;
       this.updateITRPanNumberOrUserName();
     });
   }
 
   updateITRPanNumberOrUserName(){
-    console.warn("ITRPan::",this.itrPanNumber)
-    console.warn("this is calling::::");
+//     console.warn("ITRPan::",this.itrPanNumber)
+//     console.warn("this is calling::::");
     const userNameControl = this.formITRlogin.get('userName');
     if (userNameControl) {
       userNameControl.setValue(this.itrPanNumber);

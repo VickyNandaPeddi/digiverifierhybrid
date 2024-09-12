@@ -11,4 +11,8 @@ import com.aashdit.digiverifier.config.superadmin.model.Organization;
 public interface OrganizationRepository extends JpaRepository<Organization, Long> {
 
 	List<Organization> findAllByIsActive(boolean isActive);
+	
+	List<Organization> findByOrganizationName(String orgName);
+	
+	List<Organization> findByOrganizationEmailId(String orgEmailId);
 }

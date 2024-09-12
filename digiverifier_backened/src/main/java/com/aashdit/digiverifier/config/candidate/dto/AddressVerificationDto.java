@@ -8,4 +8,5 @@ public class AddressVerificationDto extends CommonVerificationDto {
 
 	private String type;
 	private String customRemark;
+	private String periodOfStay;
 }

@@ -95,7 +95,7 @@ export class CandidateFormComponent implements OnInit {
     yearOfPassing: new FormControl('', [Validators.required,Validators.minLength(4), Validators.maxLength(4), Validators.pattern("[1-2]\\d{3}")]),
     //totalMarks: new FormControl('', [Validators.minLength(1), Validators.maxLength(4), Validators.pattern("^[0-9]*$")]),
     file: new FormControl('', Validators.required),
-    boardOrUniversityName: new FormControl('')   
+    boardOrUniversityName: new FormControl('')
   });
 
   formCandidateAddress = new FormGroup({
@@ -152,24 +152,28 @@ export class CandidateFormComponent implements OnInit {
         history.pushState(null, "", document.URL);
       });
 
-      this.getToday = calendar.getToday();   
+      this.getToday = calendar.getToday();
     this.candidateCode = this.router.snapshot.paramMap.get('candidateCode');
     this.candidateService.getServiceConfigCodes(this.candidateCode).subscribe((result:any)=>{
       this.getServiceConfigCodes = result.data;
     });
     this.candidateService.getCandidateFormData(this.candidateCode).subscribe((data: any)=>{
-      this.CandidateFormData=data.data;
-      this.candidateName=this.CandidateFormData.candidate.candidateName;
-      this.dateOfBirth=this.CandidateFormData.candidate.panDob;
-      // this.dateOfBirth=this.CandidateFormData.candidate.dateOfBirth;
-      this.panNumber=this.CandidateFormData.candidate.itrPanNumber;
-      this.candidateUan=this.CandidateFormData.candidateUan;
-      this.candidateAddressData=this.CandidateFormData.candidateCafAddressDto;
-      this.candidateEduData=this.CandidateFormData.candidateCafEducationDto;
-      this.candidateEXPData=this.CandidateFormData.candidateCafExperienceDto;
-      this.isFresher=this.CandidateFormData.candidate.isFresher;
-      this.isUanSkipped=this.CandidateFormData.candidate.isUanSkipped;
-      
+      data.data = this.candidateService.decryptData(data.data);
+      // Parse the decrypted JSON string into an object
+      data.data = JSON.parse(data.data);
+       this.CandidateFormData=data.data;
+       this.candidateName=this.CandidateFormData.candidate.candidateName;
+       this.dateOfBirth=this.CandidateFormData.candidate.panDob;
+       // this.dateOfBirth=this.CandidateFormData.candidate.dateOfBirth;
+       this.panNumber=this.CandidateFormData.candidate.itrPanNumber;
+       this.candidateUan=this.CandidateFormData.candidateUan;
+       this.candidateAddressData=this.CandidateFormData.candidateCafAddressDto;
+       this.candidateEduData=this.CandidateFormData.candidateCafEducationDto;
+       this.candidateEXPData=this.CandidateFormData.candidateCafExperienceDto;
+       this.isFresher=this.CandidateFormData.candidate.isFresher;
+       this.isUanSkipped=this.CandidateFormData.candidate.isUanSkipped;
+   
+
       if(this.candidateUan!=null){
         this.isUanSkipped=false;
       }else if(this.candidateEXPData){
@@ -178,31 +182,31 @@ export class CandidateFormComponent implements OnInit {
 
       if(this.candidateEXPData.length != 0){
         this.disableSubmit=false;
-        //sorting 
-        
+        //sorting
+
         // this.candidateEXPData = this.candidateEXPData.sort((a:any, b:any) => {
         //   const dateA = a.inputDateOfJoining ? moment(a.inputDateOfJoining, 'DD/MM/YYYY') : moment(a.inputDateOfExit, 'DD/MM/YYYY');
         //   const dateB = b.inputDateOfJoining ? moment(b.inputDateOfJoining, 'DD/MM/YYYY') : moment(b.inputDateOfExit, 'DD/MM/YYYY');
-          
+
         //   const yearA = isNaN(dateA.year()) ? 0 : dateA.year();
         //   const yearB = isNaN(dateB.year()) ? 0 : dateB.year();
-          
+
         //   return yearB - yearA;
-        // }); 
-        
+        // });
+
         this.candidateEXPData = this.candidateEXPData.sort((a:any, b:any) => {
           const dateA = a.inputDateOfJoining ? moment(a.inputDateOfJoining, 'DD/MM/YYYY') : moment(a.inputDateOfExit, 'DD/MM/YYYY');
           const dateB = b.inputDateOfJoining ? moment(b.inputDateOfJoining, 'DD/MM/YYYY') : moment(b.inputDateOfExit, 'DD/MM/YYYY');
-        
+
           const yearA = isNaN(dateA.year()) ? 0 : dateA.year();
           const yearB = isNaN(dateB.year()) ? 0 : dateB.year();
-        
+
           const monthA = isNaN(dateA.month()) ? 0 : dateA.month();
           const monthB = isNaN(dateB.month()) ? 0 : dateB.month();
-        
+
           const dayA = isNaN(dateA.date()) ? 0 : dateA.date();
           const dayB = isNaN(dateB.date()) ? 0 : dateB.date();
-        
+
           if (yearA !== yearB) {
             return yearB - yearA;
           } else if (monthA !== monthB) {
@@ -211,10 +215,10 @@ export class CandidateFormComponent implements OnInit {
             return dayB - dayA;
           }
         });
-        
+
       }
-      console.log("this.candidateUan::{}",this.candidateUan);
-      console.log("this.disableSubmit::{}",this.disableSubmit);
+//       console.log("this.candidateUan::{}",this.candidateUan);
+//       console.log("this.disableSubmit::{}",this.disableSubmit);
       const isRelVerify=this.getServiceConfigCodes.includes('RELBILLTRUE');
       const isRelVerifyFalse=this.getServiceConfigCodes.includes('RELBILLFALSE');
       if(this.candidateAddressData){
@@ -227,7 +231,7 @@ export class CandidateFormComponent implements OnInit {
         // }
       }
     });
-    
+
     this.candidateService.getAllSuspectClgList().subscribe((data: any)=>{
       this.AllSuspectClgList=data.data;
     });
@@ -238,13 +242,13 @@ export class CandidateFormComponent implements OnInit {
     this.candidateService.getQualificationList().subscribe((data: any)=>{
       this.QualificationList=data.data;
     });
-    
+
    }
-   
+
 
   selectFile(event:any) {
     const file = event.target.files[0];
-    
+
     const fileType = event.target.files[0].name.split('.').pop();
     if(fileType == 'pdf' || fileType == 'PDF'){
       this.currentFile = file;
@@ -330,7 +334,7 @@ export class CandidateFormComponent implements OnInit {
     }, (res) => {
       this.closeModal = `Dismissed ${this.getDismissReason(res)}`;
     });
-    
+
   }
 //saveCandidateExperienceForm
 onJoiningDate(event:NgbDate) {
@@ -384,7 +388,7 @@ calculateDiff(doe:any,doj:any){
   var joinDate = new Date(parseInt(join[2]) , parseInt(join[1]) , parseInt(join[0]));
   let differenceInTime = exitDate.getTime() - joinDate.getTime();
   // To calculate the no. of days between two dates
-  let differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24)); 
+  let differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
   return differenceInDays;
 }
 
@@ -394,7 +398,7 @@ onSubmitEXP(formCandidateEXP: FormGroup) {
   const inputDateOfExit = this.formCandidateEXP.get('inputDateOfExit');
   const outputDateOfJoining = this.formCandidateEXP.get('outputDateOfJoining');
   const outputDateOfExit = this.formCandidateEXP.get('outputDateOfExit');
-  console.log('..............inputDateOfJoining..........',inputDateOfJoining);
+//   console.log('..............inputDateOfJoining..........',inputDateOfJoining);
   if (inputDateOfJoining && inputDateOfJoining.value) {
     var partsDoj =String(inputDateOfJoining.value).split('/');
     var dojDate = new Date(inputDateOfJoining.value.year, inputDateOfJoining.value.month-1, inputDateOfJoining.value.day);
@@ -423,23 +427,23 @@ onSubmitEXP(formCandidateEXP: FormGroup) {
     this.outputexitDate=doe;
   }
 
-  
+
   this.patchformEXPccode();
   const candidateCafExperience = formCandidateEXP.value;
   const formData = new FormData();
   formData.append('candidateCafExperience', JSON.stringify(candidateCafExperience));
   formData.append('file', this.certificateFile);
-  console.log('..............CAN_FORM_EXPERIENCE..........',candidateCafExperience);
+//   console.log('..............CAN_FORM_EXPERIENCE..........',candidateCafExperience);
   //console.log(this.certificateFile);
 
   // formCandidateEXP.patchValue({
   //   serviceName: this.serviceName,
   //   colorColorName: this.colorName
   // })
-  
+
   if (this.formCandidateEXP_valid == true) {
     // this.candidateService.saveNUpdateCandidateExperience(formData).subscribe(
-    this.candidateService.saveCandidateExperienceInCForm(formData).subscribe(  
+    this.candidateService.saveCandidateExperienceInCForm(formData).subscribe(
       (result:any) => {
           if(result.outcome === true){
             Swal.fire({
@@ -486,9 +490,9 @@ selectResume(event:any) {
     }
 }
 onSubmit(candidateForm: FormGroup){
-  console.log(candidateForm,"----------")
-  
-  this.candidateService.getCandidateApplicationFormSubmit(this.candidateCode).subscribe(  
+//   console.log(candidateForm,"----------")
+
+  this.candidateService.getCandidateApplicationFormSubmit(this.candidateCode).subscribe(
     (result:any) => {
         // if(result.outcome === true){
         //   Swal.fire({
@@ -523,9 +527,9 @@ onSubmit(candidateForm: FormGroup){
   //       icon: 'warning'
   //     })
   //   }
-    
+
   //     })
- 
+
 }
 onSubmit_old(candidateForm: FormGroup) {
   let array : any=[];
@@ -545,7 +549,7 @@ onSubmit_old(candidateForm: FormGroup) {
   //  value.isAssetDeliveryAddress=$('.assetDeliveryAddress'+values.toString()).prop('checked')?true:false;
   // value.isPermanentAddress=$('.permanentAddress'+values.toString()).prop('checked')?true:false;
   // value.isPresentAddress=$('.presentAddress'+values.toString()).prop('checked')?true:false;
-  
+
 var assetDeliveryAddress = document.querySelector('.assetDeliveryAddress'+values.toString()) as HTMLInputElement;
 value.isAssetDeliveryAddress = assetDeliveryAddress.checked ? true : false;
 
@@ -568,11 +572,11 @@ value.isPresentAddress = presentAddress.checked ? true : false;
   const permanentAddress = $(".permanentAddress_check");
   const presentAddress = $(".presentAddress_check");
   const HighestQualification_check = $(".HighestQualification_check");
-  console.log(mainformData)
-  var i = 0, j=0, k=0, l=0; 
+//   console.log(mainformData)
+  var i = 0, j=0, k=0, l=0;
   $.each(assetAddress, function(idx,elem){
     //if($(elem).prop('checked')){
-    if(elem instanceof HTMLInputElement && elem.checked){  
+    if(elem instanceof HTMLInputElement && elem.checked){
       i++;
     }
   });
@@ -629,7 +633,7 @@ value.isPresentAddress = presentAddress.checked ? true : false;
       icon: 'warning'
     })
   }
-  
+
 }
 
 openLandlordAgreement(modalLandlordAgreement:any, document:any){
@@ -700,7 +704,7 @@ onTenureDOJ(event:any) {
     inputDateOfExit: finalDate
   });
  }
-ITRedit(EXPmodalData:any, 
+ITRedit(EXPmodalData:any,
   candidateEmployerName:any, candidateCafExperienceId:any, dateOfJoining:any, dateOfExit:any,
   outputDateOfJoining:any,outputDateOfExit:any , serviceName:any, row:any, colorName: any){
 
@@ -715,7 +719,7 @@ ITRedit(EXPmodalData:any,
     serviceName:serviceName,
     colorColorName: colorName
   });
-  console.log('serviceName colorName ' + serviceName + ' ' + colorName)
+//   console.log('serviceName colorName ' + serviceName + ' ' + colorName)
   this.serviceName = serviceName;
   this.colorName = colorName;
 
@@ -778,7 +782,7 @@ onSubmitITRedit(formITRedit:FormGroup, modal:any){
   }
 }
 formatDate(date:any) {
-  console.log(date,'date in formatDate');
+//   console.log(date,'date in formatDate');
   if(date==null){
     return null;
   }
@@ -787,10 +791,10 @@ formatDate(date:any) {
 }
 
 fetchjoinDateSelected() {
-  console.log('=================', this.getMinDate);
+//   console.log('=================', this.getMinDate);
 }
 fetchexitDateSelected() {
-  console.log('=================', this.Dateofexit);
+//   console.log('=================', this.Dateofexit);
 }
 
 inactiveCust(id: any) {

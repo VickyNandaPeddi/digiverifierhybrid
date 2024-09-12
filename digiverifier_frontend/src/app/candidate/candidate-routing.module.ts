@@ -22,7 +22,7 @@ import { ConventionLetterAcceptComponent } from './convention-letter-accept/conv
 import { ConventionalCandidateFormComponent } from './conventional-candidate-form/conventional-candidate-form.component';
 import { EpfoOtpCaptchaComponent } from './epfo-otp-captcha/epfo-otp-captcha.component';
 const routes: Routes = [
-  { path: '', component: CandidateComponent, 
+  { path: '', component: CandidateComponent,
   children:[
     { path: 'cType/:candidateCode', component: CandidateTypeComponent},
     { path: 'cAddressVerify/:candidateCode', component: AddressVerificationComponent},
@@ -45,7 +45,7 @@ const routes: Routes = [
     { path: 'conventionalCandidateForm/:candidateCode', component: ConventionalCandidateFormComponent},
     { path: 'conventionalLetterAccept/:candidateCode', component: ConventionLetterAcceptComponent},
     { path: 'epfootpcaptcha/:candidateCode', component: EpfoOtpCaptchaComponent}
-  ]  
+  ]
 }];
 
 @NgModule({

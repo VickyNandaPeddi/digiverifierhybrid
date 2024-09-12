@@ -1,7 +1,5 @@
 package com.aashdit.digiverifier.api.service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,20 +9,10 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.aashdit.digiverifier.api.model.ApiCandidate;
 import com.aashdit.digiverifier.common.ContentRepository;
+import com.aashdit.digiverifier.common.dto.EPFOResponseDto;
 import com.aashdit.digiverifier.common.enums.ContentCategory;
 import com.aashdit.digiverifier.common.enums.ContentSubCategory;
 import com.aashdit.digiverifier.common.enums.ContentType;
@@ -44,19 +33,15 @@ import com.aashdit.digiverifier.common.service.ContentService;
 import com.aashdit.digiverifier.common.util.RandomString;
 import com.aashdit.digiverifier.config.admin.model.User;
 import com.aashdit.digiverifier.config.admin.repository.UserRepository;
-import com.aashdit.digiverifier.config.admin.repository.VendorChecksRepository;
-import com.aashdit.digiverifier.config.admin.repository.VendorUploadChecksRepository;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateInvitationSentDto;
 import com.aashdit.digiverifier.config.candidate.model.Candidate;
+import com.aashdit.digiverifier.config.candidate.model.CandidateEmailStatus;
 import com.aashdit.digiverifier.config.candidate.model.CandidateResumeUpload;
 import com.aashdit.digiverifier.config.candidate.model.CandidateStatus;
 import com.aashdit.digiverifier.config.candidate.model.CandidateStatusHistory;
-import com.aashdit.digiverifier.config.candidate.model.CandidateVerificationState;
-import com.aashdit.digiverifier.config.candidate.model.OrganisationScope;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateAddCommentRepository;
+import com.aashdit.digiverifier.config.candidate.repository.CandidateEmailStatusRepository;
 import com.aashdit.digiverifier.config.candidate.repository.CandidateRepository;
 import com.aashdit.digiverifier.config.candidate.repository.CandidateResumeUploadRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateSampleCsvXlsMasterRepository;
 import com.aashdit.digiverifier.config.candidate.repository.CandidateStatusHistoryRepository;
 import com.aashdit.digiverifier.config.candidate.repository.CandidateStatusRepository;
 import com.aashdit.digiverifier.config.candidate.repository.CandidateVerificationStateRepository;
@@ -64,21 +49,15 @@ import com.aashdit.digiverifier.config.candidate.repository.OrganisationScopeRep
 import com.aashdit.digiverifier.config.candidate.repository.StatusMasterRepository;
 import com.aashdit.digiverifier.config.candidate.service.CandidateService;
 import com.aashdit.digiverifier.config.candidate.util.ExcelUtil;
-import com.aashdit.digiverifier.config.superadmin.Enum.ReportType;
-import com.aashdit.digiverifier.config.superadmin.dto.ReportSearchDto;
 import com.aashdit.digiverifier.config.superadmin.model.Organization;
 import com.aashdit.digiverifier.config.superadmin.repository.OrganizationRepository;
-import com.aashdit.digiverifier.config.superadmin.repository.ServiceSourceMasterRepository;
-import com.aashdit.digiverifier.config.superadmin.service.OrganizationService;
-import com.aashdit.digiverifier.config.superadmin.service.ReportService;
-import com.aashdit.digiverifier.epfo.remittance.repository.RemittanceRepository;
+import com.aashdit.digiverifier.email.dto.EmailProperties;
+import com.aashdit.digiverifier.epfo.model.CandidateEPFOResponse;
 import com.aashdit.digiverifier.epfo.repository.CandidateEPFOResponseRepository;
-import com.aashdit.digiverifier.epfo.repository.EpfoDataRepository;
-import com.aashdit.digiverifier.itr.repository.ITRDataRepository;
-import com.aashdit.digiverifier.utils.ApplicationDateUtils;
 import com.aashdit.digiverifier.utils.CommonValidation;
 import com.aashdit.digiverifier.utils.EmailRateLimiter;
 import com.aashdit.digiverifier.utils.SecurityHelper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -140,6 +119,13 @@ public class ApiServiceImpl implements ApiService {
 
 	@Autowired
 	private ContentService contentService;
+	
+	@Autowired
+	private CandidateEmailStatusRepository candidateEmailStatusRepository;
+	
+	@Autowired
+	@Lazy
+	private EmailProperties emailProperties;
 
 	SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
 	
@@ -405,5 +391,149 @@ public class ApiServiceImpl implements ApiService {
 			log.error("Exception occured in downloadCandidateStatusTrackerReport method in ReportServiceImpl-->", e);
 		}
 		return null;
+	}
+
+	@Override
+	public ServiceOutcome<EPFOResponseDto> getEPFODataAPI(String candidateCode) {
+		ServiceOutcome<EPFOResponseDto> outcome = new ServiceOutcome<>();
+		try {
+			Candidate candidate = candidateRepository.findByCandidateCode(candidateCode);
+			List<CandidateEPFOResponse> uanList = candidateEPFOResponseRepository
+					.findByCandidateId(candidate.getCandidateId());
+			if(!uanList.isEmpty()) {
+		        ObjectMapper objectMapper = new ObjectMapper();
+				EPFOResponseDto responseDTO = objectMapper.readValue(uanList.get(0).getEPFOResponse(), EPFOResponseDto.class);
+				
+				outcome.setData(responseDTO);
+				outcome.setOutcome(true);
+				outcome.setStatus("Success");
+				outcome.setMessage("Fetch Successful");
+			} else {
+				outcome.setData(null);
+				outcome.setOutcome(false);
+				outcome.setStatus("Failure");
+				outcome.setMessage("Data Not Found.");
+			}
+			
+		} catch (Exception e) {
+			outcome.setData(null);
+			outcome.setOutcome(false);	
+			outcome.setStatus("Failure");
+			outcome.setMessage("Something went wrong.");
+
+			log.error("Exception occured in getEPFODataAPI method in ApiServiceImpl-->" + e);
+		}
+		
+		return outcome;
+	}
+	
+	@Override
+	public ServiceOutcome<List> getInvitaionLink(List<ApiCandidate> reqCandidateList) {
+		ServiceOutcome<List> svcSearchResult = new ServiceOutcome<List>();
+		try {
+			User user = SecurityHelper.getCurrentUser();
+			Organization organization = organizationRepository.findById(user.getOrganization().getOrganizationId())
+					.get();
+			RandomString rd = null;
+			List<Candidate> candidates = null;
+			List<Candidate> candidateList = null;
+			List<CandidateStatus> candidateStatusList = new ArrayList<CandidateStatus>();
+ 
+			if (reqCandidateList != null) {
+				candidates = setCandidateObj(reqCandidateList, organization.getNoYearsToBeVerified());
+			}
+			if (candidates != null && !candidates.isEmpty()) {
+				for (Candidate candidate : candidates) {
+					candidate.setOrganization(organization);
+					rd = new RandomString(12);
+					Candidate findByCandidateCode = candidateRepository.findByCandidateCode(rd.nextString());
+					if (findByCandidateCode != null) {
+						rd = new RandomString(12);
+						candidate.setCandidateCode(rd.nextString());
+					} else {
+						candidate.setCandidateCode(rd.nextString());
+					}
+					candidate.setIsLoaAccepted(false);
+					candidate.setApprovalRequired(false);
+					candidate.setIsActive(true);
+					candidate.setCreatedOn(new Date());
+					candidate.setCreatedBy(user);
+				}
+				candidateList = candidateRepository.saveAllAndFlush(candidates);
+				uploadResume(reqCandidateList, candidateList);
+			}
+			if (candidateList != null && !candidateList.isEmpty()) {
+ 
+//				candidateList.forEach(candidateOBJ -> candidateOBJ.setCandidateSampleId(result));
+				candidateRepository.saveAllAndFlush(candidateList);
+				for (Candidate candidate : candidateList) {
+					CandidateStatus candidateStatus = new CandidateStatus();
+					candidateStatus.setCandidate(candidate);
+					candidateStatus.setCreatedBy(user);
+					candidateStatus.setCreatedOn(new Date());
+					if (candidate.getCcEmailId() != null && !candidate.getCcEmailId().isEmpty()) {
+						if (commonValidation.validationEmail(candidate.getEmailId())) {
+							candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("NEWUPLOAD"));
+						} else {
+							candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("INVALIDUPLOAD"));
+							candidateStatus.setLastUpdatedOn(new Date());
+							candidateStatus.setLastUpdatedBy(user);
+						}
+ 
+					} else {
+						if (commonValidation.validationEmail(candidate.getEmailId())) {
+							candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("NEWUPLOAD"));
+						} else {
+							candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("INVALIDUPLOAD"));
+							candidateStatus.setLastUpdatedOn(new Date());
+							candidateStatus.setLastUpdatedBy(user);
+						}
+					}
+					candidateStatus = candidateStatusRepository.save(candidateStatus);
+					candidateStatusList.add(candidateStatus);
+					createCandidateStatusHistory(candidateStatus, "NOTCANDIDATE");
+ 
+				}
+				List<String> referenceList = candidateStatusList.stream()
+						.filter(c -> c.getStatusMaster().getStatusCode().equals("NEWUPLOAD"))
+						.map(x -> emailProperties.getDigiverifierForwardUrllink() + x.getCandidate().getCandidateCode()).collect(Collectors.toList());
+				for (Candidate candidate : candidateList) {
+					CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(candidate.getCandidateCode());
+					candidateStatus.setCandidate(candidate);
+					candidateStatus.setCreatedBy(user);
+					candidateStatus.setCreatedOn(new Date());
+					candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("INVITATIONSENT"));
+					candidateStatus = candidateStatusRepository.save(candidateStatus);
+					createCandidateStatusHistory(candidateStatus, "NOTCANDIDATE");
+					CandidateEmailStatus candidateEmailStatus = new CandidateEmailStatus();
+					candidateEmailStatus.setCreatedBy(user);
+					candidateEmailStatus.setCreatedOn(new Date());
+					candidateEmailStatus.setCandidate(candidateStatus.getCandidate());
+					candidateEmailStatus.setDateOfEmailInvite(new Date());
+					candidateEmailStatus.setCandidateStatus(candidateStatus);
+					candidateEmailStatusRepository.save(candidateEmailStatus);
+					if (candidateStatus.getCandidate().getOrganization().getCallBackUrl() != null) {
+						candidateService.postStatusToOrganization(candidateStatus.getCandidate().getCandidateCode());
+					}
+ 
+				}
+ 
+				svcSearchResult.setData(referenceList);
+				svcSearchResult.setOutcome(true);
+				svcSearchResult.setMessage("File Uploaded Successfully");
+			} else {
+				svcSearchResult.setData(null);
+				svcSearchResult.setOutcome(false);
+				svcSearchResult.setMessage(
+						"File Could not be Uploaded- filename already exists OR the file content is invalid.");
+			}
+		} catch (Exception e) {
+			svcSearchResult.setData(null);
+			svcSearchResult.setOutcome(false);
+			svcSearchResult.setMessage("File Could not be Uploaded.");
+			log.error("Exception occured in saveCandidateInformation method in CandidateServiceImpl-->" + e);
+			throw new RuntimeException("fail to store csv/xls data: " + e.getMessage());
+		}
+		return svcSearchResult;
 	}
 }

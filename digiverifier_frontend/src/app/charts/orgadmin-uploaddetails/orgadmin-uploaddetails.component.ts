@@ -70,6 +70,7 @@ updateCandidate = new FormGroup({
   emailId: new FormControl('', [Validators.required,Validators.email])
 });
   PANTOUAN: boolean = false;
+  CAPGSCOPE: boolean = false;
 
 patchUserValues() {
   this.formSendInvitation.patchValue({
@@ -135,7 +136,7 @@ reFetchUANPatchValues() {
         this.getServiceConfigCodes = result.data;
         console.log("ORG SERVICES::{}",this.getServiceConfigCodes);
       });
-      
+
     }
 
     if (this.getConventionalStatCodes) {
@@ -162,17 +163,17 @@ reFetchUANPatchValues() {
       });
     }
 
-    
+
   }
 
-  downloadReports(candidate: any, reportType: any) { 
+  downloadReports(candidate: any, reportType: any) {
     if(reportType == 'Final Report') {
       for(let i=0; i<this.ChartDataListing.length; i++) {
         let index = _.findIndex(this.ChartDataListing[i].contentDTOList, {contentSubCategory: 'FINAL'});
         this.ChartDataListing[i].pre_approval_content_id = (index != -1) ? this.ChartDataListing[i].contentDTOList[index].contentId : -1;
         console.log('Lavanyafinal',index)
         this.startdownload=true
-       
+
       }
     } else if(reportType == 'Interim Report') {
       for(let i=0; i<this.ChartDataListing.length; i++) {
@@ -180,14 +181,14 @@ reFetchUANPatchValues() {
         this.ChartDataListing[i].pre_approval_content_id = (index != -1) ? this.ChartDataListing[i].contentDTOList[index].contentId : -1;
         console.log('interim',index)
         this.startdownload=true
-       
+
       }
     } else if(reportType == 'QC Pending'){
       for(let i=0; i<this.ChartDataListing.length; i++) {
         let index = _.findIndex(this.ChartDataListing[i].contentDTOList, {contentSubCategory: 'PRE_APPROVAL'});
         this.ChartDataListing[i].pre_approval_content_id = (index != -1) ? this.ChartDataListing[i].contentDTOList[index].contentId : -1;
         console.log('Lavanyafinal',index)
-        this.startdownload=true    
+        this.startdownload=true
       }
     }
 
@@ -200,7 +201,7 @@ reFetchUANPatchValues() {
         });
       }
     }
-  } 
+  }
 
   performSearch(){
     console.log('Search Text:', this.searchText);
@@ -250,19 +251,19 @@ reFetchUANPatchValues() {
       organisationId:orgId,
       roleName:userRoleName,
       userId:userID
-  
+
     };
     console.log('Search Data:', searchData);
-  
+
     // if (this.getConventionalStatCodes || this.getConventionalReportDeliveryStatCodes) {
       this.orgadmin.conventionalDashboardSearchData(searchData).subscribe((data: any) => {
         this.ChartDataListing = data.data.candidateDtoList;
         console.warn("data", data);
       })
     // }
-  
+
   }
-  
+
   ngOnInit(): void {
     const isCBadminVal = this.authService.getRoles();
     this.orgadmin
@@ -270,6 +271,8 @@ reFetchUANPatchValues() {
     .subscribe((result: any) => {
       if(result.data.includes('PANTOUAN'))
         this.PANTOUAN = true;
+      if (result.data.includes('EPFO') && !result.data.includes('EPFOEMPLOYEELOGIN') && !result.data.includes('ITR') && !result.data.includes('DIGILOCKER'))
+        this.CAPGSCOPE = true;
       if (this.getConventionalStatCodes) {
         $(".orgadmin_uploaddetails").addClass(this.getConventionalStatCodes);
         if (this.getConventionalStatCodes === "CONVENTIONALNEWUPLOAD") {
@@ -279,7 +282,7 @@ reFetchUANPatchValues() {
           this.stat_INVITATIONSENT = true;
           this.stat_btn_SendInvi = false;
           this.stat_linkAdminApproval = true;
-  
+
           // this.stat_btn_ReInvite = false;
           // this.stat_INVITATIONSENT = false;
           // this.stat_btn_SendInvi = false;
@@ -314,13 +317,13 @@ reFetchUANPatchValues() {
           this.stat_btn_SendInvi = false;
           this.stat_btn_ReInvite = false;
           this.stat_linkAdminApproval = false;
-  
+
         } else {
           this.isCBadmin = false;
         }
         //console.log(isCBadminVal);
         //console.log(this.isCBadmin);
-  
+
       }
       else if (this.getStatCodes) {
         $(".orgadmin_uploaddetails").addClass(this.getStatCodes);
@@ -331,7 +334,7 @@ reFetchUANPatchValues() {
           this.stat_INVITATIONSENT = true;
           this.stat_btn_SendInvi = false;
           this.stat_linkAdminApproval = true;
-  
+
           // this.stat_btn_ReInvite = false;
           // this.stat_INVITATIONSENT = false;
           // this.stat_btn_SendInvi = false;
@@ -368,7 +371,7 @@ reFetchUANPatchValues() {
           this.stat_btn_SendInvi = false;
           this.stat_btn_ReInvite = false;
           this.stat_linkAdminApproval = false;
-  
+
         }else{
           this.isCBadmin = false;
         }
@@ -376,9 +379,9 @@ reFetchUANPatchValues() {
         //console.log(this.isCBadmin);
         }
     });
-    
 
-     
+
+
 
 //Role Management
 this.orgadminservice.getRolePerMissionCodes(this.authService.getRoles()).subscribe(
@@ -445,7 +448,8 @@ this.orgadminservice.getRolePerMissionCodes(this.authService.getRoles()).subscri
       .subscribe((result: any) => {
         if(result.data.includes('PANTOUAN'))
           this.PANTOUAN = true;
-
+          if (result.data.includes('EPFO') && !result.data.includes('EPFOEMPLOYEELOGIN') && !result.data.includes('ITR') && !result.data.includes('DIGILOCKER'))
+            this.CAPGSCOPE = true;
         this.orgadmin.getUploadDetails(filterData).subscribe((uploadinfo: any)=>{
           this.getuploadinfo=uploadinfo.data.candidateStatusCountDto;
           //console.log(this.getuploadinfo);
@@ -456,18 +460,30 @@ this.orgadminservice.getRolePerMissionCodes(this.authService.getRoles()).subscri
             if(this.PANTOUAN) {
               if(this.getuploadinfo[i].statusName == 'Re Invite')
                 this.getuploadinfo[i].statusName = 'Re Fetch'
-              data.push({name: this.getuploadinfo[i].statusName, value: this.getuploadinfo[i].count, statcode: this.getuploadinfo[i].statusCode });
+                data.push({
+                  name: this.getuploadinfo[i].statusName,
+                  value: this.getuploadinfo[i].count,
+                  statcode: this.getuploadinfo[i].statusCode
+                });
+              } else if (this.PANTOUAN === false && this.CAPGSCOPE === true) {
+                if (this.getuploadinfo[i].statusName !== 'Upload expired' && this.getuploadinfo[i].statusName !== 'Re Invite') {
+                  data.push({
+                    name: this.getuploadinfo[i].statusName,
+                    value: this.getuploadinfo[i].count,
+                    statcode: this.getuploadinfo[i].statusCode
+                  });
+                }
             } else {
             data.push({name: this.getuploadinfo[i].statusName, value: this.getuploadinfo[i].count, statcode: this.getuploadinfo[i].statusCode });
           }
-          
+
           }
           chart.data = data;
-          
+
         });
       });
-      
-      
+
+
 // Add and configure Series
 let pieSeries = chart.series.push(new am4charts.PieSeries());
 
@@ -514,7 +530,7 @@ chart.legend.itemContainers.template.events.on("hit", (ev) => {
 });
 pieSeries.slices.template.cursorOverStyle = am4core.MouseCursorStyle.pointer;
     });
-   
+
 }
 
 conventionalLoadChartsUploadDetails() {
@@ -550,7 +566,6 @@ conventionalLoadChartsUploadDetails() {
     }
     this.orgadmin.conventionalGetUploadDetails(filterData).subscribe((uploadinfo: any) => {
       this.getConventionalUploadInfo = uploadinfo.data.candidateStatusCountDto;
-      console.log("getConventionalUploadInfo : ",this.getConventionalUploadInfo)
       let data = [];
       for (let i = 0; i < this.getConventionalUploadInfo.length; i++) {
         // let obj={};
@@ -621,7 +636,7 @@ conventionalLoadChartsUploadDetails() {
       }
     });
   }
- 
+
   sendinvitation(){
     this.patchUserValues();
     return this.orgadmin.saveInvitationSent(this.formSendInvitation.value).subscribe((result:any)=>{
@@ -761,13 +776,13 @@ conventionalLoadChartsUploadDetails() {
         // console.log(inputValues);
         arrNumber.push($(this).val());
       });
-      
+
       this.tmp = arrNumber;
       console.log(this.tmp);
     } else {
       $(".childCheck").prop('checked', false);
     }
-    
+
   }
 //*****************UPDATE CANDIDATE*****************//
   openModal(modalData:any, userId:any){
@@ -836,7 +851,7 @@ conventionalLoadChartsUploadDetails() {
         var userId: any = localStorage.getItem('userId');
         var fromDate: any = localStorage.getItem('dbFromDate');
         var toDate: any = localStorage.getItem('dbToDate');
-  
+
         console.warn("Current page : ", this.currentPageIndex)
         let filterData = {
           'fromDate': fromDate,
@@ -844,25 +859,25 @@ conventionalLoadChartsUploadDetails() {
           'status': this.getConventionalStatCodes,
           'pageNumber': this.currentPageIndex
         };
-  
+
         this.orgadmin.getConventionalChartDetails(filterData).subscribe((data: any) => {
           this.ChartDataListing = data.data.candidateDtoList;
           console.log("After : ", this.ChartDataListing);
         });
       }
-   
+
       if (this.getStatCodes) {
           var userId: any = localStorage.getItem('userId');
           var fromDate: any = localStorage.getItem('dbFromDate');
           var toDate: any = localStorage.getItem('dbToDate');
-   
+
           let filterData = {
               'fromDate': fromDate,
               'toDate': toDate,
               'status': this.getStatCodes,
               'pageNumber': this.currentPageIndex
           };
-   
+
           this.orgadmin.getChartDetails(filterData).subscribe((data: any) => {
               this.ChartDataListing = data.data.candidateDtoList;
               console.log("After : ", this.ChartDataListing);
@@ -897,7 +912,7 @@ conventionalLoadChartsUploadDetails() {
 //         const endIndex = startIndex + this.pageSize;
 //         return this.ChartDataListing.slice(startIndex, endIndex);
 //       });
-      
+
 //     }
 //   }
 
@@ -930,7 +945,7 @@ conventionalLoadChartsUploadDetails() {
   //       const endIndex = startIndex + this.pageSize;
   //       return this.ChartDataListing.slice(startIndex, endIndex);
   //     });
-      
+
   //   }
   // }
 
@@ -939,7 +954,7 @@ conventionalLoadChartsUploadDetails() {
         this.onPageChange(this.currentPageIndex + 1);
     }
   }
- 
+
   goToPrevPage(): void {
     if (this.currentPageIndex > 0) {
         this.onPageChange(this.currentPageIndex - 1);
@@ -983,7 +998,7 @@ conventionalLoadChartsUploadDetails() {
     }
     return 0;
   }
-  
+
     searchFilter(item: any): boolean {
       const searchText = this.searchText.toLowerCase();
       const candidateName = item.candidateName?.toLowerCase();
@@ -991,11 +1006,11 @@ conventionalLoadChartsUploadDetails() {
       const contactNumber = item.contactNumber?.toLowerCase();
       const applicantId = item.applicantId?.toLowerCase();
       const candidateStatusName = item.candidateStatusName?.toLowerCase();
-  
+
       return candidateName?.includes(searchText.toLowerCase()) ||
              emailId?.includes(searchText.toLowerCase()) ||
              contactNumber?.includes(searchText.toLowerCase()) ||
-             applicantId?.includes(searchText.toLowerCase()) || 
+             applicantId?.includes(searchText.toLowerCase()) ||
              candidateStatusName?.includes(searchText.toLocaleLowerCase());
   }
 

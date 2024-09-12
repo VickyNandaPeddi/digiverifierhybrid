@@ -2,7 +2,8 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12 text-center copyright">
-                <label>Copyright © 2021, Digiverifier. All rights reserved</label>
+                <label *ngIf="cwfCopyRight">{{cwfCopyRight}}</label>
+                <label *ngIf="!cwfCopyRight">Copyright © 2021, Digiverifier. All rights reserved</label>
             </div>
             <!-- <div class="col-md-6 poweredBy">
                 <span>Powered by </span>

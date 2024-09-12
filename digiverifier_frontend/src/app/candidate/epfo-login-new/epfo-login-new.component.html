@@ -68,7 +68,7 @@
                                 <div class="row my-4">
                                     <div class="col-md-12 text-center" style="margin: 10px 0; ">
                                         <button type="submit" class="btn btn-success btn-sm">Submit</button>
-                                        <button type="button" class="btn btn-danger btn-sm" (click)="redirect()">Cancel</button>
+                                        <button type="button" [hidden]="hideCancelBtn" class="btn btn-danger btn-sm" (click)="redirect()">Cancel</button>
                                     </div>
                                 </div>
                                 <div class="row">

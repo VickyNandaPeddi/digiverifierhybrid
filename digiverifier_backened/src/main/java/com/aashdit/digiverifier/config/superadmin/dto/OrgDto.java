@@ -39,6 +39,13 @@ public class OrgDto {
 	Date lastUpdatedOn;
 	String logoUrl;
 	String lastUpdatedBy;
+	private String callBackUrl;
+	private Boolean passwordPolicy;
+	private String lastPasswords;
+	private Long passwordPolicyDay;
+	private String tokenUrlForCallBack;
+	private String callBackUrlUser;
+	private String callBackUrlPassword;
 
 	
 }

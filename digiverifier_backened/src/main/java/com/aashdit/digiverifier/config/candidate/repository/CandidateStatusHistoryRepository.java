@@ -225,4 +225,26 @@ public interface CandidateStatusHistoryRepository extends JpaRepository<Candidat
 			+ "	CS.candidate_status_change_timestamp between ?1 and ?2 and o.organization_id in (?3) and CB.created_by in (?4) and SM.status_code In (?4) GROUP BY CB.candidate_id", nativeQuery = true)
 	List<CandidateStatusDto> findAllByCreatedOnBetweenAndCandidateOrganizationOrganizationIdInAndCreatedByUserIdIn(
 			Date startDate, Date endDate, List<Long> organizationIds, List<Long> agentIds, List<String> statusList);
+
+			@Query("SELECT COUNT(DISTINCT csh.candidate.id) " +
+		       "FROM CandidateStatusHistory csh " +
+		       "WHERE csh.candidate.organization.organizationId IN (:organizationId) " +
+		       "AND csh.candidate.createdBy.userId IN (:userId) " +
+		       "AND csh.candidateStatusChangeTimestamp BETWEEN :startDate AND :endDate " +
+		       "AND csh.statusMaster.statusCode = :status")
+		Integer countDistinctCandidateStatusHistory(@Param("organizationId") List<Long> organizationId,
+		                                         @Param("userId") List<Long> userId,
+		                                         @Param("startDate") Date startDate,
+		                                         @Param("endDate") Date endDate,
+		                                         @Param("status") String status);
+	
+	@Query("SELECT COUNT(DISTINCT csh.candidate.id) " +
+		       "FROM CandidateStatusHistory csh " +
+		       "WHERE csh.candidate.organization.organizationId IN (:organizationId) " +
+		       "AND csh.candidateStatusChangeTimestamp BETWEEN :startDate AND :endDate " +
+		       "AND csh.statusMaster.statusCode = :status")
+		Integer countDistinctCandidateStatusHistoryByOrg(@Param("organizationId") List<Long> organizationId,
+		                                         @Param("startDate") Date startDate,
+		                                         @Param("endDate") Date endDate,
+		                                         @Param("status") String status);
 }

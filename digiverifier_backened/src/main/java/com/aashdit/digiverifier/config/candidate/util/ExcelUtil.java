@@ -15,6 +15,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -336,6 +337,11 @@ public class ExcelUtil {
 				                        	candidate.setInputSubmitDate(getCellValue(row, 11));
 				                        	candidate.setInputSubmitTime(getCellValue(row, 12));
 				                        }
+				                        
+				                        if(getCellValue(row,13) != null && findByUserName.getOrganization().getOrganizationName().equalsIgnoreCase("CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED")) {
+											log.info("getCellValue(row, 13) for CANDIDATE EXCEL::{}",getCellValue(row, 13));
+											candidate.setCgSfCandidateId(getCellValue(row, 13));
+										}
 
 			                			if (emailRateLimiter.tryAcquire(candidate.getEmailId())) {
 				                            candidateList.add(candidate);
@@ -477,12 +483,21 @@ public class ExcelUtil {
 			
 	    	  XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
 	          XSSFSheet worksheet = workbook.getSheetAt(0);
+	          
+	          //checking header values null
+	          XSSFRow headerRow = worksheet.getRow(0); //header row
+	          if(getCellValue(headerRow, 0).equals("") || getCellValue(headerRow, 1).equals("") || 
+	        		  getCellValue(headerRow, 2).equals("")) {
+	        	  log.info("LOOKS LIKE OLD UPLOAD FILE IS USING..!");
+	        	  return bulkUanSearchList;
+	          }
+	          
 			  for(int i=1;i<worksheet.getPhysicalNumberOfRows() ;i++) {
 				  BulkUanDTO uanSearchData = new BulkUanDTO();
 		            XSSFRow row = worksheet.getRow(i);
 				  if(!getCellValue(row, 0).equals("")) {
 					  uanSearchData.setApplicantId(getCellValue(row, 0));
-					  uanSearchData.setUan(getCellValue(row, 1));
+					  uanSearchData.setUan(getCellValue(row, 2));
 					  uanSearchData.setUploadedBy(getUserForUploadedBy);
 					  uanSearchData.setBulkUanId(bulkUanId);
 					  uanSearchData.setTotalRecordFetched(0);
@@ -490,7 +505,7 @@ public class ExcelUtil {
 					  
 			          UanSearchData uanSave = new UanSearchData(); 
 					  uanSave.setApplicantId(getCellValue(row, 0));
-					  uanSave.setUan(getCellValue(row, 1));	
+					  uanSave.setUan(getCellValue(row, 2));	
 					  uanSave.setBulkUanId(bulkUanId);
 					  uanSave.setEPFOResponse("Search In Progress...");
 					  uanSave.setUploadedOn(uploadedOn);
@@ -513,12 +528,16 @@ public class ExcelUtil {
 							candidate.setCandidateCode(rd.nextString());
 						}
 						
+						if(!getCellValue(row, 1).equals("") && StringUtils.isNumeric(getCellValue(row, 1))) {
+							log.info("getCellValue(row, 1) for SFCANDIDATEID::{}",getCellValue(row, 1));
+							candidate.setCgSfCandidateId(getCellValue(row, 1));
+						}
 						candidate.setOrganization(findByUserName.getOrganization());
-						candidate.setCandidateName(getCellValue(row, 1));
-						candidate.setContactNumber(getCellValue(row, 1));
+						candidate.setCandidateName(getCellValue(row, 2));
+						candidate.setContactNumber(getCellValue(row, 2));
 						candidate.setEmailId("uan@gmail.com");
 						candidate.setApplicantId(getCellValue(row, 0));
-						candidate.setUan(getCellValue(row, 1));
+						candidate.setUan(getCellValue(row, 2));
 						candidate.setCreatedOn(new Date());
 						candidate.setCreatedBy(findByUserName);
 						candidate = candidateRepository.save(candidate);

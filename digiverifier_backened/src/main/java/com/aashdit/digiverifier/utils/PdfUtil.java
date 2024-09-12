@@ -13,11 +13,19 @@ import java.util.Locale;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.itextpdf.io.IOException;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.io.source.ByteArrayOutputStream;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -357,4 +365,153 @@ public class PdfUtil {
 	        }
  
 	    }
+		
+		public static void mergePurgedPdfFiles(List<InputStream> inputPdfList,
+				OutputStream outputStream) {
+				
+				float marginLeft = 5;
+			    float marginRight = 5;
+			    float marginTop = 5;
+			    float marginBottom = 50;
+
+			    try {
+			        Document document = new Document(PageSize.A4, marginLeft, marginRight, marginTop, marginBottom);
+			        PdfWriter pdfWriter = PdfWriter.getInstance(document, outputStream);
+			        pdfWriter.setPageEvent(new purgeFooterPageEvent());
+			        document.open();
+			        PdfContentByte pdfContentByte = pdfWriter.getDirectContent();
+			        int totalPageCount = 0;
+			        int pageNumber = 1;
+			        BaseFont baseFont = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.NOT_EMBEDDED);
+			        List<PdfReader> pdfReaders = new ArrayList<>();
+			        for (InputStream inputStream1 : inputPdfList) {
+			            PdfReader pdfReader = new PdfReader(inputStream1);
+			            pdfReaders.add(pdfReader);
+			            totalPageCount += pdfReader.getNumberOfPages();
+			        }
+
+			        
+			        for (PdfReader pdfReader : pdfReaders) {
+			            for (int i = 1; i <= pdfReader.getNumberOfPages(); i++) {
+			                document.newPage();
+			                PdfImportedPage page = pdfWriter.getImportedPage(pdfReader, i);
+
+			                // Calculate new coordinates with margins
+			                float offsetX = marginLeft;
+			                float offsetY = marginBottom;
+			                float contentWidth = PageSize.A4.getWidth() - marginLeft - marginRight;
+			                float contentHeight = PageSize.A4.getHeight() - marginTop - marginBottom;
+
+			                // Add the imported page with margins
+			                pdfContentByte.addTemplate(page, contentWidth / page.getWidth(), 0, 0,
+			                        contentHeight / page.getHeight(), offsetX, offsetY);
+			                
+			             // Draw a horizontal line separating content from bottom margin
+//			                pdfContentByte.setLineWidth(0.5f); // Set line width
+//			                pdfContentByte.moveTo(20, 60); // Starting point of the line
+//			                pdfContentByte.lineTo(PageSize.A4.getWidth() - 20, 60); // Ending point of the line
+//			                pdfContentByte.stroke(); // Draw the line
+			                
+			             // Add custom text on the left side
+//			                String leftSideText = "Registered Office: CROSSBOW Global Marketplace\n"
+//			                		+ "Solutions Private Limited\n"
+//			                		+ "No.18 & 18/1, Bikaner Signature Towers, Richmond\n"
+//			                		+ "Rd, Bengaluru, Karnataka 560025.";
+//			                String[] addressLines = leftSideText.split("\n");
+//			                for (String line : addressLines) {
+//			                    pdfContentByte.beginText();
+//			                    pdfContentByte.setFontAndSize(baseFont, 7);
+//				                pdfContentByte.setColorFill(BaseColor.GRAY);
+//				                pdfContentByte.setTextMatrix(25, marginBottom);
+//			                    pdfContentByte.showText(line);
+//			                    pdfContentByte.endText();
+//			                    marginBottom -= 10; // Move to the next line (adjust as needed)
+//			                }
+			                marginBottom=50;
+			                String pageText = "Page " + pageNumber + " of " + totalPageCount;
+			                pdfContentByte.setFontAndSize(baseFont, 8);
+			                pdfContentByte.setColorFill(BaseColor.GRAY);
+			                float textWidth = baseFont.getWidthPoint(pageText, 12);
+			                float centerX = (PageSize.A4.getWidth() - textWidth) / 2;
+			                float centerY = marginBottom;
+			                pdfContentByte.beginText();
+			                pdfContentByte.setTextMatrix(centerX, centerY);
+			                pdfContentByte.showText(pageText);
+			                pdfContentByte.endText();
+			                pageNumber++;
+			            }
+			            
+			        }
+
+			        outputStream.flush();
+			        document.close();
+			        outputStream.close();
+			    } catch (Exception e) {
+			        log.error("Exception occurred in mergePdfFiles method", e);
+			    }
+			}
+			
+			private static class purgeFooterPageEvent extends PdfPageEventHelper {
+		        public void onEndPage(PdfWriter writer, Document document) {
+		            try {
+		                PdfContentByte cb = writer.getDirectContent();
+		                URL imageUrl = new URL("https://digiverifier-new.s3.ap-south-1.amazonaws.com/Assets/digiverifier_logo_1.png");
+		                Image img = Image.getInstance(imageUrl);
+		                img.setAbsolutePosition(450f, 802f);
+		                img.scaleToFit(350, 50);
+		                cb.addImage(img);
+		            } catch (Exception e) {
+		                e.printStackTrace();
+		            }
+		        }
+		    }
+			
+			public static byte[] multiplePdfMergedSingleFile(List<MultipartFile> multipleFilesList) {
+				byte[] combinedPdfBytes =null;
+				try {
+					log.info("start merging files in multiplePdfMergedSingleFile :{}",multipleFilesList.size());
+					PDDocument document = new PDDocument();
+					String contentType = null;
+					ByteArrayOutputStream byteArrayOutputStream = null;
+					for (MultipartFile multipartFile : multipleFilesList) {
+                        contentType = multipartFile.getContentType();
+                        if (contentType != null && contentType.startsWith("image/")) {
+                            // Create an image object
+                            PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, multipartFile.getBytes(), multipartFile.getOriginalFilename());
+                            // Get image dimensions
+                            float imageWidth = pdImage.getWidth();
+                            float imageHeight = pdImage.getHeight();
+
+                            // Create a page with the same size as the image
+                            PDRectangle pageSize = new PDRectangle(imageWidth, imageHeight);
+                            PDPage page = new PDPage(pageSize);
+                            document.addPage(page);
+
+                            // Add the image to the page at position (0, 0)
+                            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+                                contentStream.drawImage(pdImage, 0, 0);
+                            } catch (IOException e) {
+                            	log.error("IOException in multiplePdfMergedSingleFile :{}",e);
+                            	break;
+                            }
+                        } else if (contentType != null && contentType.equals("application/pdf")) {
+                            // Merge PDF into the document
+                            PDDocument tempDoc = PDDocument.load(multipartFile.getBytes());
+                            PDFMergerUtility merger = new PDFMergerUtility();
+                            merger.appendDocument(document, tempDoc);
+                            tempDoc.close();
+                        }
+                        byteArrayOutputStream = new ByteArrayOutputStream();
+                        document.save(byteArrayOutputStream);
+                        contentType = "application/pdf";
+                    }
+                    document.close();
+                    combinedPdfBytes = byteArrayOutputStream.toByteArray();
+					
+				}catch(Exception e) {
+					log.error("Parent exception in multiplePdfMergedSingleFile :{}",e);
+				}
+				
+				return combinedPdfBytes;
+			}
 }

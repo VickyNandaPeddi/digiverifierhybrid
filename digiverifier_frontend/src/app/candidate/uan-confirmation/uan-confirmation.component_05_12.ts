@@ -18,7 +18,7 @@ export class UanConfirmationComponent implements OnInit {
   showvalidation:any;
   orgid:any;
   show:any;
-  
+
   getServiceConfigCodes: any=[];
   constructor(private router: ActivatedRoute, private navRouter: Router, private candidateService: CandidateService,
     private customers:CustomerService, public authService: AuthenticationService) {
@@ -30,38 +30,38 @@ export class UanConfirmationComponent implements OnInit {
     });
     this.customers.getShowvalidation(this.orgid).subscribe((data:any)=>{
       this.showvalidation=data.outcome;
-      console.log(this.showvalidation,"----------------------------------------result")
+//       console.log(this.showvalidation,"----------------------------------------result")
     })
    }
-   
+
   ngOnInit(): void {
     // this.show=this.showvalidation
     // let show:any;
     this.customers.getShowvalidation(this.orgid).subscribe((data:any)=>{
       this.showvalidation=data.outcome;
-      
-    
-    console.log(this.showvalidation,"----------------------------------------result")
+
+
+//     console.log(this.showvalidation,"----------------------------------------result")
     this.uanVal = this.router.snapshot.paramMap.get('epfoStat');
     if(this.uanVal){
       if(this.uanVal == 2){
         this.uanStat = true;
-        if(this.getServiceConfigCodes){          
+        if(this.getServiceConfigCodes){
           if(this.getServiceConfigCodes.includes('RELBILLTRUE')){
             const navURL = 'candidate/cAddressVerify/'+this.candidateCode;
             this.navRouter.navigate([navURL]);
-          }else if(this.getServiceConfigCodes.includes('RELBILLFALSE') && this.showvalidation==true){  
-            console.log("--------------------cform")         
+          }else if(this.getServiceConfigCodes.includes('RELBILLFALSE') && this.showvalidation==true){
+//             console.log("--------------------cform")
             const navURL = 'candidate/cForm/'+this.candidateCode;
             this.navRouter.navigate([navURL]);
           }
           else if(this.showvalidation == true){
-            console.log("--------------------cform1111") 
+//             console.log("--------------------cform1111")
             const navURL = 'candidate/cForm/'+this.candidateCode;
             this.navRouter.navigate([navURL]);
           }
           else{
-            console.log("--------------------thank") 
+//             console.log("--------------------thank")
             const navURL = 'candidate/cThankYou';
             this.navRouter.navigate([navURL]);
           }
@@ -69,7 +69,7 @@ export class UanConfirmationComponent implements OnInit {
       }else if(this.uanVal == 1){
         this.uanStat = false;
       }
-     
+
     }
   })
   }
@@ -80,26 +80,29 @@ export class UanConfirmationComponent implements OnInit {
 
     if(this.uanVal == 1){
       this.candidateService.isUanSkipped(formData).subscribe((result:any)=>{
+        result.data = this.candidateService.decryptData(result.data);
+        // Parse the decrypted JSON string into an object
+        result.data = JSON.parse(result.data);
         if(result.outcome){
           if(event.target.value=="yes"){
             // const navURL = 'candidate/epfologin/'+this.candidateCode;
             const navURL = 'candidate/epfologinnew/'+this.candidateCode;
             this.navRouter.navigate([navURL]);
           }else{
-            if(this.getServiceConfigCodes){              
+            if(this.getServiceConfigCodes){
               if(this.getServiceConfigCodes.includes('RELBILLTRUE')){
                 const navURL = 'candidate/cAddressVerify/'+this.candidateCode;
                 this.navRouter.navigate([navURL]);
-              }else if(this.getServiceConfigCodes.includes('RELBILLFALSE') && this.showvalidation==true){                
+              }else if(this.getServiceConfigCodes.includes('RELBILLFALSE') && this.showvalidation==true){
                 const navURL = 'candidate/cForm/'+this.candidateCode;
                 this.navRouter.navigate([navURL]);
               } else if(this.showvalidation == true){
-                console.log("--------------------cform1111") 
+//                 console.log("--------------------cform1111")
                 const navURL = 'candidate/cForm/'+this.candidateCode;
                 this.navRouter.navigate([navURL]);
               }
               else{
-                console.log("--------------------thank") 
+//                 console.log("--------------------thank")
                 const navURL = 'candidate/cThankYou';
                 this.navRouter.navigate([navURL]);
               }
@@ -111,7 +114,7 @@ export class UanConfirmationComponent implements OnInit {
             icon: 'warning'
           })
         }
-  
+
       });
     }else if(this.uanVal == 2){
       if(event.target.value=="yes"){
@@ -136,6 +139,6 @@ export class UanConfirmationComponent implements OnInit {
 
 
   }
-  
+
 
 }

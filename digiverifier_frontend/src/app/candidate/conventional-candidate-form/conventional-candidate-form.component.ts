@@ -96,8 +96,11 @@ export class ConventionalCandidateFormComponent implements OnInit {
     //getting candidate details
     this.candidateService.getCandidateDetails(this.candidateCode)
       .subscribe((data: any) => {
+        data.data = this.candidateService.decryptData(data.data);
+        // Parse the decrypted JSON string into an object
+        data.data = JSON.parse(data.data);
         if (data.outcome === true) {
-          console.warn("DATA>>>", data)
+//           console.warn("DATA>>>", data)
           this.candidateName = data.data.candidateName;
           this.contactNumber = data.data.contactNumber;
           this.candidateMailId = data.data.emailId;
@@ -105,7 +108,7 @@ export class ConventionalCandidateFormComponent implements OnInit {
           this.accountName = data.data.accountName;
           this.conventionalCandidateCheck = data.data.conventionalCandidateCheck.split(',');
 
-          console.warn("checks>>", this.conventionalCandidateCheck)
+//           console.warn("checks>>", this.conventionalCandidateCheck)
           this.Checks = this.conventionalCandidateCheck;
 
 
@@ -324,8 +327,8 @@ export class ConventionalCandidateFormComponent implements OnInit {
         });
         // console.warn("After filtering by checkNameAndType : ", this.educationPGSelectedFiles);
         this.removeTheCheckByDoc(checkName, fullcheckName, checkNameAndType, this.educationPGSelectedFiles, type);
-        // console.warn("check.documents.length : ", check.documents.length) 
-        
+        // console.warn("check.documents.length : ", check.documents.length)
+
         break;
 
       case 'Education Diploma':
@@ -341,7 +344,7 @@ export class ConventionalCandidateFormComponent implements OnInit {
         });
         // console.warn("After filtering by checkNameAndType : ", this.educationDiplomaSelectedFiles);
         this.removeTheCheckByDoc(checkName, fullcheckName, checkNameAndType, this.educationDiplomaSelectedFiles, type);
-        // console.warn("check.documents.length : ", check.documents.length) 
+        // console.warn("check.documents.length : ", check.documents.length)
 
         break;
 
@@ -358,11 +361,11 @@ export class ConventionalCandidateFormComponent implements OnInit {
         });
         // console.warn("After filtering by checkNameAndType : ", this.education10THSelectedFiles);
         this.removeTheCheckByDoc(checkName, fullcheckName, checkNameAndType, this.education10THSelectedFiles, type);
-        // console.warn("check.documents.length : ", check.documents.length) 
+        // console.warn("check.documents.length : ", check.documents.length)
 
         break;
 
-        
+
         case 'Education 12TH':
         // console.warn("Education 12TH");
         // Your logic for Work Experience
@@ -376,7 +379,7 @@ export class ConventionalCandidateFormComponent implements OnInit {
         });
         // console.warn("After filtering by checkNameAndType : ", this.education12THSelectedFiles);
         this.removeTheCheckByDoc(checkName, fullcheckName, checkNameAndType, this.education12THSelectedFiles, type);
-        // console.warn("check.documents.length : ", check.documents.length) 
+        // console.warn("check.documents.length : ", check.documents.length)
 
         break;
 
@@ -442,7 +445,7 @@ export class ConventionalCandidateFormComponent implements OnInit {
             return item.key !== fullcheckName;
           });
           // console.warn("After employmentEMP2SelectedFiles : ", this.employmentEMP2SelectedFiles)
-  
+
           this.employmentEMP2SelectedFiles = this.employmentEMP2SelectedFiles.filter(item => {
             return item.key.includes(checkNameAndType);
           });
@@ -459,7 +462,7 @@ export class ConventionalCandidateFormComponent implements OnInit {
             return item.key !== fullcheckName;
           });
           // console.warn("After employmentEMP3SelectedFiles : ", this.employmentEMP3SelectedFiles)
-  
+
           this.employmentEMP3SelectedFiles = this.employmentEMP3SelectedFiles.filter(item => {
             return item.key.includes(checkNameAndType);
           });
@@ -519,7 +522,7 @@ export class ConventionalCandidateFormComponent implements OnInit {
 
     // Remove files associated with the previous education level
     // if (this.previousEducationLevel) {
-    //   this.educationSelectedFiles = this.educationSelectedFiles.filter(fileObj => 
+    //   this.educationSelectedFiles = this.educationSelectedFiles.filter(fileObj =>
     //     !fileObj.key.startsWith(`Education ${this.previousEducationLevel}`)
     //   );
     // }
@@ -1846,7 +1849,7 @@ export class ConventionalCandidateFormComponent implements OnInit {
     console.warn("type : ", type)
     let educationTemSelectedFiles: { key: string; file: File; }[] = [];
     let employmentTemSelectedFiles: { key: string; file: File; }[] = [];
-    
+
     if (checkType == 'Education UG') {
       // console.warn("this.educationUG  :: ", this.educationUGSelectedFiles)
       const checkname = 'education';

@@ -11,7 +11,7 @@ public class EmploymentTenureVerificationDto extends CommonVerificationDto {
 	private String customRemark;
 	private Long candidateCafExperienceId;
 	private Boolean undisclosed;
-	
+
 	// added for employment history - DNHDB
 		private String outputEmployerName;
 }

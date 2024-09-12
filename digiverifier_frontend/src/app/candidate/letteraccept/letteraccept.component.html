@@ -37,7 +37,7 @@
                           <form [formGroup]="formLetterAccept">
                               <input type="hidden" formControlName="candidateCode">
                               <button type="submit" class="btn btn-success" (click)="btnLtrAccept()">Accept</button>
-                              <!-- <button type="submit" class="btn btn-danger" (click)="btnLtrDecline()">Decline</button> -->
+                              <button type="submit" *ngIf="showDeclineBtn" class="btn btn-danger" (click)="btnLtrDecline()">Decline</button>
                           </form>  
                         </div>
                     </div>

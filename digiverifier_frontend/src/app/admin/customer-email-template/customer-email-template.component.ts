@@ -12,6 +12,8 @@ import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 })
 export class CustomerEmailTemplateComponent implements OnInit {
   animationState: string = 'start';
+  public logoFile: any = File;
+  viewLogo:any;
   pageTitle = 'Customer Email Templates';
   customersData: any = [];
   orgID: any;
@@ -27,6 +29,8 @@ export class CustomerEmailTemplateComponent implements OnInit {
     inviteMailContent: new FormControl(),
     loaMailSub: new FormControl(),
     loaMailContent: new FormControl(),
+    cwfCopyright:new FormControl(),
+    cwflogo: new FormControl()
   });
 
   constructor(private customers: CustomerService,
@@ -44,12 +48,15 @@ export class CustomerEmailTemplateComponent implements OnInit {
     this.customers.getCustomerEmailTemplates(this.router.snapshot.params.organizationId).subscribe((result: any) => {
       this.CustomerEmailTemplateData = result.data;
       this.emailTemplateId = result.data.emailTemplateId;
+      this.viewLogo = this.CustomerEmailTemplateData.cwflogo;
       console.log("TEMPLATES DATA GET::{}", this.CustomerEmailTemplateData);
       this.addEmailTemplate = new FormGroup({
         inviteMailSub: new FormControl(result.data['inviteMailSub']),
         inviteMailContent: new FormControl(result.data['inviteMailContent']),
         loaMailSub: new FormControl(result.data['loaMailSub']),
         loaMailContent: new FormControl(result.data['loaMailContent']),
+        cwfCopyright: new FormControl(result.data['cwfCopyright']),
+        cwflogo: new FormControl(result.data['cwflogo'])
       });
     });
   }
@@ -183,7 +190,12 @@ export class CustomerEmailTemplateComponent implements OnInit {
   Update(addEmailTemplate: FormGroup) {
     console.log("Update templates::{}", addEmailTemplate.value);
 
-    return this.customers.saveCustomersEmailTemplates(addEmailTemplate.value, this.orgID, this.emailTemplateId).subscribe((result: any) => {
+    // console.warn("this.logoFile : ",this.logoFile)
+  //   this.addEmailTemplate.patchValue({
+  //     cwflogo: this.logoFile
+  // });
+
+      return this.customers.saveCustomersEmailTemplates1(addEmailTemplate.value, this.orgID, this.emailTemplateId).subscribe((result: any) => {
       console.log(result);
       if (result.outcome === true) {
         Swal.fire({
@@ -332,4 +344,54 @@ export class CustomerEmailTemplateComponent implements OnInit {
     console.log("onEditCustInfo URL::{}",onEditCustScopeUrl)
     this.routernav.navigate([onEditCustScopeUrl]);
    }
+
+   selectLogo(event:any) {
+    const fileType = event.target.files[0].name.split('.').pop();
+    const file = event.target.files[0];
+    if(fileType == 'jpeg' || fileType == 'JPEG' || fileType == 'png' || fileType == 'PNG' || fileType == 'jpg' || fileType == 'JPG'){
+      // this.logoFile = file;
+      if (file) {
+        this.convertFileToBase64(file).then((base64) => {
+          this.logoFile = base64;
+          this.addEmailTemplate.patchValue({
+            cwflogo: this.logoFile
+          });
+          // console.log(this.logoFile); // For debugging
+        }).catch(error => {
+          console.error('Error converting file to Base64:', error);
+        });
+      }
+    }else{
+      event.target.value = null;
+      Swal.fire({
+        title: 'Please select .jpeg, .jpg, .png file type only.',
+        icon: 'warning'
+      });
+    }  
+  }
+
+  openModal(modalData:any){
+    this.modalService.open(modalData, {
+     centered: true,
+     backdrop: 'static'
+    });
+ }
+
+ private convertFileToBase64(file: File): Promise<string | null> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onloadend = () => {
+      const base64 = reader.result as string;
+      resolve(base64);
+    };
+    
+    reader.onerror = (error) => {
+      reject(error);
+    };
+    
+    reader.readAsDataURL(file);
+  });
+}
+ 
 }

@@ -1,6 +1,6 @@
 <div class="card-body" style="padding: 5px;" class="float-right">
     <div class="input-group mb-4">
-        <input type="text" placeholder="search" class="form-control form-control-sm" [(ngModel)]="searchText" *ngIf="containerStat"  (keyup.enter)="performSearch()"/>  
+        <input type="text" placeholder="search" class="form-control form-control-sm" [(ngModel)]="searchText" *ngIf="containerStat"  (keyup.enter)="performSearch()"/>
         <button class="btn-sm btn-primary" type="button" [(ngModel)]="searchText" *ngIf="containerStat" title="DigitalSearch" (click)="performSearch()">
             <i class="fa fa-search"></i>
         </button>
@@ -12,15 +12,40 @@
                                     <th>SI#</th>
                                     <th>Agent Name</th>
                                     <th>Candidate Name</th>
-                                    <th>Email ID</th>
-                                    <th *ngIf="!this.getServiceConfigCodes.includes('PANTOUAN')">Contact Number</th>
+                                    <th
+                                      *ngIf="!(this.getServiceConfigCodes.includes('EPFO') && !getServiceConfigCodes.includes('EPFOEMPLOYEELOGIN') && !this.getServiceConfigCodes.includes('ITR') && !this.getServiceConfigCodes.includes('DIGILOCKER')) ; else pantouanBlockEmail">
+                                      Email ID</th>
+                                    <ng-template #pantouanBlockEmail>
+                                      <th *ngIf="this.getServiceConfigCodes.includes('PANTOUAN')">
+                                        Email ID
+                                      </th>
+                                    </ng-template>
+                                    <th
+                                      *ngIf="getServiceConfigCodes.includes('EPFO') && !getServiceConfigCodes.includes('ITR') && !getServiceConfigCodes.includes('DIGILOCKER') && !getServiceConfigCodes.includes('PANTOUAN') && !getServiceConfigCodes.includes('EPFOEMPLOYEELOGIN'); else pantouanBlock">
+                                      UAN
+                                    </th>
+                                    <ng-template #pantouanBlock>
+                                      <th *ngIf="!getServiceConfigCodes.includes('PANTOUAN');else pantouanfalse">
+                                        Contact Number
+                                      </th>
+                                    </ng-template>
+                                    <ng-template #pantouanfalse>
+                                    </ng-template>
+
                                     <th *ngIf="this.getServiceConfigCodes.includes('PANTOUAN')">PAN Number</th>
                                     <th>Applicant ID</th>
                                     <th>Data uploaded</th>
                                     <th>Status</th>
                                     <th *ngIf="this.getServiceConfigCodes.includes('PANTOUAN')">UAN</th>
                                     <th *ngIf="stat_INVITATIONSENT">Action</th>
-                                    <th *ngIf="(getStatCodes=='NEWUPLOAD'|| getConventionalStatCodes=='CONVENTIONALNEWUPLOAD') && !this.getServiceConfigCodes.includes('PANTOUAN')">LOA</th>
+                                    <ng-template
+                                      *ngIf="(getServiceConfigCodes.includes('EPFO') && !getServiceConfigCodes.includes('EPFOEMPLOYEELOGIN') && !getServiceConfigCodes.includes('ITR') && !getServiceConfigCodes.includes('DIGILOCKER')) ||  getServiceConfigCodes.includes('PANTOUAN') ;else notcapgscope">
+                                    </ng-template>
+                                    <ng-template #notcapgscope>
+                                      <th *ngIf="(getStatCodes=='NEWUPLOAD'|| getConventionalStatCodes=='CONVENTIONALNEWUPLOAD') && !this.getServiceConfigCodes.includes('PANTOUAN')">
+                                        LOA</th>
+                                    </ng-template>
+
                                     <th *ngIf="stat_INVITATIONSENT"><input type="checkbox" (click)="selectAll($event)"></th>
 
                                 </thead>
@@ -29,25 +54,33 @@
                                         <td>{{i+1}}</td>
                                         <td>{{ item.createdByUserFirstName }} {{ item.createdByUserLastName }}</td>
                                         <td>{{item.candidateName}}</td>
-                                        <td>{{item.emailId}}</td>
-                                        <td>{{item.contactNumber}}</td>
+                                      <td
+                                        *ngIf="!(this.getServiceConfigCodes.includes('EPFO') && !getServiceConfigCodes.includes('EPFOEMPLOYEELOGIN') && !this.getServiceConfigCodes.includes('ITR') && !this.getServiceConfigCodes.includes('DIGILOCKER')) ; else showforpantouan">
+                                        {{item.emailId}}
+                                      </td>
+                                      <ng-template #showforpantouan>
+                                        <td *ngIf="this.getServiceConfigCodes.includes('PANTOUAN')">
+                                          {{item.emailId}}
+                                        </td>
+                                      </ng-template>
+                                      <td>{{item.contactNumber}}</td>
                                         <td>{{item.applicantId}}</td>
                                         <td>{{item.createdOn}}</td>
-                                        <td *ngIf="!this.getServiceConfigCodes.includes('PANTOUAN')">{{item.candidateStatusName}} 
+                                        <td *ngIf="!this.getServiceConfigCodes.includes('PANTOUAN')">{{item.candidateStatusName}}
                                             <span>
                                                 <a type="button" *ngIf="item.candidateStatusName === 'QC Pending' || item.candidateStatusName === 'Interim Report'  || item.candidateStatusName === 'Final Report'" (click)="downloadReports(item, item.candidateStatusName)" style="color: blue;">
                                                     {{item.candidateStatusName === 'QC Pending' ? (item.preOfferVerificationColorCode ? item.preOfferVerificationColorCode.colorCode : ' ') : (item.candidateStatusName === 'Interim Report' ? (item.interimVerificationColorCode ? item.interimVerificationColorCode.colorCode : ' ') : (item.candidateStatusName === 'Final Report' ? (item.finalVerificationColorCode ? item.finalVerificationColorCode.colorCode : ' ') : ' '))}}
                                                 </a>
                                             </span>
                                         </td>
-                                        <td *ngIf="this.getServiceConfigCodes.includes('PANTOUAN') && item.candidateStatusName != 'QC Pending' && item.candidateStatusName != 'Invitation Sent' && item.candidateStatusName != 'Invalid Upload'">{{item.candidateStatusName}} 
+                                        <td *ngIf="this.getServiceConfigCodes.includes('PANTOUAN') && item.candidateStatusName != 'QC Pending' && item.candidateStatusName != 'Invitation Sent' && item.candidateStatusName != 'Invalid Upload'">{{item.candidateStatusName}}
                                             <span>
                                                 <a type="button" *ngIf="item.candidateStatusName === 'QC Pending' || item.candidateStatusName === 'Interim Report'  || item.candidateStatusName === 'Final Report'" (click)="downloadReports(item, item.candidateStatusName)" style="color: blue;">
                                                     {{item.candidateStatusName === 'QC Pending' ? (item.preOfferVerificationColorCode ? item.preOfferVerificationColorCode.colorCode : ' ') : (item.candidateStatusName === 'Interim Report' ? (item.interimVerificationColorCode ? item.interimVerificationColorCode.colorCode : ' ') : (item.candidateStatusName === 'Final Report' ? (item.finalVerificationColorCode ? item.finalVerificationColorCode.colorCode : ' ') : ' '))}}
                                                 </a>
                                             </span>
                                         </td>
-                                        <td *ngIf="this.getServiceConfigCodes.includes('PANTOUAN') && item.candidateStatusName === 'QC Pending'">Completed 
+                                        <td *ngIf="this.getServiceConfigCodes.includes('PANTOUAN') && item.candidateStatusName === 'QC Pending'">Completed
                                             <span>
                                                 <a type="button" *ngIf="item.candidateStatusName === 'QC Pending' || item.candidateStatusName === 'Interim Report'  || item.candidateStatusName === 'Final Report'" (click)="downloadReports(item, item.candidateStatusName)" style="color: blue;">
                                                     {{item.candidateStatusName === 'QC Pending' ? (item.preOfferVerificationColorCode ? item.preOfferVerificationColorCode.colorCode : ' ') : (item.candidateStatusName === 'Interim Report' ? (item.interimVerificationColorCode ? item.interimVerificationColorCode.colorCode : ' ') : (item.candidateStatusName === 'Final Report' ? (item.finalVerificationColorCode ? item.finalVerificationColorCode.colorCode : ' ') : ' '))}}
@@ -62,7 +95,7 @@
                                                 <!-- <button *ngIf="item.candidateStatusName === 'Interim Report' || item.candidateStatusName === 'QC Pending'" type="button" (click)="linkAdminApproval(item.candidateCode)" class="btn btn-sm btn-warning" title="Edit"><i class="fas fa-edit"></i></button> -->
                                                 <!-- <button type="button" (click)="initiatevendor(item.candidateId)" class="btn btn-primary btn-sm">Initiate vendor checks</button> -->
                                                 <button type="button" *ngIf="!item.conventionalCandidate && (this.getServiceConfigCodes.includes('CONVENTIONALALLCHECKS'))" (click)="sendInvitationToHybridCandidate(item.candidateId, item.candidateCode, item.accountName)" class="btn btn-primary btn-sm" title="Invite hybrid candidate for conventional"><i class="fa fa-edit"></i></button>
-                                                <button type="button" *ngIf="item.conventionalCandidate && item.candidateStatusName === 'QC Pending' || item.conventionalCandidate && item.candidateStatusName === 'Interim Report' || item.candidateStatusName === 'Conventional QC Pending' || item.conventionalCandidate && item.candidateStatusName === 'Conventional Interim Report' || item.candidateStatusName === 'Pending Approval'" (click)="initiatevendor(item.candidateId, item.candidateCode)" class="btn btn-primary btn-sm" title="Initiate vendor checks"><i class="fa fa-edit"></i></button>
+                                                <button type="button" *ngIf="item.conventionalCandidate && item.candidateStatusName === 'QC Pending' || item.candidateStatusName === 'Conventional New Upload' || item.conventionalCandidate && item.candidateStatusName === 'Interim Report' || item.candidateStatusName === 'Conventional QC Pending' || item.conventionalCandidate && item.candidateStatusName === 'Conventional Interim Report' || item.candidateStatusName === 'Pending Approval'" (click)="initiatevendor(item.candidateId, item.candidateCode)" class="btn btn-primary btn-sm" title="Initiate vendor checks"><i class="fa fa-edit"></i></button>
 
                                                 <button type="button" *ngIf="item.candidateStatusName === 'QC Pending' && !this.getServiceConfigCodes.includes('PANTOUAN') || item.candidateStatusName === 'Interim Report' && !this.getServiceConfigCodes.includes('PANTOUAN')" (click)="linkAdminApproval(item.candidateCode)" class="btn btn-warning btn-sm" title="Edit"> <i class="fa fa-edit"></i></button>
                                                 <button type="button" *ngIf="item.candidateStatusName === 'Invitation Sent' || item.candidateStatusName === 'Digilocker Completed' || item.candidateStatusName === 'ITR Completed' || item.candidateStatusName === 'EPFO Completed' || item.candidateStatusName === 'EPFO Skipped' || item.candidateStatusName === 'CAF Pending' || item.candidateStatusName === 'Invitation Expired' || item.candidateStatusName === 'Invalid Upload' || item.candidateStatusName === 'Relative Address Completed' || item.candidateStatusName === 'Re Invite' || item.candidateStatusName === 'UAN Fetch Failed'" (click)="openModal(modalData, item.candidateCode)" class="btn btn-warning btn-sm"  title="Edit"><i class="fa fa-edit"></i></button> <!--*ngIf="EDITCANDIDATE_stat || authService.roleMatch(['ROLE_ADMIN'])"-->
@@ -77,29 +110,39 @@
 
                                             </div>
                                         </td>
-                                        <td *ngIf="(getStatCodes=='NEWUPLOAD' || getConventionalStatCodes=='CONVENTIONALNEWUPLOAD') && !this.getServiceConfigCodes.includes('PANTOUAN')">
-                                            <button type="button" *ngIf="item.isLoaAccepted" (click)="getLoaPDF(item.candidateCode)" class="btn btn-sm btn-primary" title="View Loa"><i class="fas fa-eye"></i></button>
+                                      <ng-template
+                                        *ngIf="(getServiceConfigCodes.includes('EPFO') && !getServiceConfigCodes.includes('EPFOEMPLOYEELOGIN') && !getServiceConfigCodes.includes('ITR') && !getServiceConfigCodes.includes('DIGILOCKER')) ||  getServiceConfigCodes.includes('PANTOUAN') ;else notcapgscope">
+                                      </ng-template>
+                                      <ng-template #notcapgscope>
+                                        <td
+                                          *ngIf="(getStatCodes=='NEWUPLOAD'|| getConventionalStatCodes=='CONVENTIONALNEWUPLOAD') && !this.getServiceConfigCodes.includes('PANTOUAN')">
+                                          <button type="button" *ngIf="item.isLoaAccepted" (click)="getLoaPDF(item.candidateCode)"
+                                                  class="btn btn-sm btn-primary" title="View Loa"><i class="fas fa-eye"></i></button>
                                         </td>
+                                      </ng-template>
                                         <td *ngIf="!item.conventionalCandidate && stat_INVITATIONSENT"><input type="checkbox" *ngIf="item.candidateStatusName === 'Invitation Sent' || item.candidateStatusName === 'Digilocker Completed' || item.candidateStatusName === 'ITR Completed' || item.candidateStatusName === 'EPFO Completed' || item.candidateStatusName === 'EPFO Skipped' || item.candidateStatusName === 'CAF Pending' || item.candidateStatusName === 'Invitation Expired' || item.candidateStatusName === 'Invalid Upload' || item.candidateStatusName === 'Relative Address Completed' || item.candidateStatusName === 'Re Invite' || item.candidateStatusName === 'UAN Fetch Failed'" id="{{item.candidateCode}}" value="{{item.candidateCode}}" class="childCheck" (change)="childCheck($event)"></td>
                                         <!-- conventional Checkbutton -->
                                         <td *ngIf="item.conventionalCandidate && stat_INVITATIONSENT"><input type="checkbox" *ngIf="item.conventionalCandidate && item.candidateStatusName === 'Conventional Invitation Sent' || item.candidateStatusName === 'Conventional Invitation Expired' || item.candidateStatusName === 'Conventional Invalid Upload'  || item.candidateStatusName === 'Conventional Re Invite'" id="{{item.candidateCode}}" value="{{item.candidateCode}}" class="childCheck" (change)="childCheck($event)"></td>
 
                                     </tr>
                                 </tbody>
-                            </table>                        
+                            </table>
                         <form [formGroup]="formSendInvitation" *ngIf="containerStat">
                             <input type="hidden" formControlName="candidateReferenceNo" #candidateReferenceNo>
                             <input type="hidden" formControlName="statuscode">
                             <div class="row">
                                 <div class="col-md-12 text-center">
+                                  
                                     <button type="submit" *ngIf="stat_btn_SendInvi" (click)="sendinvitation()" class="btn btn-sm btn-success">Send Invitation</button>
-                                    <button type="submit" *ngIf="stat_btn_ReInvite && !this.getServiceConfigCodes.includes('PANTOUAN')" (click)="reInvite(candidateReferenceNo)" class="btn btn-sm btn-success ">Re-Invite</button>
+                                    <button type="submit" *ngIf="stat_btn_ReInvite && !this.getServiceConfigCodes.includes('PANTOUAN') && !(getServiceConfigCodes.includes('EPFO') && !getServiceConfigCodes.includes('EPFOEMPLOYEELOGIN') && !getServiceConfigCodes.includes('ITR') && !getServiceConfigCodes.includes('DIGILOCKER'))"
+                                     (click)="reInvite(candidateReferenceNo)" class="btn btn-sm btn-success ">Re-Invite</button>
+                                    
                                     <button type="submit" *ngIf="stat_btn_ReInvite && this.getServiceConfigCodes.includes('PANTOUAN')" (click)="reFetchPAToUAN()" class="btn btn-sm btn-success ">Re-Fetch</button>
                                     <button type="submit" *ngIf="stat_btn_UANFetchFailed && !this.getServiceConfigCodes.includes('PANTOUAN')" (click)="reFetchUAN()" class="btn btn-sm btn-success ">Re-Fetch</button>
                                     <button type="submit" *ngIf="stat_btn_UANFetchFailed && this.getServiceConfigCodes.includes('PANTOUAN')" (click)="reFetchPAToUAN()" class="btn btn-sm btn-success ">Re-Fetch</button>
                                 </div>
                             </div>
-                            
+
                         </form>
                             <!-- <div class="pagination">
                                 <button [disabled]="currentPageIndex == 0" (click)="goToPrevPage()">Previous</button>
@@ -110,19 +153,19 @@
                                 <button class="pagination-button prev-button" [disabled]="currentPageIndex === 0" (click)="onPageChange(currentPageIndex - 1)">
                                     Previous
                                 </button>
-                           
+
                                 <ng-container *ngFor="let page of getDisplayedPages()">
                                     <button class="pagination-button page-number-button" [ngClass]="{'active': page === currentPageIndex}" (click)="onPageChange(page)">
                                         {{ page + 1 }}
                                     </button>
                                 </ng-container>
-                           
+
                                 <button class="pagination-button next-button" [disabled]="currentPageIndex === totalPages - 1" (click)="onPageChange(currentPageIndex + 1)">
                                     Next
                                 </button>
                             </div>
-                        
-                        </div>     
+
+                        </div>
                         <ng-template #modalData let-modal>
                             <div class="modal-header">
                               <h4 class="modal-title" id="modal-basic-title">Update Candidate</h4>

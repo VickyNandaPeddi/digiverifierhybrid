@@ -3,6 +3,7 @@ package com.aashdit.digiverifier.config.superadmin.repository;
 
 import com.aashdit.digiverifier.config.superadmin.model.OrganizationExecutive;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -18,4 +19,6 @@ public interface OrganizationExecutiveRepository extends JpaRepository<Organizat
 	@Query(value = "select organization_id from t_dgv_organization_executive where organization_id = :organizationId order by weight desc",nativeQuery = true)
 	List<Long> findAllByOrganizationId(@Param(value = "organizationId") Long organizationId);
 	
+	@Modifying
+	void deleteByOrganizationId(Long orgId);
 }

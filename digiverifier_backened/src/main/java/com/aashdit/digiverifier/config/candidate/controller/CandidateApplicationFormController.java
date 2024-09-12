@@ -2,17 +2,25 @@ package com.aashdit.digiverifier.config.candidate.controller;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 import com.aashdit.digiverifier.common.enums.ContentViewType;
 import com.aashdit.digiverifier.common.service.ContentService;
+import com.aashdit.digiverifier.config.candidate.dto.*;
 import com.aashdit.digiverifier.config.superadmin.Enum.ReportType;
 import com.aashdit.digiverifier.config.superadmin.dto.ReportSearchDto;
 import com.aashdit.digiverifier.config.superadmin.model.Color;
 import com.aashdit.digiverifier.config.superadmin.service.ReportService;
+import com.aashdit.digiverifier.globalConfig.EnvironmentVal;
+import com.aashdit.digiverifier.utils.CommonUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import org.json.JSONArray;
@@ -75,6 +83,9 @@ public class CandidateApplicationFormController {
 	@Autowired
 	private ContentService contentService;
 	
+	@Autowired
+	private EnvironmentVal environmentVal;
+	
 	@Operation(summary ="Get Qualification List")
 	@GetMapping("/getQualificationList")
 	public ResponseEntity<ServiceOutcome<List<QualificationMaster>>> getQualificationList() {
@@ -88,12 +99,35 @@ public class CandidateApplicationFormController {
 		ServiceOutcome<UserDto> svcSearchResult = candidateService.agentCreatepasswrd(user);
 		return new ResponseEntity<ServiceOutcome<UserDto>>(svcSearchResult, HttpStatus.OK);
 	}
-	
-	@Operation(summary ="Get all Candidate Application form details")
-	@GetMapping("/candidateApplicationFormDetails/{candidateCode}")
-	public ResponseEntity<ServiceOutcome<?>> candidateApplicationFormDetails(@PathVariable("candidateCode")String candidateCode) {
-		ServiceOutcome<CandidationApplicationFormDto> svcSearchResult= candidateService.candidateApplicationFormDetails(candidateCode);
-		return new ResponseEntity<ServiceOutcome<?>>(svcSearchResult, HttpStatus.OK);
+    //	@Operation(summary ="Get all Candidate Application form details")
+//	@GetMapping("/candidateApplicationFormDetails/{candidateCode}")
+//	public ResponseEntity<ServiceOutcome<?>> candidateApplicationFormDetails(@PathVariable("candidateCode")String candidateCode) {
+//		ServiceOutcome<CandidationApplicationFormDto> svcSearchResult= candidateService.candidateApplicationFormDetails(candidateCode);
+//		return new ResponseEntity<ServiceOutcome<?>>(svcSearchResult, HttpStatus.OK);
+//	}
+	@Autowired
+	CommonUtils commonUtils;
+	private final ObjectMapper objectMapper = new ObjectMapper();
+
+	  @Operation(summary ="Get all Candidate Application form details")
+	   @GetMapping("/candidateApplicationFormDetails/{candidateCode}")
+	   public ResponseEntity<ServiceOutcome<String>> candidateApplicationFormDetails(@PathVariable("candidateCode") String candidateCode) {
+	    ServiceOutcome<CandidationApplicationFormDto> svcSearchResult = candidateService.candidateApplicationFormDetails(candidateCode);
+	    ServiceOutcome<String> stringServiceOutcome = new ServiceOutcome<>();
+	       try {
+	       String dtoJson = objectMapper.writeValueAsString(svcSearchResult.getData());
+	       // Encrypt the JSON string
+	       String encryptedData = commonUtils.encryptXOR(dtoJson);
+	       stringServiceOutcome.setData(encryptedData);
+	       stringServiceOutcome.setOutcome(svcSearchResult.getOutcome());
+	       stringServiceOutcome.setMessage(svcSearchResult.getMessage());
+	       stringServiceOutcome.setStatus(svcSearchResult.getStatus());
+	           return new ResponseEntity<>(stringServiceOutcome, HttpStatus.OK);
+
+	       } catch (Exception e) {
+	           e.printStackTrace();
+	           return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	       }
 	}
 	
 	@Operation(summary ="Save And Update Education Details")
@@ -164,9 +198,19 @@ public class CandidateApplicationFormController {
 	
 	@Operation(summary ="Set A Candidate is fresher or experienced")
 	@PostMapping("/isFresher")
-	public ResponseEntity<ServiceOutcome<Candidate>> isFresher(@RequestParam String  candidateCode,@RequestParam Boolean isFresher) {
+	public ResponseEntity<ServiceOutcome<String>> isFresher(@RequestParam String  candidateCode,@RequestParam Boolean isFresher) throws JsonProcessingException {
+		ServiceOutcome<String> stringServiceOutcome = new ServiceOutcome<>();
 		ServiceOutcome<Candidate> svcSearchResult = candidateService.saveIsFresher(candidateCode,isFresher);
-		return new ResponseEntity<ServiceOutcome<Candidate>>(svcSearchResult, HttpStatus.OK);
+		String dtoJson = objectMapper.writeValueAsString(svcSearchResult.getData());
+		// Encrypt the JSON string
+		String encryptedResponse = commonUtils.encryptXOR(dtoJson);
+		// Set the encrypted data in the service outcome
+		stringServiceOutcome.setData(encryptedResponse);
+		stringServiceOutcome.setOutcome(svcSearchResult.getOutcome());
+		stringServiceOutcome.setMessage(svcSearchResult.getMessage());
+		stringServiceOutcome.setStatus(svcSearchResult.getStatus());
+
+		return new ResponseEntity<ServiceOutcome<String>>(stringServiceOutcome, HttpStatus.OK);
 	}
 	
 	@Operation(summary ="Update Experience Data")
@@ -175,7 +219,7 @@ public class CandidateApplicationFormController {
 		ServiceOutcome<CandidateCafExperience> svcSearchResult=  candidateService.updateCandidateExperience(candidateCafExperienceDto);
 		return new ResponseEntity<ServiceOutcome<CandidateCafExperience>>(svcSearchResult, HttpStatus.OK);
 	}
-	
+
 	@Operation(summary ="Save candidate address")
 	@PostMapping("/saveCandidateAddress")
 	public ResponseEntity<ServiceOutcome<CandidateCafAddress>> saveCandidateAddress(@RequestBody CandidateCafAddressDto candidateCafAddressDto,@RequestHeader("Authorization") String authorization) {
@@ -199,16 +243,32 @@ public class CandidateApplicationFormController {
 	
 	@Operation(summary ="Set A Candidate if uan skipped or not")
 	@PostMapping("/isUanSkipped")
-	public ResponseEntity<ServiceOutcome<Candidate>> isUanSkipped(@RequestParam String  candidateCode,@RequestParam String isUanSkipped) {
+	public ResponseEntity<ServiceOutcome<String>> isUanSkipped(@RequestParam String  candidateCode,@RequestParam String isUanSkipped) {
 		ServiceOutcome<Candidate> svcSearchResult = candidateService.saveIsUanSkipped(candidateCode,isUanSkipped);
-		return new ResponseEntity<ServiceOutcome<Candidate>>(svcSearchResult, HttpStatus.OK);
+		ServiceOutcome<String> stringServiceOutcome = new ServiceOutcome<>();
+		try {
+			// Convert DTO to JSON string
+			String dtoJson = objectMapper.writeValueAsString(svcSearchResult.getData());
+			// Encrypt the JSON string
+			String encryptedData = commonUtils.encryptXOR(dtoJson);
+
+			// Set the encrypted data in the service outcome
+			stringServiceOutcome.setData(encryptedData);
+			stringServiceOutcome.setOutcome(svcSearchResult.getOutcome());
+			stringServiceOutcome.setStatus(svcSearchResult.getStatus());
+			stringServiceOutcome.setMessage(svcSearchResult.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<ServiceOutcome<String>>(stringServiceOutcome, HttpStatus.OK);
 	}
 	
 	@GetMapping(value = "/report")
 	public ResponseEntity getReport(@RequestParam("Authorization") String authorization,@RequestParam String candidateCode,@RequestParam
 		ReportType type,@RequestParam String overrideReportStatus) {
 		ServiceOutcome svcSearchResult = new ServiceOutcome();
-		ServiceOutcome<CandidateReportDTO> data = reportService.generateDocument(candidateCode, authorization, type,overrideReportStatus);
+		ServiceOutcome<CandidateReportDTO> data = reportService.generateDocument(candidateCode, authorization, type,overrideReportStatus,false);
 		svcSearchResult.setData(data.getMessage());
 		svcSearchResult.setStatus(data.getStatus());
 		svcSearchResult.setOutcome(data.getOutcome());
@@ -232,11 +292,37 @@ public class CandidateApplicationFormController {
 		return new ResponseEntity<ServiceOutcome<?>>(svcSearchResult, HttpStatus.OK);
 	}
 	
+//	@Operation(summary ="Get Candidate by Reference No")
+//	@GetMapping("/getCandidateDetails/{referenceNo}")
+//	public ResponseEntity<ServiceOutcome<CandidateDetailsDto>> getCandidateByCandidateCode(@PathVariable("referenceNo") String referenceNo) {
+//		ServiceOutcome<CandidateDetailsDto> svcSearchResult = candidateService.getCandidateByCandidateCode(referenceNo);
+//		return new ResponseEntity<ServiceOutcome<CandidateDetailsDto>>(svcSearchResult, HttpStatus.OK);
+//	}
+
 	@Operation(summary ="Get Candidate by Reference No")
 	@GetMapping("/getCandidateDetails/{referenceNo}")
-	public ResponseEntity<ServiceOutcome<CandidateDetailsDto>> getCandidateByCandidateCode(@PathVariable("referenceNo") String referenceNo) {
+	public ResponseEntity<ServiceOutcome<String>> getCandidateByCandidateCodeMasked(@PathVariable("referenceNo") String referenceNo) {
 		ServiceOutcome<CandidateDetailsDto> svcSearchResult = candidateService.getCandidateByCandidateCode(referenceNo);
-		return new ResponseEntity<ServiceOutcome<CandidateDetailsDto>>(svcSearchResult, HttpStatus.OK);
+		ServiceOutcome<String> stringServiceOutcome = new ServiceOutcome<>();
+		try {
+			// Convert DTO to JSON string
+			String dtoJson = objectMapper.writeValueAsString(svcSearchResult.getData());
+			// Encrypt the JSON string
+			String encryptedData = commonUtils.encryptXOR(dtoJson);
+
+			// Set the encrypted data in the service outcome
+			stringServiceOutcome.setData(encryptedData);
+			stringServiceOutcome.setOutcome(svcSearchResult.getOutcome());
+			stringServiceOutcome.setStatus(svcSearchResult.getStatus());
+			stringServiceOutcome.setMessage(svcSearchResult.getMessage());
+
+			// Return the encrypted data as a response with an OK status
+			return new ResponseEntity<>(stringServiceOutcome, HttpStatus.OK);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@Operation(summary ="Get Candidate Report Status")
@@ -346,5 +432,74 @@ public class CandidateApplicationFormController {
 		
 		return new ResponseEntity<ServiceOutcome<VendorChecks>>(svcSearchResult, HttpStatus.OK);
 
+	}
+	
+	@Operation(summary ="Get User Profile without auth token for password expiry")
+	@GetMapping("/getProfile/{userId}")
+	public ResponseEntity<ServiceOutcome<UserDto>> getProfile(@PathVariable("userId") Long userId) {
+		System.out.println("userId : "+userId);
+		ServiceOutcome<UserDto> svcSearchResult = candidateService.userProfile(userId);
+		return new ResponseEntity<ServiceOutcome<UserDto>>(svcSearchResult, HttpStatus.OK);
+	}
+	
+	@Operation(summary ="Update the password with auth token for password expiry")
+	@PostMapping(path = "/updatePassword")
+	public ResponseEntity<ServiceOutcome<UserDto>> saveNUpdateUser(@RequestBody UserDto user) {
+		ServiceOutcome<UserDto> svcSearchResult = userService.saveUser(user);
+		return new ResponseEntity<ServiceOutcome<UserDto>>(svcSearchResult, HttpStatus.OK);
+	}
+	
+	@Operation(summary = "forgot password Sent Link")
+	@PostMapping("/forgotPassword")
+	public ResponseEntity<ServiceOutcome<String>> resetPassword(@RequestBody String emailId){
+		ServiceOutcome<String> svcSearchResult = userService.forgotPassword(emailId);
+		return new ResponseEntity<ServiceOutcome<String>>(svcSearchResult, HttpStatus.OK);
+	}
+	
+	@Operation(summary = "Redirect to reset password")
+	@GetMapping(value = "/resetPassword/{userId}")
+    public void redirect(@PathVariable Long userId,HttpServletResponse res){
+		
+		try {
+			String userIdString = userId.toString();
+	        int userIdInt = Integer.parseInt(userIdString);
+            String urlEncoded = URLEncoder.encode(userIdString, "UTF-8");
+            System.out.println("urlEncoded : "+urlEncoded);
+            String base64Encoded = Base64.getEncoder().encodeToString(userIdString.getBytes());
+            System.out.println("base64Encoded : "+base64Encoded);
+            
+//            byte[] bytes = new byte[] {(byte) userIdInt};
+//            String base64Encoded2 = Base64.getEncoder().encodeToString(bytes);
+//            System.out.println("Base64 Encoded: " + base64Encoded2);
+            
+			String responseString = environmentVal.getResetPassword()+base64Encoded	;
+			System.out.println("responseString : "+responseString);
+			res.sendRedirect(responseString);
+			
+		} catch (Exception e) {
+			log.error("Exception occured in Redirect to reset password method in CandidateApplicationFormController --> " + e);
+		}
+		
+	}
+	
+	@PostMapping("/updateCandidateExperienceDetails/{candidateCode}")
+	public ResponseEntity<ServiceOutcome<String>> updateCandidateExperienceDetails(@PathVariable String candidateCode){	
+		ServiceOutcome<String> svcSearchResult = new ServiceOutcome<>();
+		candidateService.updateCandidateExperienceDetails(candidateCode);
+		svcSearchResult.setData("Successfully Done");
+		svcSearchResult.setOutcome(true);
+		return new ResponseEntity<ServiceOutcome<String>>(svcSearchResult, HttpStatus.OK);
+	}
+		
+	@GetMapping("/getOrgNameByCandidateCode/{candidateCode}")
+	public ResponseEntity<ServiceOutcome<Map<String, String>>> getOrgNameByCandidateCode(@PathVariable("candidateCode") String candidateCode){	
+		ServiceOutcome<Map<String, String>> svcSearchResult = new ServiceOutcome<>();
+		svcSearchResult = candidateService.getOrgNameByCandidateCode(candidateCode);
+		return new ResponseEntity<ServiceOutcome<Map<String, String>>>(svcSearchResult, HttpStatus.OK);
+	}
+
+	@GetMapping("/postStatusToOrganization/{candidateCode}")
+	public ServiceOutcome<Boolean> postStatusToOrganization(@PathVariable("candidateCode") String candidateCode){
+		return candidateService.postStatusToOrganization(candidateCode);
 	}
 }

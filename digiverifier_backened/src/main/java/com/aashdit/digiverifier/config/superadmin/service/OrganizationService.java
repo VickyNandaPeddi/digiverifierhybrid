@@ -22,7 +22,7 @@ public interface OrganizationService {
 
 	ServiceOutcome<List<Organization>> getAllOrganization();
 
-	ServiceOutcome<Organization> getOrganizationById(Long organizationId);
+	ServiceOutcome<OrgDto> getOrganizationById(Long organizationId);
 
 	ServiceOutcome<Organization> activeAndInactiveOrganizationById(Long organizationId, Boolean isActive);
 

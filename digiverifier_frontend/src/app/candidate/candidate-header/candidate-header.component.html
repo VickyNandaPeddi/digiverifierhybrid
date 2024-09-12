@@ -1,5 +1,16 @@
 <nav class="public_header navbar navbar-expand-lg navbar-light bg-light">
-    <h1 class="navbar-brand"><a routerLink=""><img src="assets/img/logo.png"></a></h1>
+    <h1 class="navbar-brand">
+      <a routerLink="">
+        <!-- <img src="assets/img/logo.png"> -->
+        <!-- <img *ngIf="enableEYLogo" src="assets/img/EY.png" alt="EY Logo">
+        <img *ngIf="!enableEYLogo" src="assets/img/logo.png" alt="Digiverifier Logo"> -->
+
+        <img *ngIf="cwfLogo" src="{{cwfLogo}}" alt="EY Logo" style="pointer-events: none;">
+        <img *ngIf="!cwfLogo" src="assets/img/logo.png" alt="Digiverifier Logo" style="pointer-events: none;">
+
+
+      </a>
+    </h1>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#candidateNav" aria-controls="candidateNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>

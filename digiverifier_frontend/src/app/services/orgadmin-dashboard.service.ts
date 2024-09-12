@@ -138,13 +138,18 @@ export class OrgadminDashboardService {
     return this.http.get(`${environment.apiUrl}/api/candidate/content?contentId=${contentId}&type=VIEW`);
   }
 
-  getPreSignedUrlByCandidateCode(candidateCode: any,reportStatus:any) { 
+  getPreSignedUrlByCandidateCode(candidateCode: any,reportStatus:any,isSecondReport: any) { 
     console.log("getPreSignedUrlByCandidateCode::{}",reportStatus);
-    return this.http.get(`${environment.apiUrl}/api/report?candidateCode=${candidateCode}&type=INTERIM&overrideReportStatus=${reportStatus}`);
+    return this.http.get(`${environment.apiUrl}/api/report?candidateCode=${candidateCode}&type=INTERIM&overrideReportStatus=${reportStatus}&secondReport=${isSecondReport}`);
   }
 
   getConventionalReportByCandidateCode(candidateCode:any,reportStatus:any,conventionalReport:any){
     return this.http.get(`${environment.apiUrl}/api/report/getConventionalReport?candidateCode=${candidateCode}&type=CONVENTIONALINTERIM&overrideReportStatus=${reportStatus}&conventionalReport=${conventionalReport}`);
+  }
+
+  //TECHM Report
+  getConventionalTechMReportByCandidateCode(candidateCode:any,reportStatus:any,conventionalReport:any){
+    return this.http.get(`${environment.apiUrl}/api/report/generateTechMConventional?candidateCode=${candidateCode}&type=CONVENTIONALINTERIM&overrideReportStatus=${reportStatus}&conventionalReport=${conventionalReport}`);
   }
 
   //OverAllSearch
@@ -223,5 +228,9 @@ export class OrgadminDashboardService {
 
   getEcourtProof(searchData: any) {
     return this.http.post(`${environment.apiUrl}/api/user/getECourtProof`, searchData);
+  }
+
+  oldCandidatePurge(orgId: any) { 
+    return this.http.get(`${environment.apiUrl}/api/candidate/oldCandidatesPurge/${orgId}`);
   }
 }

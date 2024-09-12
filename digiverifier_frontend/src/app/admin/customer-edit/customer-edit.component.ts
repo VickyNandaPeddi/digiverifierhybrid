@@ -17,6 +17,8 @@ export class CustomerEditComponent implements OnInit {
   CustomersData: any=[];
   public showvalid: any;
   public passwordPolicy: any;
+  public mfa: any;
+  passwordPolicyDay:any;
   updateCustomers = new FormGroup({
     organizationId: new FormControl('', Validators.required),
     organizationName: new FormControl('', Validators.required),
@@ -32,9 +34,13 @@ export class CustomerEditComponent implements OnInit {
     accountsPocPhoneNumber: new FormControl('', [Validators.minLength(10), Validators.maxLength(10), Validators.pattern('[6-9]\\d{9}')]),
     billingAddress: new FormControl(),
     callBackUrl: new FormControl(),
+    tokenUrlForCallBack: new FormControl(),
+    callBackUrlUser: new FormControl(),
+    callBackUrlPassword: new FormControl(),
     showValidation:new FormControl(),
     passwordPolicy:new FormControl('',Validators.required),
-    lastPasswords:new FormControl('',Validators.required)
+    lastPasswords:new FormControl('',Validators.required),
+    isMFA:new FormControl('',Validators.required)
   });
   constructor( private customers:CustomerService, 
     private router:ActivatedRoute,
@@ -44,6 +50,7 @@ export class CustomerEditComponent implements OnInit {
     this.customers.getCustomersData(this.router.snapshot.params.organizationId).subscribe((result: any)=>{
       this.CustomersData = result.data;
       this.orgId=result.data.organizationId;
+      this.passwordPolicyDay = result.data.passwordPolicyDay;      
       console.log(this.CustomersData)
       this.viewLogo = "data:image/png;base64,"+this.CustomersData.organizationLogo;
       this.updateCustomers = new FormGroup({
@@ -60,10 +67,14 @@ export class CustomerEditComponent implements OnInit {
         accountsPocPhoneNumber: new FormControl(result.data['accountsPocPhoneNumber'], [Validators.minLength(10), Validators.maxLength(10), Validators.pattern('[6-9]\\d{9}')]),
         billingAddress: new FormControl(result.data['billingAddress']),
         callBackUrl: new FormControl(result.data['callBackUrl']),
+        tokenUrlForCallBack: new FormControl(result.data['tokenUrlForCallBack']),
+        callBackUrlUser: new FormControl(result.data['callBackUrlUser']),
+        callBackUrlPassword: new FormControl(result.data['callBackUrlPassword']),
         // showValidation: new FormControl(result.data['showValidation'], Validators.required),
         showValidation:new FormControl('',Validators.required),
         passwordPolicy:new FormControl('',Validators.required),
-        lastPasswords:new FormControl('',Validators.required)
+        lastPasswords:new FormControl('',Validators.required),
+        isMFA:new FormControl('',Validators.required)
       })
     });
   }
@@ -89,6 +100,11 @@ export class CustomerEditComponent implements OnInit {
   selectPasswordPolicy(event:any){
     this.passwordPolicy=event.target.value
     console.log( this.passwordPolicy,"-----------------------kkk")
+    
+  }
+  selectMFA(event:any){
+    this.mfa=event.target.value
+    console.log( this.mfa,"-----------------------kkk")
     
   }
   onSubmit(updateCustomers: FormGroup) {

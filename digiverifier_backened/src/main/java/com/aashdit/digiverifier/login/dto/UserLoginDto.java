@@ -22,4 +22,8 @@ public class UserLoginDto {
 	boolean orgPassPolicy;
 	
 	Date lastPasswordUpdated;
+	
+	Long passwordPolicyDay;
+	
+	boolean isMFA;
 }

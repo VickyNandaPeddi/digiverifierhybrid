@@ -19,6 +19,7 @@ export class LetteracceptComponent implements OnInit {
   formLetterAccept = new FormGroup({
     candidateCode: new FormControl('', Validators.required)
   });
+  showDeclineBtn: boolean = false;
   patchUserValues() {
     this.formLetterAccept.patchValue({
       candidateCode: this.candidateCode
@@ -49,6 +50,18 @@ export class LetteracceptComponent implements OnInit {
         this.loaContent=result.data;
       }
     });
+
+    
+    this.candidateService.getOrgNameByCandidateCode(this.candidateCode).subscribe((data: any)=>{
+      // console.log("DATA :",data)
+      this.organizationName = data.data;
+      
+      // console.log("organizationName : ",this.organizationName)
+      if (this.organizationName && this.organizationName == 'Ernst & Young Pvt. Ltd.') {
+        this.showDeclineBtn = true;
+      }
+    })
+
   }
   checkHistoryLength(): boolean {
     return this.location.getState() === null;

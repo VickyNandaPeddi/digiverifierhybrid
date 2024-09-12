@@ -102,5 +102,7 @@ public interface UserService {
 	ServiceOutcome<VendorChecks> saveConventionalCandidateChecks(String vendorChecks, String proofDocumentNew, String addressCheck);
 
 	ServiceOutcome<?> getECourtProof(VendorInitiatDto vendorInitiatDto);
+	
+	ServiceOutcome<String> forgotPassword(String emailId);
 
 }

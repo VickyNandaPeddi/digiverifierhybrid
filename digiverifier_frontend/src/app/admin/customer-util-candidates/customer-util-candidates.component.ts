@@ -94,7 +94,7 @@ export class CustomerUtilCandidatesComponent implements OnInit {
     for (let i = 0; i < decodedBytes.length; i++) {
       decryptedData += String.fromCharCode(decodedBytes.charCodeAt(i) ^ keyBytes[i % keyBytes.length]);
     }
-    console.log("decdsafdfas  _"+decryptedData)
+    // console.log("decdsafdfas  _"+decryptedData)
     return decryptedData;
   }
 

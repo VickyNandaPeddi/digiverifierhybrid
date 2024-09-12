@@ -1615,6 +1615,7 @@ export class CustomerUtilizationComponent implements OnInit {
     console.warn('FROMDATE xyz:::', this.fromDate);
     console.warn('TODATE xyz:::', this.toDate);
 
+    if(this.authService.roleMatch(['ROLE_CBADMIN'])){
     this.customers
       .postCustomerUtilizationReport({
         fromDate: this.fromDate,
@@ -1846,6 +1847,52 @@ export class CustomerUtilizationComponent implements OnInit {
           });
         }
       });
+
+    }else{
+      console.log("Calling new counter API");
+      this.customers
+      .getCustomerUtilizationDBCounts({
+        fromDate: this.fromDate,
+        toDate: this.toDate,
+        organizationIds: organizationIds.includes(0)
+          ? [Number(this.authService.getOrgID())]
+          : organizationIds,
+      })
+      .subscribe((data: any) => {
+        this.responseCheck.set('utilizationReport', true);
+        let allResponseReceived = true;
+        for (let entry of this.responseCheck.entries()) {
+          if (entry[1] == false) {
+            allResponseReceived = false;
+          }
+        }
+
+        if (allResponseReceived) {
+          this.kyc = true;
+        }
+        if (data.outcome === true) {
+          this.getCustomerUtilizationReport = data.data?.reportResponseDtoList;
+          for ( let item in this.getCustomerUtilizationReport ){
+            this.getCustomerUtilizationReport[item]['eKYC'] = this.geteKycReport.length;
+          }
+          this.start_date =
+            data.data.fromDate != null
+              ? data.data.fromDate.split('-').join('/')
+              : '';
+          this.end_date =
+            data.data.toDate != null
+              ? data.data.toDate.split('-').join('/')
+              : '';
+
+        } else {
+          Swal.fire({
+            title: data.message,
+            icon: 'warning',
+          });
+        }
+      });
+
+    }
 
     let rportData = {
       userId: this.authService.getuserId(),
@@ -2374,7 +2421,7 @@ export class CustomerUtilizationComponent implements OnInit {
     for (let i = 0; i < decodedBytes.length; i++) {
       decryptedData += String.fromCharCode(decodedBytes.charCodeAt(i) ^ keyBytes[i % keyBytes.length]);
     }
-    console.log("decdsafdfas  _"+decryptedData)
+    // console.log("decdsafdfas  _"+decryptedData)
     return decryptedData;
   }
 }

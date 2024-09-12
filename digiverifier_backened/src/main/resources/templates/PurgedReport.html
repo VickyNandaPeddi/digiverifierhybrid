@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en-us" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>DigiVerifier Pdf</title>
+<meta charset="UTF-8" />
+<!--    <link  th:href="@{styles/css/Metro.css}"  rel="stylesheet"/>-->
+<link th:href="${cssPath + '/fonts.css'}" rel="stylesheet" />
+<link th:href="${cssPath + '/common.css'}" rel="stylesheet" />
+<link th:href="@{http://fonts.googleapis.com/css?family=Calibri}"
+	rel='stylesheet' type='text/css' />
+<!--<script src='http://localhost:9090/chart.js'></script>-->
+<style>
+span {
+	font-family: 'Calibri', sans-serif;
+}
+
+.border {
+    border: thin solid black;
+}
+
+        .customer-info {
+            border: 1px solid black;
+            padding: 10px;
+            width: fit-content;
+        }
+        .customer-info div {
+            margin: 5px 0;
+        }
+        
+        .report-filters {
+            display: flex;
+            justify-content: space-between;
+            font-family: Arial, sans-serif;
+        }
+        .column {
+            display: inline-block;
+            margin-right: 50px;
+        }
+        .label {
+            font-weight: bold;
+        }
+        .row {
+            margin-bottom: 5px;
+            margin-left: 50px;
+        }
+
+.table-st {
+	clear: both;
+	width: 100%;
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+.table-st tr {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.text-left {
+	text-align: left;
+}
+
+.table-st tr td {
+	border: 1px solid black;
+	border-collapse: collapse;
+	padding: 5px;
+}
+
+.table-st tr td span {
+	margin-left: 5px;
+}
+
+.blue-bg {
+	background-color: #1C4E80;
+}
+
+.grey-bg {
+	background-color: #DDDDDD;
+}
+
+.black-text {
+	color: black;
+	font-size: 14px;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+}
+
+.grey-text {
+	color: black;
+	font-size: 13px !important;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+}
+
+.white-text {
+	font-weight: bold;
+	color: #1C4E80;
+	font-family: 'Calibri', sans-serif;
+	font-size: 13px;
+}
+
+.td-heading {
+	font-weight: bold;
+	font-size: 15px;
+}
+
+.line-break {
+	display: block;
+	height: 15px;
+}
+
+.sub-heading {
+	text-align: center;
+	font-weight: bold;
+	font-size: 18px;
+}
+
+.green-status {
+	margin: 0px;
+	color: #008000;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.amber-status {
+	margin: 0px;
+	color: #ffA500;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.red-status {
+	margin: 0px;
+	color: #ff0000;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.invalid-status {
+	margin: 0px;
+	color: #000000;
+	font-weight: bold;
+	font-family: 'Calibri', sans-serif;
+	font-size: 12px;
+}
+
+.black-box {
+	border: 1px solid black;
+}
+/* Base styles for the table */
+.table-st {
+            width: 100%;
+            border-collapse: collapse;
+        } 
+
+.table-st td {
+            padding: 7px;
+            border: 1px solid #ccc;
+        } 
+
+/* Media query for small screens */
+        @media screen and (max-width: 480px) {
+            .table-st td {
+                display: block;
+                width: 100%;
+            }
+        } 
+
+        /* Additional styles for specific elements */
+        .text-center {
+            text-align: center;
+        } 
+
+        .text-left {
+            text-align: left;
+        } 
+
+        .sub-heading {
+            font-size: 14px;
+            font-weight: 600;
+            color: whitesmoke;
+        } 
+
+        /* Optional styles for the logo */
+        /* You can modify these styles based on your preference */
+        .table-st img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .profile-width{
+            min-width:160px;
+        }
+        
+        .centered-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%; /* Adjust as needed */
+            height: 100%; /* Adjust as needed */
+            margin-left: 40px
+        }
+        
+          @media print {
+            tr, td {
+                display: block;
+                page-break-inside: avoid;
+            }
+        }
+</style>
+</head>
+<body>
+
+<div class="header">
+	<table class="table_head table-st">
+		<!--concept Title head-->
+		<tr class="text-center">
+			<td class="blue-bg"><span
+				class="td-heading black-text" style="color: whitesmoke">Audit Trail Report (Confidential)</span></td>
+		</tr>    
+	</table>
+		<span class="line-break"></span>
+		<!-- <div th:if="${root.employmentTenureVerificationDtoList}"> -->
+		<div class="report-filters">
+<!-- 			<span style="font-size: 15px" class="grey-text">Report Filters </span> <span class="grey-text" style="font-size: 12px"></span> 
+			<br> 
+			<span style="font-size: 15px; margin-left: 50px;" class="grey-text">From Date:
+				</span> <span th:text="${root.strFromDate}" class="grey-text" style="margin-right: 200px; font-size: 12px"></span>
+			<span style="font-size: 15px" class="grey-text">To Date:
+				</span> <span th:text="${root.strToDate}" class="grey-text" style="margin-right: 200px; font-size: 12px"></span>	
+			<br> 
+			<span style="font-size: 15px; margin-left: 50px;" class="grey-text">Search Text:
+				NA </span> <span class="grey-text" style="margin-right: 250px; font-size: 12px"></span>
+			<span style="font-size: 15px" class="grey-text">Mode:
+				Purged </span> <span class="grey-text" style="margin-right: 200px; font-size: 12px"></span>			
+			<br> 
+			<span style="font-size: 15px; margin-left: 50px;" class="grey-text">Customer:
+				</span> <span th:text="${root.orgName}" class="grey-text" style="margin-right: 200px; font-size: 12px"></span>
+			<span style="font-size: 15px" class="grey-text">Company:
+				</span> <span th:text="${root.orgName}" class="grey-text" style="margin-right: 200px; font-size: 12px"></span>	
+			<br> 
+			<span style="font-size: 15px; margin-left: 50px;" class="grey-text">Agent:
+				All </span> <span class="grey-text" style="margin-right: 260px; font-size: 12px"></span>
+			<span style="font-size: 15px" class="grey-text">Candidate Status:
+				All </span> <span class="grey-text" style="margin-right: 200px; font-size: 12px"></span> -->
+	        
+	        <div class="column">
+	            <div class="label">Report Filters</div>
+	            <div class="row"><span class="label">From Date:</span> <span th:text="${root.strFromDate}"></span></div>
+	            <div class="row"><span class="label">Search Text:</span> <span th:text="'NA'"></span></div>
+	            <div class="row"><span class="label">Customer:</span> <span th:text="${root.orgName}"></span></div>
+	            <div class="row"><span class="label">Agent:</span> <span th:text="'All'"></span></div>
+	        </div>
+	        <div class="column">
+	            <div class="row"><span class="label">To Date:</span> <span th:text="${root.strToDate}"></span></div>
+	            <div class="row"><span class="label">Mode:</span> <span th:text="'Purged'"></span></div>
+	            <div class="row"><span class="label">Company:</span> <span th:text="${root.orgName}"></span></div>
+	            <div class="row"><span class="label">Candidate Status:</span> <span th:text="'All'"></span></div>
+	        </div>	        			
+		</div>
+		
+		<span class="line-break"></span>
+		
+		<div class="customer-info">
+<!-- 		    <p class="grey-text" style="font-size: 12px">Customer Name</p>
+		    <p th:text="${root.orgName}" class="grey-text" style="font-size: 12px"></p>
+		    <br>
+		    <p class="grey-text" style="font-size: 12px">Address</p>
+		    <p th:text="${root.billingAddress}" class="grey-text" style="font-size: 12px"></p> -->
+		    <div><strong>Customer Name</strong></div>
+	        <div th:text="${root.orgName}" class="grey-text" style="font-size: 12px"></div>
+	        <div><strong>Address</strong></div>
+	        <div th:text="${root.billingAddress}" class="grey-text" style="font-size: 12px"></div>		
+		</div>	
+		
+		<span class="line-break"></span><span class="line-break"></span>
+		<table class="table-st employer-name-verification" border="0" style="page-break-inside: avoid;">
+			<tr class="blue-bg text-center">
+				<td class="white-text" colspan="5"><span class="td-heading"
+					style="color: whitesmoke;"><b>SUMMARY - Company Wise
+					</b> </span></td>
+			</tr>
+			<tr class="blue-bg text-center">
+				<td
+					style="width: 5%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">S.No</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Company Name</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Report Delivered</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Process Declined</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Invitation Expired</span></td>
+
+			</tr>
+			<tr class="text-center"
+				th:each="employmentVerification,stat: ${root.pwdvMprReportDtoList}">
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${stat.index + 1}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.name}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.interimReportCount}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.processDeclinedCount}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.invitationExpireCount}"></span></td>
+
+			</tr>
+			<tr th:if="${root.summaryCompanyWiseTotal != null}">
+                <td colspan="2" class="grey-text text-center"><span style="font-size: 12px"
+                    th:text="${root.summaryCompanyWiseTotal.name}"></span></td>
+               	<td class="grey-text text-center"><span style="font-size: 12px"
+                    th:text="${root.summaryCompanyWiseTotal.interimReportCount}"></span></td>
+                <td class="grey-text text-center"><span style="font-size: 12px"
+                    th:text="${root.summaryCompanyWiseTotal.processDeclinedCount}"></span></td>
+                <td class="grey-text text-center"><span style="font-size: 12px"
+                    th:text="${root.summaryCompanyWiseTotal.invitationExpireCount}"></span></td>
+
+            </tr>
+            <tr>
+                <td colspan="4" class="grey-text text-center"><span style="font-size: 12px">Grand Total</span></td>
+                <td class="grey-text text-center"><span style="font-size: 12px"
+                    th:text="${root.summaryCompanyWiseGrandTotal}"></span></td>
+            </tr>
+		</table>
+		
+		<span class="line-break"></span><span class="line-break"></span>
+		<table class="table-st employer-name-verification" border="0" style="page-break-inside: avoid;">
+			<tr class="blue-bg text-center">
+				<td class="white-text" colspan="5"><span class="td-heading"
+					style="color: whitesmoke;"><b>SUMMARY - Agent Wise
+					</b> </span></td>
+			</tr>
+			<tr class="blue-bg text-center">
+				<td
+					style="width: 5%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">S.No</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Agent Name</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Report Delivered</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Process Declined</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Invitation Expired</span></td>
+
+			</tr>
+			<tr class="text-center"
+				th:each="employmentVerification,stat: ${root.pwdvMprReportDtoAgentList}">
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${stat.index + 1}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.name}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.interimReportCount}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.processDeclinedCount}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.invitationExpireCount}"></span></td>
+			</tr>
+			<tr th:if="${root.summaryAgentWiseTotal != null}">
+                <td colspan="2" class="grey-text text-center"><span style="font-size: 12px"
+                    th:text="${root.summaryAgentWiseTotal.name}"></span></td>
+                <td class="grey-text text-center"><span style="font-size: 12px"
+                    th:text="${root.summaryAgentWiseTotal.interimReportCount}"></span></td>
+                <td class="grey-text text-center"><span style="font-size: 12px"
+                    th:text="${root.summaryAgentWiseTotal.processDeclinedCount}"></span></td>
+                <td class="grey-text text-center"><span style="font-size: 12px"
+                    th:text="${root.summaryAgentWiseTotal.invitationExpireCount}"></span></td>
+
+            </tr>
+            <tr>
+                <td colspan="4" class="grey-text text-center"><span style="font-size: 12px">Grand Total</span></td>
+                <td class="grey-text text-center"><span style="font-size: 12px"
+                    th:text="${root.summaryAgentWiseGrandTotal}"></span></td>
+            </tr>
+		</table>
+		
+ 		<span class="line-break"></span><span class="line-break"></span>
+<!-- 		<div class="border text-center">
+		    <span class="grey-text" style="font-size: 12px">ANNEXURE - I</span>
+		    <br>
+		    <span class="grey-text" style="font-size: 12px">Reports Delivered</span>
+		</div>
+		
+		<span class="line-break"></span> -->
+		<table class="table-st employer-name-verification" border="0" style="page-break-inside: avoid;">
+			<tr class="border text-center">
+			    <td colspan="10">
+			        <span class="grey-text" style="font-size: 12px">ANNEXURE - I</span>
+			        <br>
+			        <span class="grey-text" style="font-size: 12px">Reports Delivered</span>
+			    </td>
+			</tr>
+			
+			<tr class="blue-bg text-center">
+				<td class="white-text" colspan="10"><span class="td-heading" th:text="${root.orgName}"
+					style="color: whitesmoke;"><b>
+					</b> </span></td>
+			</tr>
+			<tr class="blue-bg text-center">
+				<td
+					style="width: 5%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">S.No</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Agent Name</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">App Id</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Candidate Name</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Date of Birth</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Candidate Uploaded</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Candidate Invitation Sent</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Candidate Completed</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Report Delivered</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Candidate Purged</span></td>
+
+			</tr>
+			<tr class="text-center"
+				th:each="employmentVerification,stat: ${root.reportDeliveredList}">
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${stat.index + 1}"></span></td>
+
+				<td th:if="${employmentVerification.createdByUserLastName != null}" class="grey-text text-center"><span style="font-size: 12px"
+					 th:text="${employmentVerification.createdByUserFirstName + ' ' + employmentVerification.createdByUserLastName}"></span></td>
+				<td th:if="${employmentVerification.createdByUserLastName == null}" class="grey-text text-center"><span style="font-size: 12px"
+					 th:text="${employmentVerification.createdByUserFirstName}"></span></td>
+					
+					
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.applicantId}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${'Purged'}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${'Purged'}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.uploadedDate}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.inviteSentDate}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.qcCreatedOn}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.qcCreatedOn}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.purgedDate}"></span></td>
+			</tr>
+		</table>
+		
+		<span class="line-break"></span><span class="line-break"></span>
+<!-- 		<div class="border text-center">
+		    <span class="grey-text" style="font-size: 12px">ANNEXURE - II</span>
+		    <br>
+		    <span class="grey-text" style="font-size: 12px">Process Declined</span>
+		</div>
+		
+		<span class="line-break"></span> -->
+		<table class="table-st employer-name-verification" border="0" style="page-break-inside: avoid;">
+			<tr class="border text-center">
+			    <td colspan="10">
+			        <span class="grey-text" style="font-size: 12px">ANNEXURE - II</span>
+			        <br>
+			        <span class="grey-text" style="font-size: 12px">Process Declined</span>
+			    </td>
+			</tr>
+		
+			<tr class="blue-bg text-center">
+				<td class="white-text" colspan="10"><span class="td-heading" th:text="${root.orgName}"
+					style="color: whitesmoke;"><b>
+					</b> </span></td>
+			</tr>
+			<tr class="blue-bg text-center">
+				<td
+					style="width: 5%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">S.No</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Agent Name</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">App Id</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Candidate Name</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Date of Birth</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Candidate Uploaded</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Candidate Invitation Sent</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Candidate Invitation declined</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Candidate Purged</span></td>
+
+			</tr>
+			<tr class="text-center"
+				th:each="employmentVerification,stat: ${root.processDeclinedList}">
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${stat.index + 1}"></span></td>
+
+				<td th:if="${employmentVerification.createdByUserLastName != null}" class="grey-text text-center"><span style="font-size: 12px"
+					 th:text="${employmentVerification.createdByUserFirstName + ' ' + employmentVerification.createdByUserLastName}"></span></td>
+				<td th:if="${employmentVerification.createdByUserLastName == null}" class="grey-text text-center"><span style="font-size: 12px"
+					 th:text="${employmentVerification.createdByUserFirstName}"></span></td>
+					
+					
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.applicantId}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${'Purged'}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${'Purged'}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.uploadedDate}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.inviteSentDate}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.processDeclinedDate}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.purgedDate}"></span></td>
+			</tr>
+		</table>
+		
+		<span class="line-break"></span><span class="line-break"></span>
+<!-- 		<div class="border text-center">
+		    <span class="grey-text" style="font-size: 12px">ANNEXURE - III</span>
+		    <br>
+		    <span class="grey-text" style="font-size: 12px">Invitation Expired</span>
+		</div>
+		
+		<span class="line-break"></span> -->
+		<table class="table-st employer-name-verification" border="0" style="page-break-inside: avoid;">
+			<tr class="border text-center">
+			    <td colspan="10">
+			        <span class="grey-text" style="font-size: 12px">ANNEXURE - III</span>
+			        <br>
+			        <span class="grey-text" style="font-size: 12px">Invitation Expired</span>
+			    </td>
+			</tr>
+		
+			<tr class="blue-bg text-center">
+				<td class="white-text" colspan="10"><span class="td-heading" th:text="${root.orgName}"
+					style="color: whitesmoke;"><b>
+					</b> </span></td>
+			</tr>
+			<tr class="blue-bg text-center">
+				<td
+					style="width: 5%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">S.No</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Agent Name</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">App Id</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Candidate Name</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Date of Birth</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Candidate Uploaded</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Candidate Invitation Sent</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Invitation Expired</span></td>
+				<td
+					style="width: 20%; padding: 5px; font-weight: bold;"><span
+					class="white-text" style="color: whitesmoke;">Candidate Purged</span></td>
+
+			</tr>
+			<tr class="text-center"
+				th:each="employmentVerification,stat: ${root.invitationExpiredList}">
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${stat.index + 1}"></span></td>
+
+				<td th:if="${employmentVerification.createdByUserLastName != null}" class="grey-text text-center"><span style="font-size: 12px"
+					 th:text="${employmentVerification.createdByUserFirstName + ' ' + employmentVerification.createdByUserLastName}"></span></td>
+				<td th:if="${employmentVerification.createdByUserLastName == null}" class="grey-text text-center"><span style="font-size: 12px"
+					 th:text="${employmentVerification.createdByUserFirstName}"></span></td>
+					
+					
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.applicantId}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${'Purged'}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${'Purged'}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.uploadedDate}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.inviteSentDate}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.invitationExpiredDate}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentVerification.purgedDate}"></span></td>
+			</tr>
+		</table>
+</div>
+
+</body>
+</html>

@@ -1,6 +1,7 @@
 package com.aashdit.digiverifier.config.superadmin.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 
 import com.aashdit.digiverifier.config.admin.model.User;
@@ -51,6 +52,10 @@ public class OrganizationEmailTemplate implements Serializable{
 	@Column(name = "created_date")
 	private Date createdDate;
 	
+	@Column(name = "cwf_copyright")
+	private String cwfCopyRight;
 	
+    @Column(name = "cwf_logo", columnDefinition = "BLOB")
+    private String cwfLogo;
 
 }

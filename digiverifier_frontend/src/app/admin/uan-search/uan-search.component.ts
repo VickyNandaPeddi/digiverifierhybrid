@@ -404,7 +404,8 @@ console.warn("ApplicantKey>>>>>>>>>>",applicantKey);
     
 
       // Add additional column
-      const dateFormat = 'dd/MM/yyyy'; // Specify your desired date format
+      // const dateFormat = 'dd/MM/yyyy'; // Specify your desired date format
+      const dateFormat = 'MM/yyyy'; // Specify your desired date format
 
       const datePipe = new DateFormatPipe();
   

@@ -235,10 +235,42 @@
                            
                             <div class="">
                                 <div class="form-group">
-                                    <label for="" class="col-md-12 required">Callback URL :</label>
+                                    <label for="" class="col-md-12">Callback URL :</label>
                                     <div class="col-md-12">
                                         <input type="text" class="form-control form-control-sm"
                                         formControlName="callBackUrl">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12">Token Url For Status Callback:
+                                    </label>
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control form-control-sm"
+                                        formControlName="tokenUrlForCallBack">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12">User For Token Url For Status Callback:
+                                    </label>
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control form-control-sm"
+                                        formControlName="callBackUrlUser">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="">
+                                <div class="form-group">
+                                    <label for="" class="col-md-12">Password For Token Url For Status Callback:
+                                    </label>
+                                    <div class="col-md-12">
+                                        <input type="text" class="form-control form-control-sm"
+                                        formControlName="callBackUrlPassword">
                                     </div>
                                 </div>
                             </div>
@@ -293,7 +325,7 @@
                             </div> 
                             <div class="ml-3">
                                 <div>
-                                    <label><b>Password Policy (90Days):</b></label>
+                                    <label><b>Password Policy ({{passwordPolicyDay}} Days):</b></label>
                                     <div class="showvalid">
                                         <div class="checkbox">
                                             <span class="space"></span>

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
@@ -38,12 +39,15 @@ import com.aashdit.digiverifier.config.candidate.model.LoaConsentMaster;
 import com.aashdit.digiverifier.config.candidate.repository.CandidateRepository;
 import com.aashdit.digiverifier.config.candidate.repository.ConventionalLoaConsentRepository;
 import com.aashdit.digiverifier.config.candidate.repository.LoaConsentMasterRepository;
+import com.aashdit.digiverifier.config.superadmin.model.Organization;
 import com.aashdit.digiverifier.config.superadmin.model.OrganizationConfig;
 import com.aashdit.digiverifier.config.superadmin.model.OrganizationEmailTemplate;
 import com.aashdit.digiverifier.config.superadmin.repository.OrganizationConfigRepository;
 import com.aashdit.digiverifier.config.superadmin.repository.OrganizationEmailTemplateRepository;
+import com.aashdit.digiverifier.config.superadmin.repository.OrganizationRepository;
 import com.aashdit.digiverifier.email.dto.Email;
 import com.aashdit.digiverifier.email.dto.EmailProperties;
+import com.aashdit.digiverifier.login.service.OTPService;
 import com.itextpdf.io.source.ByteArrayOutputStream;
 
 import jakarta.mail.MessagingException;
@@ -81,6 +85,12 @@ public class EmailSentTask {
 	
 	@Autowired
 	private ConventionalLoaConsentRepository conventionaLoaConsentRepository;
+	
+    @Autowired
+	private OTPService otpService;
+    
+    @Autowired
+    private OrganizationRepository organizationRepository;
 
 
 	
@@ -107,7 +117,13 @@ public class EmailSentTask {
 		boolean kpmg = findByCandidateId.getOrganization().getOrganizationName().equalsIgnoreCase("kpmg");
 		Email email = new Email();
 		if(organizationEmailTemplate!=null && organizationEmailTemplate.getCandidateInviteEmailSub()!=null) {
-			email.setTitle(organizationEmailTemplate.getCandidateInviteEmailSub()+findByCandidateId.getApplicantId());
+			if(findByCandidateId.getOrganization().getOrganizationName().equalsIgnoreCase("Ernst & Young Pvt. Ltd.")) {
+				String updatedTitle = organizationEmailTemplate.getCandidateInviteEmailSub().replace("<Candidate_INFO>", findByCandidateId.getCandidateName()+"_"+findByCandidateId.getRecruiterName()+"_"+findByCandidateId.getApplicantId());
+				email.setTitle(updatedTitle);
+			}else {
+				email.setTitle(organizationEmailTemplate.getCandidateInviteEmailSub()+findByCandidateId.getApplicantId());
+			}
+			// email.setTitle(organizationEmailTemplate.getCandidateInviteEmailSub()+findByCandidateId.getApplicantId());
 		}else {
 			email.setTitle(emailProperties.getDigiverifierEmailTitle()+findByCandidateId.getApplicantId());
 		}
@@ -237,8 +253,15 @@ public class EmailSentTask {
         
 		if(organizationEmailTemplate!=null && organizationEmailTemplate.getCandidateInviteEmailTemp()!=null) {
 			String inviteTemplate = organizationEmailTemplate.getCandidateInviteEmailTemp();
+			
 			List<String> targetBoldWords = List.of("Note", findByCandidateCode.getOrganization().getOrganizationName());
+            if(findByCandidateCode.getOrganization().getOrganizationName().equalsIgnoreCase("Ernst & Young Pvt. Ltd.")) {
+            	targetBoldWords = new ArrayList<>();
+			}
 			String updateInviteTemplate =makeWordsBold(inviteTemplate, targetBoldWords);
+			if(findByCandidateCode.getOrganization().getOrganizationName().equalsIgnoreCase("Ernst & Young Pvt. Ltd.")) {
+				updateInviteTemplate = updateInviteTemplate.replace("<Client_Name>", findByCandidateCode.getRecruiterName());
+			}
 			
 			emailContent = 	"<!DOCTYPE html>"+
 					"<html>"+
@@ -334,7 +357,14 @@ public class EmailSentTask {
 				Session session = Session.getDefaultInstance(props);
 
 				MimeMessage msg = new MimeMessage(session);
-				msg.setFrom(new InternetAddress(email.getSender(), emailProperties.getDigiverifierSenderNickName()));
+
+				if(email.getSender() != null && email.getSender().equalsIgnoreCase("in-fmnoreplykverify@kverify.kpmg.com")) {
+					log.info("KPMG EMAIL Config :");
+					msg.setFrom(new InternetAddress(email.getSender(), emailProperties.getDigiverifierSenderNickNameKPMG()));
+				}else {
+					log.info("Other EMAIL Config :");
+					msg.setFrom(new InternetAddress(email.getSender(), emailProperties.getDigiverifierSenderNickName()));
+				}
 				msg.setRecipient(Message.RecipientType.TO, new InternetAddress(email.getReceiver()));
 				
 				if(!StringUtils.isBlank(email.getCopiedReceiver()) || !StringUtils.isBlank(email.getBccReceiver())) {
@@ -944,6 +974,44 @@ public class EmailSentTask {
 				    + "</div>"
 				    + "</body>"
 				    + "</html>";
+		// EY LOA Content
+				 String eyLoaContent = "<!DOCTYPE html>"+
+						    "<html>"+
+						    "<head>"+
+						    "<style>a:link, a:visited {"
+						    + "  background-color: #36f439;"
+						    + "  color: white;"
+						    + "  padding: 15px 25px;"
+						    + "  text-align: center;"
+						    + "  text-decoration: none;"
+						    + "  display: inline-block;"
+						    + "}"
+						    + "body {\r\n"
+						    + "            font-size: 15px; /* Adjust the size as needed */\r\n"
+						    + "            text-align: justify;\r\n"
+						    + "        }"
+						    + "a:hover, a:active {"
+						    + "  background-color: red;"
+						    + "}"
+						    + ".center {" + "  margin: auto;" + "width: 90%;" + "border: 0px solid #73AD21;" + "text-align: left; " + "padding: 20px;" + "}"
+						    + "</style>"
+						    + "</head>"
+						    + "<body>"
+						    + ""
+						    + "<div class=\"center\">"  // Fix: Use double quotes to enclose class attribute
+						    + "<p>Dear <strong>"+findByCandidateCode.getCandidateName()+",</strong></p>"
+						    + "<p>Greetings from Ernst & Young LLP (EY).\r\n"+ "</p>"
+						    + "<p>Further to your consent to perform background Document verification, please find attached the copy of accepted Letter of Authorization.\r\n"+ "</p>"
+						    + "<br/>"
+						    + "<p>Regards,</p>"
+						    + "<p>Employee Background Check Team-Ernst & Young LLP</p>"
+						    + "<p>4th & 5th Floor, Plot No. 2B, Tower 2, Sector 126, Gautam Budh Nagar, Noida - 201 304, India</p>"
+						    + "<p>Website:http://www.ey.com;Email: candidateassist@in.ey.com.</p>"
+						    + "</div>"
+						    + "</body>"
+						    + "</html>";
+				 
+				 
 		  
 		try {
 			String candidateEmail = findByCandidateCode.getCcEmailId();
@@ -976,7 +1044,11 @@ public class EmailSentTask {
 				email.setContent(kpmgLoaContent);			
 			}
 			else {
-				email.setContent(loaContent);
+				if(findByCandidateCode.getOrganization().getOrganizationName().equalsIgnoreCase("Ernst & Young Pvt. Ltd.")) { 
+					email.setContent(eyLoaContent);
+				}else {
+					email.setContent(loaContent);
+				}
 			}
 			if(organizationEmailTemplate!=null && organizationEmailTemplate.getCandidateLoaEmailSub()!=null) {
 				email.setTitle(organizationEmailTemplate.getCandidateLoaEmailSub()+findByCandidateCode.getApplicantId());
@@ -1214,6 +1286,177 @@ public class EmailSentTask {
 
 			return emailContent;
 
+		}
+		
+		public boolean resetPassword(String emailId,Long userId,String userFirstName) {
+			 Boolean result=false;
+			 String emailContent = null;
+			try {
+				if(emailId != null && userId != null && userFirstName != null) {
+			        String encodedContent = StringEscapeUtils.escapeHtml4(userFirstName);
+			        
+			        
+					emailContent = 	"<!DOCTYPE html>"+
+							"<html>"+
+							"<head>"+
+							"<style>"+
+							""
+							+".center {" + "  margin: auto;" + "width: 90%;"+ "border: 0px solid #73AD21;"+ "text-align: left; "+"padding: 20px;"+ "}"
+							+ "</style>"
+							+"</head>"
+							+"<body>"
+							+"<div class="+"center"+">" 
+							+"<p>Dear "+encodedContent+",<br>"
+//							+ "<p>Greetings from DigiVerifier.\r\n"+ "</p>"
+							+"<p>You recently requested to reset your password for your Digiverifier account. Click the button below to reset it.</p><br>"
+							+"<p><a href='"+emailProperties.getDigiverifierResetPassword()+userId+"' style='background: #00AE68; color: #fff; font-weight: 500; padding: 8px 20px; font-size: 14px; border-radius: 5px; box-shadow: 0px 2px 2px #00000052'>Reset Password</a></p>"
+//							+"Note: This link will expire on "+currentDatePlusOne
+							+ "</div>"
+							+"</body>"
+							+"</html>";
+					
+					 Email email = new Email();
+					 email.setTitle("Password Reset Request");
+					 email.setSender(emailProperties.getDigiverifierEmailSenderId());
+					 email.setContent(emailContent);
+					 email.setReceiver(emailId);
+//					 email.setBccReceiver(agentEmailId);
+					
+					 result=send(email);					
+				}
+
+			} catch (Exception e) {
+				log.info("EMAIL SENT TASK resetPassword {}");
+			}
+
+			return result;
+		}
+		
+		public boolean emailOnOrgPurge(String orgName , String emailId,String bccId,boolean isSuccessPurged, Date purgedCutoffDate) {
+			 Boolean result=false;
+			 String emailContent = null;
+			try {
+				 Email email = new Email();
+				 
+				 email.setSender(emailProperties.getDigiverifierEmailSenderId());
+				 
+				if(isSuccessPurged) {
+			        
+			        
+					emailContent = 	"<!DOCTYPE html>"+
+							"<html>"+
+							"<head>"+
+							"<style>"+
+							""
+							+".center {" + "  margin: auto;" + "width: 90%;"+ "border: 0px solid #73AD21;"+ "text-align: left; "+"padding: 20px;"+ "}"
+							+ "</style>"
+							+"</head>"
+							+"<body>"
+							+"<div class="+"center"+">" 
+							+"<p>Dear Admin<br>"
+							+ "<p>Greetings from DigiVerifier.\r\n"+ "</p>"
+							+"<p>The purge process for old candidates uploaded before the date <strong>"+purgedCutoffDate+"</strong> for <strong>"+orgName+"</strong> organization have been completed successfully.</p><br>"
+							+"<p>Please login and generate the report.</p>"
+							+ "</div>"
+							+"</body>"
+							+"</html>";
+					
+					email.setTitle("Organization Purge Notification");
+															
+				}else {
+					emailContent = 	"<!DOCTYPE html>"+
+							"<html>"+
+							"<head>"+
+							"<style>"+
+							""
+							+".center {" + "  margin: auto;" + "width: 90%;"+ "border: 0px solid #73AD21;"+ "text-align: left; "+"padding: 20px;"+ "}"
+							+ "</style>"
+							+"</head>"
+							+"<body>"
+							+"<div class="+"center"+">" 
+							+ "<p>Greetings from DigiVerifier.\r\n"+ "</p>"
+							+"<p>The purge process for old candidates uploaded before the date <strong>"+purgedCutoffDate+"</strong> for <strong>"+orgName+"</strong> organization is unable to complete.</p><br>"
+							+"<p>Please retry by using single organization purge option.</p>"
+							+ "</div>"
+							+"</body>"
+							+"</html>";
+					
+					email.setTitle("Failed Purge Notification");
+					 email.setBccReceiver(bccId);
+					
+				}
+				
+				
+				 
+				 email.setContent(emailContent);
+				 email.setReceiver(emailId);
+				 result=send(email);
+
+			} catch (Exception e) {
+				log.info("Exception EMAIL SENT TASK emailOnOrgPurge {}", e.getMessage());
+			}
+
+			return result;
+		}
+		
+		
+		
+		public boolean mfaOTP(String userMailId) {
+			Boolean result=false;
+			 String emailContent = null;
+			try {
+				System.out.println("userMailId : "+userMailId);
+				if(userMailId != null) {
+					User byUserEmailId = userRespository.findByUserEmailId(userMailId);
+					
+					if(byUserEmailId != null) {
+				        String encodedContent = StringEscapeUtils.escapeHtml4(byUserEmailId.getUserFirstName());
+
+//				        String secretKey = otpService.generateSecretKey();
+//				        String secretOTp = otpService.generateOTP(secretKey);
+				        
+//				        System.out.println("secretOTp : "+secretOTp);
+				        String OTP = otpService.generateOTP();
+				        otpService.saveOtp(byUserEmailId.getUserName(), OTP);
+				        otpService.printOtpDetails();
+				        
+//				        System.out.println("OTP  : "+secretKey);
+				        
+						emailContent = 	"<!DOCTYPE html>"+
+								"<html>"+
+								"<head>"+
+								"<style>"+
+								""
+								+".center {" + "  margin: auto;" + "width: 90%;"+ "border: 0px solid #73AD21;"+ "text-align: left; "+"padding: 20px;"+ "}"
+								+ "</style>"
+								+"</head>"
+								+"<body>"
+								+"<div class="+"center"+">" 
+								+"<p>Dear "+encodedContent+",<br>"
+								//							+ "<p>Greetings from DigiVerifier.\r\n"+ "</p>"
+								+"<p><b>OTP: ["+OTP+"]</b></p><br>"
+								+"<p>This OTP is valid for 2 minutes. Please enter it on the Digiverifier Account to proceed.</p>"
+								//							+"Note: This link will expire on "+currentDatePlusOne
+								+ "</div>"
+								+"</body>"
+								+"</html>";
+						
+						 Email email = new Email();
+						 email.setTitle("Your One-Time Password (OTP) for Digiverifier Account");
+						 email.setSender(emailProperties.getDigiverifierEmailSenderId());
+						 email.setContent(emailContent);
+						 email.setReceiver(userMailId);
+						
+						 result=send(email);					
+
+					}
+				}
+			} catch (Exception e) {
+				log.info("EMAIL SENT TASK mfaOTP {}"+e);
+			}
+			
+			return result;
+			
 		}
 
 }

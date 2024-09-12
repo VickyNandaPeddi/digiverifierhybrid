@@ -18,9 +18,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.aashdit.digiverifier.common.dto.EPFOResponseDto;
+
 
 import com.aashdit.digiverifier.api.model.ApiCandidate;
 import com.aashdit.digiverifier.api.service.ApiService;
+import com.aashdit.digiverifier.common.dto.EPFOResponseDto;
 import com.aashdit.digiverifier.common.model.ServiceOutcome;
 import com.aashdit.digiverifier.config.admin.model.Token;
 import com.aashdit.digiverifier.config.admin.model.User;
@@ -223,4 +226,19 @@ public class ApiController {
     public ResponseEntity<byte[]> downloadCandidateStatusTrackerReport(@RequestHeader("Authorization") String authorization,@RequestBody ReportSearchDto reportSearchDto) {
     	return reportService.downloadCandidateStatusTrackerReport(reportSearchDto);
     }
+    
+	@Operation(summary ="get Candidate EPFO data for candidateCode")
+	@GetMapping(value = "candidate/getEPFODataAPI/{candidateCode}")
+	public ResponseEntity<ServiceOutcome<EPFOResponseDto>> getEPFODataAPI(@PathVariable("candidateCode") String CandidateCode, @RequestHeader("Authorization") String authorization) {
+		ServiceOutcome<EPFOResponseDto> svcSearchResult = apiService.getEPFODataAPI(CandidateCode);
+		return new ResponseEntity<>(svcSearchResult, HttpStatus.OK);
+	}
+	
+	@Operation(summary ="Upload Candidate Information file CSV Or XLS and get invitation link")
+	@PostMapping("/candidate/getInvitaionLink")
+	public ResponseEntity<ServiceOutcome<List>> getInvitaionLink(@RequestBody List<ApiCandidate> candidateList,@RequestHeader("Authorization") String authorization){
+		ServiceOutcome<List> svcSearchResult = apiService.getInvitaionLink(candidateList);
+		return new ResponseEntity<ServiceOutcome<List>>(svcSearchResult, HttpStatus.OK);
+	}
+	
 }

@@ -14,28 +14,49 @@ export class EpfoLoginNewComponent implements OnInit {
 
   candidateCode: any;
   captchaSrc:any;
-  transactionid:any;
+  transactionid:any = null;
+  message: any;
+  organizationName: any;
+  hideCancelBtn: boolean = false;
   constructor(private candidateService: CandidateService,  private router:ActivatedRoute,
     private navRouter: Router) {
       console.log("epfo login New")
+      history.pushState(null, "", document.URL);
+      window.addEventListener('popstate', function () {
+        history.pushState(null, "", document.URL);
+      });
       this.candidateCode = this.router.snapshot.paramMap.get('candidateCode');
       //EPFO Captcha
       this.candidateService.getepfoLoginCaptcha(this.candidateCode).subscribe((data: any)=>{
         // console.log("data.data.captcha", data)
+        data.data = this.candidateService.decryptData(data.data);
+        // Parse the decrypted JSON string into an object
+        data.data = JSON.parse(data.data);
         if(data.outcome === true){
           this.captchaSrc="data:image/png;base64,"+data.data.captcha;
           this.transactionid=data.data.transactionid;
         }else{
+          this.message = data.message;
         Swal.fire({
           title: data.message,
           icon: 'warning'
         }).then((sresult) => {
           if (sresult.isConfirmed) {
-            window.location.reload();
+            // window.location.reload();
           }
         });
       }
 
+      })
+
+      this.candidateService.getOrgNameByCandidateCode(this.candidateCode).subscribe((data: any)=>{
+        // console.log("DATA :",data)
+        this.organizationName = data.data;
+
+        // console.log("organizationName : ",this.organizationName)
+        if (this.organizationName && this.organizationName == 'Ernst & Young Pvt. Ltd.') {
+          this.hideCancelBtn = true;
+        }
       })
     }
   formEPFOlogin = new FormGroup({
@@ -57,13 +78,24 @@ export class EpfoLoginNewComponent implements OnInit {
 
   onSubmit(){
     this.patchUserValues();
-    if (this.formEPFOlogin.valid) {
-        console.log('this.formEPFOlogin.value',this.formEPFOlogin.value);
+
+    if(!this.transactionid) {
+      Swal.fire({
+        title: this.message,
+        icon: 'warning'
+      }).then((sresult) => {
+        if (sresult.isConfirmed) {
+          window.location.reload();
+        }
+      });
+    } else if(this.formEPFOlogin.valid) {
         // this.candidateService.getEpfodetailNew(this.formEPFOlogin.value).subscribe((result:any)=>{
           this.candidateService.getepfoOTPScreenCaptcha(this.formEPFOlogin.value).subscribe((result:any)=>{
-          //console.log(result);
+            result.data = this.candidateService.decryptData(result.data);
+            // Parse the decrypted JSON string into an object
+            result.data = JSON.parse(result.data);
           if(result.outcome === true){
-              console.log("OTP CAPTCHA data.data.captcha", result.data.captcha)
+//               console.log("OTP CAPTCHA data.data.captcha", result.data.captcha)
               const hiddenParam = result.data.captcha;
               const navURL = 'candidate/epfootpcaptcha/'+this.candidateCode;
               this.navRouter.navigate([navURL], { state: { hiddenParam: hiddenParam ,tId:this.transactionid} });
@@ -76,7 +108,7 @@ export class EpfoLoginNewComponent implements OnInit {
             if (sresult.isConfirmed) {
                   window.location.reload();
                 }
-              });
+            });
           }
         });
     }else{
@@ -87,8 +119,19 @@ export class EpfoLoginNewComponent implements OnInit {
     }
   }
   redirect(){
-    const redirectURL = 'candidate/cUanConfirm/'+this.candidateCode+'/1';
-    this.navRouter.navigate([redirectURL]);
+    // const redirectURL = 'candidate/cUanConfirm/'+this.candidateCode+'/1';
+    // this.navRouter.navigate([redirectURL]);
+    this.candidateService.cancelEpfoLogin(this.candidateCode).subscribe((result:any)=>{
+      if(result.outcome) {
+        const redirectURL = 'candidate/cUanConfirm/' + this.candidateCode + '/1';
+        this.navRouter.navigate([redirectURL]);
+      }else{
+        Swal.fire({
+          title: result.message,
+          icon: 'warning'
+        })
+      }
+    });
   }
 
 }

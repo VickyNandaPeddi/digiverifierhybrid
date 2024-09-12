@@ -5,5 +5,7 @@ public enum VerificationStatus {
 	AMBER,
 	RED,
 	MOONLIGHTING,
-	OUTOFSCOPE
+	OUTOFSCOPE,
+	MAROON,
+	YELLOW
 }

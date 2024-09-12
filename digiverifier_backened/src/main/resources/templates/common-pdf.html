@@ -343,8 +343,31 @@ span {
 					class="grey-text"> <b th:text="${#strings.toUpperCase(#dates.format(root.finalReportDate, 'dd-MMM-yyyy HH:mm'))}"></b>
 				</span></td>
 			</tr>
+			
+			<tr th:if="${root.organizationName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}">
+					<td style="padding: 5px; width: 31%" class="grey-bg text-left">
+						<span class="black-text"><b>Case Reinitiation Date</b></span>
+					</td>
+					<td style="padding: 5px;" class="text-left" th:if="${root.caseReinitDate != null}">
+						<span class="grey-text"> <b th:text="${#strings.toUpperCase(#dates.format(root.caseReinitDate, 'dd-MMM-yyyy'))}"></b></span></span>
+					</td>
+					<td style="padding: 5px;" class="text-left" th:if="${root.caseReinitDate == null}">
+						<span class="grey-text"> <b>NA</b></span></span>
+					</td>
+				</tr>
 
-
+			<tr th:if="${root.organizationName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}">
+					<td style="padding: 5px; width: 31%" class="grey-bg text-left">
+						<span class="black-text"><b>Amended Report Date</b></span>
+					</td>
+					<td style="padding: 5px;" class="text-left" th:if="${root.interimAmendedDate != null}">
+						<span class="grey-text"> <b th:text="${#strings.toUpperCase(#dates.format(root.interimAmendedDate, 'dd-MMM-yyyy'))}"></b></span></span>
+					</td>
+					<td style="padding: 5px;" class="text-left" th:if="${root.interimAmendedDate == null}">
+						<span class="grey-text"> <b>NA</b></span></span>
+					</td>
+				</tr>
+				
 			<tr style="padding: 5px">
 				<td style="text-align: left; width: 31%; padding: 10px 5px;"
 					class="grey-bg text-left"><span class="black-text"><b>Verification
@@ -384,7 +407,7 @@ span {
 		<span class="line-break"
 			th:if="${!#strings.equalsIgnoreCase(root.project, 'accolite') and (#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR'))}"></span>
 
-		<table class="table_head table-st" th:if="${!#strings.equalsIgnoreCase(root.project, 'accolite') and (#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR'))}" style="page-break-inside: avoid;">
+		<table class="table_head table-st" th:if="${!#strings.equalsIgnoreCase(root.project, 'accolite') and root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'  and (#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR'))}" style="page-break-inside: avoid;">
 
 			<!--concept Title head-->
 			<tr>
@@ -553,6 +576,27 @@ span {
 					class="invalid-status" th:case="2">DRAFT</span></td>
 			</tr>
 		</table>
+		
+<!--		<div th:if="${#lists.contains(root.orgServices, 'EPFO') and !#lists.contains(root.orgServices, 'DIGILOCKER') and !#lists.contains(root.orgServices, 'ITR')and !#lists.contains(root.orgServices, 'PANTOUAN')}">
+-->
+<div th:if="${root.organizationName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}">		
+	<table class="table_head table-st" style="page-break-inside: avoid;" th:if="${root.qcRemarksDto!=null}">
+
+			    <tr>
+			        <td class="blue-bg">
+			            <span class="td-heading black-text" style="color: whitesmoke;">REMARKS / COMMENTS</span>
+			        </td>
+			    </tr>
+				<tr th:each="remarkDto : ${root.qcRemarksDto}">
+					<td style="padding: 5px; min-width: 100px;" class="text-left">
+						<span class="grey-text">
+							<b th:text="${remarkDto.qcRemarks}"></b>
+						</span>
+					</td>
+				</tr>
+			</table>
+			</div>
+		
 		<span class="line-break"
 			th:if="${!#strings.equalsIgnoreCase(root.project, 'accolite') and (#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR'))}"></span>
 		<span class="line-break"
@@ -719,15 +763,15 @@ span {
 			</tr>
 		</table>
 
-		<span class="line-break"></span> 
-		<span class="line-break"></span>
+		<span th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" class="line-break"></span> 
+		<span th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" class="line-break"></span>
 
 		<!-- <p class ="grey-text sub-heading">EXECUTIVE SUMMARY</p> -->
 		<div style="page-break-inside: avoid;">
 		<div class="text-center" style="page-break-inside: avoid;">
-		<span style="color: black;font-family: 'Roboto'; font-size: 15px; font-weight: bold; text-align: center;">Executive Summary</span>
+		<span th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" style="color: black;font-family: 'Roboto'; font-size: 15px; font-weight: bold; text-align: center;">Executive Summary</span>
 		</div>
-		<table class="table-st" style="page-break-inside: avoid;">
+		<table th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" class="table-st" style="page-break-inside: avoid;">
 			<!--
 			<tr class="blue-bg text-center">
 				<td class="white-text" colspan="6"><span class="td-heading"
@@ -809,7 +853,7 @@ span {
 				<td class="grey-text text-center"
 					th:text="${root.employmentTenureVerificationDtoList[0].customRemark}"></td>
 			</tr> -->
-			
+
 			<tr class="text-center" th:if="${root.currentEmploymentTenureVerification}">
 				<td class="grey-text text-center">Employment Verification -
 					current</td>
@@ -825,7 +869,7 @@ span {
 					<span class="grey-text" th:case="'OUTOFSCOPE'">OUT OF SCOPE</span>
 					<span class="invalid-status" style="font-size: 12px" th:case="*">INVALID</span>
 				</td>
- 
+
 				<td class="grey-text text-center"
 					th:if="${#strings.equalsIgnoreCase(root.project, 'Wipro')}"
 					th:switch="${root.currentEmploymentTenureVerification.verificationStatus.name()}">
@@ -939,7 +983,7 @@ span {
 		
 		
 		<span class="line-break"></span><span class="line-break"></span>
-		<table class="table-st employer-name-verification" border="0" style="page-break-inside: avoid;">
+		<table th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" class="table-st employer-name-verification" border="0" style="page-break-inside: avoid;">
 			<tr class="blue-bg text-center">
 				<td class="white-text" colspan="6"><span class="td-heading"
 					style="color: whitesmoke;"><b>Section Ⅰ: ID Verification
@@ -1000,47 +1044,47 @@ span {
 		<span th:if="${#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR')}" class="line-break"></span>
 		<span th:if="${#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR')}" class="line-break"></span>
 		<table class="table-st" border="0" 
-		th:if="${#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR')}" style="page-break-inside: avoid;">
-			<tr>
-				<td colspan="6" class="text-center blue-bg "><span
+		th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED' and (#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR'))}" style="page-break-inside: avoid;">
+			<tr style="width: 100%">
+				<td colspan="6" class="text-center blue-bg " style="width: 100%"><span
 					class="td-heading" style="color: whitesmoke;"><b>Section
 							ⅠⅠ: Employment Verification </b> </span></td>
 			</tr>
-			<tr class="text-center">
+			<tr class="text-center" style="width: 100%">
 				<td
-					style="width: 5%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
+					style="min-width: 20px; max-width: 50px; width: 7%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
 					class="white-text text-center">S.No</span></td>
 				<td
-					style="width: 40%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
+					style="min-width: 20px; max-width: 50px; width: 40%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
 					class="white-text text-center">Employers</span></td>
 				<td
-					style="width: 25%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
+					style="min-width: 20px; max-width: 50px; width: 15%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
 					class="white-text text-center">Input Tenure</span></td>
 				<td
-					style="width: 25%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
+					style="min-width: 20px; max-width: 50px; width: 15%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
 					class="white-text text-center">Output Tenure</span></td>
 				<td
-					style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
+					style="min-width: 20px; max-width: 50px; width: 8%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
 					class="white-text text-center">Source</span></td>
 				<td
-					style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
+					style="min-width: 20px; max-width: 50px; width: 15%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
 					class="white-text text-center">Result</span></td>
 			</tr>
-			<tr class="text-center"
-				th:each="employmentTenureVerification,stat: ${root.employmentTenureVerificationDtoList}">
-				<td class="grey-text text-center"><span style="font-size: 12px"
+			<tr class="text-center" th:each="employmentTenureVerification,stat: ${root.employmentTenureVerificationDtoList}"
+				th:if="${stat.index < 10}" style="width: 100%">
+				<td class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 7%; padding: 5px;"><span style="font-size: 12px"
 					th:text="${stat.index + 1}"></span></td>
-				<td class="grey-text text-center"><span style="font-size: 12px" th:unless="${employmentTenureVerification.undisclosed}"
+				<td class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 40%; padding: 5px;"><span style="font-size: 12px" th:unless="${employmentTenureVerification.undisclosed}"
 					th:text="${employmentTenureVerification.employerName}"></span>
 					<span style="font-size: 12px" th:if="${employmentTenureVerification.undisclosed}">UNDISCLOSED</span>
 				</td>
-				<td class="grey-text text-center"><span style="font-size: 12px"
+				<td class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 15%; padding: 5px;"><span style="font-size: 12px"
 					th:text="${employmentTenureVerification.input}"></span></td>
-				<td class="grey-text text-center"><span style="font-size: 12px"
+				<td class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 15%; padding: 5px;"><span style="font-size: 12px"
 					th:text="${employmentTenureVerification.output}"></span></td>
-				<td class="grey-text text-center"><span style="font-size: 12px"
+				<td class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 8%; padding: 5px;"><span style="font-size: 12px"
 					th:text="${employmentTenureVerification.source}"></span></td>
-				<td th:if="${!#strings.equalsIgnoreCase(root.project, 'Wipro')}"
+				<td th:if="${!#strings.equalsIgnoreCase(root.project, 'Wipro')}" style="min-width: 20px; max-width: 50px; width: 15%; padding: 5px;"
 					th:switch="${employmentTenureVerification.verificationStatus.name()}">
 					<span class="green-status" th:case="'GREEN'">GREEN</span> <span
 					class="amber-status" th:case="'AMBER'">AMBER</span> <span
@@ -1050,7 +1094,47 @@ span {
 					<span class="invalid-status" style="font-size: 12px" th:case="*">INVALID</span>
 				</td>
 
-				<td th:if="${#strings.equalsIgnoreCase(root.project, 'Wipro')}"
+				<td th:if="${#strings.equalsIgnoreCase(root.project, 'Wipro')}" style="min-width: 20px; max-width: 50px; width: 15%; padding: 5px;"
+					th:switch="${employmentTenureVerification.verificationStatus.name()}">
+					<span class="red-status" th:case="'RED'">RED</span> <span
+					class="green-status" th:case="'GREEN'">GREEN</span> <span
+					class="invalid-status" th:case="'AMBER'">DRAFT</span> 
+					<span class="amber-status" th:case="'MOONLIGHTING'">MOONLIGHTING</span> 
+					<span class="grey-text" th:case="'OUTOFSCOPE'">OUT OF SCOPE</span>
+					<span class="invalid-status" style="font-size: 12px" th:case="*">INVALID</span>
+				</td>
+
+			</tr>
+		</table>
+		
+		<table class="table-st" border="0"
+		th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED' and ((#lists.contains(root.orgServices, 'EPFO') and root.employmentTenureVerificationDtoList != null && #lists.size(root.employmentTenureVerificationDtoList) >= 10) or (#lists.contains(root.orgServices, 'ITR') and root.employmentTenureVerificationDtoList != null && #lists.size(root.employmentTenureVerificationDtoList) >= 10))}" style="table-layout: fixed; width: 100%">
+
+			<tr class="text-center" th:each="employmentTenureVerification,stat: ${root.employmentTenureVerificationDtoList}"
+				th:if="${stat.index >= 10}" style="width: 100%">
+				<td class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 7%; padding: 5px;"><span style="font-size: 12px"
+					th:text="${stat.index + 1}"></span></td>
+				<td class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 40%; padding: 5px;"><span style="font-size: 12px" th:unless="${employmentTenureVerification.undisclosed}"
+					th:text="${employmentTenureVerification.employerName}"></span>
+					<span style="font-size: 12px" th:if="${employmentTenureVerification.undisclosed}">UNDISCLOSED</span>
+				</td>
+				<td class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 15%; padding: 5px;"><span style="font-size: 12px"
+					th:text="${employmentTenureVerification.input}"></span></td>
+				<td class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 15%; padding: 5px;"><span style="font-size: 12px"
+					th:text="${employmentTenureVerification.output}"></span></td>
+				<td class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 8%; padding: 5px;"><span style="font-size: 12px"
+					th:text="${employmentTenureVerification.source}"></span></td>
+				<td th:if="${!#strings.equalsIgnoreCase(root.project, 'Wipro')}" style="min-width: 20px; max-width: 50px; width: 15%; padding: 5px;"
+					th:switch="${employmentTenureVerification.verificationStatus.name()}">
+					<span class="green-status" th:case="'GREEN'">GREEN</span> <span
+					class="amber-status" th:case="'AMBER'">AMBER</span> <span
+					class="red-status" th:case="'RED'">RED</span>
+					<span class="red-status" th:case="'MOONLIGHTING'">MOONLIGHTING</span> 
+					<span class="grey-text" th:case="'OUTOFSCOPE'">OUT OF SCOPE</span>
+					<span class="invalid-status" style="font-size: 12px" th:case="*">INVALID</span>
+				</td>
+
+				<td th:if="${#strings.equalsIgnoreCase(root.project, 'Wipro')}" style="min-width: 20px; max-width: 50px; width: 15%; padding: 5px;"
 					th:switch="${employmentTenureVerification.verificationStatus.name()}">
 					<span class="red-status" th:case="'RED'">RED</span> <span
 					class="green-status" th:case="'GREEN'">GREEN</span> <span
@@ -1064,7 +1148,7 @@ span {
 		</table>
 
 		<span class="line-break"></span>
-		<div th:if="${root.employmentTenureVerificationDtoList}">
+		<div th:if="${root.employmentTenureVerificationDtoList} and ${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}">
 			<span style="font-size: 15px" class="grey-text">Experience
 				calculation : </span> <span class="grey-text" style="font-size: 12px"
 				th:text="${root.totalTenure}"></span> <br> <span
@@ -1132,7 +1216,7 @@ span {
 		</div>
 
 
-		<div th:if="${root.addressVerificationDtoList}">
+		<div th:if="${root.addressVerificationDtoList} and ${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}">
 			<table class="table-st" border="0" style="page-break-inside: avoid;">
 				<tr>
 					<td colspan="6" class="text-center blue-bg "><span
@@ -1264,28 +1348,32 @@ span {
 		<!--Closing GST section-->
 		<div>
 			<table class="table-st" border="0" 
-			th:if="${#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR')}" style="page-break-inside: avoid;">
-				<tr>
-					<td colspan="6" class="text-center blue-bg "><span
+			th:if="${#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR')}" style="page-break-inside: avoid; width: 100%">
+				<tr style="width: 100%">
+					<td style="min-width: 20px; max-width: 50px; width: 100%" th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" colspan="6" class="text-center blue-bg "><span
 						class="td-heading" style="color: whitesmoke;"><b>
 								Employment Details </b> </span></td>
+					
+					<td style="min-width: 20px; max-width: 50px; width: 100%" th:if="${root.organizationName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" colspan="6" class="text-center blue-bg "><span
+						class="td-heading" style="color: whitesmoke;"><b>
+								Employment Details as per Resume </b> </span></td>
 				</tr>
-				<tr rowspan="2" class="text-center">
-					<td style="width: 5.5%; padding: 5px; background-color: #DDDDDD;">
+				<tr rowspan="2" class="text-center" style="width: 100%">
+					<td style="min-width: 20px; max-width: 50px; width: 10%; padding: 5px; background-color: #DDDDDD;">
 						<span class="white-text text-center">S.No </span>
 					</td>
 
-					<td style="width: 40%; padding: 5px; background-color: #DDDDDD;">
+					<td style="min-width: 20px; max-width: 50px; width: 40%; padding: 5px; background-color: #DDDDDD;">
 						<span class="white-text text-center">Employer Name </span>
 					</td>
 					<!--<td style="width:40%;padding: 5px;background-color: #DDDDDD;" colspan="2">
                 <span class="white-text text-center">Tenure
                 </span>
                 </td>-->
-					<td style="width: 20%; padding: 5px; background-color: #DDDDDD;">
+					<td style="min-width: 20px; max-width: 50px; width: 25%; padding: 5px; background-color: #DDDDDD;">
 						<span class="white-text text-center">DOJ </span>
 					</td>
-					<td style="width: 20%; padding: 5px; background-color: #DDDDDD;">
+					<td style="min-width: 20px; max-width: 50px; width: 25%; padding: 5px; background-color: #DDDDDD;">
 						<span class="white-text text-center"> DOE </span>
 					</td>
 					<!--<td style="width:10%;padding: 5px;background-color: #DDDDDD;">
@@ -1306,59 +1394,107 @@ span {
                 </td>
                 <td style="background-color: #DDDDDD;"></td>
             </tr>-->
-				<tr class="text-center"
-					th:each="epfo,stat: ${root.employementDetailsDTOlist}">
-					<td class="grey-text text-center"><b><span
+				<tr class="text-center" th:each="epfo,stat: ${root.employementDetailsDTOlist}"
+					th:if="${stat.index < 10}" style="width: 100%">
+					<td class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 10%; padding: 5px;"><b><span
 							style="font-size: 12px" th:text="${stat.index + 1}"></span></b></td>
-					<td class="grey-text text-center"><b><span
+					<td class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 40%; padding: 5px;"><b><span
 							style="font-size: 12px" th:unless="${epfo.undisclosed}"
 							 th:text="${epfo.candidateEmployerName}"></span>
 							 <span style="font-size: 12px" th:if="${epfo.undisclosed}">UNDISCLOSED</span></b></td>
-							<td class="grey-text text-center"><span
+					<td th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 25%; padding: 5px;"><span
 								style="font-size: 12px" th:text="${epfo.inputDateOfJoining}"></span></td>
-							<td class="grey-text text-center"><span
+					<td th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 25%; padding: 5px;"><span
 								style="font-size: 12px" th:text="${epfo.inputDateOfExit}"></span></td>
+								
+								
+					<td style="min-width: 20px; max-width: 50px; width: 25%; padding: 5px;" th:if="${root.organizationName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED' and (epfo.serviceName != 'DNHDB' and epfo.serviceName != null and epfo.serviceName != '')}" class="grey-text text-center"><span
+								style="font-size: 12px" th:text="${epfo.inputDateOfJoining}"></span></td>
+					<td style="min-width: 20px; max-width: 50px; width: 25%; padding: 5px;" th:if="${root.organizationName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED' and (epfo.serviceName != 'DNHDB' and epfo.serviceName != null and epfo.serviceName != '')}" class="grey-text text-center"><span
+								style="font-size: 12px" th:text="${epfo.inputDateOfExit}"></span></td>
+								
+					<td style="min-width: 20px; max-width: 50px; width: 25%; padding: 5px;" th:if="${root.organizationName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED' and (epfo.serviceName == 'DNHDB' or epfo.serviceName == null or epfo.serviceName == '')}" class="grey-text text-center"><span
+								style="font-size: 12px" th:text="${#strings.substring(epfo.inputDateOfJoining, 3)}"></span></td>
+					<td style="min-width: 20px; max-width: 50px; width: 25%; padding: 5px;" th:if="${root.organizationName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED' and (epfo.serviceName == 'DNHDB' or epfo.serviceName == null or epfo.serviceName == '')}" class="grey-text text-center"><span
+								style="font-size: 12px" th:text="${#strings.substring(epfo.inputDateOfExit, 3)}"></span></td>
+								
 					<!-- <td class="grey-text text-center"><span style="font-size:12px" th:text="${epfo.serviceName}"></span></td> -->
 				</tr>
 			</table>
+			
+			<table class="table-st" border="0" 
+			th:if="${#lists.contains(root.orgServices, 'EPFO')  && root.employementDetailsDTOlist != null && #lists.size(root.employementDetailsDTOlist) >= 10 or #lists.contains(root.orgServices, 'ITR')  && root.employementDetailsDTOlist != null && #lists.size(root.employementDetailsDTOlist) >= 10}" style="table-layout: fixed; width: 100%">
+
+				<tr class="text-center" th:each="epfo,stat: ${root.employementDetailsDTOlist}"
+				 th:if="${stat.index >= 10}" style="width: 100%" >
+					<td class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 10%; padding: 5px;"><b><span
+							style="font-size: 12px" th:text="${stat.index + 1}"></span></b></td>
+					<td class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 40%; padding: 5px;"><b><span
+							style="font-size: 12px" th:unless="${epfo.undisclosed}"
+							 th:text="${epfo.candidateEmployerName}"></span>
+							 <span style="font-size: 12px" th:if="${epfo.undisclosed}">UNDISCLOSED</span></b></td>
+					<td th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 25%; padding: 5px;"><span
+								style="font-size: 12px" th:text="${epfo.inputDateOfJoining}"></span></td>
+					<td th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" class="grey-text text-center" style="min-width: 20px; max-width: 50px; width: 25%; padding: 5px;"><span
+								style="font-size: 12px" th:text="${epfo.inputDateOfExit}"></span></td>
+								
+								
+					<td style="min-width: 20px; max-width: 50px; width: 25%; padding: 5px;" th:if="${root.organizationName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED' and (epfo.serviceName != 'DNHDB' and epfo.serviceName != null and epfo.serviceName != '')}" class="grey-text text-center"><span
+								style="font-size: 12px" th:text="${epfo.inputDateOfJoining}"></span></td>
+					<td style="min-width: 20px; max-width: 50px; width: 25%; padding: 5px;" th:if="${root.organizationName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED' and (epfo.serviceName != 'DNHDB' and epfo.serviceName != null and epfo.serviceName != '')}" class="grey-text text-center"><span
+								style="font-size: 12px" th:text="${epfo.inputDateOfExit}"></span></td>
+								
+					<td style="min-width: 20px; max-width: 50px; width: 25%; padding: 5px;" th:if="${root.organizationName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED' and (epfo.serviceName == 'DNHDB' or epfo.serviceName == null or epfo.serviceName == '')}" class="grey-text text-center"><span
+								style="font-size: 12px" th:text="${#strings.substring(epfo.inputDateOfJoining, 3)}"></span></td>
+					<td style="min-width: 20px; max-width: 50px; width: 25%; padding: 5px;" th:if="${root.organizationName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED' and (epfo.serviceName == 'DNHDB' or epfo.serviceName == null or epfo.serviceName == '')}" class="grey-text text-center"><span
+								style="font-size: 12px" th:text="${#strings.substring(epfo.inputDateOfExit, 3)}"></span></td>
+					<!-- <td class="grey-text text-center"><span style="font-size:12px" th:text="${epfo.serviceName}"></span></td> -->
+				</tr>
+			</table>
+			
 			<span class="line-break"></span><span class="line-break"></span>
 		</div>
 
 		<!--<div  th:if="${root.epfoData}">-->
-		<!--<div  th:if="${root.itrEpfoHeaderDetails}">
-            <span style="font-size:15px" class="grey-text">Candidate: </span>
-            <span style="margin-right:300px;font-size:10px" th:text="${root.itrEpfoHeaderDetails.epfoName1}" class="grey-text"></span>
-            <span style="font-size:15px" class="grey-text">UAN Number: </span>
-            <span style="font-size:10px" th:text="${root.itrEpfoHeaderDetails.uanNo1}" class="grey-text"></span>
-        </div>-->
-		<span class="line-break"></span>
-		<table class="table-st" border="0" 
-		th:if="${#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR')}" style="page-break-inside: avoid;">
-			<tr>
-				<td colspan="6" class="text-center blue-bg "><span
+		<div  th:if="${root.itrEpfoHeaderDetails}">
+           <!-- <span style="font-size:15px" class="grey-text">Candidate: </span>
+            <span style="margin-right:300px;font-size:10px" th:text="${root.itrEpfoHeaderDetails.epfoName1}" class="grey-text"></span>-->
+            <span style="font-size:15px;" class="grey-text">UAN Number: </span>
+            <span style="font-size:10px;" th:text="${root.itrEpfoHeaderDetails.uanNo1}" class="grey-text"></span>
+        </div>
+<!--		<span class="line-break"></span>
+-->		<table class="table-st" border="0" 
+		th:if="${#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR')}" style="page-break-inside: avoid; width: 100%;">
+			<tr style="width: 100%">
+				<td th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" colspan="5" class="text-center blue-bg " style="min-width: 20px; max-width: 50px; width: 100%"><span
 					class="td-heading" style="color: whitesmoke;"><b>
 							Service History - EPFO/26AS </b> </span></td>
+							
+				<td th:if="${root.organizationName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" colspan="5" class="text-center blue-bg " style="min-width: 20px; max-width: 50px; width: 100%"><span
+					class="td-heading" style="color: whitesmoke;"><b>
+							Employment Details Found in EPFO/26AS </b> </span></td>			
+							
 
 			</tr>
-			<tr rowspan="2" class="text-center">
-				<td style="width: 5.5%; padding: 5px; background-color: #DDDDDD;">
+			<tr class="text-center" style="width: 100%">
+				<td style="min-width: 20px; max-width: 50px; width: 10%; padding: 5px; background-color: #DDDDDD;">
 					<span class="white-text text-center">S.No </span>
 				</td>
 
-				<td style="width: 40%; padding: 5px; background-color: #DDDDDD;">
+				<td style="min-width: 20px; max-width: 50px; width: 40%; padding: 5px; background-color: #DDDDDD;">
 					<span class="white-text text-center">Employer Name </span>
 				</td>
 				<!--<td style="width:40%;padding: 5px;background-color: #DDDDDD;" colspan="2">
                 <span class="white-text text-center">Tenure
                 </span>
                 </td>-->
-				<td style="width: 20%; padding: 5px; background-color: #DDDDDD;">
+				<td style="min-width: 20px; max-width: 50px; width: 20%; padding: 5px; background-color: #DDDDDD;">
 					<span class="white-text text-center">DOJ </span>
 				</td>
-				<td style="width: 20%; padding: 5px; background-color: #DDDDDD;">
+				<td style="min-width: 20px; max-width: 50px; width: 20%; padding: 5px; background-color: #DDDDDD;">
 					<span class="white-text text-center"> DOE </span>
 				</td>
-				<td style="width: 10%; padding: 5px; background-color: #DDDDDD;">
+				<td style="min-width: 20px; max-width: 50px; width: 10%; padding: 5px; background-color: #DDDDDD;">
 					<span class="white-text text-center">Source</span>
 				</td>
 			</tr>
@@ -1384,26 +1520,111 @@ span {
                 <td class="grey-text text-center"><span style="font-size:12px" th:text="${epfo.serviceName}"></span></td>
             </tr> -->
 
-			<tr class="text-center" th:each="epfo,stat: ${root.serviceHistory}">
-				<td class="grey-text text-center"><b><span
+			<!-- <tr class="text-center" th:each="epfo,stat: ${root.serviceHistory}"> -->
+			<tr class="text-center" th:each="epfo,stat: ${root.serviceHistory}" th:if="${stat.index < 10}" style="width: 100%">
+				<td style="min-width: 20px; max-width: 50px; width: 10%; padding: 5px;" class="grey-text text-center"><b><span
 						style="font-size: 12px" th:text="${stat.index + 1}"></span></b></td>
-				<td class="grey-text text-left"><b><span
+				<td style="min-width: 20px; max-width: 50px; width: 40%; padding: 5px;" class="grey-text text-left"><b><span
 						style="font-size: 12px" th:text="${epfo.candidateEmployerName}"></span></b></td>
-				<td class="grey-text text-center"><span style="font-size: 12px"
+				<td style="min-width: 20px; max-width: 50px; width: 20%; padding: 5px;" class="grey-text text-center"><span style="font-size: 12px"
 					th:text="${epfo.inputDateOfJoining != null ? #strings.replace(epfo.inputDateOfJoining, '/', '-') : ''}"></span></td>
-				<td class="grey-text text-center"><span style="font-size: 12px"
+				<td style="min-width: 20px; max-width: 50px; width: 20%; padding: 5px;" class="grey-text text-center"><span style="font-size: 12px"
 					th:text="${epfo.inputDateOfExit != null ? #strings.replace(epfo.inputDateOfExit, '/', '-') : ''}"></span></td>
-				<td class="grey-text text-center"><span style="font-size: 12px"
+				<td style="min-width: 20px; max-width: 50px; width: 10%; padding: 5px;" class="grey-text text-center"><span style="font-size: 12px"
 					th:text="${epfo.serviceName}"></span></td>
 			</tr>
 
-			<tr class="grey-text text-center"
+<!-- 			<tr class="grey-text text-center"
 				th:if="${root.epfoData == null || root.epfoData?.epfoDataList?.size() == 0}">
+				<td colspan="5" style="font-size: 12px">EPFO Skipped</td>
+			</tr> -->
+		</table>
+		
+		<table class="table-st" border="0" 
+		th:if="${#lists.contains(root.orgServices, 'EPFO') && root.serviceHistory != null && #lists.size(root.serviceHistory) >= 10 or #lists.contains(root.orgServices, 'ITR')&& root.serviceHistory != null && #lists.size(root.serviceHistory) >= 10}" style="table-layout: fixed; width: 100%;">
+
+			<tr class="text-center" th:each="epfo,stat: ${root.serviceHistory}" th:if="${stat.index >= 10}" style="width: 100%">
+				<td style="min-width: 20px; max-width: 50px; width: 10%; padding: 5px;" class="grey-text text-center"><b><span
+						style="font-size: 12px" th:text="${stat.index + 1}"></span></b></td>
+				<td style="min-width: 20px; max-width: 50px; width: 40%; padding: 5px;" class="grey-text text-left"><b><span
+						style="font-size: 12px" th:text="${epfo.candidateEmployerName}"></span></b></td>
+				<td style="min-width: 20px; max-width: 50px; width: 20%; padding: 5px;" class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${epfo.inputDateOfJoining != null ? #strings.replace(epfo.inputDateOfJoining, '/', '-') : ''}"></span></td>
+				<td style="min-width: 20px; max-width: 50px; width: 20%; padding: 5px;" class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${epfo.inputDateOfExit != null ? #strings.replace(epfo.inputDateOfExit, '/', '-') : ''}"></span></td>
+				<td style="min-width: 20px; max-width: 50px; width: 10%; padding: 5px;" class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${epfo.serviceName}"></span></td>
+			</tr>
+
+
+		</table>
+
+		<table class="table-st" border="0" th:if="${root.epfoData == null || root.epfoData?.epfoDataList?.size() == 0}">
+			<tr class="grey-text text-center">
 				<td colspan="5" style="font-size: 12px">EPFO Skipped</td>
 			</tr>
 		</table>
+		
 		<!--</div>
   </div>-->
+  
+  		<span class="line-break"></span>
+  		 <span class="line-break"></span>
+
+<div th:if="${root.organizationName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED' and root.employementDetailsDTOlist != null and #lists.size(root.employementDetailsDTOlist) > 0}">
+<!--	<div th:each="epfo,stat: ${root.employementDetailsDTOlist}">
+-->  <table class="table-st" style="page-break-inside: avoid;">
+				<tr class="blue-bg text-center">
+					<td class="white-text" colspan="6">
+						<span class="td-heading" style="color: whitesmoke;"><b>Employment Details Found in DNHDB</b> </span>
+					</td>
+				</tr>
+				<tr class="text-center">
+					<td	style="width: 35%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text text-center">Employer Name</span>
+					</td>
+					<td	style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">DOJ </span>
+					</td>
+				    <td	style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">DOE</span>
+					</td>
+					<td	style="width: 7%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">Source</span>
+					</td>
+				<!--	<td style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;">
+						<span class="white-text">Result</span>
+					</td>-->
+				</tr>
+				<tr class="text-center" th:each="epfo,stat: ${root.employementDetailsDTOlist}" th:if="${epfo.serviceName == 'DNHDB' || epfo.secondaryServiceName == 'DNHDB'}" th:unless="${epfo.uan != null}">
+					<td class="grey-text text-left">
+						<span style="font-size: 12px" th:text="${epfo.candidateEmployerName}"></span>
+					</td>
+					<td class="grey-text text-center">
+						<span style="font-size: 12px" th:text="${#strings.substring(epfo.inputDateOfJoining, 3)}"></span>
+					</td>
+					<td class="grey-text text-center">
+						<span style="font-size: 12px" th:text="${#strings.substring(epfo.inputDateOfExit, 3)}"></span>
+					</td>
+					<td class="grey-text text-center">
+						<span style="font-size: 12px" th:if="${epfo.serviceName!=null}" th:text="${epfo.serviceName}"></span><span style="font-size: 12px" th:if="${epfo.secondaryServiceName!=null}" th:text="'/' + ${epfo.secondaryServiceName}"></span>
+						<span style="font-size: 12px" th:if="${epfo.serviceName==null or epfo.serviceName==''}">DNT </span>
+					</td>
+				<!--	<td th:switch="${epfo.colorColorCode}">
+						<span class="green-status" th:case="'GREEN'">GREEN</span> <span
+						class="amber-status" th:case="'AMBER'">AMBER</span> <span
+						class="red-status" th:case="'RED'">RED</span>
+					</td>-->
+			    </tr>
+			  <!-- <tr class="text-center" th:if="${root.employementDetailsDTOlist}" th:unless="${#lists.isEmpty(root.employementDetailsDTOlist.![uan]) || root.employementDetailsDTOlist.![uan].contains(null)}">
+				    <td>NA</td><td>NA</td><td>NA</td><td>NA</td>
+				</tr>
+			    <tr class="text-center" th:if="${root.employementDetailsDTOlist==null}">
+				    <td>NA</td><td>NA</td><td>NA</td><td>NA</td>
+				</tr>-->
+			</table>
+<!--	</div>		
+--></div>
 
 		<div th:if="${#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR')}" style="page-break-after: always;">
 			<!-- content -->
@@ -1465,12 +1686,19 @@ span {
 		<span class="line-break"></span> <span class="line-break"></span>
 			
 			<div th:if="${root.itrEpfoHeaderDetails!=null and (#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR'))}">
+				<!--
 				<span style="font-size: 15px" class="grey-text">Name: </span> <span
 					style="margin-right: 300px; font-size: 10px"
-					th:text="${root.itrEpfoHeaderDetails.itrName}" class="grey-text"></span>
+					th:text="${root.itrEpfoHeaderDetails.itrName}" class="grey-text"></span> -->
+				<span class="inline-block left output-data grey-text" style="float: left;"
+        th:text="'Name: ' + ${root.itrEpfoHeaderDetails.itrName}"></span>
+        <!--
 				<span style="font-size: 15px" class="grey-text">PAN Number: </span>
 				<span style="font-size: 10px"
 					th:text="${root.itrEpfoHeaderDetails.panNo}" class="grey-text"></span>
+					-->
+					<span class="inline-block left output-data grey-text" style="float: right;"
+        th:text="'PAN Number: ' + ${root.itrEpfoHeaderDetails.panNo}"></span>
 			</div>
 			<span class="line-break"></span>
 			<table class="mars_tab table-st itr-data" th:if="${#lists.contains(root.orgServices, 'EPFO') or #lists.contains(root.orgServices, 'ITR')}"
@@ -1655,27 +1883,30 @@ span {
 		<div style="page-break-after: always;">
 			<!-- content -->
 		</div>
-		<p class="td-heading text-center" style="color: #605f5f; font-size: 17px;">Remittance Proofs</p>
+<!--		<p class="td-heading text-center" style="color: #605f5f; font-size: 17px;">Remittance Proofs</p>
+-->		<p class="td-heading text-center" style="color: #605f5f; font-size: 17px;">REMITANCE PROOF FOR OVERALL RESULT</p>
 		<div th:each="image, iterStat : ${root.remittanceProofImagesData}" style="page-break-inside: avoid;">
+				<!--<span class="inline-block left output-data grey-text" style="font-size: 15px; float: left;" 
+				th:text="'Company: '+ ${image.company}+ '/' + ${image.memberId}"></span>--> 
 				<span class="inline-block left output-data grey-text" style="font-size: 15px; float: left;" 
-				th:text="'Company: '+ ${image.company}+ '/' + ${image.memberId}"></span> 
+				th:text="'Evidence: '+ ${iterStat.index + 1}+ ' : ' + ${image.remark}"></span> 
 				<!--<span
 					style="margin-right: 300px; font-size: 10px"
 					th:text="${image.company}+ '/' + ${image.memberId}" class="grey-text"></span>-->
-				<span style="font-size: 15px ; float: right;" class="inline-block left output-data grey-text"
-				 th:text="'Year: '+${image.year}"></span>
+				<!--<span th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" style="font-size: 15px ; float: right;" class="inline-block left output-data grey-text"
+				 th:text="'Year: '+${image.year}"></span>-->
 				<!--<span style="font-size: 10px ; float: right;"
 					th:text="${image.year}" class="inline-block left output-data grey-text"></span>-->
-				<span class="line-break"></span>
+				<span class="line-break"></span><span class="line-break"></span>
 		
           <!-- <img th:src="'data:image/png;base64,' + ${#strings.toString(image.image)}" alt="Image" style="width: 200px; height: auto;"> -->
-          <img th:src="'data:image/png;base64,' + ${#strings.toString(image.image)}" alt="Image" style="width: 600px; height: auto;">
+          <img th:src="'data:image/png;base64,' + ${#strings.toString(image.image)}" alt="Image" style="width: 700px; height: auto;">
        
        <span class="line-break"></span><span class="line-break"></span>
         </div>
     </div>		
     
-	<!-- ADDING THE BELOW SECTION FOR REMITTANCE RECORDS-->	
+	<!-- ADDING THE BELOW SECTION FOR REMITTANCE RECORDS-->
 <!--
  New VendorChecks 
  

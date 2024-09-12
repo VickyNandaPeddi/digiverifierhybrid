@@ -37,6 +37,9 @@ export class ConventionLetterAcceptComponent implements OnInit {
 
       this.candidateService.getCandidateDetails(this.candidateCode)
         .subscribe((data: any) => {
+        data.data = this.candidateService.decryptData(data.data);
+        // Parse the decrypted JSON string into an object
+        data.data = JSON.parse(data.data);
           if(data.outcome==true){
             // console.warn("data : ",data)
             this.conventionalCandidate = data.data.conventionalCandidate

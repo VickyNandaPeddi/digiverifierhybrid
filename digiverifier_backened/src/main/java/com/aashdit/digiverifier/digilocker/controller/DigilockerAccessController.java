@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.aashdit.digiverifier.itr.dto.ITRDetailsDto;
+import com.aashdit.digiverifier.utils.CommonUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.xml.bind.DatatypeConverter;
@@ -71,6 +73,9 @@ public class DigilockerAccessController {
 	
 	@Autowired
 	private CandidateStatusHistoryRepository candidateStatusHistoryRepository;
+
+	@Autowired
+	CommonUtils commonUtils;
 
 	@Operation(summary = "Getting the access code from Digilocker site")
 	@GetMapping(value = "/checkAgnetMail/{employeid}")
@@ -152,8 +157,11 @@ public class DigilockerAccessController {
 								String responseString = environmentVal.getRedirectAngularToDigilocker()+candidateCode;
 								System.out.println(responseString+"==================================");
 								res.sendRedirect(responseString);
-							}else {
+							}else if(Boolean.TRUE.equals(configCodes.getOutcome()) && configCodes.getData().contains("ITR")){
 								res.sendRedirect(environmentVal.getITRLogin()+candidateCode);
+							}else if(Boolean.TRUE.equals(configCodes.getOutcome()) && configCodes.getData().contains("EPFOEMPLOYEELOGIN")){
+								res.sendRedirect(environmentVal.getEpfoEmployeeLogin()+candidateCode);
+								
 							}
 						}
 						
@@ -452,9 +460,27 @@ public class DigilockerAccessController {
 			}else {
 				//below condition for the case where some organization does not need digi locker.
 				if(Boolean.TRUE.equals(configCodes.getOutcome()) && configCodes.getData().contains("DIGILOCKER")) {
-					response = environmentVal.getRedirectAngularToDigilocker()+candidateCode;
-				}else {
-					response=environmentVal.getITRLogin()+candidateCode;
+					if(findByCandidateCode.getOrganization().getOrganizationName().equalsIgnoreCase("kpmg")) {
+						response = environmentVal.getKpmgCrossOrigins()+"/#/candidate/digiLocker/"+candidateCode;
+					}else {	
+						response = environmentVal.getRedirectAngularToDigilocker()+candidateCode;
+					}
+				}else if(Boolean.TRUE.equals(configCodes.getOutcome()) && configCodes.getData().contains("ITR")){
+					if(findByCandidateCode.getOrganization().getOrganizationName().equalsIgnoreCase("kpmg")) {
+						response = environmentVal.getKpmgCrossOrigins()+"/#/candidate/itrlogin/"+candidateCode;
+					}
+					else {
+						response=environmentVal.getITRLogin()+candidateCode;
+					}
+				}else if(Boolean.TRUE.equals(configCodes.getOutcome()) && configCodes.getData().contains("EPFOEMPLOYEELOGIN")){
+					findByCandidateCode.setIsUanSkipped(false);
+					findByCandidateCode.setIsLoaAccepted(true);
+					candidateRepository.save(findByCandidateCode);
+					if(findByCandidateCode.getOrganization().getOrganizationName().equalsIgnoreCase("kpmg")) {
+						response = environmentVal.getKpmgCrossOrigins()+"/#/candidate/epfologinnew/"+candidateCode;
+					}else {	
+						response=environmentVal.getEpfoEmployeeLogin()+candidateCode;
+					}
 				}
 				Candidate candidate = candidateService.setIsLoaAccepted(candidateCode).getData();
 				// String response = createAccessCodeUriForSelf(candidateCode);
@@ -482,9 +508,17 @@ public class DigilockerAccessController {
 	
 		@Operation(summary = "New API for redirecting user to digilocker original login screen")
 		@PostMapping(value = "/getDigiLockerdetail")
-		public ServiceOutcome<String> getDigiLockerdetail(@RequestBody DigiLockerDetailsDto digilockerDetails,HttpServletResponse res){
-			System.out.println(digilockerDetails+"digi request----------------details");
+		public ServiceOutcome<String> getDigiLockerdetail(@RequestBody  String requestData,HttpServletResponse res) throws JsonProcessingException {
+
 			ServiceOutcome<String> response = new ServiceOutcome();
+
+			// Extract the encrypted data from the request
+			String encryptedData = requestData;
+			// Decrypt the data using the decryptXOR method
+			String decryptedJson = commonUtils.decryptXOR(encryptedData);
+			// Convert the decrypted JSON back to the DTO
+			ObjectMapper objectMapper = new ObjectMapper();
+			DigiLockerDetailsDto digilockerDetails = objectMapper.readValue(decryptedJson, DigiLockerDetailsDto.class);
 			if(StringUtils.isNotEmpty(digilockerDetails.getCandidateCode()) && StringUtils.isNotEmpty(digilockerDetails.getAadhaar())) {
 			 try {
 		        String digilockerDetailsString =digilockerDetails.getAadhaar()+"_"+digilockerDetails.getCandidateCode();

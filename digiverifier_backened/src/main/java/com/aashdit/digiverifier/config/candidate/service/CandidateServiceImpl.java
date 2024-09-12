@@ -27,28 +27,18 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import com.aashdit.digiverifier.itr.model.CanditateItrResponse;
 
+
+import com.aashdit.digiverifier.config.candidate.dto.*;
+import com.aashdit.digiverifier.config.candidate.model.*;
+import com.aashdit.digiverifier.config.candidate.repository.*;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.io.IOUtils;
@@ -115,84 +105,6 @@ import com.aashdit.digiverifier.config.admin.repository.RoleRepository;
 import com.aashdit.digiverifier.config.admin.repository.UserRepository;
 import com.aashdit.digiverifier.config.admin.repository.VendorChecksRepository;
 import com.aashdit.digiverifier.config.admin.repository.VendorUploadChecksRepository;
-import com.aashdit.digiverifier.config.candidate.dto.ApprovalStatusRemarkDto;
-import com.aashdit.digiverifier.config.candidate.dto.BulkPanToUanDTO;
-import com.aashdit.digiverifier.config.candidate.dto.BulkUanDTO;
-import com.aashdit.digiverifier.config.candidate.dto.CandidateCafAddressDto;
-import com.aashdit.digiverifier.config.candidate.dto.CandidateCafEducationDto;
-import com.aashdit.digiverifier.config.candidate.dto.CandidateCafExperienceDto;
-import com.aashdit.digiverifier.config.candidate.dto.CandidateCafRelationshipDto;
-import com.aashdit.digiverifier.config.candidate.dto.CandidateCaseDetailsDTO;
-import com.aashdit.digiverifier.config.candidate.dto.CandidateDetailsDto;
-import com.aashdit.digiverifier.config.candidate.dto.CandidateDetailsDtoForPanToUan;
-import com.aashdit.digiverifier.config.candidate.dto.CandidateFileDto;
-import com.aashdit.digiverifier.config.candidate.dto.CandidateInvitationSentDto;
-import com.aashdit.digiverifier.config.candidate.dto.CandidateStatusCountDto;
-import com.aashdit.digiverifier.config.candidate.dto.CandidationApplicationFormDto;
-import com.aashdit.digiverifier.config.candidate.dto.ContentFileDto;
-import com.aashdit.digiverifier.config.candidate.dto.EmploymentDetailsDto;
-import com.aashdit.digiverifier.config.candidate.dto.EmploymentResultUpdateReqDto;
-import com.aashdit.digiverifier.config.candidate.dto.ExecutiveSummaryDto;
-import com.aashdit.digiverifier.config.candidate.dto.IdItemsDto;
-import com.aashdit.digiverifier.config.candidate.dto.SearchAllCandidateDTO;
-import com.aashdit.digiverifier.config.candidate.dto.SuspectEmpMasterDto;
-import com.aashdit.digiverifier.config.candidate.dto.UanSearchDashboardFilterDTO;
-import com.aashdit.digiverifier.config.candidate.dto.UanSearchDataDTO;
-import com.aashdit.digiverifier.config.candidate.dto.UanSearchEpfoDTO;
-import com.aashdit.digiverifier.config.candidate.model.Candidate;
-import com.aashdit.digiverifier.config.candidate.model.CandidateAddComments;
-import com.aashdit.digiverifier.config.candidate.model.CandidateAdressVerification;
-import com.aashdit.digiverifier.config.candidate.model.CandidateCafAddress;
-import com.aashdit.digiverifier.config.candidate.model.CandidateCafEducation;
-import com.aashdit.digiverifier.config.candidate.model.CandidateCafExperience;
-import com.aashdit.digiverifier.config.candidate.model.CandidateCafRelationship;
-import com.aashdit.digiverifier.config.candidate.model.CandidateCaseDetails;
-import com.aashdit.digiverifier.config.candidate.model.CandidateEmailStatus;
-import com.aashdit.digiverifier.config.candidate.model.CandidateIdItems;
-import com.aashdit.digiverifier.config.candidate.model.CandidateResumeUpload;
-import com.aashdit.digiverifier.config.candidate.model.CandidateSampleCsvXlsMaster;
-import com.aashdit.digiverifier.config.candidate.model.CandidateStatus;
-import com.aashdit.digiverifier.config.candidate.model.CandidateStatusHistory;
-import com.aashdit.digiverifier.config.candidate.model.CandidateVerificationState;
-import com.aashdit.digiverifier.config.candidate.model.ConventionalCandidateEmailStatus;
-import com.aashdit.digiverifier.config.candidate.model.ConventionalCandidateStatus;
-import com.aashdit.digiverifier.config.candidate.model.ConventionalCandidateVerificationState;
-import com.aashdit.digiverifier.config.candidate.model.ConventionalLoaConsentMaster;
-import com.aashdit.digiverifier.config.candidate.model.LoaConsentMaster;
-import com.aashdit.digiverifier.config.candidate.model.OrganisationScope;
-import com.aashdit.digiverifier.config.candidate.model.QualificationMaster;
-import com.aashdit.digiverifier.config.candidate.model.RemarkMaster;
-import com.aashdit.digiverifier.config.candidate.model.StatusMaster;
-import com.aashdit.digiverifier.config.candidate.model.SuspectClgMaster;
-import com.aashdit.digiverifier.config.candidate.model.SuspectEmpMaster;
-import com.aashdit.digiverifier.config.candidate.model.UanSearchData;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateAddCommentRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateAdressVerificationRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateCafAddressRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateCafEducationRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateCafExperienceRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateCafRelationshipRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateCaseDetailsRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateEmailStatusRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateIdItemsRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateResumeUploadRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateSampleCsvXlsMasterRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateStatusHistoryRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateStatusRepository;
-import com.aashdit.digiverifier.config.candidate.repository.CandidateVerificationStateRepository;
-import com.aashdit.digiverifier.config.candidate.repository.ConventionalCandidateEmailStatusRepository;
-import com.aashdit.digiverifier.config.candidate.repository.ConventionalCandidateStatusRepository;
-import com.aashdit.digiverifier.config.candidate.repository.ConventionalCandidateVerificationStateRepository;
-import com.aashdit.digiverifier.config.candidate.repository.ConventionalLoaConsentRepository;
-import com.aashdit.digiverifier.config.candidate.repository.LoaConsentMasterRepository;
-import com.aashdit.digiverifier.config.candidate.repository.OrganisationScopeRepository;
-import com.aashdit.digiverifier.config.candidate.repository.QualificationMasterRepository;
-import com.aashdit.digiverifier.config.candidate.repository.RemarkMasterRepository;
-import com.aashdit.digiverifier.config.candidate.repository.StatusMasterRepository;
-import com.aashdit.digiverifier.config.candidate.repository.SuspectClgMasterRepository;
-import com.aashdit.digiverifier.config.candidate.repository.SuspectEmpMasterRepository;
-import com.aashdit.digiverifier.config.candidate.repository.UanSearchDataRepository;
 import com.aashdit.digiverifier.config.candidate.util.CSVUtil;
 import com.aashdit.digiverifier.config.candidate.util.ExcelUtil;
 import com.aashdit.digiverifier.config.superadmin.Enum.ReportType;
@@ -236,6 +148,7 @@ import com.aashdit.digiverifier.gst.model.GstData;
 import com.aashdit.digiverifier.gst.repository.GstRepository;
 import com.aashdit.digiverifier.gst.service.GstService;
 import com.aashdit.digiverifier.itr.dto.ITRDataFromApiDto;
+import com.aashdit.digiverifier.itr.model.CanditateItrResponse;
 import com.aashdit.digiverifier.itr.model.ITRData;
 import com.aashdit.digiverifier.itr.repository.CanditateItrEpfoResponseRepository;
 import com.aashdit.digiverifier.itr.repository.ITRDataRepository;
@@ -247,7 +160,9 @@ import com.aashdit.digiverifier.utils.DateDifference;
 import com.aashdit.digiverifier.utils.DateUtil;
 import com.aashdit.digiverifier.utils.EmailSentTask;
 import com.aashdit.digiverifier.utils.FileUtil;
+import com.aashdit.digiverifier.utils.PdfUtil;
 import com.aashdit.digiverifier.utils.SecurityHelper;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -286,6 +201,9 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 	@Autowired
 	@Lazy
 	private CandidateEPFOResponseRepository candidateEPFOResponseRepository;
+
+	@Autowired
+	QcRemarksRepository qcRemarksRepository;
 
 	@Autowired
 	private RoleRepository roleRepository;
@@ -475,6 +393,12 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 	@Value("${RESUME_PARSER_API_KEY}")
 	private String resumeParserApiKey;
 	
+	@Value("${com.dgv.onPurgeFailureRecieverEmail}")
+	private String onPurgeFailureRecieverEmail;
+	
+	@Value("${com.dgv.onPurgeFailureBCCEmail}")
+	private String onPurgeFailureBCCEmail;
+	
 	private static final String emailContent = "<html>\n" + "<head>\n" + "</head>\n" + "<body>\n"
 			+ "<p style=\"font-size:12px\">Dear %s, <br><br>Greetings from Team-DigiVerifier <br><br>Please find attached report for %s. </p>\n"
 			+ "<p style=\"font-size:8px\">\n" + "DISCLAIMER:\n"
@@ -530,18 +454,134 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 		return svcSearchResult;
 	}
 
-	@Transactional
-	@Override
-	public ServiceOutcome<List> saveCandidateInformation(MultipartFile file) {
-		ServiceOutcome<List> svcSearchResult = new ServiceOutcome<List>();
-		String originalFilename = file.getOriginalFilename();
-		System.out.println("OrginalFileName::>>>" + originalFilename);
-		try {
-			User user = SecurityHelper.getCurrentUser();
-			Organization organization = organizationRepository.findById(user.getOrganization().getOrganizationId())
-					.get();
-			
-	        Date linkExpireDate = getExpireDate(organization.getOrganizationId());
+    @Transactional
+    public ServiceOutcome<QcRemarksDto> addUpdateQcRemarks(QcRemarksDto requestBody) {
+        ServiceOutcome<QcRemarksDto> outcome = new ServiceOutcome<>();
+        try {
+            if (requestBody.getQcRemarksId() == null || requestBody.getQcRemarksId().isEmpty() || requestBody.getQcRemarksId().isBlank()) {
+                // Create new QcRemarks entity for addition
+                QcRemarks qcRemarks = new QcRemarks();
+                qcRemarks.setQcRemarks(requestBody.getQcRemarks());
+                qcRemarks.setCandidateCode(requestBody.getCandidateCode() != null ? requestBody.getCandidateCode() : null);
+                Candidate byCandidateCode = candidateRepository.findByCandidateCode(requestBody.getCandidateCode());
+                qcRemarks.setCandidateId(byCandidateCode.getCandidateId());
+                qcRemarks.setCreatedOn(new Date());
+                qcRemarks.setCreatedBy(SecurityHelper.getCurrentUser().getUserName());
+
+                // Save the new QcRemarks entity
+                QcRemarks savedQcRemarks = qcRemarksRepository.save(qcRemarks);
+
+                // Prepare outcome for addition
+                outcome.setOutcome(true);
+                outcome.setMessage("Added Remarks Successfully");
+            } else {
+                // Update existing QcRemarks entity
+                Optional<QcRemarks> optionalQcRemarks = qcRemarksRepository.findById(Long.valueOf(requestBody.getQcRemarksId()));
+                if (optionalQcRemarks.isPresent()) {
+                    QcRemarks qcRemarks = optionalQcRemarks.get();
+                    qcRemarks.setQcRemarks(requestBody.getQcRemarks());
+                    qcRemarks.setCandidateCode(requestBody.getCandidateCode() != null ? requestBody.getCandidateCode() : null);
+                    Candidate byCandidateCode = candidateRepository.findByCandidateCode(requestBody.getCandidateCode());
+                    qcRemarks.setCandidateId(byCandidateCode.getCandidateId());
+                    qcRemarks.setLastUpdatedOn(new Date());
+                    qcRemarks.setLastUpdatedBy(SecurityHelper.getCurrentUser().getUserName());
+
+                    // Save the updated QcRemarks entity
+                    QcRemarks savedQcRemarks = qcRemarksRepository.save(qcRemarks);
+
+                    // Prepare outcome for update
+                    outcome.setOutcome(true);
+                    outcome.setMessage("Updated Remarks Successfully");
+                } else {
+                    outcome.setOutcome(false);
+                    outcome.setMessage("QcRemarks with ID " + requestBody.getQcRemarksId() + " not found");
+                }
+            }
+        } catch (NumberFormatException e) {
+            outcome.setOutcome(false);
+            outcome.setMessage("Invalid candidate ID format: " + requestBody.getCandidateCode());
+        } catch (Exception e) {
+            outcome.setOutcome(false);
+            outcome.setMessage("Something Went Wrong: " + e.getMessage());
+        }
+        return outcome;
+    }
+
+
+    public ServiceOutcome<List<QcRemarksDto>> getQcRemarks(String candidateCode) {
+        ServiceOutcome<List<QcRemarksDto>> outcome = new ServiceOutcome<>();
+        try {
+            if (candidateCode != null) {
+                List<QcRemarks> qcRemarksList = qcRemarksRepository.findByCandidateCode(candidateCode);
+
+                // Map QcRemarks entities to QcRemarksDto objects using streams
+                List<QcRemarksDto> qcRemarksDtoList = qcRemarksList.stream()
+                        .map(qcRemarks -> {
+                            QcRemarksDto dto = new QcRemarksDto();
+                            dto.setCandidateCode(qcRemarks.getCandidateCode() != null ? String.valueOf(qcRemarks.getCandidateCode()) : null);
+                            dto.setQcRemarksId(qcRemarks.getQcRemarksId() != null ? String.valueOf(qcRemarks.getQcRemarksId()) : null);
+                            dto.setQcRemarks(qcRemarks.getQcRemarks());
+                            return dto;
+                        })
+                        .collect(Collectors.toList());
+
+                outcome.setData(qcRemarksDtoList);
+                outcome.setOutcome(true);
+                outcome.setMessage("Successfully retrieved QcRemarks for candidateId: " + candidateCode);
+            } else {
+                outcome.setData(null);
+                outcome.setOutcome(false);
+                outcome.setMessage("Candidate ID cannot be null");
+            }
+        } catch (NullPointerException e) {
+            outcome.setData(null);
+            outcome.setOutcome(false);
+            outcome.setMessage("Null pointer exception occurred: " + e.getMessage());
+        } catch (Exception e) {
+            outcome.setData(null);
+            outcome.setOutcome(false);
+            outcome.setMessage("Error occurred: " + e.getMessage());
+        }
+        return outcome;
+    }
+
+    public ServiceOutcome<String> deleteQcRemarkByQcRemarksId(Long qcRemarksId) {
+        String response = "";
+        ServiceOutcome<String> outcome=new ServiceOutcome<>();
+        try {
+            Optional<QcRemarks> optionalQcRemarks = qcRemarksRepository.findById(qcRemarksId);
+            if (optionalQcRemarks.isPresent()) {
+                qcRemarksRepository.deleteById(qcRemarksId);
+                response = "Deleted Successfully";
+                outcome.setMessage(response);
+                outcome.setOutcome(true);
+            } else {
+                response = "QcRemarks not found";
+                outcome.setMessage(response);
+                outcome.setOutcome(false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = "Something Went Wrong";
+            outcome.setMessage(response);
+            outcome.setOutcome(false);
+        }
+        return outcome;
+    }
+
+
+    @Transactional
+    @Override
+    public ServiceOutcome<List> saveCandidateInformation(MultipartFile file) {
+        ServiceOutcome<List> svcSearchResult = new ServiceOutcome<List>();
+        String originalFilename = file.getOriginalFilename();
+        System.out.println("OrginalFileName::>>>" + originalFilename);
+        try {
+            User user = SecurityHelper.getCurrentUser();
+            Organization organization = organizationRepository.findById(user.getOrganization().getOrganizationId())
+                    .get();
+
+            Date linkExpireDate = getExpireDate(organization.getOrganizationId());
 
 			RandomString rd = null;
 			List<Candidate> candidates = null;
@@ -1130,7 +1170,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 					reinviteCount = Integer.parseInt(activity[2].toString());
 					
 					if(orgServices!=null && orgServices.contains("EPFO") && orgServices.contains("DNHDB")
-				 			&& !orgServices.contains("DIGILOCKER") && !orgServices.contains("ITR")) {
+				 			&& !orgServices.contains("DIGILOCKER") && !orgServices.contains("ITR") && !orgServices.contains("EPFOEMPLOYEELOGIN")) {
 						invaliduploadCountExcludingUanFetchFailed = Integer.parseInt(activity[8].toString());
 					}
 				}
@@ -1192,7 +1232,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				// CandidateStatusCountDto(statusMasterRepository.findByStatusCode("INVITATIONSENT").getStatusName(),statusMasterRepository.findByStatusCode("INVITATIONSENT").getStatusCode(),invitationSentList!=null?invitationSentList.size():0));
 				StatusMaster invitExpStatusMaster = statusMasterRepository.findByStatusCode("INVITATIONEXPIRED");
 				if(orgServices!=null && orgServices.contains("EPFO") && orgServices.contains("DNHDB")
-			 			&& !orgServices.contains("DIGILOCKER") && !orgServices.contains("ITR")) {
+			 			&& !orgServices.contains("DIGILOCKER") && !orgServices.contains("ITR") && !orgServices.contains("EPFOEMPLOYEELOGIN")) {
 					candidateStatusCountDtoList.add(1, new CandidateStatusCountDto("Upload expired",
 							invitExpStatusMaster.getStatusCode(), invitationexpiredCount));
 				}else {
@@ -1203,7 +1243,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 //								invitationexpiredList != null ? invitationexpiredList.size() : 0));
 				StatusMaster invalidUploadStatusMaster = statusMasterRepository.findByStatusCode("INVALIDUPLOAD");
 				if(orgServices!=null && orgServices.contains("EPFO") && orgServices.contains("DNHDB")
-			 			&& !orgServices.contains("DIGILOCKER") && !orgServices.contains("ITR")) {
+			 			&& !orgServices.contains("DIGILOCKER") && !orgServices.contains("ITR") && !orgServices.contains("EPFOEMPLOYEELOGIN")) {
 					invalidUploadStatusMaster = statusMasterRepository.findByStatusCode("UANFETCHFAILED");
 				}
 				candidateStatusCountDtoList.add(2,
@@ -1216,7 +1256,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 						reInnviteStatusMaster.getStatusCode(), reinviteCount));
 				
 				if(orgServices!=null && orgServices.contains("EPFO") && orgServices.contains("DNHDB")
-			 			&& !orgServices.contains("DIGILOCKER") && !orgServices.contains("ITR")) {
+			 			&& !orgServices.contains("DIGILOCKER") && !orgServices.contains("ITR") && !orgServices.contains("EPFOEMPLOYEELOGIN")) {
 					StatusMaster invalidUploadStatus = statusMasterRepository.findByStatusCode("INVALIDUPLOAD");
 					candidateStatusCountDtoList.add(4, new CandidateStatusCountDto(invalidUploadStatus.getStatusName(),
 							invalidUploadStatus.getStatusCode(), invaliduploadCountExcludingUanFetchFailed));
@@ -1287,6 +1327,60 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 		}
 		return svcSearchResult;
 	}
+
+
+//	@Override
+//	public ServiceOutcome<CandidateDetailsDto> getCandidateByCandidateCodeNew(String referenceNo) {
+//		ServiceOutcome<CandidateDetailsDto> svcSearchResult = new ServiceOutcome<>();
+//		try {
+//			Candidate candidate = candidateRepository.findByCandidateCode(referenceNo);
+//			if (candidate != null) {
+//				CandidateDetailsDto candidateDetailsDto = new CandidateDetailsDto();
+//				candidateDetailsDto.setCandidateName(candidate.getCandidateName());
+//				candidateDetailsDto.setContactNumber(candidate.getContactNumber());
+//				candidateDetailsDto.setEmailId(candidate.getEmailId());
+//				candidateDetailsDto.setCandidateId(candidate.getCandidateId());
+//				candidateDetailsDto.setCandidateName(candidate.getCandidateName());
+//				candidateDetailsDto.setShowvalidation(candidate.getShowvalidation());
+//				candidateDetailsDto.setUan(candidate.getUan());
+//				candidateDetailsDto.setItrPanNumber(candidate.getItrPanNumber());
+//
+//				if(candidate.getConventionalCandidate() != null && candidate.getConventionalCandidate()) {
+//					String accountNameCandidateBasic = candidateDetailsDto.getAccountName().toLowerCase();
+//					System.out.println("accountNameCandidateBasic : "+accountNameCandidateBasic);
+//					Orgclientscope byAccountName = orgClientScopeRepository.findByAccountName(accountNameCandidateBasic);
+//					System.out.println("byAccountName in orgClientScopeRepository : "+byAccountName);
+//					if(accountNameCandidateBasic.isEmpty() || accountNameCandidateBasic == null) {
+//						candidateDetailsDto.setAccountName(null);
+//						candidateDetailsDto.setConventionalCandidateCheck("Education");
+//					}
+//					if(accountNameCandidateBasic != null && !accountNameCandidateBasic.isEmpty() && accountNameCandidateBasic.equals(byAccountName.getAccountName().toLowerCase())) {
+//						log.info("Client Name : "+byAccountName.getClientName());
+//						log.info("Account Name : "+byAccountName.getAccountName());
+//						log.info("ConventionalCandidate Check : "+byAccountName.getConventionalCandidateCheck());
+//						candidateDetailsDto.setAccountName(accountNameCandidateBasic);
+//						candidateDetailsDto.setConventionalCandidateCheck(byAccountName.getConventionalCandidateCheck());
+//
+//					}
+//				}
+//				svcSearchResult.setData(candidateDetailsDto);
+//				svcSearchResult.setOutcome(true);
+//				svcSearchResult
+//						.setMessage(messageSource.getMessage("msg.success", null, LocaleContextHolder.getLocale()));
+//			} else {
+//				svcSearchResult.setData(null);
+//				svcSearchResult.setOutcome(false);
+//				svcSearchResult.setMessage("No candidate found");
+//			}
+//		} catch (Exception ex) {
+//			svcSearchResult.setData(null);
+//			svcSearchResult.setOutcome(true);
+//			svcSearchResult
+//					.setMessage(messageSource.getMessage("ERROR.MESSAGE", null, LocaleContextHolder.getLocale()));
+//			log.error("Exception occured in getCandidate method in CandidateServiceImpl-->", ex);
+//		}
+//		return svcSearchResult;
+//	}
 
 	@Override
 	public Candidate findCandidateByCandidateCode(String candidateCode) {
@@ -1548,7 +1642,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 							processDeclined.getStatusCode(), processDeclinedCount));
 				} else {
 					if(orgServices!=null && orgServices.contains("EPFO") && orgServices.contains("DNHDB")
-				 			&& !orgServices.contains("DIGILOCKER") && !orgServices.contains("ITR")) {
+				 			&& !orgServices.contains("DIGILOCKER") && !orgServices.contains("ITR")&& !orgServices.contains("EPFOEMPLOYEELOGIN")) {
 						candidateStatusCountDtoList.add(0,
 								new CandidateStatusCountDto("QC Pending", pending.getStatusCode(), pendingCount));
 					}else {
@@ -2001,8 +2095,9 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				if (candidateCafExperiences.isEmpty()) {
 					candidateCafExperiences = getCandidateExperienceFromItrAndEpfoByCandidateId(
 							candidate.getCandidateId(), false);
-					System.out.println(candidateCafExperiences.size() + "getting");
+					log.info("No. of Exp records after adjudication :: {} {}", candidateCafExperiences.size(), candidate.getCandidateCode());
 					candidateCafExperienceRepository.saveAll(candidateCafExperiences);
+					moonlightingCheckByCandidateCode(candidateCode);
 				}
 				
 				List<String> uanNUmberList = candidateCafExperienceRepository
@@ -2042,7 +2137,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 									candidateCafExperience.getInputDateOfExit() != null
 											? candidateCafExperience.getInputDateOfExit()
 											: new Date());
-							log.info("Checking the Tenuer duration::{}", dateDifference);
+//							log.info("Checking the Tenuer duration::{}", dateDifference);
 							// adding the experience in list only when tenuer not less then 1 and should not
 							// have ITR data
 //							if(candidateCafExperience.getServiceSourceMaster() != null
@@ -2202,7 +2297,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 			svcSearchResult.setMessage("Thank you for submitting your response.");
 
 			CompletableFuture.runAsync(() -> {
-				reportService.generateDocument(candidateCode, "", ReportType.PRE_OFFER, "");
+				reportService.generateDocument(candidateCode, "", ReportType.PRE_OFFER, "",false);
 			});
 
 		} catch (Exception ex) {
@@ -2620,7 +2715,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 	@Transactional
 	@Override
 	public ServiceOutcome<Boolean> candidateApplicationFormApproved(String candidateCode,
-			MultipartFile criminalVerificationDocument, Long criminalVerificationColorId,
+			MultipartFile[] criminalVerificationDocument, Long criminalVerificationColorId,
 			MultipartFile globalDatabseCaseDetailsDocument, Long globalDatabseCaseDetailsColorId, String reportType) {
 		ServiceOutcome<Boolean> svcSearchResult = new ServiceOutcome<Boolean>();
 		try {
@@ -2657,6 +2752,11 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 						: null);
 				
 				if (criminalVerificationDocument != null) {
+					//if files coming in list then merge that files into single file and get bytes
+					byte[] mergedBytes = null;
+					if(criminalVerificationDocument.length>1) {
+						mergedBytes = PdfUtil.multiplePdfMergedSingleFile(Arrays.asList(criminalVerificationDocument));
+					}
 //					candidateCaseDetails.setCriminalVerificationDocument(
 //							criminalVerificationDocument != null ? criminalVerificationDocument.getBytes() : null);
 					candidateCaseDetails.setCriminalVerificationisExist(criminalVerificationColorId != null
@@ -2664,7 +2764,8 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 							: null);
 
 			      	String path = "Candidate/".concat(candidateCode + "/Generated".concat("/Resume").concat(".pdf"));
-					awsUtils.uploadFileAndGetPresignedUrl_bytes(DIGIVERIFIER_DOC_BUCKET_NAME, path, criminalVerificationDocument.getBytes());
+					awsUtils.uploadFileAndGetPresignedUrl_bytes(DIGIVERIFIER_DOC_BUCKET_NAME, path, 
+							mergedBytes !=null ? mergedBytes : criminalVerificationDocument[0].getBytes());
 					Content content = new Content();
 					content.setCandidateId(candidate.getCandidateId());
 					content.setContentCategory(ContentCategory.OTHERS);
@@ -2720,8 +2821,8 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				if (candidateStatus.getStatusMaster().getStatusCode().equals("INTERIMREPORT")) {
 					CandidateStatusHistory candidateStatusHistoryObj = candidateStatusHistoryRepository
 							.findLastStatusHistorytRecord(candidate.getCandidateId());
-					log.info("LAST STATUS HISTORY IS ::{}",
-							candidateStatusHistoryObj.getStatusMaster().getStatusCode());
+//					log.info("LAST STATUS HISTORY IS ::{}",
+//							candidateStatusHistoryObj.getStatusMaster().getStatusCode());
 					candidateStatusHistoryObj.setCreatedOn(new Date());
 					candidateStatusHistoryObj.setCandidateStatusChangeTimestamp(new Date());
 					candidateStatusHistoryRepository.save(candidateStatusHistoryObj);
@@ -3299,15 +3400,15 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 
 				List<CandidateCafExperience> efpolist = candidateCafExperienceList != null
 						? candidateCafExperienceList.stream()
-								.filter(c -> c.getServiceSourceMaster() != null
-										&& c.getServiceSourceMaster().getServiceCode().equals("EPFO"))
-								.collect(Collectors.toList())
+						.filter(c -> c.getServiceSourceMaster() != null
+								&& c.getServiceSourceMaster().getServiceCode().equals("EPFO"))
+						.collect(Collectors.toList())
 						: new ArrayList<>();
 				List<Long> itrIds = candidateCafExperienceList != null
 						? candidateCafExperienceList.stream()
-								.filter(c -> c.getServiceSourceMaster() != null
-										&& c.getServiceSourceMaster().getServiceCode().equals("ITR"))
-								.map(f -> f.getCandidateCafExperienceId()).collect(Collectors.toList())
+						.filter(c -> c.getServiceSourceMaster() != null
+								&& c.getServiceSourceMaster().getServiceCode().equals("ITR"))
+						.map(f -> f.getCandidateCafExperienceId()).collect(Collectors.toList())
 						: new ArrayList<>();
 
 				Boolean dojNull = false; // added to avoid null doj value while sorting
@@ -3393,7 +3494,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 						.findAllByCandidateCandidateCode(candidateCode);
 				if (candidateCafAddressList != null) {
 					candidateCafAddressDtoList = candidateCafAddressList.stream().map(
-							candidateCafAddress -> modelMapper.map(candidateCafAddress, CandidateCafAddressDto.class))
+									candidateCafAddress -> modelMapper.map(candidateCafAddress, CandidateCafAddressDto.class))
 							.collect(Collectors.toList());
 					candidationApplicationFormDto.setCandidateCafAddressDto(candidateCafAddressDtoList);
 				}
@@ -3406,7 +3507,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				}
 
 				// Adding epfo dto for output service history table
-				List<EpfoData> epfoDataList = epfoDataRepository.findAllByCandidateCandidateCode(candidateCode);
+				List<EpfoData> epfoDataList = epfoDataRepository.findAllByCandidateCandidateCodeOrderByDojDesc(candidateCode);
 				if (!epfoDataList.isEmpty()) {
 					for (EpfoData epfoData : epfoDataList) {
 						EpfoDataFromApiDto epfoDataFromApiDto = this.modelMapper.map(epfoData,
@@ -3420,7 +3521,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 							Calendar cal = Calendar.getInstance();
 							cal.setTime(doj);
 							Date dateWith1Days = cal.getTime();
-							log.info("EPFOdoj ::{}", dateWith1Days);
+//							log.info("EPFOdoj ::{}", dateWith1Days);
 							epfoDataFromApiDto.setDoj(dateWith1Days != null ? sdf.format(dateWith1Days) : null);
 
 						}
@@ -3429,7 +3530,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 							Calendar cal = Calendar.getInstance();
 							cal.setTime(doe);
 							Date doee = cal.getTime();
-							log.info("EPFOdoee ::{}", doee);
+//							log.info("EPFOdoee ::{}", doee);
 							epfoDataFromApiDto.setDoe(doee != null ? sdf.format(doee) : null);
 						}
 
@@ -3458,9 +3559,9 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 
 					dataDTOList.add(remittanceDataFromApiDto);
 				}
-				
+
 //				if(dataDTOList!=null && !dataDTOList.isEmpty()) {
-//					//sorting remittance 
+//					//sorting remittance
 //					List<RemittanceDataFromApiDto> sortedList = dataDTOList.stream()
 //			                .sorted(Comparator.comparing(dto -> {
 //			                    // Parsing the "year" string to LocalDate
@@ -3474,37 +3575,29 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 //				}else {
 //					candidationApplicationFormDto.setRemittanceProofImagesData(null);
 //				}
-				
+
 				if (dataDTOList != null && !dataDTOList.isEmpty()) {
-				    // Step 1: Sort by createdOn
-				    List<RemittanceDataFromApiDto> sortedList = dataDTOList.stream()
-				          .sorted(Comparator.comparing(RemittanceDataFromApiDto::getCreatedOn))
-				          .collect(Collectors.toList());
-				    // Step 2: Group by company
-				    Map<String, List<RemittanceDataFromApiDto>> groupedByCompany = sortedList.stream()
-				          .collect(Collectors.groupingBy(RemittanceDataFromApiDto::getCompany));
-				    // Step 3: Sort each group by year and remove duplicates
-				    groupedByCompany.forEach((company, list) -> {
-				       Set<String> seenYears = new LinkedHashSet<>();
-				       List<RemittanceDataFromApiDto> distinctList = list.stream()
-				             .sorted(Comparator.comparing(dto -> {
-				                String yearString = dto.getYear();
-				                return LocalDate.parse("01-" + yearString, DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH));
-				             }))
-				             .filter(dto -> seenYears.add(dto.getYear()))
-				             .collect(Collectors.toList());
-				       groupedByCompany.put(company, distinctList);
-				    });
-				    // Step 3: Flatten the grouped data into a single list
-				    List<RemittanceDataFromApiDto> finalSortedList = groupedByCompany.values().stream()
-				          .flatMap(List::stream)
-				          .collect(Collectors.toList());
-				    candidationApplicationFormDto.setRemittanceProofImagesData(!finalSortedList.isEmpty() ? finalSortedList : null);
+					Map<String, List<RemittanceDataFromApiDto>> groupedAndSorted = dataDTOList.stream()
+							.sorted(Comparator.comparing(RemittanceDataFromApiDto::getCreatedOn))
+							.collect(Collectors.groupingBy(
+									RemittanceDataFromApiDto::getCompany,
+									() -> new LinkedHashMap<>(), // Preserve insertion order
+									Collectors.toList()
+							));
+
+					List<RemittanceDataFromApiDto> finalSortedList = groupedAndSorted.values().stream()
+							.flatMap(list -> list.stream()
+									.sorted(Comparator.comparing(dto -> LocalDate.parse("01-" + dto.getYear(),
+											DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH))))
+							)
+							.collect(Collectors.toList());
+
+					candidationApplicationFormDto.setRemittanceProofImagesData(!finalSortedList.isEmpty() ? finalSortedList : null);
 				} else {
-				    candidationApplicationFormDto.setRemittanceProofImagesData(null);
+					candidationApplicationFormDto.setRemittanceProofImagesData(null);
 				}
-				
-				
+
+
 				//adding gst images in report
 				List<GstData> gstRecords = gstRepository.findAllByCandidateCandidateCode(candidateCode);
 				List<GstDataFromApiDto> gstDataDTOList = new ArrayList<>();
@@ -3512,23 +3605,23 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 					GstDataFromApiDto gstDataFromApiDto= new GstDataFromApiDto();
 					gstDataFromApiDto.setGstId(gstData.getGstId());
 					gstDataFromApiDto.setCandidateCode(candidate.getCandidateCode());
-		            gstDataFromApiDto.setColor(gstData.getColor()!=null ? gstData.getColor().getColorCode() : "");
-		            gstDataFromApiDto.setColorHexCode(gstData.getColor()!=null ? gstData.getColor().getColorHexCode() : "");
-		            gstDataFromApiDto.setCompany(gstData.getCompany()!=null || gstData.getCompany().equals("")? gstData.getCompany() : "");
-		            gstDataFromApiDto.setCreatedOn(gstData.getCreatedOn());
-		            gstDataFromApiDto.setImage(Base64.getEncoder().encodeToString(gstData.getImage()));
-		            gstDataFromApiDto.setPanNumber(gstData.getPanNumber());
-		            gstDataFromApiDto.setGstNumber(gstData.getGstNumber());
-		            gstDataFromApiDto.setStatus(gstData.getStatus()!=null || gstData.getStatus().equals("")? gstData.getStatus() : "");
-		            
-		            gstDataDTOList.add(gstDataFromApiDto);
-				
+					gstDataFromApiDto.setColor(gstData.getColor()!=null ? gstData.getColor().getColorCode() : "");
+					gstDataFromApiDto.setColorHexCode(gstData.getColor()!=null ? gstData.getColor().getColorHexCode() : "");
+					gstDataFromApiDto.setCompany(gstData.getCompany()!=null || gstData.getCompany().equals("")? gstData.getCompany() : "");
+					gstDataFromApiDto.setCreatedOn(gstData.getCreatedOn());
+					gstDataFromApiDto.setImage(Base64.getEncoder().encodeToString(gstData.getImage()));
+					gstDataFromApiDto.setPanNumber(gstData.getPanNumber());
+					gstDataFromApiDto.setGstNumber(gstData.getGstNumber());
+					gstDataFromApiDto.setStatus(gstData.getStatus()!=null || gstData.getStatus().equals("")? gstData.getStatus() : "");
+
+					gstDataDTOList.add(gstDataFromApiDto);
+
 				}
 				candidationApplicationFormDto.setGstImagesData(gstDataDTOList!=null && !gstDataDTOList.isEmpty() ? gstDataDTOList : null);
 				//setting case reinit date to dto
 				CandidateVerificationState candidateVerificationState = candidateVerificationStateRepository.findByCandidateCandidateId(candidate.getCandidateId());
 				if(candidateVerificationState!=null && candidateVerificationState.getCaseReInitiationTime()!=null) {
-					
+
 					candidationApplicationFormDto.setCandidateReinitiatedDate(java.sql.Date.valueOf(candidateVerificationState.getCaseReInitiationTime().toLocalDate()));
 				}
 
@@ -3736,149 +3829,149 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 							.findByCandidateCandidateCode(candidateCode);
 //					System.out.println("caseDetailsssssssssss" + caseDetails);
 					switch (executiveSummary[1].toString()) {
-					case "Employments":
-						if (!executiveSummary[3].toString().equals("")
-								&& executiveSummary[3].toString().indexOf("/") == 0) {
-							executiveSummaryDto.setSource(executiveSummary[3].toString().substring(1));
-						} else if (!executiveSummary[3].toString().equals("")
-								&& executiveSummary[3].toString().indexOf("/") != 0) {
-							executiveSummaryDto.setSource(executiveSummary[3].toString());
-						} else {
-							executiveSummaryDto.setSource("Not-Available");
-						}
+						case "Employments":
+							if (!executiveSummary[3].toString().equals("")
+									&& executiveSummary[3].toString().indexOf("/") == 0) {
+								executiveSummaryDto.setSource(executiveSummary[3].toString().substring(1));
+							} else if (!executiveSummary[3].toString().equals("")
+									&& executiveSummary[3].toString().indexOf("/") != 0) {
+								executiveSummaryDto.setSource(executiveSummary[3].toString());
+							} else {
+								executiveSummaryDto.setSource("Not-Available");
+							}
 
-						List<CandidateCafExperience> redColorList = candidateCafExperienceList.stream()
-								.filter(c -> c.getColor().getColorCode().equals("RED")).collect(Collectors.toList());
-						if (redColorList != null && redColorList.size() > 0) {
-							executiveSummaryDto.setResult(colRed.getColorName());
-							executiveSummaryDto.setColorCode(colRed.getColorCode());
-							executiveSummaryDto.setColorHexCode(colRed.getColorHexCode());
-						} else {
-							List<CandidateCafExperience> amberColorList = candidateCafExperienceList.stream()
-									.filter(c -> c.getColor().getColorCode().equals("AMBER"))
-									.collect(Collectors.toList());
-							if (amberColorList != null && amberColorList.size() > 0) {
+							List<CandidateCafExperience> redColorList = candidateCafExperienceList.stream()
+									.filter(c -> c.getColor().getColorCode().equals("RED")).collect(Collectors.toList());
+							if (redColorList != null && redColorList.size() > 0) {
+								executiveSummaryDto.setResult(colRed.getColorName());
+								executiveSummaryDto.setColorCode(colRed.getColorCode());
+								executiveSummaryDto.setColorHexCode(colRed.getColorHexCode());
+							} else {
+								List<CandidateCafExperience> amberColorList = candidateCafExperienceList.stream()
+										.filter(c -> c.getColor().getColorCode().equals("AMBER"))
+										.collect(Collectors.toList());
+								if (amberColorList != null && amberColorList.size() > 0) {
+									executiveSummaryDto.setResult(colAmber.getColorName());
+									executiveSummaryDto.setColorCode(colAmber.getColorCode());
+									executiveSummaryDto.setColorHexCode(colAmber.getColorHexCode());
+								} else {
+									executiveSummaryDto.setResult(colGreen.getColorName());
+									executiveSummaryDto.setColorCode(colGreen.getColorCode());
+									executiveSummaryDto.setColorHexCode(colGreen.getColorHexCode());
+								}
+							}
+							break;
+						case "Education":
+							if (!executiveSummary[3].toString().equals("")
+									&& executiveSummary[3].toString().indexOf("/") == 0) {
+								executiveSummaryDto.setSource(executiveSummary[3].toString().substring(1));
+							} else if (!executiveSummary[3].toString().equals("")
+									&& executiveSummary[3].toString().indexOf("/") != 0) {
+								executiveSummaryDto.setSource(executiveSummary[3].toString());
+							} else {
+								executiveSummaryDto.setSource("Not-Available");
+							}
+							List<CandidateCafEducation> redColorEduList = candidateCafEducationList.stream()
+									.filter(c -> c.getColor().getColorCode().equals("RED")).collect(Collectors.toList());
+							if (redColorEduList != null && redColorEduList.size() > 0) {
+								executiveSummaryDto.setResult(colRed.getColorName());
+								executiveSummaryDto.setColorCode(colRed.getColorCode());
+								executiveSummaryDto.setColorHexCode(colRed.getColorHexCode());
+							} else {
+								List<CandidateCafEducation> amberColorEduList = candidateCafEducationList.stream()
+										.filter(c -> c.getColor().getColorCode().equals("AMBER"))
+										.collect(Collectors.toList());
+								if (amberColorEduList != null && amberColorEduList.size() > 0) {
+									executiveSummaryDto.setResult(colAmber.getColorName());
+									executiveSummaryDto.setColorCode(colAmber.getColorCode());
+									executiveSummaryDto.setColorHexCode(colAmber.getColorHexCode());
+								} else {
+									executiveSummaryDto.setResult(colGreen.getColorName());
+									executiveSummaryDto.setColorCode(colGreen.getColorCode());
+									executiveSummaryDto.setColorHexCode(colGreen.getColorHexCode());
+								}
+							}
+							break;
+						case "Global Database check":
+							if (caseDetails != null && caseDetails.getGlobalDatabaseCaseDetailsIsExist() != null) {
+								executiveSummaryDto
+										.setResult(caseDetails.getGlobalDatabaseCaseDetailsIsExist().getColorName());
+								executiveSummaryDto
+										.setColorCode(caseDetails.getGlobalDatabaseCaseDetailsIsExist().getColorCode());
+								executiveSummaryDto.setColorHexCode(
+										caseDetails.getGlobalDatabaseCaseDetailsIsExist().getColorHexCode());
+							} else {
 								executiveSummaryDto.setResult(colAmber.getColorName());
 								executiveSummaryDto.setColorCode(colAmber.getColorCode());
 								executiveSummaryDto.setColorHexCode(colAmber.getColorHexCode());
-							} else {
-								executiveSummaryDto.setResult(colGreen.getColorName());
-								executiveSummaryDto.setColorCode(colGreen.getColorCode());
-								executiveSummaryDto.setColorHexCode(colGreen.getColorHexCode());
 							}
-						}
-						break;
-					case "Education":
-						if (!executiveSummary[3].toString().equals("")
-								&& executiveSummary[3].toString().indexOf("/") == 0) {
-							executiveSummaryDto.setSource(executiveSummary[3].toString().substring(1));
-						} else if (!executiveSummary[3].toString().equals("")
-								&& executiveSummary[3].toString().indexOf("/") != 0) {
-							executiveSummaryDto.setSource(executiveSummary[3].toString());
-						} else {
-							executiveSummaryDto.setSource("Not-Available");
-						}
-						List<CandidateCafEducation> redColorEduList = candidateCafEducationList.stream()
-								.filter(c -> c.getColor().getColorCode().equals("RED")).collect(Collectors.toList());
-						if (redColorEduList != null && redColorEduList.size() > 0) {
-							executiveSummaryDto.setResult(colRed.getColorName());
-							executiveSummaryDto.setColorCode(colRed.getColorCode());
-							executiveSummaryDto.setColorHexCode(colRed.getColorHexCode());
-						} else {
-							List<CandidateCafEducation> amberColorEduList = candidateCafEducationList.stream()
-									.filter(c -> c.getColor().getColorCode().equals("AMBER"))
-									.collect(Collectors.toList());
-							if (amberColorEduList != null && amberColorEduList.size() > 0) {
+							break;
+						case "Criminal":
+							if (caseDetails != null && caseDetails.getCriminalVerificationisExist() != null) {
+								executiveSummaryDto.setResult(caseDetails.getCriminalVerificationisExist().getColorName());
+								executiveSummaryDto
+										.setColorCode(caseDetails.getCriminalVerificationisExist().getColorCode());
+								executiveSummaryDto
+										.setColorHexCode(caseDetails.getCriminalVerificationisExist().getColorHexCode());
+							} else {
 								executiveSummaryDto.setResult(colAmber.getColorName());
 								executiveSummaryDto.setColorCode(colAmber.getColorCode());
 								executiveSummaryDto.setColorHexCode(colAmber.getColorHexCode());
+							}
+							break;
+						case "Address":
+							if (!executiveSummary[3].toString().equals("")
+									&& executiveSummary[3].toString().indexOf("/") == 0) {
+								executiveSummaryDto.setSource(executiveSummary[3].toString().substring(1));
+							} else if (!executiveSummary[3].toString().equals("")
+									&& executiveSummary[3].toString().indexOf("/") != 0) {
+								executiveSummaryDto.setSource(executiveSummary[3].toString());
 							} else {
+								executiveSummaryDto.setSource("Not-Available");
+							}
+							List<CandidateCafAddress> redColorAddrList = candidateCafAddressList.stream()
+									.filter(c -> c.getColor().getColorCode().equals("RED")).collect(Collectors.toList());
+							if (redColorAddrList != null && redColorAddrList.size() > 0) {
+								executiveSummaryDto.setResult(colRed.getColorName());
+								executiveSummaryDto.setColorCode(colRed.getColorCode());
+								executiveSummaryDto.setColorHexCode(colRed.getColorHexCode());
+							} else {
+								List<CandidateCafAddress> amberColorAddrList = candidateCafAddressList.stream()
+										.filter(c -> c.getColor().getColorCode().equals("AMBER"))
+										.collect(Collectors.toList());
+								if (amberColorAddrList != null && amberColorAddrList.size() > 0) {
+									executiveSummaryDto.setResult(colAmber.getColorName());
+									executiveSummaryDto.setColorCode(colAmber.getColorCode());
+									executiveSummaryDto.setColorHexCode(colAmber.getColorHexCode());
+								} else {
+									executiveSummaryDto.setResult(colGreen.getColorName());
+									executiveSummaryDto.setColorCode(colGreen.getColorCode());
+									executiveSummaryDto.setColorHexCode(colGreen.getColorHexCode());
+								}
+							}
+							break;
+						case "ID Items":
+
+							if (!executiveSummary[3].toString().equals("")
+									&& executiveSummary[3].toString().indexOf("/") == 0) {
+
+								executiveSummaryDto.setSource(executiveSummary[3].toString().substring(1));
+							} else if (!executiveSummary[3].toString().equals("")
+									&& executiveSummary[3].toString().indexOf("/") != 0) {
+								executiveSummaryDto.setSource(executiveSummary[3].toString());
+							} else {
+								executiveSummaryDto.setSource("Not-Available");
+							}
+							if (Long.parseLong(executiveSummary[5].toString()) == 0) {
 								executiveSummaryDto.setResult(colGreen.getColorName());
 								executiveSummaryDto.setColorCode(colGreen.getColorCode());
 								executiveSummaryDto.setColorHexCode(colGreen.getColorHexCode());
-							}
-						}
-						break;
-					case "Global Database check":
-						if (caseDetails != null && caseDetails.getGlobalDatabaseCaseDetailsIsExist() != null) {
-							executiveSummaryDto
-									.setResult(caseDetails.getGlobalDatabaseCaseDetailsIsExist().getColorName());
-							executiveSummaryDto
-									.setColorCode(caseDetails.getGlobalDatabaseCaseDetailsIsExist().getColorCode());
-							executiveSummaryDto.setColorHexCode(
-									caseDetails.getGlobalDatabaseCaseDetailsIsExist().getColorHexCode());
-						} else {
-							executiveSummaryDto.setResult(colAmber.getColorName());
-							executiveSummaryDto.setColorCode(colAmber.getColorCode());
-							executiveSummaryDto.setColorHexCode(colAmber.getColorHexCode());
-						}
-						break;
-					case "Criminal":
-						if (caseDetails != null && caseDetails.getCriminalVerificationisExist() != null) {
-							executiveSummaryDto.setResult(caseDetails.getCriminalVerificationisExist().getColorName());
-							executiveSummaryDto
-									.setColorCode(caseDetails.getCriminalVerificationisExist().getColorCode());
-							executiveSummaryDto
-									.setColorHexCode(caseDetails.getCriminalVerificationisExist().getColorHexCode());
-						} else {
-							executiveSummaryDto.setResult(colAmber.getColorName());
-							executiveSummaryDto.setColorCode(colAmber.getColorCode());
-							executiveSummaryDto.setColorHexCode(colAmber.getColorHexCode());
-						}
-						break;
-					case "Address":
-						if (!executiveSummary[3].toString().equals("")
-								&& executiveSummary[3].toString().indexOf("/") == 0) {
-							executiveSummaryDto.setSource(executiveSummary[3].toString().substring(1));
-						} else if (!executiveSummary[3].toString().equals("")
-								&& executiveSummary[3].toString().indexOf("/") != 0) {
-							executiveSummaryDto.setSource(executiveSummary[3].toString());
-						} else {
-							executiveSummaryDto.setSource("Not-Available");
-						}
-						List<CandidateCafAddress> redColorAddrList = candidateCafAddressList.stream()
-								.filter(c -> c.getColor().getColorCode().equals("RED")).collect(Collectors.toList());
-						if (redColorAddrList != null && redColorAddrList.size() > 0) {
-							executiveSummaryDto.setResult(colRed.getColorName());
-							executiveSummaryDto.setColorCode(colRed.getColorCode());
-							executiveSummaryDto.setColorHexCode(colRed.getColorHexCode());
-						} else {
-							List<CandidateCafAddress> amberColorAddrList = candidateCafAddressList.stream()
-									.filter(c -> c.getColor().getColorCode().equals("AMBER"))
-									.collect(Collectors.toList());
-							if (amberColorAddrList != null && amberColorAddrList.size() > 0) {
+							} else {
 								executiveSummaryDto.setResult(colAmber.getColorName());
 								executiveSummaryDto.setColorCode(colAmber.getColorCode());
 								executiveSummaryDto.setColorHexCode(colAmber.getColorHexCode());
-							} else {
-								executiveSummaryDto.setResult(colGreen.getColorName());
-								executiveSummaryDto.setColorCode(colGreen.getColorCode());
-								executiveSummaryDto.setColorHexCode(colGreen.getColorHexCode());
 							}
-						}
-						break;
-					case "ID Items":
-
-						if (!executiveSummary[3].toString().equals("")
-								&& executiveSummary[3].toString().indexOf("/") == 0) {
-
-							executiveSummaryDto.setSource(executiveSummary[3].toString().substring(1));
-						} else if (!executiveSummary[3].toString().equals("")
-								&& executiveSummary[3].toString().indexOf("/") != 0) {
-							executiveSummaryDto.setSource(executiveSummary[3].toString());
-						} else {
-							executiveSummaryDto.setSource("Not-Available");
-						}
-						if (Long.parseLong(executiveSummary[5].toString()) == 0) {
-							executiveSummaryDto.setResult(colGreen.getColorName());
-							executiveSummaryDto.setColorCode(colGreen.getColorCode());
-							executiveSummaryDto.setColorHexCode(colGreen.getColorHexCode());
-						} else {
-							executiveSummaryDto.setResult(colAmber.getColorName());
-							executiveSummaryDto.setColorCode(colAmber.getColorCode());
-							executiveSummaryDto.setColorHexCode(colAmber.getColorHexCode());
-						}
-						break;
+							break;
 					}
 
 					executiveSummaryDtoList.add(executiveSummaryDto);
@@ -4003,7 +4096,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 								LocalDate experience2Outputdoe = experience2.getOutputDateOfExit() == null
 										? LocalDate.now()
 										: experience2.getOutputDateOfExit().toInstant().atZone(ZoneId.systemDefault())
-												.toLocalDate();
+										.toLocalDate();
 								Period gapPeriod = Period.between(experience2Outputdoe, experience1Inputdoj);
 								int gapYears = gapPeriod.getYears();
 								int gapMonths = gapPeriod.getMonths();
@@ -4598,7 +4691,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		org.joda.time.format.DateTimeFormatter formatter = org.joda.time.format.DateTimeFormat.forPattern("yyyy-MM-dd");
-		System.out.println("enter new" + formatEpfoDate);
+//		System.out.println("enter new" + formatEpfoDate);
 		Candidate candidate = candidateRepository.findById(candidateId)
 				.orElseThrow(() -> new RuntimeException("invalid candidate id"));
 		List<String> orgServices = serviceTypeConfigRepository.getServiceSourceMasterByOrgId(candidate.getOrganization().getOrganizationId());
@@ -4612,7 +4705,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 		Date doe = null;
 		ToleranceConfig toleranceConfig = toleranceConfigRepository
 				.findByOrganizationOrganizationId(candidate.getOrganization().getOrganizationId());
-		log.info("moonlighting tolerance in days {}", toleranceConfig.getDualEmployment());
+//		log.info("moonlighting tolerance in days {}", toleranceConfig.getDualEmployment());
 		if (uan.isEmpty()) {
 			if (!iTRDataList.isEmpty()) {
 //				int j = 0;
@@ -4757,7 +4850,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				        LocalDate epfoDataDoe = epfoData.getDoe() != null ? epfoData.getDoe().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 		                
 		                if ((formattedYearMonth.isAfter(YearMonth.from(epfoDataDoj)) || formattedYearMonth.equals(YearMonth.from(epfoDataDoj))) && (formattedYearMonth.isBefore(YearMonth.from(epfoDataDoe)) || formattedYearMonth.equals(YearMonth.from(epfoDataDoe)))  && CommonUtils.checkStringSimilarity(iTRDataList.get(i).getDeductor(), epfoData.getCompany()) > 0.90) {
-		                	log.info("filtered out record {} {} {}", iTRDataList.get(i).getDeductor(), formattedYearMonth, candidate.getCandidateCode());
+//		                	log.info("filtered out record {} {} {}", iTRDataList.get(i).getDeductor(), formattedYearMonth, candidate.getCandidateCode());
 		                	epfoIndex = j;
 		                    break;
 		                }
@@ -4799,6 +4892,41 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				}
 			});
 
+			for (int j = 0; j < uan.size(); j++) {
+				List<ITRData> recordsBeforeDoj = new ArrayList<>();
+				List<ITRData> recordsAfterDoe = new ArrayList<>();
+				EpfoDataFromDetailsDto epfoData = this.modelMapper.map(uan.get(j), EpfoDataFromDetailsDto.class);
+				String deductor = null;
+				boolean recordsBeforeDojPresent = false;
+				boolean recordsAfterDoePresent = false;
+		        for (int i = 0; i < filteredITRList.size(); i++) {
+		            LocalDate formattedDate = LocalDate.parse(filteredITRList.get(i).getDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+		            YearMonth formattedYearMonth = YearMonth.from(formattedDate);
+//                	log.info("filtered itr {} {}", filteredITRList.get(i).getDeductor() , filteredITRList.get(i).getDate());
+			        LocalDate epfoDataDoj = epfoData.getDoj() != null ? epfoData.getDoj().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : null;
+			        LocalDate epfoDataDoe = epfoData.getDoe() != null ? epfoData.getDoe().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+ 
+					if(epfoData.getDoj() != null) {
+		                if(formattedYearMonth.isBefore(YearMonth.from(epfoDataDoj)) && CommonUtils.checkStringSimilarity(filteredITRList.get(i).getDeductor(), epfoData.getCompany()) > 0.90) {
+		                	recordsBeforeDoj.add(filteredITRList.get(i));
+		                	recordsBeforeDojPresent = true;
+		                	deductor = filteredITRList.get(i).getDeductor();
+//		                	log.info("Before doj {} {}", filteredITRList.get(i).getDeductor(), filteredITRList.get(i).getDate());
+		                } else if(formattedYearMonth.isAfter(YearMonth.from(epfoDataDoe)) && CommonUtils.checkStringSimilarity(filteredITRList.get(i).getDeductor(), epfoData.getCompany()) > 0.90) {
+		                	recordsAfterDoe.add(filteredITRList.get(i));
+		                	recordsAfterDoePresent = true;
+		                }
+					}
+		        }
+		        if(!recordsBeforeDoj.isEmpty() && recordsBeforeDojPresent == true && recordsAfterDoePresent == true) {
+		        	map.put(deductor+"_"+recordsBeforeDoj.get(0).getDate(), recordsBeforeDoj);
+		        }
+		        if(!recordsAfterDoe.isEmpty() && recordsBeforeDojPresent == true && recordsAfterDoePresent == true) {
+		        	map.put(deductor+"_"+recordsAfterDoe.get(0).getDate(), recordsAfterDoe);
+		        }
+            }
+			
+			
 			for (EpfoData epfoData : uan) {
 				EpfoDataFromDetailsDto epfoDataFromApiDto = this.modelMapper.map(epfoData,
 						EpfoDataFromDetailsDto.class);
@@ -4817,8 +4945,8 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 								&& epfoDataFromApiDto.getDoj()
 										.after(epfoDataFromApiDto.getDoe() != null ? epfoDataFromApiDto.getDoe()
 												: new Date())) {
-					log.info("getDoj() after doe then dates and taken from itr for {}",
-							epfoDataFromApiDto.getCompany());
+//					log.info("getDoj() after doe then dates and taken from itr for {}",
+//							epfoDataFromApiDto.getCompany());
 //						map.keySet().forEach(itrMapKey -> {
 					List<ITRData> itrList = map.get(epfoDataFromApiDto.getCompany());
 
@@ -4852,7 +4980,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 //						});
 
 				} else {
-					log.info("Doj Doe dates taken from epfo for {}", epfoDataFromApiDto.getCompany());
+//					log.info("Doj Doe dates taken from epfo for {}", epfoDataFromApiDto.getCompany());
 //						Date doj = epfoDataFromApiDto.getDoj() != null ? epfoDataFromApiDto.getDoj() : new Date();
 					if (epfoDataFromApiDto.getDoj() != null && epfoDataFromApiDto.getDoj()
 							.after(epfoDataFromApiDto.getDoe() != null ? epfoDataFromApiDto.getDoe() : new Date())) {
@@ -5008,7 +5136,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 									.parse(itrList.get(itrList.size() - 1).getDate()));
 						}
 						
-						log.info("taking itr record for caf exp {} {} {}", itrDataFromApiDto.getDeductor(), candidateCafExperience.getOutputDateOfJoining(), candidateCafExperience.getOutputDateOfExit());
+//						log.info("taking itr record for caf exp {} {} {}", itrDataFromApiDto.getDeductor(), candidateCafExperience.getOutputDateOfJoining(), candidateCafExperience.getOutputDateOfExit());
 
 					} catch (Exception e) {
 						log.error(
@@ -5222,6 +5350,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 			if (CommonUtils.checkStringSimilarity(candidateCafExp.getCandidateEmployerName(),
 					candidateCafExperience.getCandidateEmployerName()) > 0.90) {
 				duplicateExp = candidateCafExp;
+				break;
 			}
 		}
 //		for(int k=0;k<candidateCafExperiences.size();k++) {
@@ -5278,6 +5407,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 			if (CommonUtils.checkStringSimilarity(candidateCafExp.getCandidateEmployerName(),
 					candidateCafExperience.getCandidateEmployerName()) > 0.90) {
 				duplicateExp = candidateCafExp;
+				break;
 			}
 		}
 
@@ -5370,6 +5500,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 //					}
 				}
 				candidateCafExperienceRepository.saveAll(candidateCafExperiences);
+				moonlightingCheckByCandidateCode(candidateCode);
 			}
 		} catch (Exception ex) {
 			log.error("Exception occured in candidateApplicationFormDetails method in CandidateServiceImpl-->",
@@ -5480,7 +5611,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 
 				log.info("PRE offer Async call started-->");
 				CompletableFuture.runAsync(() -> {
-					reportService.generateDocument(candidateCode, "", ReportType.PRE_OFFER, "");
+					reportService.generateDocument(candidateCode, "", ReportType.PRE_OFFER, "",false);
 				});
 
 			} else {
@@ -5698,7 +5829,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 						createCandidateStatusHistory(candidateStatus, "CANDIDATE");
 					}
 					// start generation
-					reportService.generateDocument(CandidateCode, "", ReportType.PRE_OFFER, "");
+					reportService.generateDocument(CandidateCode, "", ReportType.PRE_OFFER, "",false);
 
 					Optional<Content> updatedContentList = contentRepository
 							.findByCandidateIdAndContentTypeAndContentCategoryAndContentSubCategory(
@@ -5933,7 +6064,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 			String removenumbers = extractMainEmployerName(companyName).trim();
 			String[] enteredEmp = removenumbers.split(" ", 8);
 			int wordCount = 2;
-			String searchEmployer = getSubString(enteredEmp, wordCount);
+			String searchEmployer = getSubStringForSingleLetterWords(enteredEmp, wordCount);
 
 			List<SuspectEmpMaster> suspectEmpMaster = suspectEmpMasterRepository
 					.getByOrganizationIdAndSuspectCompanyName(orgid, searchEmployer + "%");
@@ -5951,9 +6082,9 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 //				suspectEmpMaster = suspectEmpMasterRepository
 //						.getByOrganizationIdAndSuspectCompanyName(orgid, searchEmployer + "%");
 //			}
-			log.info("no of iterations done and for emp {}", wordCount);
+//			log.info("no of iterations done and for emp {}", wordCount);
 
-			if (!suspectEmpMaster.isEmpty()) {
+			if (!suspectEmpMaster.isEmpty() && !searchEmployer.isEmpty()) {
 				int i = 0;
 				int j = 0;
 				String[] splitSuspectEmp = null;
@@ -5962,19 +6093,29 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				List<String> partialMatches = new ArrayList<>();
 
 				if (suspectEmpMaster.size() == 1) {
-					log.info("SUSPECT ONE MATCHING ONLY :{}");
+//					log.info("SUSPECT ONE MATCHING ONLY :{}");
 					String suspectEmployer = extractMainEmployerName(suspectEmpMaster.get(0).getSuspectCompanyName())
 							.trim();
+//					suspectEmployer = getSubString(suspectEmployer.split(" ", 8), 2);
+
 					svcSearchResult.setData("RED");
 					matchedFromDBWith = suspectEmpMaster.get(0).getSuspectCompanyName();
-//					double similarity = CommonUtils.checkStringSimilarity(searchEmployer, suspectEmployer);
-//					if(similarity > 0.90) {
-//						svcSearchResult.setData("RED");
-//						matchedFromDBWith = suspectEmployer;
-//					} else {
-//						log.info("SIMILARITY NOT MATCHING FOR :{}",suspectEmpMaster.get(0).getSuspectCompanyName());
-//						svcSearchResult.setData("AMBER");
-//					}
+					
+					if(enteredEmp.length != 0 && enteredEmp[i].length() == 1) {
+						double similarity = CommonUtils.checkStringSimilarity(removenumbers,suspectEmployer);
+						if(similarity > 0.90) {
+							svcSearchResult.setData("RED");
+							matchedFromDBWith = suspectEmpMaster.get(0).getSuspectCompanyName();
+						} else {
+//							log.info("SIMILARITY NOT MATCHING FOR :{}",suspectEmpMaster.get(0).getSuspectCompanyName());
+							svcSearchResult.setData("AMBER");
+							matchedFromDBWith = "";
+						}
+					} else {
+						svcSearchResult.setData("RED");
+						matchedFromDBWith = suspectEmpMaster.get(0).getSuspectCompanyName();
+					}
+
 				} else {
 					outerLoop: for (SuspectEmpMaster SuspectEmp : suspectEmpMaster) {
 						String suspectEmployer = extractMainEmployerName(SuspectEmp.getSuspectCompanyName()).trim();
@@ -5998,7 +6139,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 							if (!wordMatchCheckList.contains(false)) {
 								j++;
 								matchedFromDBWith = SuspectEmp.getSuspectCompanyName();
-								log.info("exact match {}", matchedFromDBWith);
+//								log.info("exact match {}", matchedFromDBWith);
 							}
 						} else {
 							searchEmployer = getSubString(enteredEmp, enteredEmp.length);
@@ -6016,7 +6157,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 								if (!wordMatchCheckList.contains(false)) {
 									j++;
 									matchedFromDBWith = SuspectEmp.getSuspectCompanyName();
-									log.info("exact match in else block {}", matchedFromDBWith);
+//									log.info("exact match in else block {}", matchedFromDBWith);
 								}
 							}
 						}
@@ -6045,8 +6186,12 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				}
 
 				svcSearchResult.setOutcome(true);
-				if (matchedFromDBWith != null)
-					svcSearchResult.setMessage("Match found " + matchedFromDBWith);
+				if (matchedFromDBWith != null) {
+					if(matchedFromDBWith.isEmpty())
+						svcSearchResult.setMessage("Match Not found");
+					else
+						svcSearchResult.setMessage("Match found " + matchedFromDBWith);
+				}
 				else
 					svcSearchResult.setMessage("Match found " + partialMatches.toString());
 
@@ -6066,6 +6211,24 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 			subString += splitedWords[i];
 			subString += " ";
 		}
+		return subString.trim();
+	}
+	
+	public String getSubStringForSingleLetterWords(String[] splitedWords, int noOfWordsRequired) {
+		String subString = "";
+		for (int i = 0; i < noOfWordsRequired && i < splitedWords.length; i++) {
+			subString += splitedWords[i];
+			subString += " ";
+		}
+		
+		if(splitedWords.length > 0 && splitedWords[0].length() == 1) {
+			subString = "";
+			for(int j = 0; j < splitedWords.length; j++) {
+				subString += splitedWords[j];
+				subString += " ";
+			}
+		}
+		
 		return subString.trim();
 	}
 
@@ -6123,68 +6286,92 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 			HttpHeaders headers = new HttpHeaders();
 			setHeaderDetails(headers);
 			JSONObject request = new JSONObject();
-
-			request.put(epfoSecurityConfig.getClientIdValue(), epfoSecurityConfig.getClientId());
-			request.put(epfoSecurityConfig.getClientSecretValue(), epfoSecurityConfig.getClientSecret());
-			HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
-
-			log.info("epfoSecurityConfig.getAccessTokenUrl() *************************\" =",
-					epfoSecurityConfig.getAccessTokenUrl());
-
-			epfoTokenResponse = restTemplate.exchange(epfoSecurityConfig.getAccessTokenUrl(), HttpMethod.POST, entity,
-					String.class);
-			log.info("Response from EPFO TOKEN API " + epfoTokenResponse);
-			String message1 = epfoTokenResponse.getBody(); // .get("message").toString().replaceAll("=", ":")
-			log.info("epfoTokenResponse  ************************* =", epfoTokenResponse.getBody());
-			JSONObject obj1 = new JSONObject(message1);
-			log.info("Response from EPFO TOKEN API - message " + obj1);
-			log.info("last message " + obj1.getJSONObject("message"));
-			JSONObject obj = obj1.getJSONObject("message");
-			String access_token = obj.getString("access_token");
-			log.info("access_token =", access_token);
-
+//
+//			request.put(epfoSecurityConfig.getClientIdValue(), epfoSecurityConfig.getClientId());
+//			request.put(epfoSecurityConfig.getClientSecretValue(), epfoSecurityConfig.getClientSecret());
+//			HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
+//
+//			log.info("epfoSecurityConfig.getAccessTokenUrl() *************************\" =",
+//					epfoSecurityConfig.getAccessTokenUrl());
+//
+//			epfoTokenResponse = restTemplate.exchange(epfoSecurityConfig.getAccessTokenUrl(), HttpMethod.POST, entity,
+//					String.class);
+//			log.info("Response from EPFO TOKEN API " + epfoTokenResponse);
+//			String message1 = epfoTokenResponse.getBody(); // .get("message").toString().replaceAll("=", ":")
+//			log.info("epfoTokenResponse  ************************* =", epfoTokenResponse.getBody());
+//			JSONObject obj1 = new JSONObject(message1);
+//			log.info("Response from EPFO TOKEN API - message " + obj1);
+//			log.info("last message " + obj1.getJSONObject("message"));
+//			JSONObject obj = obj1.getJSONObject("message");
+//			String access_token = obj.getString("access_token");
+//			log.info("access_token =", access_token);
+//
+//			ResponseEntity<String> response = null;
+//			headers.setBearerAuth(access_token);
+//			headers.add("Bearer", access_token);
+//			HttpEntity<String> request1 = new HttpEntity<String>(headers);
+//
+//			EpfoDetailsDto epfoDetails = new EpfoDetailsDto();
+//
+//			response = restTemplate.exchange(epfoSecurityConfig.getTransactionIdUrl(), HttpMethod.GET, request1,
+//					String.class);
+//			String message2 = response.getBody();
+//			log.info("Response from EPFO Transaction API : " + message2);
+//			JSONObject obj2 = new JSONObject(message2);
+//			log.info("Response from EPFO Transaction API - obj: " + obj2);
+//			transactionId = obj2.getString("message").toString();
+//			epfoDetails.setTransactionid(transactionId);
+//			log.info("Generated transactionId Id is {}" + transactionId);
+//			log.info("transaction 123 id--> {}", transactionId);
 			ResponseEntity<String> response = null;
-			headers.setBearerAuth(access_token);
-			headers.add("Bearer", access_token);
-			HttpEntity<String> request1 = new HttpEntity<String>(headers);
-
-			EpfoDetailsDto epfoDetails = new EpfoDetailsDto();
-
-			response = restTemplate.exchange(epfoSecurityConfig.getTransactionIdUrl(), HttpMethod.GET, request1,
-					String.class);
-			String message2 = response.getBody();
-			log.info("Response from EPFO Transaction API : " + message2);
-			JSONObject obj2 = new JSONObject(message2);
-			log.info("Response from EPFO Transaction API - obj: " + obj2);
-			transactionId = obj2.getString("message").toString();
-			epfoDetails.setTransactionid(transactionId);
-			log.info("Generated transactionId Id is {}" + transactionId);
-			log.info("transaction 123 id--> {}", transactionId);
 
 			int maxRetryCount = 2;
 			int retryCount = 0;
+			String resMsg = null;
 			try {
 				while (retryCount < maxRetryCount) {
 					log.info("____________________epfoDetails.getUanusername()", uanNumber);
 
-					request.put(EPFOConstants.EPFO_USR, uanNumber);
+//					request.put(EPFOConstants.EPFO_USR, uanNumber);
+//
+//					request.put(EPFOConstants.EPFO_PWD, ' ');
+//					request.put(EPFOConstants.EPFO_UAN, uanNumber);
+//
+//					HttpEntity<String> entity1 = new HttpEntity<String>(request.toString(), headers);
+//					log.info("\\n------epfoSecurityConfig ------ {}", epfoSecurityConfig.getFinalSubmitPostUrl());
+//					log.info("\\n------epfoDetails ------  {}", epfoDetails.getTransactionid());
+//					response = restTemplate.exchange(
+//							epfoSecurityConfig.getFinalSubmitPostUrl() + epfoDetails.getTransactionid(),
+//							HttpMethod.POST, entity1, String.class);
 
-					request.put(EPFOConstants.EPFO_PWD, ' ');
-					request.put(EPFOConstants.EPFO_UAN, uanNumber);
+					List<String> uanNumbers = new ArrayList<>();
+					uanNumbers.add(uanNumber); // Add UANs to the list
+					
+					 request.put("uan_list", uanNumbers);
 
-					HttpEntity<String> entity1 = new HttpEntity<String>(request.toString(), headers);
-					log.info("\\n------epfoSecurityConfig ------ {}", epfoSecurityConfig.getFinalSubmitPostUrl());
-					log.info("\\n------epfoDetails ------  {}", epfoDetails.getTransactionid());
-					response = restTemplate.exchange(
-							epfoSecurityConfig.getFinalSubmitPostUrl() + epfoDetails.getTransactionid(),
-							HttpMethod.POST, entity1, String.class);
+						HttpEntity<String> entity1 = new HttpEntity<String>(request.toString(), headers);
+//						log.info("\\n------epfoSecurityConfig ------  {}", epfoSecurityConfig.getFinalSubmitPostUrl());
+//						log.info("\\n------epfoDetails ------  {}", epfoDetails.getTransactionid());
 
+//						response = restTemplate.exchange(
+//								epfoSecurityConfig.getFinalSubmitPostUrl() + epfoDetails.getTransactionid(),
+//								HttpMethod.POST, entity1, String.class);
+						
+						response = restTemplate.exchange(
+	    						epfoSecurityConfig.getEpfoBulkUanUrl(),HttpMethod.POST, entity1, String.class);
+//						
+//						System.out.println("Response : "+response);
+						
 					String responseBody = response.getBody();
-					System.out.println("RESPONSEBODY::::" + responseBody);
 					JSONObject obj3 = new JSONObject(responseBody);
 					log.info("\\n--------obj ---------  {}", obj3);
 					
-					
+					// Retrieve the dynamic key (UAN)
+					JSONObject messageObj = obj3.getJSONObject("message");
+					String dynamicKey = messageObj.keys().next(); // Extracts the dynamic UAN key
+
+					// Get the nested 'message' object for the UAN key
+					JSONObject uanData = messageObj.getJSONObject(dynamicKey);
 
 					boolean success = obj3.getBoolean("success");
 					
@@ -6212,14 +6399,35 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 						}
 					}
 					// handling empty response message array
-					JSONArray messagee = obj3.getBoolean("success") ? obj3.getJSONArray("message") : new JSONArray();
-					if (obj3.getBoolean("success") && (messagee == null || messagee.isEmpty())) {
-						obj3.remove("message");
-						obj3.put("message", "No data found for this UAN");
-						success = false;
+//					JSONArray messagee = obj3.getBoolean("success") ? obj3.getJSONArray("message") : new JSONArray();
+//					if (obj3.getBoolean("success") && (messagee == null || messagee.isEmpty())) {
+//						obj3.remove("message");
+//						obj3.put("message", "No data found for this UAN");
+//						success = false;
+//					}
+					
+					
+					// Ensure 'message' inside the UAN data is a JSONArray
+					if (uanData.has("message") && uanData.get("message") instanceof JSONArray) {
+					    JSONArray messageArray = uanData.getJSONArray("message");
+
+					    // If 'success' is true but the message array is empty, handle no data scenario
+					    if (obj3.getBoolean("success") && (messageArray == null || messageArray.isEmpty())) {
+					        obj3.remove("message");
+					        obj3.put("message", "No data found for this UAN");
+					        success = false;
+					    } else {
+					        // Loop through the message array
+					        for (int i = 0; i < messageArray.length(); i++) {
+					            JSONObject companyDetails = messageArray.getJSONObject(i);
+					            log.info("Company: {}, DOJ: {}, DOE: {}", companyDetails.getString("company"), companyDetails.getString("doj"), companyDetails.getString("doe"));
+					        }
+					    }
+					} else {
+					    log.error("The 'message' field for UAN {} is not a JSONArray.", dynamicKey);
 					}
 
-					String resMsg = obj3.toString();
+					 resMsg = obj3.toString();
 					log.info("\\n--------resMsg --------- {}", resMsg);
 					uanSave.setEPFOResponse(resMsg);
 
@@ -6251,9 +6459,35 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 
 				} else {
 					log.info("Operation succeeded. {}");
+					ObjectMapper objectMapper = new ObjectMapper();
+			        JsonNode rootNode = objectMapper.readTree(resMsg);
+			        JsonNode messageNode = rootNode.path("message");
+			        if (messageNode.isObject()) {
+			            String dynamicKey = messageNode.fieldNames().next();
+			            JsonNode dynamicMessage = messageNode.path(dynamicKey);
+
+			            // Check the type of inner message
+			            JsonNode innerMessageNode = dynamicMessage.path("message");
+
+			            if (innerMessageNode.isTextual()) {
+			                log.info("The innerMessage is of type String.");
+							uanSave.setTotalRecordFailed(1);
+							uanSave.setTotalRecordFetched(0);
+			                
+			            } else if (innerMessageNode.isObject()) {
+			            	log.info("The innerMessage is an Object.");
+			            } else if (innerMessageNode.isArray()) {
+			            	log.info("The innerMessage is an Array.");
+			            	uanSave.setTotalRecordFailed(0);
+							uanSave.setTotalRecordFetched(1);
+			            } else {
+			            	log.info("The innerMessage is of some other type.");
+			            }
+			        }
+
 					uanSave.setTotalRecordUploaded(1);
-					uanSave.setTotalRecordFetched(1);
-					uanSave.setTotalRecordFailed(0);
+//					uanSave.setTotalRecordFetched(1);
+//					uanSave.setTotalRecordFailed(0);
 //						uanSearchDataRepository.save(uanSave);
 //						svcSearchResult.setData(uanSave);
 					svcSearchResult.setMessage("SUCCESS");
@@ -6329,59 +6563,197 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 						// if (epfoJson.has("message") && epfoJson.get("message").isJsonArray()) {
 						// JsonArray messageArray = epfoJson.getAsJsonArray("message");
 
-						JsonElement messageElement = epfoJson.get("message");
+						JsonElement messageElement = epfoJson.get("message");			
+						// start api response as jsonArray
+//						if (messageElement.isJsonArray()) {
+//							System.out.println("mefhvsfjvfsj1111111");
+//							JsonArray messageArray = messageElement.getAsJsonArray();
+//
+//							for (JsonElement messageElement2 : messageArray) {
+//								JsonObject messageObj = messageElement2.getAsJsonObject();
+//
+//								// Convert JsonObject to EpfoDataFromDetailsDto
+//								UanSearchEpfoDTO epfoData = new UanSearchEpfoDTO();
+//								epfoData.setUan(messageObj.get("uan").getAsString());
+//								epfoData.setName(messageObj.get("name").getAsString());
+//								epfoData.setCompany(messageObj.get("company").getAsString());
+//
+//								if (messageObj.has("doe")) {
+//									String doeString = messageObj.get("doe").getAsString();
+//									if (!doeString.equals("NOT_AVAILABLE")) {
+//										try {
+//											Date doe = dateFormat.parse(doeString);
+//											epfoData.setDoe(doe);
+//										} catch (ParseException e) {
+//											log.error(
+//													"Exception1 occured in getEpfoData method for DOE parsing bulk in CandidateServiceImpl-->",
+//													e);
+//											epfoData.setDoe(null); // Set as null if parsing fails
+//										}
+//									}
+//								}
+//
+////										String dojString = messageObj.get("doj").getAsString();
+////										Date doj = dateFormat.parse(dojString);
+////										epfoData.setDoj(doj);
+//								if (messageObj.has("doj")) {
+//									String dojString = messageObj.get("doj").getAsString();
+//									if (!dojString.equals("NOT_AVAILABLE")) {
+//										try {
+//											Date doj = dateFormat.parse(dojString);
+//											epfoData.setDoj(doj);
+//										} catch (ParseException e) {
+//											log.error(
+//													"Exception1A occured in getEpfoData method for DOJ parsing bulk in CandidateServiceImpl-->",
+//													e);
+//											epfoData.setDoj(null); // Set as null if parsing fails
+//										}
+//									}
+//								}
+//								epfoData.setApplicantId(BulkApplicantId);
+//
+//								epfoData.setBulkId(bulkUanId);
+//
+//								epfoDataList.add(epfoData);
+//							}
+//						}
+						// end api response as jsonArray
 
-						if (messageElement.isJsonArray()) {
-							JsonArray messageArray = messageElement.getAsJsonArray();
+						if (messageElement != null && messageElement.isJsonObject()) {
+						    JsonObject innerObject = messageElement.getAsJsonObject();
 
-							for (JsonElement messageElement2 : messageArray) {
-								JsonObject messageObj = messageElement2.getAsJsonObject();
+						    // Loop through the dynamic keys in the innerObject
+						    for (Map.Entry<String, JsonElement> entry : innerObject.entrySet()) {
+						        String dynamicKey = entry.getKey();
+//						        System.out.println("dynamicKey : "+dynamicKey);
+						        JsonObject uanObject = innerObject.getAsJsonObject(dynamicKey);
 
-								// Convert JsonObject to EpfoDataFromDetailsDto
-								UanSearchEpfoDTO epfoData = new UanSearchEpfoDTO();
-								epfoData.setUan(messageObj.get("uan").getAsString());
-								epfoData.setName(messageObj.get("name").getAsString());
-								epfoData.setCompany(messageObj.get("company").getAsString());
+						        // Check if the "message" array exists and is a JSON array
+						        if (uanObject.has("message") && uanObject.get("message").isJsonArray()) {
+						            JsonArray messageArray = uanObject.getAsJsonArray("message");
 
-								if (messageObj.has("doe")) {
-									String doeString = messageObj.get("doe").getAsString();
-									if (!doeString.equals("NOT_AVAILABLE")) {
-										try {
-											Date doe = dateFormat.parse(doeString);
-											epfoData.setDoe(doe);
-										} catch (ParseException e) {
-											log.error(
-													"Exception1 occured in getEpfoData method for DOE parsing bulk in CandidateServiceImpl-->",
-													e);
-											epfoData.setDoe(null); // Set as null if parsing fails
-										}
-									}
-								}
+						            // Loop through the array to extract employment details
+						            for (JsonElement messageElement2 : messageArray) {
+						                JsonObject messageObj = messageElement2.getAsJsonObject();
 
-//										String dojString = messageObj.get("doj").getAsString();
-//										Date doj = dateFormat.parse(dojString);
-//										epfoData.setDoj(doj);
-								if (messageObj.has("doj")) {
-									String dojString = messageObj.get("doj").getAsString();
-									if (!dojString.equals("NOT_AVAILABLE")) {
-										try {
-											Date doj = dateFormat.parse(dojString);
-											epfoData.setDoj(doj);
-										} catch (ParseException e) {
-											log.error(
-													"Exception1A occured in getEpfoData method for DOJ parsing bulk in CandidateServiceImpl-->",
-													e);
-											epfoData.setDoj(null); // Set as null if parsing fails
-										}
-									}
-								}
-								epfoData.setApplicantId(BulkApplicantId);
+						                // Create a new DTO object
+						                UanSearchEpfoDTO epfoData = new UanSearchEpfoDTO();
 
-								epfoData.setBulkId(bulkUanId);
+						                // Extract values and set them to the DTO
+						                epfoData.setUan(messageObj.get("uan").getAsString());
+						                epfoData.setName(messageObj.get("name").getAsString());
+						                epfoData.setCompany(messageObj.get("company").getAsString());
 
-								epfoDataList.add(epfoData);
-							}
-						} else if (messageElement.isJsonPrimitive()) {
+						                // Handle "doe" field (Date of Exit)
+						                if (messageObj.has("doe")) {
+						                    String doeString = messageObj.get("doe").getAsString();
+						                    if (!"NOT_AVAILABLE".equals(doeString)) {
+						                        try {
+						                            Date doe = dateFormat.parse(doeString);
+						                            epfoData.setDoe(doe);
+						                        } catch (ParseException e) {
+						                            log.error("Error parsing DOE in CandidateServiceImpl: ", e);
+						                            epfoData.setDoe(null);
+						                        }
+						                    }
+						                }
+
+						                // Handle "doj" field (Date of Joining)
+						                if (messageObj.has("doj")) {
+						                    String dojString = messageObj.get("doj").getAsString();
+						                    if (!"NOT_AVAILABLE".equals(dojString)) {
+						                        try {
+						                            Date doj = dateFormat.parse(dojString);
+						                            epfoData.setDoj(doj);
+						                        } catch (ParseException e) {
+						                            log.error("Error parsing DOJ in CandidateServiceImpl: ", e);
+						                            epfoData.setDoj(null);
+						                        }
+						                    }
+						                }
+
+						                // Add additional fields like applicantId and bulkId
+						                epfoData.setApplicantId(BulkApplicantId);
+						                epfoData.setBulkId(bulkUanId);
+
+						                // Add the DTO to the list
+						                epfoDataList.add(epfoData);
+						            }
+						        } else {
+						            log.error("The 'message' array is not present or not a JSON array for key: " + dynamicKey);
+						            if (uanObject.has("message")) {
+							            JsonElement messageElement2 = uanObject.get("message");
+//							            	 System.out.println("response 3: "+messageElement2);
+											UanSearchEpfoDTO epfoData = new UanSearchEpfoDTO();
+											String messageString = messageElement2.getAsString();
+											epfoData.setApplicantId(BulkApplicantId);
+											epfoData.setUan(uan);
+											epfoData.setEpfoResponse(messageString);
+											epfoData.setBulkId(bulkUanId);
+											epfoData.setCompany(null);
+											epfoData.setDoe(null);
+											epfoData.setDoj(null);
+											epfoData.setName(null);
+											epfoDataList.add(epfoData);
+											svcSearchResult.setOutcome(false);
+											// Handle the String
+//										}
+							         }
+						        }
+						    }
+						}
+						else if(messageElement != null && messageElement.isJsonArray()) {
+							log.info("Specific to CG Excel {}");
+						        JsonArray messageArray = messageElement.getAsJsonArray();
+
+					            // Loop through the array to extract employment details
+					            for (JsonElement messageElement2 : messageArray) {
+					                JsonObject messageObj = messageElement2.getAsJsonObject();
+
+					                // Create a new DTO object
+					                UanSearchEpfoDTO epfoData = new UanSearchEpfoDTO();
+
+					                // Extract values and set them to the DTO
+					                epfoData.setUan(messageObj.get("uan").getAsString());
+					                epfoData.setName(messageObj.get("name").getAsString());
+					                epfoData.setCompany(messageObj.get("company").getAsString());
+
+					                // Handle "doe" field (Date of Exit)
+					                if (messageObj.has("doe")) {
+					                    String doeString = messageObj.get("doe").getAsString();
+					                    if (!"NOT_AVAILABLE".equals(doeString)) {
+					                        try {
+					                            Date doe = dateFormat.parse(doeString);
+					                            epfoData.setDoe(doe);
+					                        } catch (ParseException e) {
+					                            log.error("Error parsing DOE in CandidateServiceImpl: ", e);
+					                            epfoData.setDoe(null);
+					                        }
+					                    }
+					                }
+
+					                // Handle "doj" field (Date of Joining)
+					                if (messageObj.has("doj")) {
+					                    String dojString = messageObj.get("doj").getAsString();
+					                    if (!"NOT_AVAILABLE".equals(dojString)) {
+					                        try {
+					                            Date doj = dateFormat.parse(dojString);
+					                            epfoData.setDoj(doj);
+					                        } catch (ParseException e) {
+					                            log.error("Error parsing DOJ in CandidateServiceImpl: ", e);
+					                            epfoData.setDoj(null);
+					                        }
+					                    }
+					                }
+					                // Add additional fields like applicantId and bulkId
+					                epfoData.setApplicantId(BulkApplicantId);
+					                epfoData.setBulkId(bulkUanId);
+
+					                // Add the DTO to the list
+					                epfoDataList.add(epfoData);
+					            }
+						}
+						else if (messageElement.isJsonPrimitive()) {
 							log.info("EPFO RESPONSE IS TRUE::: {}");
 							UanSearchEpfoDTO epfoData = new UanSearchEpfoDTO();
 							String messageString = messageElement.getAsString();
@@ -6403,6 +6775,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				}
 				svcSearchResult.setData(epfoDataList);
 
+//				System.out.println("EPFODATA : "+epfoDataList);
 			}
 
 			else {
@@ -6422,69 +6795,159 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 					JsonObject epfoJson = new Gson().fromJson(epfoResponse, JsonObject.class);
 
 					JsonElement messageElement = epfoJson.get("message");
-					if (messageElement.isJsonArray()) {
-						JsonArray messageArray = messageElement.getAsJsonArray();
-						for (JsonElement messageElement2 : messageArray) {
-							JsonObject messageObj = messageElement2.getAsJsonObject();
-
-							// Convert JsonObject to EpfoDataFromDetailsDto
-							UanSearchEpfoDTO epfoData = new UanSearchEpfoDTO();
-							epfoData.setUan(messageObj.get("uan").getAsString());
-							epfoData.setName(messageObj.get("name").getAsString());
-							epfoData.setCompany(messageObj.get("company").getAsString());
-
-							if (messageObj.has("doe")) {
-								String doeString = messageObj.get("doe").getAsString();
-								if (!doeString.equals("NOT_AVAILABLE")) {
-									try {
-										Date doe = dateFormat.parse(doeString);
-										epfoData.setDoe(doe);
-									} catch (ParseException e) {
-										log.error(
-												"Exception2 occured in getEpfoData method in DOE PARSING CandidateServiceImpl-->",
-												e);
-										epfoData.setDoe(null); // Set as null if parsing fails
-									}
-								}
-							}
-
+					
+					//Start api response for jsonArray
+//					if (messageElement.isJsonArray()) {
+//						JsonArray messageArray = messageElement.getAsJsonArray();
+//						for (JsonElement messageElement2 : messageArray) {
+//							JsonObject messageObj = messageElement2.getAsJsonObject();
+//
+//							// Convert JsonObject to EpfoDataFromDetailsDto
+//							UanSearchEpfoDTO epfoData = new UanSearchEpfoDTO();
+//							epfoData.setUan(messageObj.get("uan").getAsString());
+//							epfoData.setName(messageObj.get("name").getAsString());
+//							epfoData.setCompany(messageObj.get("company").getAsString());
+//
+//							if (messageObj.has("doe")) {
+//								String doeString = messageObj.get("doe").getAsString();
+//								if (!doeString.equals("NOT_AVAILABLE")) {
+//									try {
+//										Date doe = dateFormat.parse(doeString);
+//										epfoData.setDoe(doe);
+//									} catch (ParseException e) {
+//										log.error(
+//												"Exception2 occured in getEpfoData method in DOE PARSING CandidateServiceImpl-->",
+//												e);
+//										epfoData.setDoe(null); // Set as null if parsing fails
+//									}
+//								}
+//							}
+//
+////								String dojString = messageObj.get("doj").getAsString();
+////								Date doj = dateFormat.parse(dojString);
+////								epfoData.setDoj(doj);
+//							if (messageObj.has("doj")) {
 //								String dojString = messageObj.get("doj").getAsString();
-//								Date doj = dateFormat.parse(dojString);
-//								epfoData.setDoj(doj);
-							if (messageObj.has("doj")) {
-								String dojString = messageObj.get("doj").getAsString();
-								if (!dojString.equals("NOT_AVAILABLE")) {
-									try {
-										Date doj = dateFormat.parse(dojString);
-										epfoData.setDoj(doj);
-									} catch (ParseException e) {
-										log.error(
-												"Exception2A occured in getEpfoData method for DOJ parsing in CandidateServiceImpl-->",
-												e);
-										epfoData.setDoj(null); // Set as null if parsing fails
-									}
-								}
-							}
+//								if (!dojString.equals("NOT_AVAILABLE")) {
+//									try {
+//										Date doj = dateFormat.parse(dojString);
+//										epfoData.setDoj(doj);
+//									} catch (ParseException e) {
+//										log.error(
+//												"Exception2A occured in getEpfoData method for DOJ parsing in CandidateServiceImpl-->",
+//												e);
+//										epfoData.setDoj(null); // Set as null if parsing fails
+//									}
+//								}
+//							}
+//
+//							epfoDataList.add(epfoData);
+//							svcSearchResult.setOutcome(true);
+//						}
+//						// Handle the JsonArray
+//					} 
+					
+					//end api response for jsonArray
+					
+					if (messageElement != null && messageElement.isJsonObject()) {
+					    JsonObject innerObject = messageElement.getAsJsonObject();
 
-							epfoDataList.add(epfoData);
-							svcSearchResult.setOutcome(true);
-						}
-						// Handle the JsonArray
-					} else if (messageElement.isJsonPrimitive()) {
-						UanSearchEpfoDTO epfoData = new UanSearchEpfoDTO();
-						String messageString = messageElement.getAsString();
-						epfoData.setApplicantId(applicantId);
-						epfoData.setUan(uan);
-						epfoData.setEpfoResponse(messageString);
-						epfoData.setBulkId(null);
-						epfoData.setCompany(null);
-						epfoData.setDoe(null);
-						epfoData.setDoj(null);
-						epfoData.setName(null);
-						epfoDataList.add(epfoData);
-						svcSearchResult.setOutcome(false);
-						// Handle the String
-					}
+					    // Loop through the dynamic keys in the innerObject
+					    for (Map.Entry<String, JsonElement> entry : innerObject.entrySet()) {
+					        String dynamicKey = entry.getKey();
+					        JsonObject uanObject = innerObject.getAsJsonObject(dynamicKey);
+
+					        // Check if the "message" array exists and is a JSON array
+					        if (uanObject.has("message") && uanObject.get("message").isJsonArray()) {
+					            JsonArray messageArray = uanObject.getAsJsonArray("message");
+
+					            // Loop through the array to extract employment details
+					            for (JsonElement messageElement2 : messageArray) {
+					                JsonObject messageObj = messageElement2.getAsJsonObject();
+
+					                // Create a new DTO object
+					                UanSearchEpfoDTO epfoData = new UanSearchEpfoDTO();
+
+					                // Extract values and set them to the DTO
+					                epfoData.setUan(messageObj.get("uan").getAsString());
+					                epfoData.setName(messageObj.get("name").getAsString());
+					                epfoData.setCompany(messageObj.get("company").getAsString());
+
+					                // Handle "doe" field (Date of Exit)
+					                if (messageObj.has("doe")) {
+					                    String doeString = messageObj.get("doe").getAsString();
+					                    if (!"NOT_AVAILABLE".equals(doeString)) {
+					                        try {
+					                            Date doe = dateFormat.parse(doeString);
+					                            epfoData.setDoe(doe);
+					                        } catch (ParseException e) {
+					                            log.error("Error parsing DOE in CandidateServiceImpl: ", e);
+					                            epfoData.setDoe(null);
+					                        }
+					                    }
+					                }
+
+					                // Handle "doj" field (Date of Joining)
+					                if (messageObj.has("doj")) {
+					                    String dojString = messageObj.get("doj").getAsString();
+					                    if (!"NOT_AVAILABLE".equals(dojString)) {
+					                        try {
+					                            Date doj = dateFormat.parse(dojString);
+					                            epfoData.setDoj(doj);
+					                        } catch (ParseException e) {
+					                            log.error("Error parsing DOJ in CandidateServiceImpl: ", e);
+					                            epfoData.setDoj(null);
+					                        }
+					                    }
+					                }
+
+					                // Add additional fields like applicantId and bulkId
+//					                epfoData.setApplicantId(BulkApplicantId);
+//					                epfoData.setBulkId(bulkUanId);
+
+					                // Add the DTO to the list
+					                epfoDataList.add(epfoData);
+					            }
+					        } else {
+					            log.error("The 'message' array is not present or not a JSON array for key: " + dynamicKey);
+//					            System.out.println("response 2 : "+messageElement);
+//					             if (messageElement.isJsonPrimitive()) {
+					            if (uanObject.has("message")) {
+					            JsonElement messageElement2 = uanObject.get("message");
+//					            	 System.out.println("response 3: "+messageElement2);
+									UanSearchEpfoDTO epfoData = new UanSearchEpfoDTO();
+									String messageString = messageElement2.getAsString();
+									epfoData.setApplicantId(applicantId);
+									epfoData.setUan(uan);
+									epfoData.setEpfoResponse(messageString);
+									epfoData.setBulkId(null);
+									epfoData.setCompany(null);
+									epfoData.setDoe(null);
+									epfoData.setDoj(null);
+									epfoData.setName(null);
+									epfoDataList.add(epfoData);
+									svcSearchResult.setOutcome(false);
+									// Handle the String
+//								}
+					            }
+					        }
+					    }
+					}										
+//					else if (messageElement.isJsonPrimitive()) {
+//						UanSearchEpfoDTO epfoData = new UanSearchEpfoDTO();
+//						String messageString = messageElement.getAsString();
+//						epfoData.setApplicantId(applicantId);
+//						epfoData.setUan(uan);
+//						epfoData.setEpfoResponse(messageString);
+//						epfoData.setBulkId(null);
+//						epfoData.setCompany(null);
+//						epfoData.setDoe(null);
+//						epfoData.setDoj(null);
+//						epfoData.setName(null);
+//						epfoDataList.add(epfoData);
+//						svcSearchResult.setOutcome(false);
+//						// Handle the String
+//					}
 
 					svcSearchResult.setData(epfoDataList);
 
@@ -7055,12 +7518,20 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 					.findByCandidateCandidateId(findByCandidateCode.getCandidateId());
 			if (candidateVerificationState != null && candidateVerificationState.getInterimColorCodeStatus() != null) {
 				statusColor = candidateVerificationState.getInterimColorCodeStatus();
-				log.info("candidateReportStatus FOR INTERIM REPORT::{}", statusColor);
+//				log.info("candidateReportStatus FOR INTERIM REPORT::{}", statusColor);
 
 			}
 			if (candidateVerificationState != null && candidateVerificationState.getFinalColorCodeStatus() != null) {
 				statusColor = candidateVerificationState.getFinalColorCodeStatus();
-				log.info("candidateReportStatus FOR FINAL REPORT::{}", statusColor);
+//				log.info("candidateReportStatus FOR FINAL REPORT::{}", statusColor);
+			}
+			
+			CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(candidateCode);
+			if(findByCandidateCode.getOrganization().getOrganizationName().contains("Infosys")
+					&& candidateStatus.getStatusMaster().getStatusCode().equalsIgnoreCase("PENDINGAPPROVAL")
+					&& candidateVerificationState != null && candidateVerificationState.getPreApprovalColorCodeStatus() != null) {
+				statusColor =candidateVerificationState.getPreApprovalColorCodeStatus();
+				
 			}
 			sv.setData(statusColor);
 			sv.setOutcome(true);
@@ -7150,13 +7621,21 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 //	        }
 
 			StatusMaster statusMaster =  statusMasterRepository.findByStatusCode("PURGED");
-//			List<Organization> activeORGS = organizationRepository.findAllByIsActive(true);
-			List<Long> orgIds=new ArrayList<>();
-			orgIds.add(orgId);
-			List<Organization> activeORGS = organizationRepository.findAllById(orgIds);
-			log.info("No of active ORGS::{}", activeORGS.size());
+			List<Organization> activeORGS =null;
+			if(orgId==null) {
+				activeORGS = organizationRepository.findAllByIsActive(true);
+				log.info("No of active ORGS for purging using schedular::{}", activeORGS.size());
+			}else {
+				List<Long> orgIds=new ArrayList<>();
+				orgIds.add(orgId);
+				activeORGS = organizationRepository.findAllById(orgIds);
+				log.info("No of active ORGS for purging using API::{}", activeORGS.size());
+			}
+			
 
-			for (Organization org : activeORGS) {
+		  for (Organization org : activeORGS) {
+			  Date cutoffDate =null;
+				try {
 				Calendar calendar = Calendar.getInstance();
 				calendar.setTime(new Date());
 
@@ -7172,7 +7651,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 		        calendar.set(Calendar.HOUR_OF_DAY, 23);
 		        calendar.set(Calendar.MINUTE, 59);
 		        calendar.set(Calendar.SECOND, 59);
-				Date cutoffDate = calendar.getTime();
+				cutoffDate = calendar.getTime();
 				log.info("cutoffDate to be purged::{}", cutoffDate + "For Org::" +org.getOrganizationName());
 
 				List<Candidate> candidatesNeedsToPurge = candidateRepository
@@ -7191,6 +7670,8 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 						org.getOrganizationName()+ "::" + daysToPurge + "::" + candidatesNeedsToPurge.size());
 				log.info("List of candidates to be purged::{}", orgsCandidateIds + "For Org::" +org.getOrganizationName());
 				// delete the records only when records are present for organization.
+				List<Long> sampleFilesIdsNeedToPurge= new ArrayList<>();
+				
 				if (orgsCandidateIds != null && !orgsCandidateIds.isEmpty()) {
 					int batchSize= 100;
 					for (int i = 0; i < orgsCandidateIds.size(); i += batchSize) {
@@ -7263,6 +7744,11 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 								x.setUan(null);
 								x.setUanDob(null);
 								x.setUanName(null);
+								
+								if(x.getCandidateSampleId()!=null) {
+									sampleFilesIdsNeedToPurge.add(x.getCandidateSampleId().getCandidateSampleId());
+								}
+								
 								x.setCandidateSampleId(null);
 								
 
@@ -7279,13 +7765,40 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				}
 				
 				//deleteing sample csv, xl files with refer to organization (because candidate reference not present)
-				List<CandidateSampleCsvXlsMaster> sampleCsvXlList = candidateSampleCsvXlsMasterRepository
-				                            .findByCreatedOnBeforeAndOrganizationOrganizationId(cutoffDate, org.getOrganizationId());
-				candidateSampleCsvXlsMasterRepository.deleteAll(sampleCsvXlList);
+				if(sampleFilesIdsNeedToPurge!=null && !sampleFilesIdsNeedToPurge.isEmpty()) {
+					try {
+						log.info("START sampleCsvXlList Recodes purging..");
+						List<CandidateSampleCsvXlsMaster> sampleCsvXlList = candidateSampleCsvXlsMasterRepository
+	                            .findByCreatedOnBeforeAndOrganizationOrganizationId(cutoffDate, org.getOrganizationId());
+					
+						List<CandidateSampleCsvXlsMaster> filteredListNeedPurge = sampleCsvXlList.stream()
+							    .filter(fl -> sampleFilesIdsNeedToPurge.contains(fl.getCandidateSampleId())) 
+							    .collect(Collectors.toList());
+						
+						candidateSampleCsvXlsMasterRepository.deleteAll(filteredListNeedPurge);
+					}catch(Exception e){
+						log.error("Exception in deleting the sampleCsvXlList records::{}",e.getMessage());
+						
+					}
+					
+				}
 				
 				candidateIds.addAll(orgsCandidateIds);
+				//sendinng email on seccess purge to org admin
+				User adminUserOfOrg = userRepository.findByOrganizationOrganizationIdAndRoleRoleIdAndIsActiveTrue(org.getOrganizationId(),
+						roleRepository.findRoleByRoleCode("ROLE_ADMIN").getRoleId());
+				if(adminUserOfOrg!=null) {
+					emailSentTask.emailOnOrgPurge(org.getOrganizationName(),adminUserOfOrg.getUserEmailId(),"",true,cutoffDate);	
+				}
 				
+				
+			}catch(Exception e) {
+				log.error("Exception In oldCandidatesPurge for organization ID :{} {}",org.getOrganizationId()+"::", e.getMessage());
+				//sending email on failure 
+				emailSentTask.emailOnOrgPurge(org.getOrganizationName(),onPurgeFailureRecieverEmail,onPurgeFailureBCCEmail
+						,false,cutoffDate);
 			}
+		  }
 
 			
 			// delete the records only when records are present.
@@ -7943,7 +8456,7 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 					executorService.shutdown();
 				}else {
 					svcSearchResult.setOutcome(false);
-					svcSearchResult.setMessage("Something Went Wrong, Please Try ReUpload The Fresh File..");
+					svcSearchResult.setMessage("Something Went Wrong, Please download new sample file and try ReUpload The Fresh File..");
 					executorService.shutdown();
 				}
 
@@ -7997,46 +8510,60 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 			setHeaderDetails(headers);
 			JSONObject request = new JSONObject();
 
-			request.put(epfoSecurityConfig.getClientIdValue(), epfoSecurityConfig.getClientId());
-			request.put(epfoSecurityConfig.getClientSecretValue(), epfoSecurityConfig.getClientSecret());
-			HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
-
-			log.info("epfoSecurityConfig.getAccessTokenUrl() *************************"
-					+ epfoSecurityConfig.getAccessTokenUrl());
-
-			epfoTokenResponse = restTemplate.exchange(epfoSecurityConfig.getAccessTokenUrl(), HttpMethod.POST, entity,
-					String.class);
-			log.info("Response from EPFO TOKEN API " + epfoTokenResponse);
-			String message1 = epfoTokenResponse.getBody(); // .get("message").toString().replaceAll("=", ":")
-			log.info("epfoTokenResponse  ************************* {}", epfoTokenResponse.getBody());
-			JSONObject obj1 = new JSONObject(message1);
-			log.info("Response from EPFO TOKEN API - message " + obj1);
-			log.info("last message " + obj1.getJSONObject("message"));
-			JSONObject obj = obj1.getJSONObject("message");
-			String access_token = obj.getString("access_token");
-			log.info("access_token-->  {}", access_token);
+//			request.put(epfoSecurityConfig.getClientIdValue(), epfoSecurityConfig.getClientId());
+//			request.put(epfoSecurityConfig.getClientSecretValue(), epfoSecurityConfig.getClientSecret());
+//			HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
+//
+//			log.info("epfoSecurityConfig.getAccessTokenUrl() *************************"
+//					+ epfoSecurityConfig.getAccessTokenUrl());
+//
+//			epfoTokenResponse = restTemplate.exchange(epfoSecurityConfig.getAccessTokenUrl(), HttpMethod.POST, entity,
+//					String.class);
+//			log.info("Response from EPFO TOKEN API " + epfoTokenResponse);
+//			String message1 = epfoTokenResponse.getBody(); // .get("message").toString().replaceAll("=", ":")
+//			log.info("epfoTokenResponse  ************************* {}", epfoTokenResponse.getBody());
+//			JSONObject obj1 = new JSONObject(message1);
+//			log.info("Response from EPFO TOKEN API - message " + obj1);
+//			log.info("last message " + obj1.getJSONObject("message"));
+//			JSONObject obj = obj1.getJSONObject("message");
+//			String access_token = obj.getString("access_token");
+//			log.info("access_token-->  {}", access_token);
 
 			//
 			ResponseEntity<String> response = null;
-			headers.setBearerAuth(access_token);
-			headers.add("Bearer", access_token);
+//			headers.setBearerAuth(access_token);
+//			headers.add("Bearer", access_token);
 			HttpEntity<String> request1 = new HttpEntity<String>(headers);
 
 			EpfoDetailsDto epfoDetails = new EpfoDetailsDto();
 
-			response = restTemplate.exchange(epfoSecurityConfig.getTransactionIdUrl(), HttpMethod.GET, request1,
-					String.class);
-			String message2 = response.getBody();
-			log.info("Response from EPFO Transaction API : " + message2);
-			JSONObject obj2 = new JSONObject(message2);
-			log.info("Response from EPFO Transaction API - obj: " + obj2);
-			transactionId = obj2.getString("message").toString();
-			epfoDetails.setTransactionid(transactionId);
-			log.info("Generated transactionId Id is " + transactionId);
-			log.info("transaction 123 id-->  {}", transactionId);
+//			response = restTemplate.exchange(epfoSecurityConfig.getTransactionIdUrl(), HttpMethod.GET, request1,
+//					String.class);
+//			String message2 = response.getBody();
+//			log.info("Response from EPFO Transaction API : " + message2);
+//			JSONObject obj2 = new JSONObject(message2);
+//			log.info("Response from EPFO Transaction API - obj: " + obj2);
+//			transactionId = obj2.getString("message").toString();
+//			epfoDetails.setTransactionid(transactionId);
+//			log.info("Generated transactionId Id is " + transactionId);
+//			log.info("transaction 123 id-->  {}", transactionId);
 
 			int totalRecordFetchedIncrementCounter = 0;
 			int totalRecordFailedIncrementCounter = 0;
+			
+//			List<String> uanListForBatch = batch.stream().map(BulkUanDTO::getUan).collect(Collectors.toList());
+//            log.info("BATCH HAVING UANS ::{}",uanListForBatch);
+			
+//			 request.put("uan_list", bulkUan);
+//
+//				HttpEntity<String> entity2 = new HttpEntity<String>(request.toString(), headers);
+//
+//				response = restTemplate.exchange(
+//						epfoSecurityConfig.getEpfoBulkUanUrl(),HttpMethod.POST, entity2, String.class);
+//				
+//				String responseBody2 = response.getBody();
+//				JSONObject obj4 = new JSONObject(responseBody2);
+//				log.info("\\n--------obj --------- {}", obj4);
 
 			for (BulkUanDTO details : bulkUan) {
 				// log.info("{}",details);
@@ -8055,24 +8582,33 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 
 				int maxRetryCount = 2;
 				int retryCount = 0;
-
+				
+				List<String> uanNumbers = new ArrayList<>();
+				uanNumbers.add(uanNumber); // Add UANs to the list
+				String resMsg = null;
 				try {
 
 					while (retryCount < maxRetryCount) {
 
 						log.info("____________________epfoDetails.getUanusername()  {}", uanNumber);
-						request.put(EPFOConstants.EPFO_USR, uanNumber);
-
-						request.put(EPFOConstants.EPFO_PWD, ' ');
-						request.put(EPFOConstants.EPFO_UAN, uanNumber);
+//						request.put(EPFOConstants.EPFO_USR, uanNumber);
+//
+//						request.put(EPFOConstants.EPFO_PWD, ' ');
+//						request.put(EPFOConstants.EPFO_UAN, uanNumber);
+						
+	    	            request.put("uan_list", uanNumbers);
 
 						HttpEntity<String> entity1 = new HttpEntity<String>(request.toString(), headers);
-						log.info("\\n------epfoSecurityConfig ------  {}", epfoSecurityConfig.getFinalSubmitPostUrl());
-						log.info("\\n------epfoDetails ------  {}", epfoDetails.getTransactionid());
+//						log.info("\\n------epfoSecurityConfig ------  {}", epfoSecurityConfig.getFinalSubmitPostUrl());
+//						log.info("\\n------epfoDetails ------  {}", epfoDetails.getTransactionid());
 
+//						response = restTemplate.exchange(
+//								epfoSecurityConfig.getFinalSubmitPostUrl() + epfoDetails.getTransactionid(),
+//								HttpMethod.POST, entity1, String.class);
+						
 						response = restTemplate.exchange(
-								epfoSecurityConfig.getFinalSubmitPostUrl() + epfoDetails.getTransactionid(),
-								HttpMethod.POST, entity1, String.class);
+	    						epfoSecurityConfig.getEpfoBulkUanUrl(),HttpMethod.POST, entity1, String.class);
+//						
 						String responseBody = response.getBody();
 						JSONObject obj3 = new JSONObject(responseBody);
 						log.info("\\n--------obj --------- {}", obj3);
@@ -8111,7 +8647,7 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 //							success = false;
 //						}
 
-						String resMsg = obj3.toString();
+						resMsg = obj3.toString();
 						log.info("\\n--------resMsg --------- {}", resMsg);
 						findByBulkIdAndUanAndApplicantId.setTotalRecordUploaded(totalRecordUploaded);
 						findByBulkIdAndUanAndApplicantId.setEPFOResponse(resMsg);
@@ -8146,7 +8682,32 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 					} else {
 						// Operation succeeded
 						log.info("Operation Succeeded!! {}");
-						findByBulkIdAndUanAndApplicantId.setTotalRecordFetched(totalRecordFetchedIncrementCounter);
+//						findByBulkIdAndUanAndApplicantId.setTotalRecordFetched(totalRecordFetchedIncrementCounter);
+						ObjectMapper objectMapper = new ObjectMapper();
+				        JsonNode rootNode = objectMapper.readTree(resMsg);
+				        JsonNode messageNode = rootNode.path("message");
+				        if (messageNode.isObject()) {
+				            String dynamicKey = messageNode.fieldNames().next();
+				            JsonNode dynamicMessage = messageNode.path(dynamicKey);
+
+				            // Check the type of inner message
+				            JsonNode innerMessageNode = dynamicMessage.path("message");
+
+				            if (innerMessageNode.isTextual()) {
+				                log.info("The innerMessage is of type String.");
+				                System.out.println("totalRecordFailedIncrementCounter : "+totalRecordFailedIncrementCounter);
+				                System.out.println("totalRecordFetchedIncrementCounter : "+totalRecordFetchedIncrementCounter);
+								findByBulkIdAndUanAndApplicantId.setTotalRecordFailed(totalRecordFailedIncrementCounter++);
+								findByBulkIdAndUanAndApplicantId.setTotalRecordFetched(totalRecordFetchedIncrementCounter--);
+				                
+				            } else if (innerMessageNode.isObject()) {
+				            	log.info("The innerMessage is an Object.");
+				            } else if (innerMessageNode.isArray()) {
+				            	log.info("The innerMessage is an Array.");
+				            } else {
+				            	log.info("The innerMessage is of some other type.");
+				            }
+				        }
 						for (UanSearchData uanData : bulkData) {
 							uanData.setTotalRecordFetched(totalRecordFetchedIncrementCounter);
 							uanData.setTotalRecordFailed(totalRecordFailedIncrementCounter);
@@ -8154,7 +8715,6 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 					}
 
 					bulkData.add(findByBulkIdAndUanAndApplicantId);
-
 				} catch (Exception e) {
 					log.info(e.getMessage());
 				}
@@ -8163,7 +8723,7 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 			uanSearchDataRepository.saveAll(bulkData);
 
 		} catch (Exception e) {
-			log.error("Exception occured in BulkUanExcel method in CandidateServiceImpl-->" + e);
+			log.error("Exception occured in BulkUanProcess method in CandidateServiceImpl-->" + e);
 		}
 
 	}
@@ -8187,7 +8747,7 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 			setHeaderDetails(headers);
 			
 			ResponseEntity<String> response = null;
-			int batchSize = 10;
+			int batchSize = 1;
 			int totalItems = totalRecordUploaded;
 			if(totalRecordFetchedIncrementCounter>0) {
 				totalItems = bulkUan.size();
@@ -8205,7 +8765,7 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 	            log.info("BATCH HAVING UANS ::{}",uanListForBatch);
 	            
 	            //requesting these batch uans for fetching epfo record
-	            int maxRetryCount = 3;
+	            int maxRetryCount = 1;
 				int retryCount = 0;
 				JSONObject batchJsonResponse = null;
 	            try {
@@ -8605,7 +9165,8 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 	}
 
 	@Override
-	public void postStatusToOrganization(String candidateCode) {
+	public ServiceOutcome<Boolean> postStatusToOrganization(String candidateCode) {
+		ServiceOutcome<Boolean> svcSearchResult = new ServiceOutcome<>();
 		try {
 			Candidate findByCandidateCode = candidateRepository.findByCandidateCode(candidateCode);
 			CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(candidateCode);
@@ -8622,7 +9183,52 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 
 				HttpHeaders headers = new HttpHeaders();
 				setHeaderDetails(headers);
-				// request object
+				//check if client callback url want token for access, then need to call client token api
+				if(organization.getTokenUrlForCallBack() != null && !organization.getTokenUrlForCallBack().isEmpty() 
+						&& organization.getCallBackUrlUser() != null && !organization.getCallBackUrlUser().isEmpty() 
+						&& organization.getCallBackUrlPassword() != null && !organization.getCallBackUrlPassword().isEmpty()) {
+					
+					JSONObject callbackTokenRequestJson = new JSONObject();
+					callbackTokenRequestJson.put("username", organization.getCallBackUrlUser().trim());
+					callbackTokenRequestJson.put("password", organization.getCallBackUrlPassword().trim());
+					
+					log.info("Token api call start for posting call back status ::{}", callbackTokenRequestJson.toString());
+					try {
+						HttpEntity<String> callBackTokenRequestEntity = new HttpEntity<>(callbackTokenRequestJson.toString(), headers);
+						// calling token URL To post the candidate status
+						ResponseEntity<String> callBackTokenResponse = restTemplate.exchange(organization.getTokenUrlForCallBack().trim(), HttpMethod.POST, callBackTokenRequestEntity,
+								String.class);
+						String message1 = callBackTokenResponse.getBody();
+						log.info("callBackTokenResponse ::{}", message1);
+						
+						JSONObject callBackTokenJsonResponse = new JSONObject(message1);
+	                    String apiStatus = callBackTokenJsonResponse.getString("statusMsg");
+	                    Integer code = callBackTokenJsonResponse.getInt("statusCode");
+	                    log.info("callBackTokenResponse code and status::{}{}", code +"::", apiStatus);
+	                    
+	                    //on success response of the token, add this token into the header of post status api
+	                    if(apiStatus.equalsIgnoreCase("Success") && code == 200) {
+	                    	String tokrnForPostStatus = callBackTokenJsonResponse.getString("refreshToken");
+	                    	headers.add("x-access-token", tokrnForPostStatus);
+	                    }
+					
+					} catch (HttpClientErrorException c) {
+						log.info("Exception in Client call for callBackTokenRequestEntity for candidate::{}", candidateCode);
+						log.error("CLIENT Exception for callBackTokenRequestEntity::{}", c);
+						svcSearchResult.setData(false);
+						svcSearchResult.setOutcome(false);
+						svcSearchResult.setMessage("Something Went Wrong while getting call back token, Please check call back token api and its credentials.");
+					} catch (Exception e) {
+						log.info("Exception In callBackTokenRequestEntity for ::{}", candidateCode);
+						log.info("Exception in callBackTokenRequestEntity::{}", e.getMessage());
+						svcSearchResult.setData(false);
+						svcSearchResult.setOutcome(false);
+						svcSearchResult.setMessage("Something Went Wrong while getting token for post status, Please check error logs.");
+					
+					}
+					
+				}
+				// post status request object
 				JSONObject requestJson = new JSONObject();
 				requestJson.put("candidateCode", candidateCode);
 				requestJson.put("status", candidateStatus.getStatusMaster().getStatusCode());
@@ -8637,15 +9243,28 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 				String message = response.getBody();
 				log.info("Response after posting the status to organization ::{}", message);
 
+				svcSearchResult.setData(true);
+				svcSearchResult.setOutcome(true);
+				svcSearchResult.setMessage("Status Posted Successfully.");
+			
 			}
 		} catch (HttpClientErrorException c) {
 			log.info("Exception in Client call To send status for ::{}", candidateCode);
 			log.error("CLIENT Exception occured while posting the candidate status to client::{}", c);
+			svcSearchResult.setData(false);
+			svcSearchResult.setOutcome(false);
+			svcSearchResult.setMessage("Something Went Wrong while Post Status, Please check call back API and request.");
+		
 		} catch (Exception e) {
 			log.info("Exception To send status for ::{}", candidateCode);
 			log.info("Exception in postStatusToOrganization::{}", e.getMessage());
+			svcSearchResult.setData(false);
+			svcSearchResult.setOutcome(false);
+			svcSearchResult.setMessage("Something Went Wrong while Post Status, Please check error logs.");
+		
 		}
 
+		return svcSearchResult;
 	}
 
 	@Override
@@ -8913,7 +9532,7 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 				setHeaderDetails(headers);
 				
 				ResponseEntity<String> response = null;
-				int batchSize = 10;
+				int batchSize = 1;
 				int totalItems = bulkUan.size();
 				mainloop :
 				for (int i = 0; i < totalItems; i += batchSize) {
@@ -8926,7 +9545,7 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 		            log.info("BATCH HAVING UANS ::{}",uanListForBatch);
 		            
 		            //requesting these batch uans for fetching epfo record
-		            int maxRetryCount = 2;
+		            int maxRetryCount = 1;
 					int retryCount = 0;
 					JSONObject batchJsonResponse = null;
 		            try {
@@ -10034,7 +10653,7 @@ public ServiceOutcome<Boolean> reFetchPanToUANData(CandidateInvitationSentDto ca
 
 			// Calculate the gap in months
 			filingGap = ChronoUnit.MONTHS.between(yearMonth1, yearMonth2);
-			log.info("Gap in months between 2 ITR Filing date{} {} {}", date1, date2, filingGap);
+//			log.info("Gap in months between 2 ITR Filing date{} {} {}", date1, date2, filingGap);
 			if( filingGap > 6) {
 				break;
 			}
@@ -10042,4 +10661,229 @@ public ServiceOutcome<Boolean> reFetchPanToUANData(CandidateInvitationSentDto ca
 		return filingGap;
 	}
 	 
+	@Override
+	public ServiceOutcome<UserDto> userProfile(Long userId) {
+		ServiceOutcome<UserDto> svcSearchResult = new ServiceOutcome<UserDto>();
+		try {
+			if(userId != null) {
+				Optional<User> userObj = userRepository.findById(userId);
+				if (userObj.isPresent()) {
+					UserDto userDto = new UserDto();
+					BeanUtils.copyProperties(userObj.get(), userDto);
+					setSomeUserDataInDTO(userDto, userObj.get());
+					svcSearchResult.setData(userDto);
+					svcSearchResult.setOutcome(true);
+					svcSearchResult.setMessage("SUCCESS");
+				} else {
+					svcSearchResult.setData(null);
+					svcSearchResult.setOutcome(false);
+					svcSearchResult.setMessage("NO USER FOUND");
+				}
+			}
+			
+		} catch (Exception e) {
+			log.error("Exception occured in updatePassword method in CandidateServiceImpl-->", e);
+		}
+		
+		return svcSearchResult;
+	}
+	
+	private UserDto setSomeUserDataInDTO(UserDto userDto, User result) {
+		userDto.setOrganizationId(
+				result.getOrganization() != null ? result.getOrganization().getOrganizationId() : null);
+		userDto.setRoleId(result.getRole().getRoleId());
+		userDto.setRoleName(result.getRole().getRoleName());
+		userDto.setCreatedBy(result.getCreatedBy() != null ? result.getCreatedBy().getUserFirstName() : null);
+		userDto.setCreatedOn(result.getCreatedOn());
+		userDto.setLastUpdatedBy(result.getLastUpdatedBy() != null ? result.getLastUpdatedBy().getUserFirstName() : "");
+		userDto.setLastUpdatedOn(result.getLastUpdatedOn() != null ? result.getLastUpdatedOn() : null);
+		userDto.setAgentSupervisorId(
+				result.getAgentSupervisor() != null ? result.getAgentSupervisor().getUserId() : null);
+		userDto.setPassword(null);
+		userDto.setOldPassword(null);
+		return userDto;
+	}
+
+	@Override
+	public ServiceOutcome<String> updateITRDetails(UpdateITRDto updateITRDto) {
+		 ServiceOutcome<String> outcome = new ServiceOutcome<String>();	
+		if(StringUtils.isNotEmpty(updateITRDto.getCandidateCode()) && StringUtils.isNotEmpty(updateITRDto.getForm26AsResponse())) {
+			Candidate candidate= candidateRepository.findByCandidateCode(updateITRDto.getCandidateCode());
+			List<String> orgServices = serviceTypeConfigRepository.getServiceSourceMasterByOrgId(candidate.getOrganization().getOrganizationId());
+
+
+		        SimpleDateFormat sdfp = new SimpleDateFormat("yyyy-MM-dd");
+		        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+		        try {
+	        		log.info("Post Login Information retrieved successfully ", updateITRDto.getCandidateCode());
+	        		JSONObject form26ASInfo = new JSONObject(updateITRDto.getForm26AsResponse());
+	        		String resMsg = form26ASInfo.toString();
+	        		JSONArray tDSDetails = form26ASInfo.getJSONArray("TDSDetails");	
+	        		log.info(tDSDetails+"tDSDetailsssss ", updateITRDto.getCandidateCode());
+	        		List<ITRDataFromApiDto> finalItrList = new ArrayList<ITRDataFromApiDto>();
+	        		for(int i=0; i<tDSDetails.length();i++) {
+	        			JSONObject object = tDSDetails.getJSONObject(i);
+	        			if(object.length()!=0) {
+	        				JSONObject year = object.getJSONObject("$");
+		        			JSONArray tdss = object.getJSONArray("TDSs");
+		        			for(int j=0; j<tdss.length();j++) {
+		        				JSONObject preFinalObject = tdss.getJSONObject(j);
+		        				JSONArray tds = preFinalObject.getJSONArray("TDS");
+		        				for(int k=0; k<tds.length();k++) {
+									JSONObject finalObject = tds.getJSONObject(k);
+									JSONObject tdsData = finalObject.getJSONObject("$");
+									final ObjectMapper objectMapper = new ObjectMapper();
+									ITRDataFromApiDto itr = objectMapper.readValue(tdsData.toString(), ITRDataFromApiDto.class);
+									itr.setAssesmentYear(year.getString("ay"));
+									itr.setFinancialYear(year.getString("fy"));
+									itr.setFiledDate(dateFormat.parse(itr.getDate()));
+									finalItrList.add(itr);
+		        				}
+		        			}
+	        			}
+	        		}
+	        		List<ITRData> itrDataList = new ArrayList<ITRData>();
+	        		for(ITRDataFromApiDto itr: finalItrList) {
+	        			ITRData itrData = new ITRData();
+	        			BeanUtils.copyProperties(itr, itrData);
+	        			itrData.setCandidate(candidate);
+	        			itrData.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("ITR"));
+	        			itrDataList.add(itrData);
+	        		}
+	        		
+	        		List<ITRData> alreadyExistingData = itrDataRepository.findAllByCandidateCandidateCodeOrderByFiledDateDesc(candidate.getCandidateCode());
+	        		if(itrDataList!=null && itrDataList.size()>0 && alreadyExistingData.size() == 0) {
+	        			itrDataRepository.saveAll(itrDataList);			        			
+
+	        			outcome.setData("ITR data recieved successfully.");
+			      		outcome.setOutcome(true);
+			      		outcome.setMessage("ITR data recieved successfully.");
+			      		log.info("ITR data recieved successfully ", updateITRDto.getCandidateCode());
+	        		}else {
+	        			CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(updateITRDto.getCandidateCode());
+	        			candidateStatus.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("ITR"));
+	        			candidateStatus.setLastUpdatedOn(new Date());
+	        			candidateStatusRepository.save(candidateStatus);
+						if(candidateStatus.getCandidate().getOrganization().getCallBackUrl() != null)
+							candidateService.postStatusToOrganization(candidateStatus.getCandidate().getCandidateCode());
+	        			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
+	        			log.info("ITR else ", updateITRDto.getCandidateCode());
+	        			outcome.setData("No Data Found.");
+			      		outcome.setOutcome(true);
+			      		outcome.setMessage("No Data Found.");
+	        		}
+	        	
+			CanditateItrResponse canditateItrEpfoResponse = canditateItrEpfoResponseRepository
+				.findByCandidateId(candidate.getCandidateId()).orElse(new CanditateItrResponse());
+			canditateItrEpfoResponse.setForm26AsResponse(resMsg);
+			canditateItrEpfoResponse.setCandidateId(candidate.getCandidateId());
+			canditateItrEpfoResponse.setCandidate(candidate);
+			canditateItrEpfoResponse.setCreatedOn(new Date());
+			canditateItrEpfoResponse.setLastUpdatedOn(new Date());
+			canditateItrEpfoResponseRepository.save(canditateItrEpfoResponse);
+
+				JSONArray personalDetails = form26ASInfo.getJSONArray("PersonalDetails"); 
+				for(int i=0; i<personalDetails.length();i++) {
+					JSONObject object = personalDetails.getJSONObject(i);
+					if(object.length()!=0) {
+						JSONObject name = object.getJSONObject("$");
+						candidate.setItrPanNumber(name.getString("pan"));
+						candidate.setPanDob(name.getString("dob")); 
+						candidate.setPanName(name.getString("name"));
+						candidate.setMaskedAadhar(name.getString("masked_aadhar"));
+						candidate.setAadharLinked(name.getBoolean("aadhar_linked"));
+						
+						if(!orgServices.contains("DIGILOCKER")) {
+							if(name.has("gender"))
+								candidate.setAadharGender(name.getString("gender"));
+							if(name.has("address")) {
+						  		CandidateCafAddress address = new CandidateCafAddress();
+						  		address.setCandidate(candidate);
+								address.setCandidateAddress(name.getString("address"));
+						  		address.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("PAN"));
+						  		address.setColor(colorRepository.findByColorCode("GREEN"));
+						  		address.setCreatedOn(new Date());
+						  		if(name.has("name"))
+						  			address.setName(name.getString("name"));
+						  		
+						  		CandidateCafAddress candidateCafAddress = candidateCafAddressRepository.findByCandidateCandidateCodeAndServiceSourceMasterServiceCode(candidate.getCandidateCode(),"PAN");
+		 						if(candidateCafAddress != null)
+		 							address.setCandidateCafAddressId(candidateCafAddress.getCandidateCafAddressId());
+		 						
+						  		candidateCafAddressRepository.save(address);
+							}	
+						}
+
+						candidateRepository.save(candidate);
+					}
+				}
+				
+				//updating status in last of the ITR flow
+				CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(updateITRDto.getCandidateCode());
+   			candidateStatus.setServiceSourceMaster(serviceSourceMasterRepository.findByServiceCode("ITR"));
+   			candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("ITR"));
+   			candidateStatus.setLastUpdatedOn(new Date());
+   			candidateStatusRepository.save(candidateStatus);
+   			if(candidateStatus.getCandidate().getOrganization().getCallBackUrl() != null) {
+					candidateService.postStatusToOrganization(candidateStatus.getCandidate().getCandidateCode());
+   			}
+   			candidateService.createCandidateStatusHistory(candidateStatus,"CANDIDATE");
+					
+					return outcome;
+		        }catch (Exception jsn) {
+		        	log.error("Exception occured in itr: {}{}", updateITRDto.getCandidateCode(),jsn); 
+		        	outcome.setData("Something went wrong.");
+		      		outcome.setOutcome(false);
+		      		outcome.setMessage("Something went wrong.");
+		  			log.error("JSON Exception occured {}{}", updateITRDto.getCandidateCode(),jsn);
+		  			return outcome;
+				}
+				
+			}else {
+				log.error("Either ITR Token Or TransactionId Or candidateId Or UserName Or Password is not provided / Missing {}", updateITRDto.getCandidateCode());
+				outcome.setData("Either ITR Token Or TransactionId Or candidateId Or UserName Or Password is not provided / Missing");
+	      		outcome.setOutcome(false);
+	      		outcome.setMessage("Something went wrong.");
+				return  outcome;
+			}
+	}
+	
+	@Override
+	public ServiceOutcome<Map<String, String>> getOrgNameByCandidateCode(String candidateCode) {
+		 ServiceOutcome<Map<String, String>> outcome = new ServiceOutcome<Map<String, String>>();	
+
+		try {
+			if (StringUtils.isNotEmpty(candidateCode)) {
+				Candidate candidate = candidateRepository.findByCandidateCode(candidateCode);
+				
+				OrganizationEmailTemplate byOrganizationId = organizationEmailTemplateRepository.getByOrganizationId(candidate.getOrganization().getOrganizationId());
+				if(byOrganizationId != null) {
+					String cwfCopyRight = byOrganizationId.getCwfCopyRight();
+					String cwfLogo = byOrganizationId.getCwfLogo();
+					
+					 Map<String, String> dataMap = new HashMap<>();
+					    dataMap.put("cwfCopyRight", cwfCopyRight);
+					    dataMap.put("cwfLogo", cwfLogo);
+					    
+					outcome.setData(dataMap);
+					outcome.setOutcome(true);
+					outcome.setMessage("candidate code is not provided / Missing");
+				}
+				
+			} else {
+				outcome.setOutcome(false);
+				outcome.setMessage("candidate code is not provided / Missing");
+				outcome.setData(null);
+			}
+			
+		} catch (Exception ex) {
+			log.error("Exception occured in getOrgNameByCandidateCode method in CandidateServiceImpl --> {} {}",
+					ex.getMessage(), candidateCode);
+			outcome.setOutcome(false);
+			outcome.setMessage("Something went wrong.");
+			outcome.setData(null);
+		}	
+		
+		return outcome;
+	}
 }

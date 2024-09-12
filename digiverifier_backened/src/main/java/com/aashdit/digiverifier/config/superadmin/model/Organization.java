@@ -146,4 +146,16 @@ public class Organization implements Serializable {
 	
 	@Column(name = "last_passwords")
 	private String lastPasswords;
+	
+	@Column(name = "token_url_for_call_back")
+	private String tokenUrlForCallBack;
+	
+	@Column(name = "call_back_url_user")
+	private String callBackUrlUser;
+	
+	@Column(name = "call_back_url_password")
+	private String callBackUrlPassword;
+	
+	@Column(name = "mfa")
+	private Boolean isMFA;
 }

@@ -43,5 +43,10 @@ public class EmailProperties {
 	private String kpmgEmailSenderId;
 	
 	private String digiverifierForwardUrllinkForConventional;
+	
+	private String digiverifierResetPassword;
+	
+	private String digiverifierSenderNickNameKPMG;
+
 
 }

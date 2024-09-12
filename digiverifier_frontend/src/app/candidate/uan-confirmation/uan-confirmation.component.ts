@@ -29,7 +29,7 @@ export class UanConfirmationComponent implements OnInit {
     
     this.candidateService.getCurrentStatusByCandidateCode(this.candidateCode).subscribe((result:any)=>{
       if(result.outcome==true){
-        console.log(result.data)
+//         console.log(result.data)
         const navURL = result.data.split('#/')[1];
         this.navRouter.navigate([navURL]);
       } else {
@@ -53,6 +53,9 @@ export class UanConfirmationComponent implements OnInit {
     //getting candidate details
     this.candidateService.getCandidateDetails(this.candidateCode)
     .subscribe((data: any) => {
+      data.data = this.candidateService.decryptData(data.data);
+      // Parse the decrypted JSON string into an object
+      data.data = JSON.parse(data.data);
       if (data.outcome === true) {
         if(data.data.showvalidation){
 
@@ -95,6 +98,9 @@ export class UanConfirmationComponent implements OnInit {
 
     if(this.uanVal == 1){
       this.candidateService.isUanSkipped(formData).subscribe((result:any)=>{
+        result.data = this.candidateService.decryptData(result.data);
+        // Parse the decrypted JSON string into an object
+        result.data = JSON.parse(result.data);
         if(result.outcome){
           if(event.target.value=="yes"){
             // const navURL = 'candidate/epfologinnew/'+this.candidateCode;

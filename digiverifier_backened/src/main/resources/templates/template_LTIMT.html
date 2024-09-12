@@ -702,7 +702,7 @@ span {
 		</table>
 
 		<span class="line-break"></span>
-		<div th:if="${root.employmentTenureVerificationDtoList}">
+		<div th:if="${root.employmentTenureVerificationDtoList}" style="page-break-inside: avoid;">
 			<span style="font-size: 15px" class="grey-text">Experience
 				calculation : </span> <span class="grey-text" style="font-size: 12px"
 				th:text="${root.totalTenure}"></span> <br> <span
@@ -710,7 +710,7 @@ span {
 				verified : </span> <span class="grey-text" style="margin-right: 300px; font-size: 12px"
 				th:text="${root.noOfYearsToBeVerified}"></span>
 		</div>
-		
+
 					<span class="line-break"></span><span class="line-break"></span>
 			<table class="table-st" border="0" style="page-break-inside: avoid;" th:if="${root.employmentHistoryDNHDBList}">
 			<tr>
@@ -748,28 +748,28 @@ span {
 			<td class="grey-text text-center"><span th:if="${employmentTenureVerification.secondarySource == null}" style="font-size: 12px"
 								th:text="${employmentTenureVerification.source}"></span>
 			<span style="font-size: 12px" th:if="${employmentTenureVerification.secondarySource != null}"
-							          th:text="${employmentTenureVerification.secondarySource} + ', ' + ${employmentTenureVerification.source}"></span>					
+							          th:text="${employmentTenureVerification.secondarySource} + ', ' + ${employmentTenureVerification.source}"></span>
 			</td>
 			<td th:if="${!#strings.equalsIgnoreCase(root.project, 'Wipro')}"
 								th:switch="${employmentTenureVerification.verificationStatus.name()}">
 			<span class="green-status" th:case="'GREEN'">GREEN</span> <span
 								class="amber-status" th:case="'AMBER'">AMBER</span> <span
 								class="red-status" th:case="'RED'">RED</span>
-			<span class="red-status" th:case="'MOONLIGHTING'">MOONLIGHTING</span> 
+			<span class="red-status" th:case="'MOONLIGHTING'">MOONLIGHTING</span>
 			<span class="grey-text" th:case="'OUTOFSCOPE'">OUT OF SCOPE</span>
 			<span class="invalid-status" style="font-size: 12px" th:case="*">INVALID</span>
 			</td>
-			 
+
 							<td th:if="${#strings.equalsIgnoreCase(root.project, 'Wipro')}"
 								th:switch="${employmentTenureVerification.verificationStatus.name()}">
 			<span class="red-status" th:case="'RED'">RED</span> <span
 								class="green-status" th:case="'GREEN'">GREEN</span> <span
-								class="invalid-status" th:case="'AMBER'">DRAFT</span> 
-			<span class="amber-status" th:case="'MOONLIGHTING'">MOONLIGHTING</span> 
+								class="invalid-status" th:case="'AMBER'">DRAFT</span>
+			<span class="amber-status" th:case="'MOONLIGHTING'">MOONLIGHTING</span>
 			<span class="grey-text" th:case="'OUTOFSCOPE'">OUT OF SCOPE</span>
 			<span class="invalid-status" style="font-size: 12px" th:case="*">INVALID</span>
 			</td>
-			 
+
 						</tr>
 			</table>
 
@@ -1356,10 +1356,10 @@ span {
 				 th:text="'Year: '+${image.year}"></span>
 				<!--<span style="font-size: 10px ; float: right;"
 					th:text="${image.year}" class="inline-block left output-data grey-text"></span>-->
-				<span class="line-break"></span>
+				<span class="line-break"></span><span class="line-break"></span>
 		
           <!-- <img th:src="'data:image/png;base64,' + ${#strings.toString(image.image)}" alt="Image" style="width: 200px; height: auto;"> -->
-          <img th:src="'data:image/png;base64,' + ${#strings.toString(image.image)}" alt="Image" style="width: 600px; height: auto;">
+          <img th:src="'data:image/png;base64,' + ${#strings.toString(image.image)}" alt="Image" style="width: 700px; height: auto;">
        
        <span class="line-break"></span><span class="line-break"></span>
         </div>

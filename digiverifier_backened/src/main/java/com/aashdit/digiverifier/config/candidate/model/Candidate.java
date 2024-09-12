@@ -163,6 +163,9 @@ public class Candidate implements Serializable {
 	@Column(name = "aadhar_linked")
 	private Boolean aadharLinked;
 	
+	@Column(name = "cg_sf_candidate_id")
+	private String cgSfCandidateId;
+	
 //	@Column(name = "conventional_status_id")
 //	private Integer conventionalStatusId;
 	

@@ -34,6 +34,11 @@ export class EpfoLoginComponent implements OnInit {
       history.pushState(null, "", document.URL);
     });
     this.candidateCode = this.router.snapshot.paramMap.get('candidateCode');
+    this.router.queryParams.subscribe(params => {
+      this.enterUanInQcPending = params['enterUanInQcPending'];
+    });
+    // this.enterUanInQcPending = this.router.snapshot.paramMap.get('enterUanInQcPending');
+    console.warn("enterUanInQcPending : ", this.enterUanInQcPending)
     //EPFO Captcha
     // this.candidateService
     //   .getepfoCaptcha(this.candidateCode)
@@ -63,13 +68,16 @@ export class EpfoLoginComponent implements OnInit {
       //getting candidate details
       this.candidateService.getCandidateDetails(this.candidateCode)
       .subscribe((data: any) => {
+        data.data = this.candidateService.decryptData(data.data);
+        // Parse the decrypted JSON string into an object
+        data.data = JSON.parse(data.data);
         if (data.outcome === true) {
           if(data.data.showvalidation){
 
             this.showvalidation = data.data.showvalidation;
           }
           
-          console.log("IS SHOW VALIDATION::{}",this.showvalidation);
+//           console.log("IS SHOW VALIDATION::{}",this.showvalidation);
         } else {
           Swal.fire({
             title: data.message,
@@ -78,15 +86,18 @@ export class EpfoLoginComponent implements OnInit {
         }
       });
 
-      const navURL= 'candidate/epfologinnew/' + this.candidateCode;
-          Swal.fire({
-            title: "EPFO Site is down, Please try another..!",
-            icon: 'warning',
-          }).then((sresult) => {
-            if (sresult.isConfirmed) {
-              this.navRouter.navigate([navURL]);
-            }
-          });
+      if(!this.enterUanInQcPending){
+        const navURL= 'candidate/epfologinnew/' + this.candidateCode;
+        this.navRouter.navigate([navURL]);
+            // Swal.fire({
+            //   title: "EPFO Site is down, Please try another..!",
+            //   icon: 'warning',
+            // }).then((sresult) => {
+            //   if (sresult.isConfirmed) {
+            //     this.navRouter.navigate([navURL]);
+            //   }
+            // });
+      }
 
   }
   formEPFOlogin = new FormGroup({
@@ -98,7 +109,8 @@ export class EpfoLoginComponent implements OnInit {
     ]),
     //uanpassword: new FormControl('', [Validators.required, Validators.maxLength(40)]),
     //captcha: new FormControl('', Validators.required),
-    transactionid: new FormControl('', Validators.required),
+    // transactionid: new FormControl('', Validators.required),
+    transactionid: new FormControl(''),
     enterUanInQcPending: new FormControl(''),
   });
   checkHistoryLength(): boolean {
@@ -122,13 +134,13 @@ export class EpfoLoginComponent implements OnInit {
     this.router.queryParams.subscribe((params) => {
       this.enterUanInQcPending = params.enterUanInQcPending === 'true'; // Assuming the parameter is passed as a string
       // Rest of your code...
-      console.log(this.enterUanInQcPending)
+//       console.log(this.enterUanInQcPending)
     });
 
     if(!this.enterUanInQcPending) {
       this.candidateService.getCurrentStatusByCandidateCode(this.candidateCode).subscribe((result:any)=>{
         if(result.outcome==true){
-          console.log(result.data)
+//           console.log(result.data)
           const navURL = result.data.split('#/')[1];
           this.navRouter.navigate([navURL]);
         } else {
@@ -146,7 +158,7 @@ export class EpfoLoginComponent implements OnInit {
     this.patchUserValues();
 
     if (this.formEPFOlogin.valid) {
-      console.log('this.formEPFOlogin.value', this.formEPFOlogin.value);
+//       console.log('this.formEPFOlogin.value', this.formEPFOlogin.value);
 
       this.candidateService
         .getEpfodetail(this.formEPFOlogin.value)
@@ -165,7 +177,7 @@ export class EpfoLoginComponent implements OnInit {
                 this.candidateEXPData =
                   this.CandidateFormData.candidateCafExperienceDto;
 
-                console.warn('candidateEXPData::>>>>', this.candidateEXPData);
+//                 console.warn('candidateEXPData::>>>>', this.candidateEXPData);
               });
           }
 
@@ -183,12 +195,12 @@ export class EpfoLoginComponent implements OnInit {
                 }, 2000);
               });
             } else if (this.enterUanInQcPending == false && this.showvalidation== false) {
-              console.log("GOING TO THANK You PAGE::");
+//               console.log("GOING TO THANK You PAGE::");
               const navURL = 'candidate/cThankYou/' + this.candidateCode;
 
               this.navRouter.navigate([navURL]);
             } else if (this.enterUanInQcPending == false && this.showvalidation== true) {
-              console.log("GOING TO Candidate FORM::");
+//               console.log("GOING TO Candidate FORM::");
               const navURL = 'candidate/cForm/' + this.candidateCode;
 
               this.navRouter.navigate([navURL]);
@@ -227,7 +239,7 @@ export class EpfoLoginComponent implements OnInit {
   }
   redirect() {
     if(this.enterUanInQcPending){
-      console.warn("EnterUanInQcPending:::",this.enterUanInQcPending)
+//       console.warn("EnterUanInQcPending:::",this.enterUanInQcPending)
       const redirectURL = 'admin/cReportApproval/' + this.candidateCode;
       this.navRouter.navigate([redirectURL]);
     }

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators } from '@angular/forms';
 import { CustomerService } from '../../services/customer.service';
 import Swal from 'sweetalert2';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Customer } from 'src/app/models/customer';
 
 
@@ -20,6 +20,9 @@ export class AddCustomerComponent implements OnInit {
   public logoFile: any = File;
   public showvalid: any;
   public passwordPolicy: any;
+  orgId:any;
+  CustomersData: any=[];
+  passwordPolicyDay:any;
   addCustomers = new FormGroup({
     organizationName: new FormControl('', Validators.required),
     gstNumber: new FormControl('', [Validators.minLength(15), Validators.maxLength(15)]),
@@ -34,6 +37,9 @@ export class AddCustomerComponent implements OnInit {
     organizationWebsite: new FormControl(),
     organizationEmailId: new FormControl('', [Validators.required,Validators.email]),
     callBackUrl: new FormControl(),
+    tokenUrlForCallBack: new FormControl(),
+    callBackUrlUser: new FormControl(),
+    callBackUrlPassword: new FormControl(),
     emailConfig:new FormControl(),
     emailTemplate:new FormControl(),
     daysToPurge:new FormControl(),
@@ -47,6 +53,11 @@ export class AddCustomerComponent implements OnInit {
   constructor( private customers:CustomerService, private router: Router) {}
 
   ngOnInit(): void {
+    this.customers.getPasswordPolicyDayFromConfig().subscribe((result: any)=>{
+      console.log("result : ",result)
+      this.passwordPolicyDay = result.data;      
+      console.log(this.passwordPolicyDay)
+    })
   }
   selectLogo(event:any) {
   const fileType = event.target.files[0].name.split('.').pop();

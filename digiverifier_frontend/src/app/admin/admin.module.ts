@@ -45,6 +45,7 @@ import { AddCheckComponent } from './add-check/add-check.component';
 import { CandidateTrackerComponent } from './candidate-tracker/candidate-tracker.component';
 import { CustomerScopeConfigComponent } from './customer-scope-config/customer-scope-config.component';
 import { EmploymentTrackerSheetComponent } from './employment-tracker-sheet/employment-tracker-sheet.component';
+import { PurgedReportComponent } from './purged-report/purged-report.component';
 
 
 @NgModule({
@@ -85,7 +86,8 @@ import { EmploymentTrackerSheetComponent } from './employment-tracker-sheet/empl
     AddCheckComponent,
     CandidateTrackerComponent,
     CustomerScopeConfigComponent,
-    EmploymentTrackerSheetComponent
+    EmploymentTrackerSheetComponent,
+    PurgedReportComponent
 
   ],
   imports: [

@@ -8,13 +8,17 @@ import { ForgotpwdComponent } from './forgotpwd/forgotpwd.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { UpdatePasswordComponent } from './update-password/update-password.component';
+import { ResetPasswordComponent } from './reset-password/reset-password.component';
 
 
 @NgModule({
   declarations: [
     UserAuthsComponent,
     LoginComponent,
-    ForgotpwdComponent
+    ForgotpwdComponent,
+    UpdatePasswordComponent,
+    ResetPasswordComponent
   ],
   imports: [
     CommonModule,

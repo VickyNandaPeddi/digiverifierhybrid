@@ -4,9 +4,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -25,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.aashdit.digiverifier.config.superadmin.util.ClientExcelUtil;
+import com.aashdit.digiverifier.globalConfig.EnvironmentVal;
 import com.aashdit.digiverifier.config.superadmin.util.ClientCSVUtil;
 import com.aashdit.digiverifier.config.superadmin.repository.OrgclientscopeRepository;
 
@@ -34,6 +38,7 @@ import com.aashdit.digiverifier.config.admin.repository.AgentSampleCsvXlsMasterR
 import com.aashdit.digiverifier.config.admin.repository.UserRepository;
 import com.aashdit.digiverifier.config.candidate.model.Candidate;
 import com.aashdit.digiverifier.config.candidate.repository.CandidateRepository;
+import com.aashdit.digiverifier.config.candidate.repository.SuspectEmpMasterRepository;
 import com.aashdit.digiverifier.config.superadmin.dto.OrganizationDto;
 import com.aashdit.digiverifier.config.superadmin.dto.OrganizationEmailTemplateDto;
 import com.aashdit.digiverifier.config.superadmin.dto.ServiceConfigurationDto;
@@ -80,6 +85,9 @@ public class OrganizationServiceImpl implements OrganizationService{
 	@Autowired
 	private OrganizationConfigRepository organizationConfigRepository;
 	
+	@Autowired
+	private SuspectEmpMasterRepository suspectEmpMasterRepository;
+	
 	@PersistenceContext
 	private EntityManager entityManager;
 	
@@ -115,6 +123,9 @@ public class OrganizationServiceImpl implements OrganizationService{
 
 	@Autowired
 	private ModelMapper modelMapper;
+	
+	@Autowired
+	private EnvironmentVal envirnmentVal;
 
 	//new code added for client scope upload//--------------------------------------------
 	@Transactional
@@ -261,6 +272,11 @@ public class OrganizationServiceImpl implements OrganizationService{
 					orgObj.setPasswordPolicy(organization.getPasswordPolicy());
 					orgObj.setLastPasswords(organization.getLastPasswords());
 					orgObj.setLastUpdatedBy(user);
+					orgObj.setIsMFA(organization.getIsMFA());
+					orgObj.setTokenUrlForCallBack(organization.getTokenUrlForCallBack());		
+					orgObj.setCallBackUrlUser(organization.getCallBackUrlUser());
+					orgObj.setCallBackUrlPassword(organization.getCallBackUrlPassword());
+					
 					result = organizationRepository.save(orgObj);
 					
 					if(result!=null) {
@@ -366,12 +382,24 @@ public class OrganizationServiceImpl implements OrganizationService{
 	// }
 
 	@Override
-	public ServiceOutcome<Organization> getOrganizationById(Long organizationId) {
-		ServiceOutcome<Organization> svcSearchResult = new ServiceOutcome<Organization>();
+	public ServiceOutcome<OrgDto> getOrganizationById(Long organizationId) {
+		ServiceOutcome<OrgDto> svcSearchResult = new ServiceOutcome<OrgDto>();
 		try {
 			Optional<Organization> organization= organizationRepository.findById(organizationId);
+			Long passwordPolicy = envirnmentVal.getPasswordPolicyDay();
+			OrgDto dto = null;
+//			if (organization.isPresent()) {
+//	            Organization org = organization.get();
+//	             dto = modelMapper.map(org, OrgDto.class);
+//	            dto.setPasswordPolicyDay(passwordPolicy);
+//	        }
+			
 			if (organization.isPresent()) {
-				svcSearchResult.setData(organization.get());
+				 Organization org = organization.get();
+	             dto = modelMapper.map(org, OrgDto.class);
+	            dto.setPasswordPolicyDay(passwordPolicy);
+//				svcSearchResult.setData(organization.get());
+				svcSearchResult.setData(dto);
 				svcSearchResult.setOutcome(true);
 				svcSearchResult.setMessage("SUCCESS");
 			} else {
@@ -568,26 +596,46 @@ public class OrganizationServiceImpl implements OrganizationService{
 						log.error("Exception occured in organizationConfig save inside saveOrganizationServiceConfiguration method in OrganizationServiceImpl-->" + e);
 					}
 		    	}
-				OrganizationExecutive organizationExecutive = new OrganizationExecutive();
-				organizationExecutive.setOrganizationId(serviceConfigurationDto.getOrganizationId());
-				organizationExecutive.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(0));
-				organizationExecutive.setWeight(serviceConfigurationDto.getWeight().get(0));
-				organizationExecutiveRepository.save(organizationExecutive);
-				OrganizationExecutive organizationExecutivee = new OrganizationExecutive();
-				organizationExecutivee.setOrganizationId(serviceConfigurationDto.getOrganizationId());
-				organizationExecutivee.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(1));
-				organizationExecutivee.setWeight(serviceConfigurationDto.getWeight().get(1));
-				organizationExecutiveRepository.save(organizationExecutivee);
-				OrganizationExecutive organizationExecutiveee = new OrganizationExecutive();
-				organizationExecutiveee.setOrganizationId(serviceConfigurationDto.getOrganizationId());
-				organizationExecutiveee.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(2));
-				organizationExecutiveee.setWeight(serviceConfigurationDto.getWeight().get(2));
-				organizationExecutiveRepository.save(organizationExecutiveee);
-				OrganizationExecutive organizationExecutiveeee = new OrganizationExecutive();
-				organizationExecutiveeee.setOrganizationId(serviceConfigurationDto.getOrganizationId());
-				organizationExecutiveeee.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(3));
-				organizationExecutiveeee.setWeight(serviceConfigurationDto.getWeight().get(3));
-				organizationExecutiveRepository.save(organizationExecutiveeee);
+				List<OrganizationExecutive> organizationExecutiveByOrganizationId = organizationExecutiveRepository
+						.findAllByOrganizationIdAndOrderByWeightDesc(serviceConfigurationDto.getOrganizationId());
+		    	if(organizationExecutiveByOrganizationId.isEmpty()) {
+					OrganizationExecutive organizationExecutive = new OrganizationExecutive();
+					organizationExecutive.setOrganizationId(serviceConfigurationDto.getOrganizationId());
+					organizationExecutive.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(0));
+					organizationExecutive.setWeight(serviceConfigurationDto.getWeight().get(0));
+					organizationExecutiveRepository.save(organizationExecutive);
+					OrganizationExecutive organizationExecutivee = new OrganizationExecutive();
+					organizationExecutivee.setOrganizationId(serviceConfigurationDto.getOrganizationId());
+					organizationExecutivee.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(1));
+					organizationExecutivee.setWeight(serviceConfigurationDto.getWeight().get(1));
+					organizationExecutiveRepository.save(organizationExecutivee);
+					OrganizationExecutive organizationExecutiveee = new OrganizationExecutive();
+					organizationExecutiveee.setOrganizationId(serviceConfigurationDto.getOrganizationId());
+					organizationExecutiveee.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(2));
+					organizationExecutiveee.setWeight(serviceConfigurationDto.getWeight().get(2));
+					organizationExecutiveRepository.save(organizationExecutiveee);
+					OrganizationExecutive organizationExecutiveeee = new OrganizationExecutive();
+					organizationExecutiveeee.setOrganizationId(serviceConfigurationDto.getOrganizationId());
+					organizationExecutiveeee.setExecutiveId(serviceConfigurationDto.getExecutiveId().get(3));
+					organizationExecutiveeee.setWeight(serviceConfigurationDto.getWeight().get(3));
+					organizationExecutiveRepository.save(organizationExecutiveeee);
+		    	} else {
+		    	    List<OrganizationExecutive> updatedExecutives = IntStream.range(0, serviceConfigurationDto.getExecutiveId().size())
+		    	            .mapToObj(i -> {
+		    	                Long executiveId = serviceConfigurationDto.getExecutiveId().get(i);
+		    	                OrganizationExecutive organizationExecutive = organizationExecutiveByOrganizationId.stream()
+		    	                    .filter(exec -> exec.getExecutiveId().equals(executiveId))
+		    	                    .findFirst()
+		    	                    .orElse(new OrganizationExecutive());
+		    	                organizationExecutive.setOrganizationId(serviceConfigurationDto.getOrganizationId());
+		    	                organizationExecutive.setExecutiveId(executiveId);
+		    	                organizationExecutive.setWeight(serviceConfigurationDto.getWeight().get(i));
+		    	                return organizationExecutive;
+		    	            })
+		    	            .collect(Collectors.toList());
+
+		    	        organizationExecutiveRepository.saveAll(updatedExecutives);
+		    	}
 					
 		    	svcSearchResult.setData(serviceConfigurationDtoObj);
 		    	svcSearchResult.setOutcome(true);
@@ -1004,12 +1052,24 @@ public class OrganizationServiceImpl implements OrganizationService{
 	}
 	
 	@Override
+	@Transactional
 	public ServiceOutcome<String> deleteOrg(Long orgId) {
 		ServiceOutcome svcSearchResult = new ServiceOutcome<>();
 		try {
-			candidateRepository.deleteAllByOrgId(orgId);
-			candidateRepository.deleteByOrgId(orgId);
-			
+	        entityManager.createNativeQuery("SET FOREIGN_KEY_CHECKS=0").executeUpdate();
+		    
+//	        List<Long> userIds = userRepository.getUserIdsByOrgId(orgId);
+	        List<Long> candidateIds = candidateRepository.findCandidateIdsByOrgId(orgId);
+			candidateRepository.deleteAllByOrgId(candidateIds);
+//	        log.info("candidate ids before flush {}", candidateIds);
+
+	        // Ensure the previous deletion is complete before proceeding
+	        entityManager.flush();
+//	        log.info("candidate ids after flush {}", candidateIds);
+	        candidateRepository.deleteByOrgId(orgId);
+//	        log.info("candidate ids after candidate delete {}", candidateIds);
+
+	        
 			toleranceConfigRepository.deleteByOrganizationOrganizationId(orgId);
 			
 			List<Long> organizationExecutives= organizationExecutiveRepository.findAllByOrganizationId(orgId);
@@ -1018,7 +1078,12 @@ public class OrganizationServiceImpl implements OrganizationService{
 			serviceTypeConfigRepository.deleteByOrganizationOrganizationId(orgId);
 			userRepository.deleteByOrganizationOrganizationId(orgId);
 			agentSampleCsvXlsMasterRepository.deleteByOrganizationOrganizationId(orgId);
+			organizationConfigRepository.deleteByOrganizationId(orgId);
+			suspectEmpMasterRepository.removeAllSuspectEmpByOrgId(orgId);
+			organizationExecutiveRepository.deleteByOrganizationId(orgId);
 			organizationRepository.deleteById(orgId);
+			
+	        entityManager.createNativeQuery("SET FOREIGN_KEY_CHECKS=1").executeUpdate();
 			
 			svcSearchResult.setData("Success");
 			svcSearchResult.setOutcome(true);
@@ -1026,7 +1091,7 @@ public class OrganizationServiceImpl implements OrganizationService{
 		} catch (Exception e) {
 			svcSearchResult.setOutcome(false);
 			svcSearchResult.setMessage("Something Went Wrong, Please Try After Sometimes.");
-			log.error("Exception occured in deleteOrg method in OrganizationServiceImpl --> "+ e);
+			log.error("Exception occured in deleteOrg method in OrganizationServiceImpl --> ", e);
 		}
 		return svcSearchResult;
 	}
@@ -1046,6 +1111,10 @@ public class OrganizationServiceImpl implements OrganizationService{
 					organizationEmailTemplate.setCandidateInviteEmailTemp(organizationEmailTemplateDto.getInviteMailContent());
 					organizationEmailTemplate.setCandidateLoaEmailSub(organizationEmailTemplateDto.getLoaMailSub());		
 					organizationEmailTemplate.setCandidateLoaEmailTemp(organizationEmailTemplateDto.getLoaMailContent());
+					organizationEmailTemplate.setCwfCopyRight(organizationEmailTemplateDto.getCwfCopyright());					
+					if(organizationEmailTemplateDto.getCwflogo() != null) {
+						organizationEmailTemplate.setCwfLogo(organizationEmailTemplateDto.getCwflogo());	
+					}
 					
 					organizationEmailTemplateRepository.save(organizationEmailTemplate);
 					
@@ -1060,14 +1129,20 @@ public class OrganizationServiceImpl implements OrganizationService{
 					svcSearchResult.setStatus("Fail");
 				}
 			}else {
-				log.info("New Email templates Storing for ORG ID::{}",organizationEmailTemplateDto.getOrgId());
+				log.info("New Email templates Storing for ORG ID::{}",organizationEmailTemplateDto.getOrgId());			
+				
 				OrganizationEmailTemplate organizationEmailTemplate= new OrganizationEmailTemplate();
 				organizationEmailTemplate.setOrganizationId(organizationEmailTemplateDto.getOrgId());
 				organizationEmailTemplate.setCandidateInviteEmailSub(organizationEmailTemplateDto.getInviteMailSub());
 				organizationEmailTemplate.setCandidateInviteEmailTemp(organizationEmailTemplateDto.getInviteMailContent());
 				organizationEmailTemplate.setCandidateLoaEmailSub(organizationEmailTemplateDto.getLoaMailSub());		
 				organizationEmailTemplate.setCandidateLoaEmailTemp(organizationEmailTemplateDto.getLoaMailContent());
+				organizationEmailTemplate.setCwfCopyRight(organizationEmailTemplateDto.getCwfCopyright());
 				organizationEmailTemplate.setCreatedDate(new Date());
+				
+				if(organizationEmailTemplateDto.getCwflogo() != null) {
+					organizationEmailTemplate.setCwfLogo(organizationEmailTemplateDto.getCwflogo());
+				}
 
 				organizationEmailTemplateRepository.save(organizationEmailTemplate);
 				svcSearchResult.setData(true);
@@ -1100,6 +1175,8 @@ public class OrganizationServiceImpl implements OrganizationService{
 				organizationEmailTemplateDto.setLoaMailContent(organizationEmailTemplate.getCandidateLoaEmailTemp());
 				organizationEmailTemplateDto.setLoaMailSub(organizationEmailTemplate.getCandidateLoaEmailSub());
 				organizationEmailTemplateDto.setOrgId(orgId);
+				organizationEmailTemplateDto.setCwfCopyright(organizationEmailTemplate.getCwfCopyRight());
+				organizationEmailTemplateDto.setCwflogo(organizationEmailTemplate.getCwfLogo());
 				
 				svcSearchResult.setData(organizationEmailTemplateDto);
 				svcSearchResult.setStatus("Success");

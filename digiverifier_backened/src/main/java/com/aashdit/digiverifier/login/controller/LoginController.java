@@ -1,5 +1,6 @@
 package com.aashdit.digiverifier.login.controller;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +22,16 @@ import com.aashdit.digiverifier.config.admin.model.Token;
 import com.aashdit.digiverifier.config.admin.model.User;
 import com.aashdit.digiverifier.config.admin.repository.TokenRepository;
 import com.aashdit.digiverifier.config.admin.service.UserService;
+import com.aashdit.digiverifier.globalConfig.EnvironmentVal;
 import com.aashdit.digiverifier.login.dto.AuthenticationRequest;
 import com.aashdit.digiverifier.login.dto.UserLoginDto;
+import com.aashdit.digiverifier.login.service.OTPService;
 import com.aashdit.digiverifier.security.JwtUtil;
 import com.aashdit.digiverifier.utils.CommonUtils;
+import com.aashdit.digiverifier.utils.EmailSentTask;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import io.swagger.v3.oas.annotations.Operation;
 //import io.swagger.annotations.ApiOperation;
@@ -55,6 +60,15 @@ public class LoginController {
 	
 	@Autowired
 	private CommonUtils commonUtils;
+	
+	@Autowired
+	private EnvironmentVal envirnmentVal;
+	
+	@Autowired
+	private EmailSentTask emailSentTask;
+	
+	@Autowired
+	private OTPService otpService;
 
 	@Operation(summary ="To authenticate user and generate and return JWT")
 	@PostMapping(path="/authenticate", produces=MediaType.APPLICATION_JSON_VALUE)
@@ -100,21 +114,105 @@ public class LoginController {
 						
 						if (isOK)
 						{
+							Long passwordPolicyDay = envirnmentVal.getPasswordPolicyDay();
+							Boolean validateOtp = false;
 							UserLoginDto userLoginDto = new UserLoginDto();
 							String jwtToken= jwtUtil.generateToken(user.getUserName());
-							userLoginDto.setJwtToken(commonUtils.encryptXOR(jwtToken));
+							if(user.getOrganization().getPasswordPolicy() != null && user.getOrganization().getPasswordPolicy() && authRequest.getOtp() == null) {
+								if(user.getOrganization().getIsMFA() != null && user.getOrganization().getIsMFA() && authRequest.getOtp() == null) {
+		                            userLoginDto.setRoleName(commonUtils.encryptXOR(user.getRole().getRoleName()));
+		                            userLoginDto.setMFA(user.getOrganization().getIsMFA());
+		                            if(user.getUserEmailId() != null) {
+		                            	emailSentTask.mfaOTP(user.getUserEmailId());
+		                            }
+								}
+								else {
+									if(user.getLastUpdatedPassword() != null) {
+										Date lastPasswordUpdated = user.getLastUpdatedPassword();
+										Date currentDate = new Date();
+										
+										long timeDifference = currentDate.getTime() - lastPasswordUpdated.getTime();
+										long daysDifference = TimeUnit.MILLISECONDS.toDays(timeDifference);
+										log.info("daysDifference : "+daysDifference);
+//									System.out.println("passwordPolicyDay : "+passwordPolicyDay);
+										if (daysDifference >= passwordPolicyDay) {
+											log.info("Password was updated more than "+passwordPolicyDay+" days ago.");
+										} else {
+											userLoginDto.setJwtToken(commonUtils.encryptXOR(jwtToken));
+											userLoginDto.setRoleName(commonUtils.encryptXOR(user.getRole().getRoleName()));
+											log.info("Password was updated within the last "+passwordPolicyDay+" days.");
+										}
+										
+									}else {
+										userLoginDto.setLastPasswordUpdated(user.getCreatedOn());
+										userLoginDto.setJwtToken(commonUtils.encryptXOR(jwtToken));
+										userLoginDto.setRoleName(commonUtils.encryptXOR(user.getRole().getRoleName()));
+									}
+								}
+							}else {
+								if(authRequest.getOtp() != null) {
+//									System.out.println("OTP IS NOT NULL !"+authRequest.getOtp());
+									 validateOtp = otpService.validateOtp(user.getUserName(), authRequest.getOtp());
+//									System.out.println("Validate the OTP : "+validateOtp);
+									if(validateOtp) {
+										log.info(" OTP is VAlid!! {}");	
+										if(user.getOrganization().getPasswordPolicy() != null && user.getOrganization().getPasswordPolicy() && user.getLastUpdatedPassword() != null) {
+											Date lastPasswordUpdated = user.getLastUpdatedPassword();
+											Date currentDate = new Date();
+
+											long timeDifference = currentDate.getTime() - lastPasswordUpdated.getTime();
+											long daysDifference = TimeUnit.MILLISECONDS.toDays(timeDifference);
+											log.info("daysDifference : "+daysDifference);
+											//										System.out.println("passwordPolicyDay : "+passwordPolicyDay);
+											if (daysDifference >= passwordPolicyDay) {
+												log.info("Password was updated more than "+passwordPolicyDay+" days ago.");
+											}else {
+												userLoginDto.setJwtToken(commonUtils.encryptXOR(jwtToken));
+												userLoginDto.setRoleName(commonUtils.encryptXOR(user.getRole().getRoleName()));
+											}
+										}else {
+											userLoginDto.setJwtToken(commonUtils.encryptXOR(jwtToken));
+											userLoginDto.setRoleName(commonUtils.encryptXOR(user.getRole().getRoleName()));
+										}
+									}
+//									else {
+//										System.out.println("INVALID OTP!");
+//										response.setData(null);
+//										response.setOutcome(false);
+//										response.setMessage("Invalid OTP!.");
+//									}	
+								}
+								else if(user.getOrganization().getIsMFA() != null && user.getOrganization().getIsMFA() && authRequest.getOtp() == null) {
+									log.info("MFA Block {}");
+		                            userLoginDto.setRoleName(commonUtils.encryptXOR(user.getRole().getRoleName()));
+		                            userLoginDto.setMFA(user.getOrganization().getIsMFA());
+		                            if(user.getUserEmailId() != null) {
+		                            	emailSentTask.mfaOTP(user.getUserEmailId());
+		                            }
+								}else {
+									log.info("ELSE Block {}");
+									userLoginDto.setJwtToken(commonUtils.encryptXOR(jwtToken));
+									userLoginDto.setRoleName(commonUtils.encryptXOR(user.getRole().getRoleName()));
+								}
+							}
                             userLoginDto.setUserFirstName(commonUtils.encryptXOR(user.getUserFirstName()));
                             userLoginDto.setOrganizationId(String.valueOf(user.getOrganization() != null ? user.getOrganization().getOrganizationId() : null));
                             userLoginDto.setOrganizationId(commonUtils.encryptXOR(userLoginDto.getOrganizationId()));
                             userLoginDto.setRoleCode(commonUtils.encryptXOR(user.getRole().getRoleCode()));
-                            userLoginDto.setRoleName(commonUtils.encryptXOR(user.getRole().getRoleName()));
+//                            userLoginDto.setRoleName(commonUtils.encryptXOR(user.getRole().getRoleName()));
                             userLoginDto.setUserId(String.valueOf(user.getUserId()));
                             userLoginDto.setUserId(commonUtils.encryptXOR(userLoginDto.getUserId()));
-                            if(user.getOrganization().getPasswordPolicy() != null) {
+                            userLoginDto.setPasswordPolicyDay(passwordPolicyDay);
+                            if(user.getOrganization().getPasswordPolicy() != null && user.getOrganization().getPasswordPolicy()) {
                             	userLoginDto.setOrgPassPolicy(user.getOrganization().getPasswordPolicy());
+                            	System.out.println("LastUpdatedPassword : "+user.getLastUpdatedPassword());	
+                            	if(user.getLastUpdatedPassword() != null) {	
+                            		userLoginDto.setLastPasswordUpdated(user.getLastUpdatedPassword());
+                            	}else {
+                            		userLoginDto.setLastPasswordUpdated(user.getCreatedOn());
+                            	}
                             }
 //                            if(user.getLastUpdatedPassword() != null) {      	
-                            	userLoginDto.setLastPasswordUpdated(user.getLastUpdatedPassword());
 //                            }
 							response.setData(userLoginDto);
 							user.setIsLoggedIn(true);
@@ -125,7 +223,14 @@ public class LoginController {
 								List<Token> existingTokens= tokenRepository.findByUserId(user.getUserId());
 								if(existingTokens.isEmpty())
 									response.setMessage("Change your password.");
+								else if(authRequest.getOtp() != null && !validateOtp) {
+									log.info("INvalid OTP {}");
+									response.setData(null);
+									response.setOutcome(false);
+									response.setMessage("Invalid OTP!.");
+								}
 								else
+									log.info("Logged In User");
 									response.setMessage("User authenticated successfully.");
 							} catch (Exception e) {
 								log.info("Exception occured in new agent login check method {}", e.getMessage());

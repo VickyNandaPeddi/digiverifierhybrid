@@ -57,4 +57,8 @@ public class UserDto {
 	
 	private String confirmPassword;
 	
+	private Boolean resetPassword;
+	
+	private String encryptUserId;
+	
 }

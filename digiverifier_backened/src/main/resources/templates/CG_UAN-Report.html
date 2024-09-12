@@ -238,6 +238,14 @@ span {
 						<span class="grey-text"> <b th:text="${root.applicantId}"></b></span>
 					</td>
 				</tr>
+				<tr th:if="${root.cgSfCandidateId != null and not #strings.isEmpty(root.cgSfCandidateId)}" th:trim="true">
+					<td style="padding: 5px; width: 31%" class="grey-bg text-left" th:if="!${#lists.contains(root.orgServices, 'PANTOUAN')}">
+						<span class="black-text"><b>Get Talent Candidate ID </b></span>
+					</td>
+					<td style="padding: 5px;" class="text-left">
+						<span class="grey-text"> <b th:text="${root.cgSfCandidateId}"></b></span>
+					</td>
+				</tr> 
 				<tr th:if="${root.accountName != null and not #strings.isEmpty(root.accountName)}" th:trim="true">
 					<td style="text-align: left; padding: 5px; width: 31%" class="grey-bg text-left">
 						<span class="black-text"><b>Client Name</b></span>
@@ -343,64 +351,81 @@ span {
 				</tr>
 			</table>
 			<span class="line-break"></span>
-			<table class="table_head table-st" style="page-break-inside: avoid;" th:if="${root.organisationScope!=null}">
-			    <!-- Concept Title head -->
+
+<!--			<table class="table_head table-st" style="page-break-inside: avoid;" th:if="${root.organisationScope!=null}">-->
+<!--				&lt;!&ndash; Concept Title head &ndash;&gt;-->
+<!--				<tr>-->
+<!--					<td class="blue-bg">-->
+<!--						<span class="td-heading black-text" style="color: whitesmoke;">REMARKS / COMMENTS</span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--				<tr th:if="${root.organisationScope!=null and root.organisationScope.dualEmployment != null and root.organisationScope.dualEmployment != ''}">-->
+<!--					<td style="padding: 5px; min-width: 100px;" class="text-left">-->
+<!--			            <span class="grey-text" th:if="${root.organisationScope}">-->
+<!--			                <b th:text="${root.organisationScope.dualEmployment}"></b>-->
+<!--			            </span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--				<tr th:if="${root.organisationScope!=null and root.organisationScope.undisclosed != null and root.organisationScope.undisclosed != ''}">-->
+<!--					<td style="padding: 5px; min-width: 100px;" class="text-left">-->
+<!--			            <span class="grey-text" th:if="${root.organisationScope}">-->
+<!--			                <b th:text="${root.organisationScope.undisclosed}"></b>-->
+<!--			            </span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--				<tr th:if="${root.organisationScope!=null and root.organisationScope.dataNotFound != null and root.organisationScope.dataNotFound != ''}">-->
+<!--					<td style="padding: 5px; min-width: 100px;" class="text-left">-->
+<!--			            <span class="grey-text" th:if="${root.organisationScope}">-->
+<!--			                <b th:text="${root.organisationScope.dataNotFound}"></b>-->
+<!--			            </span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--				<tr th:if="${root.organisationScope!=null and root.organisationScope.dNHDB != null and root.organisationScope.dNHDB != ''}">-->
+<!--					<td style="padding: 5px; min-width: 100px;" class="text-left">-->
+<!--			            <span class="grey-text" th:if="${root.organisationScope}">-->
+<!--			                <b th:text="${root.organisationScope.dNHDB}"></b>-->
+<!--			            </span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--				<tr th:if="${root.organisationScope!=null and root.organisationScope.tenureMismatch != null and root.organisationScope.tenureMismatch != ''}">-->
+<!--					<td style="padding: 5px; min-width: 100px;" class="text-left">-->
+<!--			            <span class="grey-text" th:if="${root.organisationScope}">-->
+<!--			                <b th:text="${root.organisationScope.tenureMismatch}"></b>-->
+<!--			            </span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--				<tr th:if="${root.organisationScope!=null and root.organisationScope.overseasEmployment != null and root.organisationScope.overseasEmployment != ''}">-->
+<!--					<td style="padding: 5px; min-width: 100px;" class="text-left">-->
+<!--			            <span class="grey-text" th:if="${root.organisationScope}">-->
+<!--			                <b th:text="${root.organisationScope.overseasEmployment}"></b>-->
+<!--			            </span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--				<tr th:if="${root.organisationScope!=null and root.organisationScope.others != null and root.organisationScope.others != ''}">-->
+<!--					<td style="padding: 5px; min-width: 100px;" class="text-left">-->
+<!--			            <span class="grey-text" th:if="${root.organisationScope}">-->
+<!--			                <b th:text="${root.organisationScope.others}"></b>-->
+<!--			            </span>-->
+<!--					</td>-->
+<!--				</tr>-->
+<!--			</table>-->
+			<div th:if="${#lists.contains(root.orgServices, 'EPFO') and !#lists.contains(root.orgServices, 'DIGILOCKER') and !#lists.contains(root.orgServices, 'ITR')and !#lists.contains(root.orgServices, 'PANTOUAN')}">
+			<table class="table_head table-st" style="page-break-inside: avoid;" th:if="${root.qcRemarksDto!=null}">
+
 			    <tr>
 			        <td class="blue-bg">
 			            <span class="td-heading black-text" style="color: whitesmoke;">REMARKS / COMMENTS</span>
 			        </td>
 			    </tr>
-			    <tr th:if="${root.organisationScope!=null and root.organisationScope.dualEmployment != null and root.organisationScope.dualEmployment != ''}">
-			        <td style="padding: 5px; min-width: 100px;" class="text-left">
-			            <span class="grey-text" th:if="${root.organisationScope}">
-			                <b th:text="${root.organisationScope.dualEmployment}"></b>
-			            </span>
-			        </td>
-			    </tr>
-			    <tr th:if="${root.organisationScope!=null and root.organisationScope.undisclosed != null and root.organisationScope.undisclosed != ''}">
-			        <td style="padding: 5px; min-width: 100px;" class="text-left">
-			            <span class="grey-text" th:if="${root.organisationScope}">
-			                <b th:text="${root.organisationScope.undisclosed}"></b>
-			            </span>
-			        </td>
-			    </tr>
-			    <tr th:if="${root.organisationScope!=null and root.organisationScope.dataNotFound != null and root.organisationScope.dataNotFound != ''}">
-			        <td style="padding: 5px; min-width: 100px;" class="text-left">
-			            <span class="grey-text" th:if="${root.organisationScope}">
-			                <b th:text="${root.organisationScope.dataNotFound}"></b>
-			            </span>
-			        </td>
-			    </tr>
-			    <tr th:if="${root.organisationScope!=null and root.organisationScope.dNHDB != null and root.organisationScope.dNHDB != ''}">
-			        <td style="padding: 5px; min-width: 100px;" class="text-left">
-			            <span class="grey-text" th:if="${root.organisationScope}">
-			                <b th:text="${root.organisationScope.dNHDB}"></b>
-			            </span>
-			        </td>
-			    </tr>
-			    <tr th:if="${root.organisationScope!=null and root.organisationScope.tenureMismatch != null and root.organisationScope.tenureMismatch != ''}">
-			        <td style="padding: 5px; min-width: 100px;" class="text-left">
-			            <span class="grey-text" th:if="${root.organisationScope}">
-			                <b th:text="${root.organisationScope.tenureMismatch}"></b>
-			            </span>
-			        </td>
-			    </tr>
-			    <tr th:if="${root.organisationScope!=null and root.organisationScope.overseasEmployment != null and root.organisationScope.overseasEmployment != ''}">
-			        <td style="padding: 5px; min-width: 100px;" class="text-left">
-			            <span class="grey-text" th:if="${root.organisationScope}">
-			                <b th:text="${root.organisationScope.overseasEmployment}"></b>
-			            </span>
-			        </td>
-			    </tr>
-			    <tr th:if="${root.organisationScope!=null and root.organisationScope.others != null and root.organisationScope.others != ''}">
-			        <td style="padding: 5px; min-width: 100px;" class="text-left">
-			            <span class="grey-text" th:if="${root.organisationScope}">
-			                <b th:text="${root.organisationScope.others}"></b>
-			            </span>
-			        </td>
-			    </tr>
+				<tr th:each="remarkDto : ${root.qcRemarksDto}">
+					<td style="padding: 5px; min-width: 100px;" class="text-left">
+						<span class="grey-text">
+							<b th:text="${remarkDto.qcRemarks}"></b>
+						</span>
+					</td>
+				</tr>
 			</table>
-
+			</div>
 			<span class="line-break"></span>
 			<!--<table class="table-st">
 				<tr>
@@ -460,11 +485,27 @@ span {
                 <td class="grey-text text-left">
                     <span style="font-size: 12px" th:text="${epfo.candidateEmployerName}"></span>
                 </td>
-                <td class="grey-text text-center">
-                    <span style="font-size: 12px" th:text="${epfo.inputDateOfJoining != null ? #strings.replace(epfo.inputDateOfJoining, '/', '-') : ''}"></span>
+                <td class="grey-text text-center" th:if="${!#lists.contains(root.orgServices, 'EPFOEMPLOYEELOGIN')}">
+                    <span style="font-size: 12px" th:text="${epfo.inputDateOfJoining != null ? 
+                     (epfo.inputDateOfJoining != 'NOT_AVAILABLE' ? #strings.replace(#strings.substring(epfo.inputDateOfJoining, 3), '/', '-') : 
+                     'NOT_AVAILABLE') : ''}">
+                    </span>
                 </td>
-                <td class="grey-text text-center">
-                    <span style="font-size: 12px" th:text="${epfo.inputDateOfExit != null ? #strings.replace(epfo.inputDateOfExit, '/', '-') : ''}"></span>
+                <td class="grey-text text-center" th:if="${!#lists.contains(root.orgServices, 'EPFOEMPLOYEELOGIN')}">
+					<span style="font-size: 12px" th:text="${epfo.inputDateOfExit != null ? 
+                     (epfo.inputDateOfExit != 'NOT_AVAILABLE' ? #strings.replace(#strings.substring(epfo.inputDateOfExit, 3), '/', '-') : 
+                     'NOT_AVAILABLE') : ''}">
+                    </span>
+                </td>
+                <td class="grey-text text-center" th:if="${#lists.contains(root.orgServices, 'EPFOEMPLOYEELOGIN')}">
+                    
+                    <span th:if="epfo.serviceName != 'DNHDB' and epfo.serviceName != null and epfo.serviceName != ''" style="font-size: 12px" th:text="${epfo.inputDateOfJoining}"></span>
+                    <span th:if="epfo.serviceName == 'DNHDB' or epfo.serviceName == null or epfo.serviceName == ''" style="font-size: 12px" th:text="${#strings.substring(epfo.inputDateOfJoining, 3)}"></span>
+                </td>
+                <td class="grey-text text-center" th:if="${#lists.contains(root.orgServices, 'EPFOEMPLOYEELOGIN')}">
+					
+                     <span th:if="epfo.serviceName != 'DNHDB' and epfo.serviceName != null and epfo.serviceName != ''" style="font-size: 12px" th:text="${epfo.inputDateOfExit}"></span>
+                    <span th:if="epfo.serviceName == 'DNHDB' or epfo.serviceName == null or epfo.serviceName == ''" style="font-size: 12px" th:text="${#strings.substring(epfo.inputDateOfExit, 3)}"></span>
                 </td>
                 <td class="grey-text text-center">
                     <span style="font-size: 12px" th:text="${epfo.serviceName}"></span>
@@ -669,31 +710,37 @@ span {
 				    <td>NA</td><td>NA</td><td>NA</td><td>NA</td>
 				</tr>
 			</table>
-			 <!-- ADDING THE BELOW SECTION FOR REMITTANCE RECORDS-->
-    
-    <div th:if="${root.remittanceProofImagesData}">
+			
+	<!-- ADDING THE BELOW SECTION FOR REMITTANCE RECORDS-->		 
+	 <div th:if="${root.remittanceProofImagesData}">
 		<div style="page-break-after: always;">
 			<!-- content -->
 		</div>
-		<p class="td-heading text-center" style="color: #605f5f; font-size: 17px;">REMITANCE PROOF FOR OVERALL RESULT</p>
+<!--		<p class="td-heading text-center" style="color: #605f5f; font-size: 17px;">Remittance Proofs</p>
+-->		<p class="td-heading text-center" style="color: #605f5f; font-size: 17px;">REMITANCE PROOF FOR OVERALL RESULT</p>
 		<div th:each="image, iterStat : ${root.remittanceProofImagesData}" style="page-break-inside: avoid;">
-				<span style="font-size: 15px" class="grey-text" th:text="'Evidence ' + ${iterStat.count} + ':'"></span> 
-				<span
-					style="font-size: 10px"
-					th:text="${image.remark}" class="grey-text"></span>
-				<!--<span style="font-size: 15px" class="grey-text">Year: </span>
-				<span style="font-size: 10px"
-					th:text="${image.year}" class="grey-text"></span>  -->
-				<span class="line-break"></span>
+				<!--<span class="inline-block left output-data grey-text" style="font-size: 15px; float: left;" 
+				th:text="'Company: '+ ${image.company}+ '/' + ${image.memberId}"></span>--> 
+				<span class="inline-block left output-data grey-text" style="font-size: 15px; float: left;" 
+				th:text="'Evidence: '+ ${iterStat.index + 1}+ ' : ' + ${image.remark}"></span> 
+				<!--<span
+					style="margin-right: 300px; font-size: 10px"
+					th:text="${image.company}+ '/' + ${image.memberId}" class="grey-text"></span>-->
+				<!--<span th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}" style="font-size: 15px ; float: right;" class="inline-block left output-data grey-text"
+				 th:text="'Year: '+${image.year}"></span>-->
+				<!--<span style="font-size: 10px ; float: right;"
+					th:text="${image.year}" class="inline-block left output-data grey-text"></span>-->
+				<span class="line-break"></span><span class="line-break"></span>
 		
           <!-- <img th:src="'data:image/png;base64,' + ${#strings.toString(image.image)}" alt="Image" style="width: 200px; height: auto;"> -->
-          <img th:src="'data:image/png;base64,' + ${#strings.toString(image.image)}" alt="Image" style="width: 600px; height: auto;">
+          <img th:src="'data:image/png;base64,' + ${#strings.toString(image.image)}" alt="Image" style="width: 700px; height: auto;">
        
-       <span class="line-break"></span><span class="line-break"></span>
+          <span class="line-break"></span><span class="line-break"></span>
         </div>
     </div>		
     
-	<!-- ADDING THE BELOW SECTION FOR REMITTANCE RECORDS-->	
+	<!-- ADDING THE BELOW SECTION FOR REMITTANCE RECORDS-->
+			 
 		</section>
 	</body>
 </html>

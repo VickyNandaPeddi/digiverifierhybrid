@@ -2,6 +2,7 @@ package com.aashdit.digiverifier.config.superadmin.controller;
 
 import java.util.List;
 
+import com.aashdit.digiverifier.config.candidate.dto.ConventionalCandidateDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.aashdit.digiverifier.common.model.ServiceOutcome;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateReportDTO;
 import com.aashdit.digiverifier.config.superadmin.Enum.ReportType;
+import com.aashdit.digiverifier.config.superadmin.dto.CandidatePurgedReportResponseDto;
 import com.aashdit.digiverifier.config.superadmin.dto.DateRange;
 import com.aashdit.digiverifier.config.superadmin.dto.ReportSearchDto;
 import com.aashdit.digiverifier.config.superadmin.dto.VendorSearchDto;
@@ -61,12 +63,24 @@ public class ReportController {
 		ServiceOutcome<ReportSearchDto> svcSearchResult=  reportService.eKycReportData(reportSearchDto);
 		return new ResponseEntity<ServiceOutcome<ReportSearchDto>>(svcSearchResult, HttpStatus.OK);
 	}
-	
+
 	@GetMapping(value = "")
 	public ResponseEntity getReport(@RequestHeader("Authorization") String authorization,@RequestParam String candidateCode,@RequestParam
+		ReportType type,@RequestParam(name = "overrideReportStatus", required = false) String overrideReportStatus,
+		@RequestParam(name = "secondReport", required = false) Boolean secondReport) {
+		ServiceOutcome svcSearchResult = new ServiceOutcome();
+		ServiceOutcome<CandidateReportDTO> data = reportService.generateDocument(candidateCode, authorization, type,overrideReportStatus,secondReport);
+		svcSearchResult.setData(data.getMessage());
+		svcSearchResult.setStatus(data.getStatus());
+		svcSearchResult.setOutcome(data.getOutcome());
+		svcSearchResult.setMessage(String.valueOf(data.getData().getCandidate_reportType()));
+		return new ResponseEntity<ServiceOutcome<ReportSearchDto>>(svcSearchResult, HttpStatus.OK);
+	}
+	@GetMapping(value = "generateTechMConventional")
+	public ResponseEntity getTechmConvnetionalReport(@RequestHeader("Authorization") String authorization,@RequestParam String candidateCode,@RequestParam
 		ReportType type,@RequestParam(name = "overrideReportStatus", required = false) String overrideReportStatus) {
 		ServiceOutcome svcSearchResult = new ServiceOutcome();
-		ServiceOutcome<CandidateReportDTO> data = reportService.generateDocument(candidateCode, authorization, type,overrideReportStatus);
+		ServiceOutcome<ConventionalCandidateDTO> data = reportService.generateTechMConventionalDocument(candidateCode, authorization, type,overrideReportStatus,true);
 		svcSearchResult.setData(data.getMessage());
 		svcSearchResult.setStatus(data.getStatus());
 		svcSearchResult.setOutcome(data.getOutcome());
@@ -118,4 +132,32 @@ public class ReportController {
 	    public ResponseEntity<byte[]> downloadCandidateEmploymentReport(@RequestHeader("Authorization") String authorization,@RequestBody ReportSearchDto reportSearchDto) {
 	    	return reportService.downloadCandidateEmploymentReport(reportSearchDto);
 	    }
+	    
+		@Operation(summary ="Get Purged Candidate Details By Status")
+		@PostMapping("/getPurgedCanididateDetailsByStatus")
+		public ResponseEntity<ServiceOutcome<CandidatePurgedReportResponseDto>> getPurgedCanididateDetailsByStatus(@RequestHeader("Authorization") String authorization,@RequestBody ReportSearchDto reportSearchDto) {
+			ServiceOutcome<CandidatePurgedReportResponseDto> svcSearchResult=  reportService.getPurgedCanididateDetailsByStatus(reportSearchDto);
+			return new ResponseEntity<ServiceOutcome<CandidatePurgedReportResponseDto>>(svcSearchResult, HttpStatus.OK);
+		}
+
+		@Operation(summary ="Customer Utilization Report")
+		@RequestMapping(value = "/getCandidatePurgedReport", method = { RequestMethod.GET, RequestMethod.POST })
+		public ResponseEntity<ServiceOutcome<ReportSearchDto>> getCandidatePurgedReport(@RequestHeader("Authorization") String authorization,@RequestBody(required=false) ReportSearchDto reportSearchDto) {
+			ServiceOutcome<ReportSearchDto> svcSearchResult=  reportService.getCandidatePurgedReport(reportSearchDto);
+			return new ResponseEntity<ServiceOutcome<ReportSearchDto>>(svcSearchResult, HttpStatus.OK);
+		}
+		
+		@Operation(summary ="Customer Utilization Report")
+		@PostMapping("/getCandidatePurgedReportByAgent")
+		public ResponseEntity<ServiceOutcome<ReportSearchDto>> getCandidatePurgedReportByAgent(@RequestHeader("Authorization") String authorization,@RequestBody ReportSearchDto reportSearchDto) {
+			ServiceOutcome<ReportSearchDto> svcSearchResult=  reportService.getCandidatePurgedReportByAgent(reportSearchDto);
+			return new ResponseEntity<ServiceOutcome<ReportSearchDto>>(svcSearchResult, HttpStatus.OK);
+		}
+
+		@Operation(summary ="Customer Utilization Report Dashboard Counts")
+		@PostMapping(value = "/getCustomerUtilizationDashboardCounts")
+		public ResponseEntity<ServiceOutcome<ReportSearchDto>> getCustomerUtilizationDashboardCounts(@RequestHeader("Authorization") String authorization,@RequestBody(required=false) ReportSearchDto reportSearchDto) {
+			ServiceOutcome<ReportSearchDto> svcSearchResult=  reportService.getCustomerUtilizationDashboardCounts(reportSearchDto);
+			return new ResponseEntity<ServiceOutcome<ReportSearchDto>>(svcSearchResult, HttpStatus.OK);
+		}
 }

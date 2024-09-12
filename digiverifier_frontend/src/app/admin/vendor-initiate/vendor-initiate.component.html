@@ -304,7 +304,7 @@
 </form>
 <div class="col-md-12 mt-4 mb-4 text-center">
 
-  <button *ngIf="!hideAddCheckAndVendorTableAndInterimReportButton" type="button" [disabled]="!vendorProofDetails || !conventionalCandidate"
+  <button *ngIf="!hideAddCheckAndVendorTableAndInterimReportButton" type="button" [disabled]="!vendorProofDetails || (!conventionalCandidate && orgName !== 'TECHMAHINDRA LIMITED')"
     (click)="submitReportApproval(formReportApproval, 'CONVENTIONALINTERIM')" class="btn btn-primary">Generate
     Conventional Interim Report</button>
 
@@ -575,8 +575,8 @@
         </div>
       </div>
     </form>
-    <!-- ==== crimnal =====GlobalDatabasecheck========AddressStatus=======******************************************** -->
-    <form *ngIf="crimnal || GlobalDatabasecheck" [formGroup]="forAddressCrimnalGlobal"
+    <!-- ==== crimnal =====GlobalDatabasecheck========AddressStatus=======CreditCheck ======= referenceCheck====gapJustificationCheck******************************************** -->
+    <form *ngIf="crimnal || GlobalDatabasecheck || creditCheck || referenceCheck || gapJustificationCheck" [formGroup]="forAddressCrimnalGlobal"
       (ngSubmit)="submitAgentAttributes(forAddressCrimnalGlobal)">
       <input type="hidden" />
       <div class="row">
@@ -679,10 +679,10 @@
           </div>
         </div>
 
-        <input *ngIf="GlobalDatabasecheck" type="hidden" name="" id="" formControlName="type"
+        <input *ngIf="GlobalDatabasecheck || creditCheck || referenceCheck || gapJustificationCheck" type="hidden" name="" id="" formControlName="type"
           [(ngModel)]="globalCheckDefaultType">
 
-        <div class="col-md-3" *ngIf="!GlobalDatabasecheck">
+        <div class="col-md-3" *ngIf="!GlobalDatabasecheck && !creditCheck && !referenceCheck && !gapJustificationCheck">
           <div class="form-group">
             <label for="" class="required">Type</label>
             <!-- <h6>{{ vendoruser }}</h6> -->
@@ -1235,6 +1235,97 @@
         </div> -->
       </div>
 
+      <div class="col-md-12" *ngIf="idItemsCheckType && candidateDetails.candidate.organization.organizationName == 'TECHMAHINDRA LIMITED'">
+       
+        <div class="form-group" *ngIf="!idItemsPassportCheck">
+          <label for="" class="">{{idItemsPanORAadharORPassport}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'nameAsPerProof'" />
+        </div>
+
+        <div class="form-group" *ngIf="!idItemsPassportCheck">
+          <label for="" class="">{{idItemsPanORAadharORPassportRemarks}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'nameAsPerProofRemarks'" />
+        </div>
+
+        <div class="form-group">
+          <label for="" class="">{{idItemsProofName}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'proof'" />
+        </div>
+
+        <div class="form-group" *ngIf="!idItemsPassportCheck">
+          <label for="" class="">{{idItemsProofRemarks}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'proofRemarks'" />
+        </div>
+
+        <!-- <div class="form-group" *ngIf="!idItemsPassportCheck">
+          <label for="" class="">{{idItemsProofRemarks}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'proofRemarks'" />
+        </div> -->
+        
+
+        <div class="form-group">
+          <label for="" class="">{{idItemsDateOfBirth}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'dateOfBirth'" />
+        </div>
+
+        <div class="form-group">
+          <label for="" class="">{{idItemsDateOfBirthRemarks}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'dateOfBirthRemarks'" />
+        </div>
+
+        <div class="form-group">
+          <label for="" class="">{{idItemsModeOfVerification}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'modeOfVerification'" />
+        </div>
+
+        <div class="form-group">
+          <label for="" class="">{{idItemsVerifiedDate}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'verifiedDate'" />
+        </div>
+
+        <div class="form-group">
+          <label for="" class="">{{idItemsAdditionalComments}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'additionalComments'" />
+        </div>
+
+        <div class="form-group">
+          <label for="" class="">{{idItemsAnnexureDetails}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'annexureDetails'" />
+        </div>
+
+        <div class="form-group" *ngIf="idItemsPassportCheck">
+          <label for="" class="">{{idItemsDateOfIssue}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'dateOfIssue'" />
+        </div>
+
+        <div class="form-group" *ngIf="idItemsPassportCheck">
+          <label for="" class="">{{idItemsDateOfIssueRemarks}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'dateOfIssueRemarks'" />
+        </div>
+
+        <div class="form-group" *ngIf="idItemsPassportCheck">
+          <label for="" class="">{{idItemsDateOfExpiry}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'placeOfIssue'" />
+        </div>
+
+        <div class="form-group" *ngIf="idItemsPassportCheck">
+          <label for="" class="">{{idItemsPlaceOfIssueRemarks}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'placeOfIssueRemarks'" />
+        </div>
+
+        <div class="form-group" *ngIf="idItemsPassportCheck">
+          <label for="" class="">{{idItemsPlaceOfIssue}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'dateOfExpiry'" />
+        </div>
+
+        <div class="form-group" *ngIf="idItemsPassportCheck">
+          <label for="" class="">{{idItemsDateOfExpiryRemarks}}</label>
+          <input type="text" class="form-control form-control-sm" [formControlName]="'dateOfExpiryRemarks'" />
+        </div>
+
+      </div>
+
+      <div *ngIf="idItemsCheckType && candidateDetails.candidate.organization.organizationName != 'TECHMAHINDRA LIMITED'">
       <div class="col-md-12" *ngIf="idItemsCheckType">
         <div class="form-group">
           <label for="" class="">{{idItemsPanORAadharORPassport}}</label>
@@ -1262,6 +1353,8 @@
           <input type="text" class="form-control form-control-sm" [formControlName]="'fatherName'" />
         </div>
       </div>
+
+    </div>
 
       <div *ngIf="!globaldataBaseCheck && !idItemsCheckType">
 

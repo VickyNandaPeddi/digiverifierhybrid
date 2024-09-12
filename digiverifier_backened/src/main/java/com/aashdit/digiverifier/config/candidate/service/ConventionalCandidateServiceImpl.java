@@ -893,12 +893,20 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 					}
 					//end expire date update
 					if (conventionalCandidateStatus != null) {
-						Boolean result = emailSentTask.sendEmail(conventionalCandidateStatus.getCandidate().getCandidateCode(),
-								conventionalCandidateStatus.getCandidate().getCandidateName(),
-								conventionalCandidateStatus.getCandidate().getEmailId(),
-								conventionalCandidateStatus.getCandidate().getCcEmailId());
-						conventionalCandidateEmailStatus = conventionalCandidateEmailStatusRepository
-								.findByCandidateCandidateCode(conventionalCandidateStatus.getCandidate().getCandidateCode());
+						Long organizationId = conventionalCandidateStatus.getCandidate().getOrganization().getOrganizationId();
+						List<String> serviceSourceMasterByOrgId = serviceTypeConfigRepository.getServiceSourceMasterByOrgId(organizationId);
+						System.out.println("serviceSourceMasterByOrgId : "+serviceSourceMasterByOrgId.toString());
+						
+						Boolean result = false;
+						if(serviceSourceMasterByOrgId.contains("INVITATIONSENT")){
+//							System.out.println("Conventional InvitationSent");
+							 result = emailSentTask.sendEmail(conventionalCandidateStatus.getCandidate().getCandidateCode(),
+									conventionalCandidateStatus.getCandidate().getCandidateName(),
+									conventionalCandidateStatus.getCandidate().getEmailId(),
+									conventionalCandidateStatus.getCandidate().getCcEmailId());
+							conventionalCandidateEmailStatus = conventionalCandidateEmailStatusRepository
+									.findByCandidateCandidateCode(conventionalCandidateStatus.getCandidate().getCandidateCode());
+						}
 						if (conventionalCandidateEmailStatus == null) {
 							conventionalCandidateEmailStatus = new ConventionalCandidateEmailStatus();
 							conventionalCandidateEmailStatus.setCreatedBy(user);
@@ -908,7 +916,12 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 							conventionalCandidateEmailStatus.setLastUpdatedBy(user);
 							conventionalCandidateEmailStatus.setLastUpdatedOn(new Date());
 						}
-						if (result && candidateInvitationSentDto.getStatuscode().equalsIgnoreCase("CONVENTIONALINVITATIONSENT")) {
+						
+						if (!result) {
+							conventionalCandidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("CONVENTIONALNEWUPLOAD"));
+							conventionalCandidateEmailStatus.setDateOfEmailInvite(new Date());
+						}
+						else if (result && candidateInvitationSentDto.getStatuscode().equalsIgnoreCase("CONVENTIONALINVITATIONSENT")) {
 							log.info("ConventionalcandidateStatus Moved to : CONVENTIONALINVITATIONSENT => candidateId : "+conventionalCandidateStatus.getCandidate().getCandidateId());
 							conventionalCandidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("CONVENTIONALINVITATIONSENT"));
 							conventionalCandidateEmailStatus.setDateOfEmailInvite(new Date());
@@ -1288,6 +1301,8 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 							conventionalCandidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("CONVENTIONALINTERIMREPORT"));
 							conventionalCandidateStatus.setLastUpdatedOn(new Date());
 							conventionalCandidateStatus.setLastUpdatedBy(user);
+							conventionalCandidateStatus.setCreatedOn(new Date());
+							conventionalCandidateStatus.setCreatedBy(user);
 							conventionalCandidateStatusRepository.save(conventionalCandidateStatus);
 
 
@@ -1305,8 +1320,8 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 					if (candidateStatus.getStatusMaster().getStatusCode().equals("CONVENTIONALINTERIMREPORT")) {
 						ConventionalCandidateStatusHistory candidateStatusHistoryObj = conventionalCandidateStatusHistoryReposiory
 								.findLastStatusHistorytRecord(candidate.getCandidateId());
-						log.info("LAST STATUS HISTORY IS ::{}",
-								candidateStatusHistoryObj.getStatusMaster().getStatusCode());
+//						log.info("LAST STATUS HISTORY IS ::{}",
+//								candidateStatusHistoryObj.getStatusMaster().getStatusCode());
 						candidateStatusHistoryObj.setCreatedOn(new Date());
 						candidateStatusHistoryObj.setCandidateStatusChangeTimestamp(new Date());
 						conventionalCandidateStatusHistoryReposiory.save(candidateStatusHistoryObj);

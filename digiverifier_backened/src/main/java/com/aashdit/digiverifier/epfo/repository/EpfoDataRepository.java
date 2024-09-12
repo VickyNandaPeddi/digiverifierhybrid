@@ -19,6 +19,9 @@ public interface EpfoDataRepository extends JpaRepository<EpfoData,Long> {
 	
 	List<EpfoData> findAllByCandidateCandidateCode(String candidateCode);
 	
+	List<EpfoData> findAllByCandidateCandidateCodeOrderByDojDesc(String candidateCode);
+
+	
 	@Query(value ="SELECT name FROM t_dgv_candidate_epfo where candidate_id = ?1", nativeQuery = true)
 	List<EpfoDto> findAllByCandidateCandidateId(Long candidateId);
 	EpfoData  findByCandidateCandidateCode(String getCandidateCode);

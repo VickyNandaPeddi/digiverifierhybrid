@@ -75,7 +75,7 @@
                                     <label for="" class="col-md-12">New Password :</label>
                                     <div class="col-md-12">
                                         <input
-                                        type="{{ isPasswordVisibleNew ? 'text' : 'password' }}"                                          [class.error]="isPasswordInvalid()"
+                                        type="{{ isPasswordVisibleNew ? 'text' : 'password' }}" [class.error]="isPasswordInvalid()"
                                             [class.success]="isPasswordValid()" class="form-control form-control-sm"
                                             formControlName="password">
                                             <button class="eye-button" type="button" (click)="togglePasswordVisibilityNew()">
