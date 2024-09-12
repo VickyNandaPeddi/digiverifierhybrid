@@ -78,7 +78,8 @@ public class JwtFilter extends OncePerRequestFilter {
 		httpServletResponse.setHeader("Content-Security-Policy", "frame-ancestors 'self'");
 		httpServletResponse.setHeader("X-Xss-Protection", "1; mode=block");
 		httpServletResponse.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-		
+		httpServletResponse.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' https://trusted-scripts.com");
+
 		Boolean skipThis = false;
 		if (httpServletRequest.getRequestURI().contains("/api/login/authenticate")
 				|| httpServletRequest.getRequestURI().contains("/configuration/ui")
