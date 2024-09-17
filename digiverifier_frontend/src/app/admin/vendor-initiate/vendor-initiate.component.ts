@@ -1439,7 +1439,6 @@ export class VendorInitiateComponent implements OnInit {
         else {
           defaultValue = null; // or any other default value
         }
-        console.log(`Setting default value for "${ele}" to:`, defaultValue);
         return {
 
           label: ele,
@@ -2435,7 +2434,7 @@ export class VendorInitiateComponent implements OnInit {
             this.venderAttributeValue
           );
         });
-   
+
       }
       else{
       this.customers

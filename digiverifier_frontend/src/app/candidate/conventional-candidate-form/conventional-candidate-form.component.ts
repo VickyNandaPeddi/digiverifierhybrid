@@ -121,7 +121,6 @@ export class ConventionalCandidateFormComponent implements OnInit {
           this.agentAttributeListForm = this.conventionalCandidateCheck.map((ele: any) => {
             // let defaultValue;
             let defaultValue = ele === "Database" ? "NA" : ''; // Check if ele is "database", set defaultValue to "NA", otherwise empty string
-            console.log(`Setting default value for "${ele}" to:`, defaultValue);
             return {
 
               label: ele,
