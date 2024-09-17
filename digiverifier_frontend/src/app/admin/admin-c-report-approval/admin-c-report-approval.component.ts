@@ -450,6 +450,22 @@ export class AdminCReportApprovalComponent implements OnInit {
           '------------candidate-----------'
         );
         this.orgName = this.cApplicationFormDetails.candidate?.organization?.organizationName;
+        this.candidateService.getColors().subscribe((data1: any) => {
+          if(data1.data) {
+            this.getAllColor = data1.data;
+            console.log("this.orgName:{}",this.orgName);
+            if (this.orgName !== 'Infosys Limited') {
+              this.getAllColor = this.getAllColor.filter((temp: any) => temp.colorName !== 'Maroon' && temp.colorName !== 'Yellow');
+            }
+            this.getColors = this.getAllColor.filter((temp: any) => {
+              if(temp.colorName != 'Moonlighting' && temp.colorName != 'Out of Scope') {
+                return temp;
+              }
+            });
+            console.log(this.getColors, this.getAllColor);
+          }
+        });
+        
         this.appId=this.cApplicationFormDetails.candidate.applicantId;
         this.candidateName =
           this.cApplicationFormDetails.candidate.candidateName;
@@ -594,29 +610,7 @@ export class AdminCReportApprovalComponent implements OnInit {
                 inputDate.value = this.caseReinitiationDate; // Patching the value into the input field
               }
         }
-        this.candidateService.getColors().subscribe((data1: any) => {
-          if(data1.data) {
-            this.getAllColor = data1.data;
-            console.log("this.orgName:{}",this.orgName);
-            if (this.orgName !== 'Infosys Limted') {
-              this.getAllColor = this.getAllColor.filter((temp: any) => temp.colorName !== 'Maroon' && temp.colorName !== 'Yellow');
-            }
-            // if (this.orgName === 'Infosys Limted') {
-            //   this.getAllColor = this.getAllColor.map((temp: any) => {
-            //     if (temp.colorName === 'Amber') {
-            //       return { ...temp, colorName: 'Orange' , colorCode: 'ORANGE'};
-            //     }
-            //     return temp;
-            //   });
-            // }
-            this.getColors = this.getAllColor.filter((temp: any) => {
-              if(temp.colorName != 'Moonlighting' && temp.colorName != 'Out of Scope') {
-                return temp;
-              }
-            });
-            console.log(this.getColors, this.getAllColor);
-          }
-        });
+        
       });
 
     

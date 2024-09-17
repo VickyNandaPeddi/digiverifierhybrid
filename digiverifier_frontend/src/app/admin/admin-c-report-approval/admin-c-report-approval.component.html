@@ -1148,7 +1148,7 @@
                 <button *ngIf="this.getServiceConfigCodes.includes('EPFO')" type="button" (click)="enteruan()" class="btn btn-primary">Enter UAN</button>
                 <button type="button" (click)="initiatevendor()" class="btn btn-primary">Initiate vendor checks</button>
                 <button type="button"  (click)="submitReportApproval(formReportApproval, 'INTERIMREPORT')" class="btn btn-primary">Generate Interim Report</button>
-                <button *ngIf="reportStatus==='GREEN' && this.orgName === 'Infosys Limted'" type="button"  (click)="submitSecondReportApproval(formReportApproval, 'INTERIMREPORT')" class="btn btn-primary">Generate Interim Report Without Form26</button>
+                <button *ngIf="reportStatus==='GREEN' && this.orgName === 'Infosys Limited'" type="button"  (click)="submitSecondReportApproval(formReportApproval, 'INTERIMREPORT')" class="btn btn-primary">Generate Interim Report Without Form26</button>
                 <button type="button"  [disabled]="isCommentAdded"  (click)="submitReportApproval(formReportApproval, 'FINALREPORT')" class="btn btn-primary">Approve Report</button>
                 <!-- <button type="button" [disabled]="isCommentAdded"  (click)="submitReportApproval(formReportApproval, 'FINALREPORT')" class="btn btn-primary">Approve Report</button> -->
             </div>

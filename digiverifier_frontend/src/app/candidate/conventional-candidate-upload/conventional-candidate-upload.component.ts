@@ -434,9 +434,7 @@ while ((index = this.EmploymentEMP1DocTypeList.findIndex(item => item.key && ite
 
           let index2;
           while ((index2 = this.employmentSelectedFiles.findIndex(item => item.key && item.key === fullcheckName)) !== -1) {
-            console.warn(`Removing employmentSelectedFiles item at index ${index2}:`, this.employmentSelectedFiles[index]);
             this.employmentSelectedFiles.splice(index2, 1);
-            console.warn("List employmentEMP1SelectedFiles after removal:", this.employmentSelectedFiles);
           }
 
           console.log("Remove AFter============ File employmentEMP1SelectedFiles : ",this.employmentEMP1SelectedFiles)
