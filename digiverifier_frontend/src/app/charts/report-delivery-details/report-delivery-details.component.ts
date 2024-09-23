@@ -34,7 +34,10 @@ export class ReportDeliveryDetailsComponent implements OnInit {
   stat_linkAdminApproval: boolean = false;
   stat_linkCandidateReport: boolean = false;
   finalreport: boolean = false;
+  conventionalfinalreport: boolean=false;
+  conventionalSupplementaryReport: boolean=false;
   interimreport: boolean = false;
+  supplementaryReport: boolean = false;
   disablePreOfferForConventional: boolean = false;
   startdownload: boolean = false;
   Action: boolean = false;
@@ -657,8 +660,10 @@ conventionalSearch(){
           $(".dbtabheading").text("Conventional Final Report");
           this.stat_linkAdminApproval = false;
           this.stat_linkCandidateReport = false;
-          this.Action = false;
+          this.Action = true;
           this.finalreport = true;
+          this.conventionalfinalreport = true;
+          this.interimreport = false;
         } else if (this.getConventionalReportDeliveryStatCodes === "CONVENTIONALPROCESSDECLINED") {
           $(".dbtabheading").text("Conventional Process Declined");
           this.stat_linkAdminApproval = false;
@@ -672,6 +677,17 @@ conventionalSearch(){
           this.Action = true;
           this.finalreport = false;
           this.interimreport = false;
+          this.disablePreOfferForConventional = true;
+        }else if (this.getConventionalReportDeliveryStatCodes === "CONVENTIONALSUPPLEMENTARYREPORT") {
+          $(".dbtabheading").text("Conventional Supplementary Report");
+          this.stat_linkAdminApproval = true;
+          this.stat_linkCandidateReport = false;
+          this.Action = true;
+          this.finalreport = false;
+          this.interimreport = true;
+          this.conventionalfinalreport = true;
+          this.conventionalSupplementaryReport = true;
+          // this.supplementaryReport = true;
           this.disablePreOfferForConventional = true;
         }
         this.containerStat = true;
@@ -762,6 +778,33 @@ conventionalSearch(){
         // let index = this.CharReportDelivery[i].contentDTOList.findIndex((item: any)=> item.contentSubCategory.includes('INTERIM'));
         this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
         console.log('CONVENTIONALINTERIM', index)
+        this.startdownload = true
+
+      }
+    }else if (candidate.candidateStatusName == 'Conventional Final Report') {
+      for (let i = 0; i < this.CharReportDelivery.length; i++) {
+        let index = _.findIndex(this.CharReportDelivery[i].contentDTOList, { contentSubCategory: 'CONVENTIONALFINAL' });
+        // let index = this.CharReportDelivery[i].contentDTOList.findIndex((item: any)=> item.contentSubCategory.includes('INTERIM'));
+        this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
+        console.log('CONVENTIONALFINAL', index)
+        this.startdownload = true
+
+      }
+    }else if (candidate.candidateStatusName == 'Conventional Supplementary Report') {
+      console.log("reportType : ",reportType)
+      let strReportValue = '';
+      if(reportType == 'CONVENTIONALFINALREPORT'){
+        strReportValue = 'CONVENTIONALFINAL';
+      }else if(reportType == 'CONVENTIONALSUPPLEMENTARYREPORT'){
+        strReportValue = 'CONVENTIONALSUPPLEMENTARY';
+      }else if(reportType == 'CONVENTIONALINTERIM'){
+        strReportValue = 'CONVENTIONALINTERIM';
+      }
+      for (let i = 0; i < this.CharReportDelivery.length; i++) {
+        let index = _.findIndex(this.CharReportDelivery[i].contentDTOList, { contentSubCategory: strReportValue });
+        // let index = this.CharReportDelivery[i].contentDTOList.findIndex((item: any)=> item.contentSubCategory.includes('INTERIM'));
+        this.CharReportDelivery[i].pre_approval_content_id = (index != -1) ? this.CharReportDelivery[i].contentDTOList[index].contentId : -1;
+        console.log('CONVENTIONALSUPPLEMENTARY', index)
         this.startdownload = true
 
       }

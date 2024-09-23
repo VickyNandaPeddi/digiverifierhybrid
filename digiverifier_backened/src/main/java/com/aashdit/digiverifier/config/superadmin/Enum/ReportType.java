@@ -4,7 +4,9 @@ public enum ReportType {
 	PRE_OFFER("Pre Offer"),
 	INTERIM("Interim"),
 	FINAL("Final"),
-	CONVENTIONALINTERIM("conventionalInterim");
+	CONVENTIONALINTERIM("conventionalInterim"),
+	CONVENTIONALFINAL("conventionalFinal"),
+	CONVENTIONALSUPPLEMENTARY("conventionalSupplementary");
 	
 	public final String label;
 	

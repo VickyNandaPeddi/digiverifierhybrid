@@ -712,5 +712,12 @@ public class CandidateController {
         return new ResponseEntity<ServiceOutcome<String>>(svcSearchResult, HttpStatus.OK);
 
     }
+    
+    @PostMapping("saveConventionalReferenceData")
+    public ResponseEntity<ServiceOutcome<ConventionalReferenceDataDTO>> saveConventionalReferenceData(@RequestHeader("Authorization") String authorization,@RequestBody ConventionalReferenceDataDTO conventionalReferenceDto){
+    	        ServiceOutcome<ConventionalReferenceDataDTO> svcSearchResult = conventionalConventionalService.saveConventionalRefereneceData(conventionalReferenceDto);
+
+    	return new ResponseEntity<ServiceOutcome<ConventionalReferenceDataDTO>>(svcSearchResult, HttpStatus.OK);
+    }
 
 }

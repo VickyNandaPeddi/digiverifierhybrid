@@ -222,7 +222,7 @@
                                             <option value="true">Yes</option>
                                             <option value="false">No</option>
                                         </select> -->
-                                        <div class="checkbox">
+                                        <!-- <div class="checkbox">
                                             <span>
                                                 <label class="checkbox-label" for="accessToRelativesBillYes">Yes</label>
                                             </span>
@@ -235,6 +235,16 @@
                                             </span>
                                             <span>
                                                 <input type="checkbox" class="inputcheckbox" id="accessToRelativesBillNo" formControlName="accessToRelativesBill" [value]="false">
+                                            </span>
+                                        </div> -->
+                                        <div class="radio-group">
+                                            <span class="radio-item">
+                                                <input type="radio" class="inputradio" id="accessToRelativesBillYes" formControlName="accessToRelativesBill" [value]="true">
+                                                <label class="radio-label" for="accessToRelativesBillYes">Yes</label>
+                                            </span>
+                                            <span class="radio-item">
+                                                <input type="radio" class="inputradio" id="accessToRelativesBillNo" formControlName="accessToRelativesBill" [value]="false">
+                                                <label class="radio-label" for="accessToRelativesBillNo">No</label>
                                             </span>
                                         </div>
                                     </div>

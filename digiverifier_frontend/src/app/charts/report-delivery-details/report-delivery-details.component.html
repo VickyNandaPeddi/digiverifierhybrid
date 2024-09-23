@@ -63,6 +63,8 @@
         <th *ngIf="finalreport">Interim Report</th>
         <th *ngIf="finalreport">Final Report</th>
         <th *ngIf="interimreport">Interim Report</th>
+        <th *ngIf="conventionalfinalreport">Final Report</th>
+        <th *ngIf="conventionalSupplementaryReport">Supplementary Report</th>
         <th *ngIf="Action && (!this.getServiceConfigCodes.includes('PANTOUAN'))">Action</th>
         <th *ngIf="this.getServiceConfigCodes.includes('FORWARDREPORT') && interimreport"><input type="checkbox"
                                                                                                  (click)="selectAll($event)"></th>
@@ -137,17 +139,31 @@
                         (click)="downloadFinalReport(item, 'FINAL')" class="btn btn-sm btn-primary"
                         title="View Report"><i class="fas fa-eye"></i></button>
             </td>
+            
             <td *ngIf="interimreport">
                 <button type="button"
-                        *ngIf="item.candidateStatusName === 'Interim Report'  || item.candidateStatusName === 'Final Report'|| item.candidateStatusName === 'Conventional Interim Report'"
+                        *ngIf="item.candidateStatusName === 'Interim Report'  || item.candidateStatusName === 'Final Report'|| item.candidateStatusName === 'Conventional Interim Report' || item.candidateStatusName === 'Conventional Supplementary Report'"
                         (click)="downloadFinalReport(item, getConventionalReportDeliveryStatCodes ? 'CONVENTIONALINTERIM' : 'INTERIM')"
                         class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button>
                 <!-- <button type="button" *ngIf="item.candidateStatusName === 'Interim Report' || item.candidateStatusName === 'Final Report'|| item.candidateStatusName === 'Conventional Interim Report'" (click)="downloadInterimReport(item,null)" class="btn btn-sm btn-primary" title="View Report"><i class="fas fa-eye"></i></button> -->
             </td>
+
+            <td *ngIf="conventionalfinalreport">
+                <button type="button" *ngIf="item.candidateStatusName === 'Conventional Final Report' || item.candidateStatusName === 'Conventional Supplementary Report'"
+                        (click)="downloadFinalReport(item, getConventionalReportDeliveryStatCodes ? 'CONVENTIONALFINALREPORT' : 'FINAL')" class="btn btn-sm btn-primary"
+                        title="View Report"><i class="fas fa-eye"></i></button>
+            </td>
+
+            <td *ngIf="conventionalSupplementaryReport">
+                <button type="button" *ngIf="item.candidateStatusName === 'Conventional Supplementary Report'"
+                        (click)="downloadFinalReport(item, getConventionalReportDeliveryStatCodes ? 'CONVENTIONALSUPPLEMENTARYREPORT' : 'FINAL')" class="btn btn-sm btn-primary"
+                        title="View Report"><i class="fas fa-eye"></i></button>
+            </td>
+
             <td *ngIf="Action && (!this.getServiceConfigCodes.includes('PANTOUAN'))">
                 <!-- <td *ngIf="Action">    -->
                 <button type="button"
-                        *ngIf="item.conventionalCandidate && (item.candidateStatusName === 'Conventional QC Pending' || item.candidateStatusName === 'Conventional Interim Report' || item.candidateStatusName === 'Conventional Candidate Approve' || item.candidateStatusName === 'Pending Approval')"
+                        *ngIf="item.conventionalCandidate && (item.candidateStatusName === 'Conventional QC Pending' || item.candidateStatusName === 'Conventional Interim Report' || item.candidateStatusName === 'Conventional Candidate Approve' || item.candidateStatusName === 'Pending Approval' || item.candidateStatusName === 'Conventional Final Report' || item.candidateStatusName === 'Conventional Supplementary Report')"
                         (click)="initiatevendor(item.candidateId,item.candidateCode)" class="btn btn-primary btn-sm"
                         title="Edit">
                     <i class="fa fa-edit"></i>

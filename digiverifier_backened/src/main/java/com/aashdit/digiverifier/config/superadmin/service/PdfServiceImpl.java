@@ -8,6 +8,8 @@ import com.aashdit.digiverifier.globalConfig.EnvironmentVal;
 import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.events.Event;
@@ -17,13 +19,17 @@ import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.geom.Rectangle;
+import com.itextpdf.kernel.pdf.PdfAnnotationBorder;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.action.PdfAction;
 import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.annot.PdfLinkAnnotation;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvasConstants;
+import com.itextpdf.kernel.pdf.navigation.PdfExplicitDestination;
+import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.property.TextAlignment;
@@ -47,6 +53,8 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import java.io.*;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
@@ -198,13 +206,27 @@ public class PdfServiceImpl implements PdfService {
 
             // Add the FooterEventHelper to handle footer
 //            String address = "1234 Street, City, Country";
-            FooterEventHelper footerEventHelper = new FooterEventHelper();
-            pdfDocument.addEventHandler(PdfDocumentEvent.END_PAGE, footerEventHelper);
+//            FooterEventHelper footerEventHelper = new FooterEventHelper();
+//            pdfDocument.addEventHandler(PdfDocumentEvent.END_PAGE, footerEventHelper);
+//            Document document = new Document(pdfDocument);
 
-            System.out.println("pdfDocument :: "+pdfDocument);
 
             HtmlConverter.convertToPdf(htmlContent, outputStream);
-			byte[] pdfBytes = outputStream.toByteArray();
+            ByteArrayOutputStream outputStreamWithFooter = new ByteArrayOutputStream();
+            PdfReader pdfReader = new PdfReader(new ByteArrayInputStream(outputStream.toByteArray()));
+            PdfWriter pdfWriterWithFooter = new PdfWriter(outputStreamWithFooter);
+            PdfDocument pdfDocumentWithFooter = new PdfDocument(pdfReader, pdfWriterWithFooter);
+            
+            addFooterToAllPages(pdfDocumentWithFooter, "Registered Office: CROSSBOW Global Marketplace\r\n"
+            		+ "Solutions Private LimitedNo.18 & 18/1, Bikaner \r\n"
+            		+ "Signature Towers, RichmondRd, Bengaluru, Karnataka \r\n"
+            		+ "560025",pdfReader,pdfWriterWithFooter);
+
+//            document.close();  // This triggers the END_PAGE event handler
+
+            pdfDocumentWithFooter.close(); 
+			byte[] pdfBytes = outputStreamWithFooter.toByteArray();
+
 
 			// Create a File object and write the PDF bytes to it
 			File pdfFile = new File("report.pdf");
@@ -220,202 +242,138 @@ public class PdfServiceImpl implements PdfService {
 	}
 
 
+	private void addFooterToAllPages(PdfDocument pdfDocument, String address,PdfReader pdfReader,PdfWriter pdfWriter) {
+        int numberOfPages = pdfDocument.getNumberOfPages();
+        
+//        String logoUrl = "https://digiverifier-new.s3.ap-south-1.amazonaws.com/Assets/digiverifier_logo_1.png";
+//        InputStream imageStream = new URL("https://digiverifier-new.s3.ap-south-1.amazonaws.com/Assets/digiverifier_logo_1.png").openStream();
+        ImageData imageData = null;
+        float logoWidth = 0;
+        float logoHeight = 0;
+       
+		try {
+			imageData = ImageDataFactory.create("https://digiverifier-new.s3.ap-south-1.amazonaws.com/Assets/digiverifier_logo_1.png");
+			 logoWidth = imageData.getWidth();
+			 logoHeight = imageData.getHeight();
+		} catch (MalformedURLException e) {
+			log.info("PDF LOGO Exceptions : "+e);
 
+		}
 
-//    public File parseThymeleafTemplate(String techmConventional, ConventionalCandidateDTO variable) {
-//        try {
-//            // Configure Thymeleaf template resolver
-//            ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
-//            templateResolver.setTemplateMode(TemplateMode.HTML);
-//
-//            // Prepare Thymeleaf context with variables
-//            Context context = new Context();
-//            context.setVariable("panCardVerification", variable.getPanCardVerification());
-//            context.setVariable("name", variable.getName());
-//            context.setVariable("root", variable);
-//
-//            // Get the backend.host property value
-//            String backendHost = envirnoment.getBackendHost();
-//            System.out.println("BACKEND HOST::::" + backendHost);
-//
-//            // Determine the CSS path based on the backend.host value
-//            String cssPath;
-//            if ("localhost".equalsIgnoreCase(backendHost)) {
-//                cssPath = envirnoment.getCssPathLocal();
-//                System.out.println("CSSPATH::::" + cssPath);
-//            } else {
-//                cssPath = envirnoment.getCssPathServer();
-//                System.out.println("CSSPATH::::" + cssPath);
-//            }
-//
-//            // Add the CSS path variable to the Thymeleaf context
-//            context.setVariable("cssPath", cssPath);
-//
-//            // Process the template to generate HTML content
-//            String htmlContent = templateEngine.process(techmConventional, context);
-//
-//            // Convert HTML to PDF (using iText)
-//            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//            PdfWriter pdfWriter = new PdfWriter(outputStream);
-//            PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-//            Document document = new Document(pdfDocument);
-//            document.setMargins(5, 5, 50, 5); // Set margins (top, right, bottom, left)
-//
-//            // Convert HTML to PDF
-//            HtmlConverter.convertToPdf(htmlContent, outputStream);
-//
-//            byte[] pdfBytes = outputStream.toByteArray();
-//
-//            // Write the PDF bytes to a file
-//            File pdfFile = new File("report.pdf");
-//            try (FileOutputStream fos = new FileOutputStream(pdfFile)) {
-//                fos.write(pdfBytes);
-//            }
-//
-//            // Reopen the PDF to add the footer
-//            PdfReader pdfReader = new PdfReader("report.pdf");
-//            PdfWriter pdfFooterWriter = new PdfWriter("report_with_footer.pdf");
-//            PdfDocument pdfDocWithFooter = new PdfDocument(pdfReader, pdfFooterWriter);
-//
-//            int numberOfPages = pdfDocWithFooter.getNumberOfPages();
-//
-//            for (int i = 1; i <= numberOfPages; i++) {
-//                PdfPage page = pdfDocWithFooter.getPage(i);
-//                PdfCanvas pdfCanvas = new PdfCanvas(page);
-//                Rectangle pageSize = page.getPageSize();
-//
-//                // Add footer text on the left side
-//                pdfCanvas.beginText()
-//                        .setFontAndSize(PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD), 12)
-//                        .moveText(pageSize.getLeft() + 36, pageSize.getBottom() + 36) // Position for footer
-//                        .showText("Summary")
-//                        .endText();
-//                pdfCanvas.stroke();
-//            }
-//
-//            // Close the document with footer
-//            pdfDocWithFooter.close();
-//
-//            // Return the new file with the footer
-//            return new File("report_with_footer.pdf");
-//
-//        } catch (Exception e) {
-//            log.info("ERROR in GENERATING PDF ::{}", e);
-//        }
-//        return null;
-//    }
-}
-
-//
-// class FooterEventHandler implements IEventHandler {
-//
-//    @Override
-//    public void handleEvent(Event event) {
-//        // Cast the event to PdfDocumentEvent to access the PdfDocument and PdfPage
-//        PdfDocumentEvent pdfDocEvent = (PdfDocumentEvent) event;
-//        PdfDocument pdfDoc = pdfDocEvent.getDocument();
-//        PdfPage pdfPage = pdfDocEvent.getPage();
-//        PdfCanvas pdfCanvas = new PdfCanvas(pdfPage);
-//
-//        // Get the page size
-//        Rectangle pageSize = pdfPage.getPageSize();
-//
-//        // Add text to the footer on the left side
-//        try {
-//            pdfCanvas.beginText()
-//                    .setFontAndSize(PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD), 12)
-//                    .moveText(pageSize.getLeft() + 36, pageSize.getBottom() + 36) // Position for footer
-//                    .showText(" <a href=\"#summary-section\">Aadhar Verification</a>")
-//                    .endText();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//        pdfCanvas.stroke();
-//    }
-//}
-
-
-
- class FooterEventHelper implements IEventHandler {
-	 
-	 private final String address = "1234 Street, City, Country";
-//	    private final PdfFont font;
-//
-//	    public FooterEventHelper(String address) throws IOException {
-//	        this.address = address;
-//	        // Load a standard font (Helvetica)
-//	        this.font = PdfFontFactory.createFont("Helvetica");
-//	    }
-
-    @Override
-    public void handleEvent(Event event) {
-        if (event instanceof PdfDocumentEvent) {
-            PdfDocumentEvent docEvent = (PdfDocumentEvent) event;
-            PdfDocument pdfDoc = docEvent.getDocument();
-            PdfPage pdfPage = docEvent.getPage();
-
+        for (int i = 1; i <= numberOfPages; i++) {
+            PdfPage pdfPage = pdfDocument.getPage(i);
+            Rectangle pageSize = pdfPage.getPageSize();
             PdfCanvas pdfCanvas = new PdfCanvas(pdfPage);
+            
+            //LOGO SIZE
+            float targetWidth = 130f;  // Desired logo width
+            float targetHeight = 70f; // Desired logo height
+            Rectangle pageSize2 = pdfPage.getPageSize();
+            float xPosition = pageSize2.getRight() - targetWidth - 30;  // 20px padding from the right edge
+
+            float yPosition = pageSize2.getTop() - targetHeight + 10;  // 20px padding from the top edge
+
+            pdfCanvas.addImage(imageData, targetWidth, 0, 0, targetHeight, xPosition, yPosition);
+            
+            //LOGO SIZE
+            
+            float footerStartY = pageSize.getBottom() + 60; // Adjust this value as needed
+
+//            pdfCanvas.moveTo(pageSize.getLeft(), pageSize.getBottom() + 35) // Adjust Y coordinate as needed
+//            .lineTo(pageSize.getRight(), pageSize.getBottom() + 35) // Draw line across page
+//            .stroke();
+            
+            pdfCanvas.moveTo(pageSize.getLeft(), footerStartY - 5) // Line slightly above the footer
+            .lineTo(pageSize.getRight(), footerStartY - 5) // Draw line across the page
+            .stroke();
+
+            // Draw "Summary" on the left
             try {
-                PdfFont font = PdfFontFactory.createFont(StandardFonts.HELVETICA);
-                pdfCanvas.beginText().setFontAndSize(font, 12);
-                pdfCanvas.moveText(40, 30); // Adjust coordinates as needed
-                pdfCanvas.showText("Summaryyuf"); // Footer text
-                pdfCanvas.endText();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            	 float x = pageSize.getLeft() + 20;
+            	    float y = pageSize.getBottom() + 40;
+            	
+//            	float x = pageSize.getLeft() + 20;
+//                float y = pageSize.getBottom() + 100; // Adjusted Y to make sure it's not too close to the bottom
+
+
+
+//                pdfCanvas.beginText()
+//                .setFontAndSize(PdfFontFactory.createFont(StandardFonts.TIMES_ROMAN), 10)
+//                .moveText(x, y)
+////                .setFillColor(ColorConstants.BLUE)  // Set text color to blue
+//                .showText("Back to Summary")
+//                .endText();
+            	    
+            	    pdfCanvas.setFillColor(ColorConstants.BLUE)  // Set text color to blue
+                    .beginText()
+                    .setFontAndSize(PdfFontFactory.createFont(StandardFonts.TIMES_BOLD), 10)
+                    .moveText(x, y)
+                    .showText("Back to Summary")
+                    .endText();
+            	    
+//            	    float textWidth = PdfFontFactory.createFont(StandardFonts.TIMES_ROMAN).getWidth("Back to Summary");
+//            	    pdfCanvas.setStrokeColor(ColorConstants.BLUE)  // Set underline color to blue
+//            	             .setLineWidth(0.5f)  // Set underline thickness
+//            	             .moveTo(x, y - 2)  // Position the underline slightly below the text
+//            	             .lineTo(x + textWidth, y - 2)  // Extend the line to match the text width
+//            	             .stroke();
+//            	    
+            	    
+
+                
+                // Get the PdfPage object for page 2
+                PdfPage page2 = pdfDocument.getPage(2);
+
+                // Adjust the Rectangle to cover the text properly
+                Rectangle linkArea = new Rectangle(x, y - 3, 80, 10);  // Fine-tuned dimensions to cover the text
+
+//                Rectangle linkArea = new Rectangle(x, y - 10, textWidth, 10);  // Define clickable area
+
+                // Create a link annotation to navigate to page 2
+                PdfLinkAnnotation linkAnnotation = new PdfLinkAnnotation(linkArea);
+                PdfAction action = PdfAction.createGoTo(PdfExplicitDestination.createFit(page2));  // Navigate to page 2
+                linkAnnotation.setAction(action);
+
+                // Optionally set the border of the clickable area for visibility
+//                linkAnnotation.setBorder(new PdfAnnotationBorder(1, 1, 1));  // No visible border
+
+                // Add the link annotation to the last page
+                pdfPage.addAnnotation(linkAnnotation);
+	            
+				
+			} catch (IOException e) {
+				log.info("PDF text back to Summary : "+e);
+			}
+        
+            try {
+				pdfCanvas.beginText()
+				        .setFontAndSize(PdfFontFactory.createFont(StandardFonts.TIMES_ROMAN), 10)
+				        .moveText(pageSize.getWidth() / 2 - 20, pageSize.getBottom() + 40)
+				        .setFillColor(ColorConstants.BLACK)
+				        .showText(String.format("Page %d of %d", i, numberOfPages))
+				        .endText();
+			} catch (IOException e) {
+				log.info("PDF PageNumber exception : "+e);
+			}
+
+            // Draw the address on the right
+            try {
+            	pdfCanvas.beginText()
+                .setFontAndSize(PdfFontFactory.createFont(StandardFonts.TIMES_ROMAN), 8)  // Reduced font size to 8
+                .moveText(pageSize.getRight() - 200, pageSize.getBottom() + 40)  // Adjust the X and Y coordinates as needed
+                .showText("Registered Office: CROSSBOW Global Marketplace") // First line
+                .moveText(0, -10) // Move down 10 units for the next line
+                .showText("Solutions Private Limited")
+                .moveText(0, -10) // Move down another 10 units for the next line
+                .showText("No.18 & 18/1, Bikaner Signature Towers, Richmond Rd")
+                .moveText(0, -10) // Move down 10 units for the next line
+                .showText("Bengaluru, Karnataka 560025")
+                .endText();
+			} catch (IOException e) {
+				log.info("PDF Address Exception : "+e);
+			}
+
             pdfCanvas.release();
         }
-    }
-    
-	
-    public void handleEvent2(PdfDocumentEvent event) {
-        PdfDocument pdfDocument = event.getDocument();
-        PdfPage page = event.getPage();
-        int pageNumber = pdfDocument.getPageNumber(page);
-
-        // Create a PdfCanvas for drawing the footer
-        PdfCanvas pdfCanvas = new PdfCanvas(page.newContentStreamBefore(), page.getResources(), pdfDocument);
-
-        Rectangle pageSize = page.getPageSize();
-        float y = pageSize.getBottom() + 20;  // Position 20 units from the bottom
-
-        // Draw "Summary" on the left
-        try {
-			pdfCanvas.beginText()
-			        .setFontAndSize(PdfFontFactory.createFont("Helvetica"), 10)
-			        .moveText(pageSize.getLeft() + 20, y)
-			        .showText("Summary")
-			        .endText();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-        // Draw the page number in the center
-        try {
-			pdfCanvas.beginText()
-			        .setFontAndSize(PdfFontFactory.createFont("Helvetica"), 10)
-			        .moveText(pageSize.getWidth() / 2 - 20, y)
-			        .showText(String.format("Page %d of %d", pageNumber, pdfDocument.getNumberOfPages()))
-			        .endText();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-        // Draw the address on the right
-        try {
-			pdfCanvas.beginText()
-			        .setFontAndSize(PdfFontFactory.createFont("Helvetica"), 10)
-			        .moveText(pageSize.getRight() - 200, y)  // Adjust this value based on the address length
-			        .showText(address)
-			        .endText();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-        pdfCanvas.release();
     }
 }

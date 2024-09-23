@@ -7,6 +7,7 @@ import com.aashdit.digiverifier.config.candidate.model.Candidate;
 import com.aashdit.digiverifier.config.candidate.model.CandidateEmailStatus;
 import com.aashdit.digiverifier.config.candidate.model.CandidateIdItems;
 import com.aashdit.digiverifier.config.candidate.model.CandidateStatus;
+import com.aashdit.digiverifier.config.candidate.model.ConventionalCandidateStatus;
 import com.aashdit.digiverifier.config.candidate.model.OrganisationScope;
 import com.aashdit.digiverifier.epfo.dto.EpfoDataFromApiDto;
 import com.aashdit.digiverifier.epfo.remittance.dto.RemittanceDataFromApiDto;
@@ -35,6 +36,7 @@ public class CandidationApplicationFormDto {
 	private String candidateUan;
 	private Candidate candidate;
 	private CandidateStatus candidateStatus;
+	private ConventionalCandidateStatus conventionalCandidateStatus;
 	private List<CandidateIdItems> candidateIdItems;
 	private List<ExecutiveSummaryDto> executiveSummary;
 	private List<EmploymentDetailsDto> employmentDetails;
@@ -53,4 +55,5 @@ public class CandidationApplicationFormDto {
 	private Boolean isRemittancePresent;
 	private List<GstDataFromApiDto> gstImagesData;
 	private Date candidateReinitiatedDate;
+	private ConventionalReferenceDataDTO conventionalReferenceDataDTO;
 }

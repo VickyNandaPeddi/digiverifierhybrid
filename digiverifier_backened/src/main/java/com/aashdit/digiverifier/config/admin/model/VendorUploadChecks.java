@@ -83,5 +83,8 @@ public class VendorUploadChecks implements Serializable {
 
     @Column(name = "vendor_upload_document_path_key")
     private String vendorUploadDocumentPathKey;
+    
+    @Column(name = "conventional_qc_pending")
+    private Boolean conventionalQcPending;
 
 }

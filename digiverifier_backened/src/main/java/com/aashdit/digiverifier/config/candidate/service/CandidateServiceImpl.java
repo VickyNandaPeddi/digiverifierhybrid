@@ -101,6 +101,7 @@ import com.aashdit.digiverifier.config.admin.dto.VendorUploadChecksDto;
 import com.aashdit.digiverifier.config.admin.model.User;
 import com.aashdit.digiverifier.config.admin.model.VendorChecks;
 import com.aashdit.digiverifier.config.admin.model.VendorUploadChecks;
+import com.aashdit.digiverifier.config.admin.repository.ConventionalReferenceDataRepository;
 import com.aashdit.digiverifier.config.admin.repository.RoleRepository;
 import com.aashdit.digiverifier.config.admin.repository.UserRepository;
 import com.aashdit.digiverifier.config.admin.repository.VendorChecksRepository;
@@ -419,6 +420,9 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 	
 	@Autowired
 	private ConventionalCandidateEmailStatusRepository conventionalCandidateEmailStatusRepository;
+	
+	@Autowired
+	private ConventionalReferenceDataRepository conventionalReferenceDataRepository;
 	
 	
 	public ServiceOutcome<Boolean> updateCandidateOrganisationScope(OrganisationScope organisationScope) {
@@ -3663,14 +3667,29 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 								vendorChecksss.getVendorUploadedDocument(), vendorChecksss.getDocumentname(),
 								vendorChecksss.getAgentColor().getColorName(),
 								vendorChecksss.getAgentColor().getColorHexCode(), null, null,
-								vendorChecksss.getCreatedOn(),vendorChecksss.getVendorChecks().getSource(),vendorChecksss.getVendorAttirbuteValue(),vendorChecks.getCheckType(),vendorChecksss.getVendorUploadDocumentPathKey(),vendorChecksss.getVendorChecks().getVendorCheckStatusMaster().getCheckStatusName());
+								vendorChecksss.getCreatedOn(),vendorChecksss.getVendorChecks().getSource(),vendorChecksss.getVendorAttirbuteValue(),vendorChecks.getCheckType(),vendorChecksss.getVendorUploadDocumentPathKey(),vendorChecksss.getVendorChecks().getVendorCheckStatusMaster().getCheckStatusName(),vendorChecksss.getConventionalQcPending());
 						vendordocDtoList.add(vendorUploadChecksDto);
 
 					}
 					candidationApplicationFormDto.setVendorProofDetails(vendordocDtoList);
 
 				}
-
+				
+				//ConventionalReferenceDataDto
+				ConventionalReferenceData byCandidateId = conventionalReferenceDataRepository.findByCandidateId(candidate);
+				if(byCandidateId != null) {
+					ConventionalReferenceDataDTO conventionalReferenceDataDto = new ConventionalReferenceDataDTO();
+					conventionalReferenceDataDto.setCeaInitiationDate(byCandidateId.getCeaInitiationDate());
+					conventionalReferenceDataDto.setCeInsufficiency(byCandidateId.getCeInsufficiency());
+					conventionalReferenceDataDto.setDateOfJoining(byCandidateId.getDateOfJoining());
+					conventionalReferenceDataDto.setFresher(byCandidateId.getFresher());
+					conventionalReferenceDataDto.setReInitiationDate(byCandidateId.getReInitiationDate());
+					conventionalReferenceDataDto.setSupplementaryDate(byCandidateId.getSupplementaryDate());
+					conventionalReferenceDataDto.setDateOfBirth(byCandidateId.getDateOfBirth());
+					
+					candidationApplicationFormDto.setConventionalReferenceDataDTO(conventionalReferenceDataDto);
+				}
+				
 				List<Content> contentDetails = contentRepository.findAllByCandidateId(candidateId);
 				byte[] document;
 
@@ -3691,7 +3710,14 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				}
 
 				CandidateStatus candidateStatus = candidateStatusRepository.findByCandidateCandidateCode(candidateCode);
-				candidationApplicationFormDto.setCandidateStatus(candidateStatus);
+				if(candidateStatus != null) {
+					candidationApplicationFormDto.setCandidateStatus(candidateStatus);
+				}else {
+					ConventionalCandidateStatus byCandidateCandidateCode = conventionalCandidateStatusRepository.findByCandidateCandidateCode(candidateCode);
+					if(byCandidateCandidateCode != null) {				
+						candidationApplicationFormDto.setConventionalCandidateStatus(byCandidateCandidateCode);
+					}
+				}
 
 				List<CandidateIdItems> candidateIdItems = candidateIdItemsRepository
 						.findByCandidateCandidateCode(candidateCode);
@@ -9843,7 +9869,7 @@ private void updatePurgedStatusOfCandidate(StatusMaster statusMaster, String can
 					executorService.shutdown();
 				}else {
 					svcSearchResult.setOutcome(false);
-					svcSearchResult.setMessage("Something Went Wrong, Please check if file having invalid format of DOB or PAN Or Please Try ReUpload The Fresh File..");
+					svcSearchResult.setMessage("Something Went Wrong, Please check if file having invalid format of DOB (should be in dd/mm/yyyy) or Invalid PAN Or Please Try ReUpload The Fresh File..");
 					executorService.shutdown();
 				}
 
@@ -10159,82 +10185,86 @@ public ServiceOutcome<Boolean> reFetchPanToUANData(CandidateInvitationSentDto ca
 					log.info("Not processing reFetchPanToUANDat if UAN already present::{}",candidate.getUan());
 					candidateReferenceNoHaveUans.add(candidate.getCandidateCode());
 				}
-//				else {
-//					log.info("Processing reFetchPanToUANDat  if UAN not present for Candidate ::{}",candidate.getCandidateCode());
-//					HttpHeaders headers = new HttpHeaders();
-//					setHeaderDetails(headers);
-//					ResponseEntity<String> response = null;
-//					String tId = epfoServiceImpl.getEpfoTIDGeneral();
-//					int maxRetryCount = 3;
-//    				int retryCount = 0;
-//    				JSONObject batchJsonResponse = null;
-//    				
-//        			JSONObject request = new JSONObject();
-//    	            request.put("full_name", candidate.getCandidateName());
-//    	            request.put("pan_number", candidate.getPanNumber());
-//    	            String dob= candidate.getDateOfBirth();
-//    	            request.put("date_of_birth", dob.replace("-", "/"));
-//    	            log.info("reFetchPanToUANData Request FOR THE PanToUANS for candidate::{}{}",candidate.getCandidateCode(),request.toString());
-//    	            HttpEntity<String> entity1 = new HttpEntity<>(request.toString(), headers);
-//    	            try {
-//	    	           while (retryCount < maxRetryCount) {
-//		    	            response = restTemplate.exchange(
-//		    						epfoSecurityConfig.getEpfoPanToUanUrl()+"?txnid="+tId,HttpMethod.POST, entity1, String.class);
-//		    	            log.info("GOT RESPONSE FOR THE reFetchPanToUANData for candidate ::{}",response);
-//		    	            batchJsonResponse = new JSONObject(response.getBody());
-//		                    boolean success = batchJsonResponse.getBoolean("success");
-//		                    
-//		                    if(!success) {
-//		                    	retryCount++;
-//								
-//									log.info("Retry # {}" + retryCount);
-//									continue batchloop;
-//										
-//		                    }else {
-//		                    	String uan = batchJsonResponse.getString("message");
-//								boolean uanIsNumeric = StringUtils.isNumeric(uan);
-//		                    	if(uanIsNumeric) {
-//		                    	
-//		                    		candidate.setUan(uan);
-//		                    		candidateRepository.save(candidate);
-//		                    		
-//		                    		candidateReferenceNoHaveUans.add(candidate.getCandidateCode());
-//			                    }
-//								continue batchloop;
-//		                    }
-//            		    }
-//    	            }catch(HttpClientErrorException ce) {
-//    	            	log.warn("HttpClientErrorException in reFetchPanToUANData for :: {}" , candidate.getCandidateCode());
-//    	            	log.error("HttpClientErrorException is :: {}" , ce);
-//    	            }catch(HttpServerErrorException ce) {
-//    	            	
-//    	            	log.warn("HttpServerErrorException in reFetchPanToUANData for :: {}" , candidate.getCandidateCode());
-//    	            	log.error("HttpServerErrorException is :: {}" , ce);
-//	                }catch(Exception ce) {
-//    	            	
-//    	            	log.warn("General exception in reFetchPanToUANData for :: {}" , candidate.getCandidateCode());
-//    	            	log.error("General exception is :: {}" , ce);
-//	                }
-//				}
+				else {
+					log.info("Processing reFetchPanToUANDat  if UAN not present for Candidate ::{}",candidate.getCandidateCode());
+					HttpHeaders headers = new HttpHeaders();
+					setHeaderDetails(headers);
+					ResponseEntity<String> response = null;
+					String tId = epfoServiceImpl.getEpfoTIDGeneral();
+					int maxRetryCount = 3;
+    				int retryCount = 0;
+    				JSONObject batchJsonResponse = null;
+    				
+        			JSONObject request = new JSONObject();
+    	            request.put("full_name", candidate.getCandidateName());
+    	            request.put("pan_number", candidate.getPanNumber());
+    	            String dob= candidate.getDateOfBirth();
+    	            request.put("date_of_birth", dob.replace("-", "/"));
+    	            log.info("reFetchPanToUANData Request FOR THE PanToUANS for candidate::{}{}",candidate.getCandidateCode(),request.toString());
+    	            HttpEntity<String> entity1 = new HttpEntity<>(request.toString(), headers);
+    	            try {
+	    	           while (retryCount < maxRetryCount) {
+		    	            response = restTemplate.exchange(
+		    						epfoSecurityConfig.getEpfoPanToUanUrl()+"?txnid="+tId,HttpMethod.POST, entity1, String.class);
+		    	            log.info("GOT RESPONSE FOR THE reFetchPanToUANData for candidate ::{}",response);
+		    	            batchJsonResponse = new JSONObject(response.getBody());
+		                    boolean success = batchJsonResponse.getBoolean("success");
+		                    
+		                    if(!success) {
+		                    	retryCount++;
+								
+									log.info("Retry # {}" + retryCount);
+									continue batchloop;
+										
+		                    }else {
+		                    	String uan = batchJsonResponse.getString("message");
+								boolean uanIsNumeric = StringUtils.isNumeric(uan);
+		                    	if(uanIsNumeric) {
+		                    	
+		                    		candidate.setUan(uan);
+		                    		candidateRepository.save(candidate);
+		                    		
+		                    		candidateReferenceNoHaveUans.add(candidate.getCandidateCode());
+			                    }
+								continue batchloop;
+		                    }
+            		    }
+    	            }catch(HttpClientErrorException ce) {
+    	            	log.warn("HttpClientErrorException in reFetchPanToUANData for :: {}" , candidate.getCandidateCode());
+    	            	log.error("HttpClientErrorException is :: {}" , ce);
+    	            }catch(HttpServerErrorException ce) {
+    	            	
+    	            	log.warn("HttpServerErrorException in reFetchPanToUANData for :: {}" , candidate.getCandidateCode());
+    	            	log.error("HttpServerErrorException is :: {}" , ce);
+	                }catch(Exception ce) {
+    	            	
+    	            	log.warn("General exception in reFetchPanToUANData for :: {}" , candidate.getCandidateCode());
+    	            	log.error("General exception is :: {}" , ce);
+	                }
+				}
 			}
 			log.info("reFetchPanToUANData Operation Succeeded!! {}");
 
     		log.info("calling bulkUanRefetch FOR CANDIDATES After getting UAN from PANTOUAN API::{}",candidateReferenceNoHaveUans);
     		if(candidateReferenceNoHaveUans!=null && !candidateReferenceNoHaveUans.isEmpty()) {
         		candidateInvitationSentDto.setCandidateReferenceNo(candidateReferenceNoHaveUans);
-        		reFetchUANData(candidateInvitationSentDto);
-    			log.info("reFetchPanToUANData Operation and BulkUan operation Succeeded!! {}");
-    			svcSearchResult.setData(true);
-    			svcSearchResult.setOutcome(true);
-    			svcSearchResult.setMessage("ReFetch Completed Successfully.");
+        		ServiceOutcome<Boolean> uanServiceSearchResult = reFetchUANData(candidateInvitationSentDto);
+        		if(Boolean.TRUE.equals(uanServiceSearchResult.getData())) {
+        			log.info("reFetchPanToUANData Operation and BulkUan operation Succeeded!! {}");
+        			svcSearchResult.setData(true);
+        			svcSearchResult.setOutcome(true);
+        			svcSearchResult.setMessage("ReFetch Completed Successfully.");
+        		}else {
+        			svcSearchResult.setData(false);
+        			svcSearchResult.setOutcome(false);
+        			svcSearchResult.setMessage("ReFetch Failed..!");
+        		}
+    			
     		}else {
     			svcSearchResult.setData(false);
     			svcSearchResult.setOutcome(false);
-    			svcSearchResult.setMessage("No UANs Found To Fetch Records, Please Try Again..");
+    			svcSearchResult.setMessage("Failed To Fetch UAN Numbers, Please Check Pan Numbers OR Try Again..");
     		}
-			
-			
-			
 		}else {
 			svcSearchResult.setData(false);
 			svcSearchResult.setOutcome(false);

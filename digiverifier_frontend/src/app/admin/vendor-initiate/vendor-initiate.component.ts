@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators, FormArray, Form } from '@angular/forms';
 import { CustomerService } from '../../services/customer.service';
 import Swal from 'sweetalert2';
@@ -12,6 +12,7 @@ import { ReportDeliveryDetailsComponent } from 'src/app/charts/report-delivery-d
 import JSZip from 'jszip';
 import { OrgadminService } from 'src/app/services/orgadmin.service';
 import { any } from '@amcharts/amcharts4/.internal/core/utils/Array';
+import { CellComp } from 'ag-grid-community';
 
 @Component({
   selector: 'app-vendor-initiate',
@@ -51,6 +52,7 @@ export class VendorInitiateComponent implements OnInit {
   ofac: Boolean = false;
   creditCheck: boolean = false;
   gapJustificationCheck: boolean = false;
+  loaCheck: boolean = false;
   referenceCheck: boolean = false;
   public proofDocumentNew: any = File;
   public empexirdocument: any = File;
@@ -79,7 +81,8 @@ export class VendorInitiateComponent implements OnInit {
   globalCheckDefaultType: string = " ";
   form: FormGroup = new FormGroup({});
   vendorProof: any;
-
+  conventionalCandidateStatus: string = '';
+  conventionalFinalReportStatus:boolean = false;
   //Vendor related
 
   idItemsCheckType: boolean = false;
@@ -168,7 +171,8 @@ export class VendorInitiateComponent implements OnInit {
     vendorCheckStatusMasterId: new FormControl(''),
     roleAdmin: new FormControl(''),
     remarks: new FormControl('', [Validators.required]),
-    // fileInput: new FormControl('',Validators.required)
+    conventionalQcPending: new FormControl(''),
+        // fileInput: new FormControl('',Validators.required)
     legalProcedings: new FormGroup({
       civilProceedingsList: new FormArray([]),
       criminalProceedingsList: new FormArray([]),
@@ -359,6 +363,18 @@ export class VendorInitiateComponent implements OnInit {
     vendorcheckId: new FormControl('')
   })
 
+  referenceData = new FormGroup({
+    candidateCode: new FormControl('',Validators.required),
+    dateOfJoining: new FormControl(''),
+    fresher: new FormControl(''),
+    ceaInitiationDate: new FormControl(''),
+    ceInsufficiency: new FormControl(''),
+    reInitiationDate: new FormControl(''),
+    supplementaryDate: new FormControl(''),
+    supplementaryReportSLA: new FormControl(''),
+    dateOfBirth: new FormControl('')
+  })
+
 
 
   constructor(private customers: CustomerService, private router: ActivatedRoute, private fb: FormBuilder, public authService: AuthenticationService,
@@ -397,6 +413,8 @@ export class VendorInitiateComponent implements OnInit {
       .getCandidateFormData_admin(this.candidateCode)
       .subscribe((data: any) => {
         this.candidateDetails = data.data;
+        this.conventionalCandidateStatus = this.candidateDetails.conventionalCandidateStatus.statusMaster.statusCode
+     
         this.conventionalCandidate = this.candidateDetails.candidate.conventionalCandidate;
         this.orgName = this.candidateDetails.candidate.organization.organizationName
         console.warn("this.orgName : ", this.orgName)
@@ -421,11 +439,27 @@ export class VendorInitiateComponent implements OnInit {
         }
         this.candidateName = this.candidateDetails.candidate.candidateName;
         this.appId = this.candidateDetails.candidate.applicantId;
-        console.log(this.candidateDetails)
+
         // console.warn("CandidateDOB:::",this.candidateDOB)
         // console.warn("candidateAddress:::",this.candidateAddress)
         // console.warn("candidateFatherName:::",this.candidateFatherName)
         // console.warn("candidateGender:::",this.candidateGender)
+
+       
+       if(this.candidateDetails.conventionalReferenceDataDTO){
+        this.referenceData.patchValue({
+          // candidateCode: this.candidateDetails.conventionalReferenceDataDTO.candidateCode,
+          dateOfJoining: this.candidateDetails.conventionalReferenceDataDTO.dateOfJoining,
+          fresher: this.candidateDetails.conventionalReferenceDataDTO.fresher,
+          ceaInitiationDate: this.candidateDetails.conventionalReferenceDataDTO.ceaInitiationDate,
+          ceInsufficiency: this.candidateDetails.conventionalReferenceDataDTO.ceInsufficiency,
+          reInitiationDate: this.candidateDetails.conventionalReferenceDataDTO.reInitiationDate,
+          supplementaryDate: this.candidateDetails.conventionalReferenceDataDTO.supplementaryDate,
+          // supplementaryReportSLA: this.candidateDetails.conventionalReferenceDataDTO.SupplementaryReportSLA
+          dateOfBirth: this.candidateDetails.conventionalReferenceDataDTO.dateOfBirth,
+
+        });
+       }
 
       });
 
@@ -1387,6 +1421,21 @@ export class VendorInitiateComponent implements OnInit {
         this.referenceCheck = true;
         this.gapJustificationCheck = false;
 
+      }
+      if ((correspondingSourceName && correspondingSourceName.toLowerCase().trim().includes("loa") || (this.sourceid == "91"))) {
+        this.ofac = true;
+        this.PhysicalVisit = false;
+        this.DrugTest = false;
+        this.Employments = false;
+        this.education = false;
+        this.GlobalDatabasecheck = false;
+        this.Address = false;
+        this.IDItems = false;
+        this.crimnal = false;
+        this.creditCheck = false;
+        this.referenceCheck = false;
+        this.gapJustificationCheck = false;
+        this.loaCheck = true;
       }
       // if(this.sourceid == "25"){
       //   this.DrugTest=false;
@@ -2434,7 +2483,7 @@ export class VendorInitiateComponent implements OnInit {
             this.venderAttributeValue
           );
         });
-
+   
       }
       else{
       this.customers
@@ -2516,7 +2565,8 @@ export class VendorInitiateComponent implements OnInit {
         documentname: documentname,
         vendorcheckId: vendorcheckId,
         colorid: this.colorid,
-        roleAdmin: true
+        roleAdmin: true,
+        conventionalQcPending:true
 
       });
   }
@@ -2916,7 +2966,7 @@ export class VendorInitiateComponent implements OnInit {
                   console.warn("this.candidateDetails.candidate.candidateCode>>", this.candidateDetails.candidate.candidateCode)
                   if (this.candidateDetails.candidate.organization.organizationName == "TECHMAHINDRA LIMITED") {
                     console.log("TECHM IS TRUE : ")
-                    this.orgAdmin.getConventionalTechMReportByCandidateCode(this.candidateDetails.candidate.candidateCode, this.reportStatus, this.conventionalReport).subscribe((url: any) => {
+                    this.orgAdmin.getConventionalTechMReportByCandidateCode(this.candidateDetails.candidate.candidateCode,reportType, this.conventionalReport).subscribe((url: any) => {
                       // console.warn("url : "+url)
                       window.open(url.data, '_blank');
                     });
@@ -2929,8 +2979,37 @@ export class VendorInitiateComponent implements OnInit {
                 }
 
               } else {
-                console.log("showing the FINAL report ::");
-                this.reportDeliveryDetailsComponent.downloadFinalReportDirectFromQC(this.candidateDetails.candidate, this.reportStatus);
+                // this.reportDeliveryDetailsComponent.downloadFinalReportDirectFromQC(this.candidateDetails.candidate, this.reportStatus);
+                if (reportType == 'CONVENTIONALSUPPLEMENTARY') {
+                  console.log("showing the Supplementary report ::");
+                  if (this.candidateDetails.candidate.organization.organizationName == "TECHMAHINDRA LIMITED") {
+                    console.log("TECHM IS TRUE : ")
+                    this.orgAdmin.getConventionalTechMReportByCandidateCodeFinalReport(this.candidateDetails.candidate.candidateCode,reportType, this.conventionalReport).subscribe((url: any) => {
+                      // console.warn("url : "+url)
+                      window.open(url.data, '_blank');
+                    });
+                  }else{
+                    this.orgAdmin.getConventionalReportByCandidateCode(this.candidateDetails.candidate.candidateCode,this.reportStatus, this.conventionalReport).subscribe((url: any) => {
+                      // console.warn("url : "+url)
+                      window.open(url.data, '_blank');
+                    });
+                  }
+
+                }else{
+                  console.log("showing the FINAL report ::");
+                  if (this.candidateDetails.candidate.organization.organizationName == "TECHMAHINDRA LIMITED") {
+                    console.log("TECHM IS TRUE : ")
+                    this.orgAdmin.getConventionalTechMReportByCandidateCodeFinalReport(this.candidateDetails.candidate.candidateCode, reportType, this.conventionalReport).subscribe((url: any) => {
+                      // console.warn("url : "+url)
+                      window.open(url.data, '_blank');
+                    });
+                  }else{
+                    this.orgAdmin.getConventionalReportByCandidateCode(this.candidateDetails.candidate.candidateCode, this.reportStatus, this.conventionalReport).subscribe((url: any) => {
+                      // console.warn("url : "+url)
+                      window.open(url.data, '_blank');
+                    });
+                  }
+                }
                 // const navURL = 'admin/cFinalReport/' + this.candidateCode;
                 // this.navRouter.navigate([navURL]);
               }
@@ -3251,6 +3330,45 @@ export class VendorInitiateComponent implements OnInit {
   //   }
   //   return {};
   // }
+
+
+  addReferenceData(addReferenceData:any,candidateCode:any){
+
+    console.warn("fhsvfv")
+    this.modalService.open(addReferenceData, {
+      centered: true,
+      backdrop: 'static'
+     });
+
+  }
+
+  onSubmitReferenceData(referenceData:any){
+    this.referenceData.patchValue({
+      candidateCode: this.candidateCode
+    })
+
+    console.warn("reference Data : ",this.referenceData.value)
+
+    this.orgAdmin.conventionalReferenceData(this.referenceData.value).subscribe((result: any) => {
+      if (result.outcome === true) {
+        Swal.fire({
+          title: result.message,
+          icon: 'success',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.reload();
+          }
+        });
+      } else {
+        Swal.fire({
+          title: result.message,
+          icon: 'warning',
+        });
+      }
+    });
+
+
+  }
 
 
 }

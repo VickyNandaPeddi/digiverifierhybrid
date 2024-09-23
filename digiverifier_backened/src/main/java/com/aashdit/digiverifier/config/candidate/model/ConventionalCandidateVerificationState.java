@@ -70,6 +70,9 @@ public class ConventionalCandidateVerificationState {
 	
 	@Column(name = "interim_report_amended_time")
 	private ZonedDateTime interimReportAmendedTime;
+	
+	@Column(name = "supplementary_report_time")
+	private ZonedDateTime supplementaryReport;
 
 
 }

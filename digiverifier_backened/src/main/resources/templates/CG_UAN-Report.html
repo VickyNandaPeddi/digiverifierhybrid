@@ -443,6 +443,83 @@ span {
 			<!-- Assuming this code is within a Thymeleaf template -->
 <!-- Assuming root.epfoDetailsForMultiUAN is a list of objects with properties: epfoName1, uanNo1 -->
 
+					<!--
+					<p class="td-heading text-center" style="color: black; font-family: 'Arial Black'; font-size: 17px; font-weight: bold;"
+		th:if="${#strings.equalsIgnoreCase(root.project, 'LTIMindtree')}">EXECUTIVE SUMMARY</p>-->
+		<div th:if="${root.organizationName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'}">
+				<table class="table-st" border="0" style="page-break-inside: avoid;">
+			<tr>
+				<td colspan="6" class="text-center blue-bg "><span
+					class="td-heading" style="color: whitesmoke;"><b>Section
+							ⅠⅠ: Employment Verification </b> </span></td>
+			</tr>
+			<tr class="text-center">
+				<td
+					style="width: 5%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
+					class="white-text text-center">S.No</span></td>
+				<td
+					style="width: 40%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
+					class="white-text text-center">Employers</span></td>
+				<td
+					style="width: 25%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
+					class="white-text text-center">Input Tenure</span></td>
+				<td
+					style="width: 25%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
+					class="white-text text-center">Output Tenure</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
+					class="white-text text-center">Source</span></td>
+				<td
+					style="width: 10%; padding: 5px; font-weight: bold; background-color: #DDDDDD;"><span
+					class="white-text text-center">Result</span></td>
+			</tr>
+			<tr class="text-center"
+				th:each="employmentTenureVerification,stat: ${root.employmentTenureVerificationDtoList}">
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${stat.index + 1}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px" th:unless="${employmentTenureVerification.undisclosed}"
+					th:text="${employmentTenureVerification.employerName}"></span>
+					<span style="font-size: 12px" th:if="${employmentTenureVerification.undisclosed}">UNDISCLOSED</span>
+				</td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentTenureVerification.input}"></span></td>
+				<td class="grey-text text-center"><span style="font-size: 12px"
+					th:text="${employmentTenureVerification.output}"></span></td>
+				<td class="grey-text text-center"><span th:if="${employmentTenureVerification.secondarySource == null}" style="font-size: 12px"
+					th:text="${employmentTenureVerification.source}"></span>
+				
+					<span style="font-size: 12px" th:if="${employmentTenureVerification.secondarySource != null}"
+				          th:text="${employmentTenureVerification.secondarySource} + ', ' + ${employmentTenureVerification.source}"></span>					
+				</td>
+				<td th:if="${!#strings.equalsIgnoreCase(root.project, 'Wipro')}"
+					th:switch="${employmentTenureVerification.verificationStatus.name()}">
+					<span class="green-status" th:case="'GREEN'">GREEN</span> <span
+					class="amber-status" th:case="'AMBER'">AMBER</span> <span
+					class="red-status" th:case="'RED'">RED</span>
+					<span class="red-status" th:case="'MOONLIGHTING'">MOONLIGHTING</span> 
+					<span class="grey-text" th:case="'OUTOFSCOPE'">OUT OF SCOPE</span>
+					<span class="invalid-status" style="font-size: 12px" th:case="*">INVALID</span>
+				</td>
+
+				<td th:if="${#strings.equalsIgnoreCase(root.project, 'Wipro')}"
+					th:switch="${employmentTenureVerification.verificationStatus.name()}">
+					<span class="red-status" th:case="'RED'">RED</span> <span
+					class="green-status" th:case="'GREEN'">GREEN</span> <span
+					class="invalid-status" th:case="'AMBER'">DRAFT</span> 
+					<span class="amber-status" th:case="'MOONLIGHTING'">MOONLIGHTING</span> 
+					<span class="grey-text" th:case="'OUTOFSCOPE'">OUT OF SCOPE</span>
+					<span class="invalid-status" style="font-size: 12px" th:case="*">INVALID</span>
+				</td>
+
+			</tr>
+		</table>
+						<span class="line-break"></span><span class="line-break"></span>		
+		</div>
+
+
+
+
+
 <div th:each="epfoDetails, index: ${root.epfoDetailsForMultiUAN}">
     <span class="inline-block left output-data grey-text" style="float: left;" th:if="${epfoDetails != null}"
         th:text="'Candidate: ' + ${epfoDetails.epfoName1}"></span>

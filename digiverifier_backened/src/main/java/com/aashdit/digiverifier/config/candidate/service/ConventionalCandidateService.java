@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.aashdit.digiverifier.common.model.ServiceOutcome;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateDetailsDto;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateInvitationSentDto;
+import com.aashdit.digiverifier.config.candidate.dto.ConventionalReferenceDataDTO;
 import com.aashdit.digiverifier.config.candidate.dto.SearchAllCandidateDTO;
 import com.aashdit.digiverifier.config.candidate.model.CandidateStatus;
 import com.aashdit.digiverifier.config.candidate.model.CandidateStatusHistory;
@@ -54,7 +55,7 @@ public interface ConventionalCandidateService {
 	
 	ServiceOutcome<?> clientApproval(String vendorCheckID);
 
-
+	ServiceOutcome<ConventionalReferenceDataDTO> saveConventionalRefereneceData(ConventionalReferenceDataDTO conventionalReferenceDataDTO);
 
 
 }

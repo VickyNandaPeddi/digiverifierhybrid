@@ -33,6 +33,7 @@ public class VendorUploadChecksDto {
 	private String checkType;
 	private String documentPathkey;
 	private String checkStatus;
+	private Boolean conventionalQcPending;
 
 
 	

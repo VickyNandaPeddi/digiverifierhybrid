@@ -95,6 +95,8 @@ private String applicantId;
 	private String dateOfIssueRemarks;
 	private String placeOfIssueRemarks;
 	private String dateOfExpiryRemarks;
+	private boolean conventionalQcPending; 
+
 	
 
 	// private Long VendorCheckStatusId;

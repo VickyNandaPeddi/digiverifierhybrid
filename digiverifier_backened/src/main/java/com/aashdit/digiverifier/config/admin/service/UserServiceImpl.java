@@ -2282,6 +2282,7 @@ public class UserServiceImpl implements UserService {
 						log.info("agentAttributeList@@@@@@@@@@@@@@@@@>" + venderAttributeList);
 //	                 Set the vendorAttirbuteValue field in vendorChecks
 						vendorChecks.setVendorAttirbuteValue(venderAttributeList);
+						vendorChecks.setConventionalQcPending(vendorcheckdashbordtDto.isConventionalQcPending());
 						svcSearchResult.setMessage("Vendor checks document updated successfully.");
 						// vendorChecks.setVendorCheckStatusMaster(vendorCheckStatusMasterRepository.findById(vendorcheckdashbordtDto.getVendorCheckStatusMasterId()).get());
 						result = vendorUploadChecksRepository.save(vendorChecks);

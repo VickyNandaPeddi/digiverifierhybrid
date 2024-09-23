@@ -1097,7 +1097,6 @@ export class ConventionalCandidateFormComponent implements OnInit {
 
                 // Set the input element's files to the combined list
                 educationInput.files = totalCount > 0 ? remainingEducationFiles.files : null;
-                // console.log(`Total files count: ${totalCount}`);
               }
               // console.warn("zip file converted : ")
               zip.file(file.file.name, file.file);
@@ -1153,7 +1152,6 @@ export class ConventionalCandidateFormComponent implements OnInit {
 
                 // Set the input element's files to the combined list
                 employmentInput.files = totalCount > 0 ? remainingEmploymentFiles.files : null;
-                console.log(`Total files count: ${totalCount}`);
               }
               console.warn("zip file converted : ")
               zip.file(file.file.name, file.file);
@@ -1202,7 +1200,6 @@ export class ConventionalCandidateFormComponent implements OnInit {
 
                 // Set the input element's files to the combined list
                 criminalInput.files = totalCount > 0 ? remainingCriminalFiles.files : null;
-                // console.log(`Total files count: ${totalCount}`);
               }
               // console.warn("zip file converted : ")
               zip.file(file.file.name, file.file);
@@ -1251,7 +1248,6 @@ export class ConventionalCandidateFormComponent implements OnInit {
 
                 // Set the input element's files to the combined list
                 idInput.files = totalCount > 0 ? remainingIdFiles.files : null;
-                // console.log(`Total files count: ${totalCount}`);
               }
               console.warn("zip file converted : ")
               zip.file(file.file.name, file.file);
@@ -1289,7 +1285,6 @@ export class ConventionalCandidateFormComponent implements OnInit {
 
                 // Set the input element's files to the combined list
                 databaseInput.files = totalCount > 0 ? remainingDatabaseFiles.files : null;
-                // console.log(`Total files count: ${totalCount}`);
               }
               console.warn("zip file converted : ")
               zip.file(file.name, file.file);
@@ -2320,7 +2315,6 @@ export class ConventionalCandidateFormComponent implements OnInit {
     const mergedString = Object.values(mergedObject).join(', ');
     // const mergedString = `{${Object.values(mergedObject).join(', ')}}`;
 
-    // console.log(`{${mergedString}}`);
     // console.log(mergedObject);
 
     const jsonArrayString = JSON.stringify(jsonArray);

@@ -13,5 +13,6 @@ public class CheckAttributeAndValueDTO {
 	private String checkStatus;
 	private String checkRemarks;
 	private String checkDetails;
+	private Boolean conventionalQcPending;
 
 }

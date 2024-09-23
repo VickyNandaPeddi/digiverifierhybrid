@@ -58,11 +58,13 @@ import com.aashdit.digiverifier.common.service.ContentService;
 import com.aashdit.digiverifier.common.util.RandomString;
 import com.aashdit.digiverifier.config.admin.model.User;
 import com.aashdit.digiverifier.config.admin.model.VendorChecks;
+import com.aashdit.digiverifier.config.admin.repository.ConventionalReferenceDataRepository;
 import com.aashdit.digiverifier.config.admin.repository.UserRepository;
 import com.aashdit.digiverifier.config.admin.repository.VendorChecksRepository;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateDetailsDto;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateInvitationSentDto;
 import com.aashdit.digiverifier.config.candidate.dto.CandidateStatusCountDto;
+import com.aashdit.digiverifier.config.candidate.dto.ConventionalReferenceDataDTO;
 import com.aashdit.digiverifier.config.candidate.dto.SearchAllCandidateDTO;
 import com.aashdit.digiverifier.config.candidate.model.Candidate;
 import com.aashdit.digiverifier.config.candidate.model.CandidateCaseDetails;
@@ -75,6 +77,7 @@ import com.aashdit.digiverifier.config.candidate.model.ConventionalCandidateEmai
 import com.aashdit.digiverifier.config.candidate.model.ConventionalCandidateStatus;
 import com.aashdit.digiverifier.config.candidate.model.ConventionalCandidateStatusHistory;
 import com.aashdit.digiverifier.config.candidate.model.ConventionalCandidateVerificationState;
+import com.aashdit.digiverifier.config.candidate.model.ConventionalReferenceData;
 import com.aashdit.digiverifier.config.candidate.model.StatusMaster;
 import com.aashdit.digiverifier.config.candidate.repository.CandidateEmailStatusRepository;
 import com.aashdit.digiverifier.config.candidate.repository.CandidateRepository;
@@ -200,6 +203,8 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 	@Autowired
 	private CandidateStatusRepository candidateStatusRepository;
 
+	@Autowired
+	private ConventionalReferenceDataRepository conventionalReferenceDataRepository;
 	
 	@Override
 	public void setMessageSource(MessageSource messageSource) {
@@ -448,6 +453,7 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 				int conventionalPendingCount = 0;
 				int conventionalInterimReport = 0;
 				int conventionalApprovedCount = 0;
+				int conventionalSupplementaryCount = 0;
 				List<Object[]> activityList = getConventionalCountsForDashboard(strToDate, strFromDate, dashboardDto.getUserId());
 				for (Object[] activity : activityList) {
 					//				"select newupload,invalid,reinvites,interReport,finalReport,cancelled,invExpired,pendingNow\n");
@@ -459,6 +465,8 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 					conventionalPendingCount = Integer.parseInt(activity[7].toString());
 					conventionalInterimReport = Integer.parseInt(activity[3].toString());
 					conventionalApprovedCount = Integer.parseInt(activity[8].toString());
+					conventionalSupplementaryCount = Integer.parseInt(activity[9].toString());
+
 
 //					log.info("conventionalPendingCount :"+conventionalPendingCount);
 //					log.info("conventionalInterimReport :"+conventionalInterimReport);
@@ -478,6 +486,8 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 				StatusMaster conventionalPending = statusMasterRepository.findByStatusCode("CONVENTIONALPENDINGAPPROVAL");
 				StatusMaster conventionInterim = statusMasterRepository.findByStatusCode("CONVENTIONALINTERIMREPORT");
 				StatusMaster conventionalApprove = statusMasterRepository.findByStatusCode("CONVENTIONALCANDIDATEAPPROVE");
+				StatusMaster conventionalSupplementaryReport = statusMasterRepository.findByStatusCode("CONVENTIONALSUPPLEMENTARYREPORT");
+
 						
 				// getting user and checking the organization for naming the status
 				User user = userRepository.findById(dashboardDto.getUserId()).get();
@@ -516,6 +526,8 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 						processDeclined.getStatusCode(), processDeclinedCount));
 				candidateStatusCountDtoList.add(3, new CandidateStatusCountDto("Final Report",
 						finalReport.getStatusCode(), finalReportCount));
+				candidateStatusCountDtoList.add(4, new CandidateStatusCountDto("Supplementary Report",
+						conventionalSupplementaryReport.getStatusCode(), conventionalSupplementaryCount));
 				//				}
 				DashboardDto dashboardDtoObj = new DashboardDto(strFromDate, strToDate, null, null,
 						candidateStatusCountDtoList, dashboardDto.getUserId(), null, null,
@@ -662,7 +674,7 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 			// Query Start
 			StringBuilder query = new StringBuilder();
 			query.append(
-					"select newupload,invalid,reinvites,interReport,finalReport,cancelled,invExpired,pendingNow,conventionalApprove\n");
+					"select newupload,invalid,reinvites,interReport,finalReport,cancelled,invExpired,pendingNow,conventionalApprove,supplementaryReport\n");
 			query.append("from \n");
 			query.append(
 					"(select count(distinct tdcsh.candidate_id) as newupload from t_dgv_conventional_candidate_status_history tdcsh\n");
@@ -764,11 +776,24 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 			}
 			
 			query.append("and tdcsh.last_updated_on between :startDate and :endDate) app,\n");
-			query.append("(select count(*) as conventionalApprove from t_dgv_conventional_candidate_status tds\n");
+			query.append("(select count(*) as conventionalApprove from t_dgv_conventional_candidate_status tdcsh\n");
+			query.append("join t_dgv_candidate_basic bas on bas.candidate_id = tdcsh.candidate_id \n");
+			query.append("join t_dgv_organization_master org on bas.organization_id = org.organization_id \n");
+			query.append("join t_dgv_status_master mas on mas.status_master_id = tdcsh.status_master_id \n");
+			query.append("where mas.status_code ='CONVENTIONALCANDIDATEAPPROVE'\n");
+			if (orgId != 0) {
+				query.append("and org.organization_id =:orgId\n");
+			}
+			if (agentIds != null && !agentIds.isEmpty()) {
+				query.append("and bas.created_by IN (:agentIds)\n");
+			}
+			
+			query.append("and tdcsh.last_updated_on between :startDate and :endDate) supp,\n");
+			query.append("(select count(*) as supplementaryReport from t_dgv_conventional_candidate_status tds\n");
 			query.append("join t_dgv_candidate_basic bas on bas.candidate_id = tds.candidate_id \n");
 			query.append("join t_dgv_organization_master org on bas.organization_id = org.organization_id \n");
 			query.append("join t_dgv_status_master mas on mas.status_master_id = tds.status_master_id \n");
-			query.append("where mas.status_code ='CONVENTIONALCANDIDATEAPPROVE'\n");
+			query.append("where mas.status_code ='CONVENTIONALSUPPLEMENTARYREPORT'\n");
 			if (orgId != 0) {
 				query.append("and org.organization_id =:orgId\n");
 			}
@@ -1338,15 +1363,27 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 					}
 				}
 			} else {
-				ConventionalCandidateStatus candidateStatus = conventionalCandidateStatusRepository.findByCandidateCandidateCode(candidateCode);
-				candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("FINALREPORT"));
-
-				candidateStatus.setLastUpdatedOn(new Date());
-				candidateStatus.setLastUpdatedBy(user);
-				conventionalCandidateStatusRepository.save(candidateStatus);
-				if (candidateStatus.getCandidate().getOrganization().getCallBackUrl() != null)
-					postStatusToOrganization(candidateStatus.getCandidate().getCandidateCode());
-				createConventionalCandidateStatusHistory(candidateStatus, "NOTCANDIDATE");
+				if(reportType.equals("CONVENTIONALSUPPLEMENTARY")) {
+					ConventionalCandidateStatus candidateStatus = conventionalCandidateStatusRepository.findByCandidateCandidateCode(candidateCode);
+					candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("CONVENTIONALSUPPLEMENTARYREPORT"));
+					
+					candidateStatus.setLastUpdatedOn(new Date());
+					candidateStatus.setLastUpdatedBy(user);
+					conventionalCandidateStatusRepository.save(candidateStatus);
+					if (candidateStatus.getCandidate().getOrganization().getCallBackUrl() != null)
+						postStatusToOrganization(candidateStatus.getCandidate().getCandidateCode());
+					createConventionalCandidateStatusHistory(candidateStatus, "NOTCANDIDATE");
+				}else {	
+					ConventionalCandidateStatus candidateStatus = conventionalCandidateStatusRepository.findByCandidateCandidateCode(candidateCode);
+					candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("CONVENTIONALFINALREPORT"));
+					
+					candidateStatus.setLastUpdatedOn(new Date());
+					candidateStatus.setLastUpdatedBy(user);
+					conventionalCandidateStatusRepository.save(candidateStatus);
+					if (candidateStatus.getCandidate().getOrganization().getCallBackUrl() != null)
+						postStatusToOrganization(candidateStatus.getCandidate().getCandidateCode());
+					createConventionalCandidateStatusHistory(candidateStatus, "NOTCANDIDATE");
+				}
 			}
 
 			//			candidateStatus.setLastUpdatedOn(new Date());
@@ -1721,6 +1758,68 @@ public class ConventionalCandidateServiceImpl implements ConventionalCandidateSe
 	}
 
 
+	@Override
+	public ServiceOutcome<ConventionalReferenceDataDTO> saveConventionalRefereneceData(
+			ConventionalReferenceDataDTO conventionalReferenceCandidateDTO) {
+		
+		System.out.println("conventionalReferenceCandidateDTO : "+conventionalReferenceCandidateDTO.toString());
+		ServiceOutcome<ConventionalReferenceDataDTO> svcSearchResult = new ServiceOutcome<>();
+		try {
+			
+			Candidate candidate = candidateRepository.findByCandidateCode(conventionalReferenceCandidateDTO.getCandidateCode());
+			
+			if(candidate != null) {
+				System.out.println("candidate is not null : "+candidate.getCandidateId());
+				ConventionalReferenceData byCandidateId = conventionalReferenceDataRepository.findByCandidateId(candidate);
+				
+				if(byCandidateId != null) {	
+//				conventionalReferenceData.setCandidateId(candidate);
+					byCandidateId.setCeaInitiationDate(conventionalReferenceCandidateDTO.getCeaInitiationDate());
+					byCandidateId.setCeInsufficiency(conventionalReferenceCandidateDTO.getCeInsufficiency());
+					byCandidateId.setDateOfJoining(conventionalReferenceCandidateDTO.getDateOfJoining());
+					byCandidateId.setFresher(conventionalReferenceCandidateDTO.getFresher());
+					byCandidateId.setReInitiationDate(conventionalReferenceCandidateDTO.getReInitiationDate());
+					byCandidateId.setSupplementaryDate(conventionalReferenceCandidateDTO.getSupplementaryDate());
+					byCandidateId.setDateOfBirth(conventionalReferenceCandidateDTO.getDateOfBirth());		
+					
+					ConventionalReferenceData save = conventionalReferenceDataRepository.save(byCandidateId);
+					if(save != null) {
+						svcSearchResult.setData(conventionalReferenceCandidateDTO);
+						svcSearchResult.setMessage("Reference Data Updated Successfully.");
+						svcSearchResult.setOutcome(true);	
+					}
+				}	
+				else {
+					ConventionalReferenceData conventionalReferenceData = new ConventionalReferenceData();
+					conventionalReferenceData.setCandidateId(candidate);
+					conventionalReferenceData.setCeaInitiationDate(conventionalReferenceCandidateDTO.getCeaInitiationDate());
+					conventionalReferenceData.setCeInsufficiency(conventionalReferenceCandidateDTO.getCeInsufficiency());
+					conventionalReferenceData.setDateOfJoining(conventionalReferenceCandidateDTO.getDateOfJoining());
+					conventionalReferenceData.setFresher(conventionalReferenceCandidateDTO.getFresher());
+					conventionalReferenceData.setReInitiationDate(conventionalReferenceCandidateDTO.getReInitiationDate());
+					conventionalReferenceData.setSupplementaryDate(conventionalReferenceCandidateDTO.getSupplementaryDate());
+					conventionalReferenceData.setDateOfBirth(conventionalReferenceCandidateDTO.getDateOfBirth());		
+					
+					ConventionalReferenceData save = conventionalReferenceDataRepository.save(conventionalReferenceData);
+					if(save != null) {
+						svcSearchResult.setData(conventionalReferenceCandidateDTO);
+						svcSearchResult.setMessage("Reference Data Stored Successfully.");
+						svcSearchResult.setOutcome(true);	
+					}
+				}
+			}
+			
+			
+		} catch (Exception ex) {
+
+			log.error("Exception occured in saveConventionalRefereneceData method in CandidateServiceImpl --> {} {}",
+					ex.getMessage());
+			svcSearchResult.setMessage("Something went Wrong.");
+			svcSearchResult.setOutcome(false);
+		}
+		
+		return svcSearchResult;
+	}
 
 
 }

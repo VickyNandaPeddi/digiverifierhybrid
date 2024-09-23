@@ -122,7 +122,7 @@ export class ConventionalCandidateUploadComponent implements OnInit {
           this.accountName = data.data.accountName;
           this.conventionalCandidateCheck = data.data.conventionalCandidateCheck.split(',');
 
-
+//           console.warn("checks>>", this.conventionalCandidateCheck)
           this.Checks = this.conventionalCandidateCheck;
 
 
@@ -266,20 +266,26 @@ export class ConventionalCandidateUploadComponent implements OnInit {
         let indexEduUG2Doc;
         while ((indexEduUG2Doc = this.EducationUGDocTypeList.findIndex(item => item.key && item.key === fullcheckName)) !== -1) {
             this.EducationUGDocTypeList.splice(indexEduUG2Doc, 1);
+            console.warn("List UG after removal:", this.EducationUGDocTypeList);
         }
-
+        
         let indexEduUG;
         while ((indexEduUG = this.educationSelectedFiles.findIndex(item => item.key && item.key === fullcheckName)) !== -1) {
           this.educationSelectedFiles.splice(indexEduUG, 1);
+          console.warn("List educationSelectedFiles after removal:", this.educationSelectedFiles);
         }
+        // console.warn("After filtering by checkNameAndType : ", this.educationUGSelectedFiles);
         this.removeTheCheckByDoc(checkName, fullcheckName, checkNameAndType, this.educationUGSelectedFiles, type);
+        // console.warn("check.documents.length : ", check.documents.length)
         break;
 
       case 'Education PG':
+        // console.warn("Handle Education PG case",this.educationPGSelectedFiles);
 
         this.educationPGSelectedFiles = this.educationSelectedFiles.filter(item => {
           return item.key !== fullcheckName;
         });
+        // console.warn("After educationPGSelectedFiles : ", this.educationPGSelectedFiles)
 
         this.educationPGSelectedFiles = this.educationPGSelectedFiles.filter(item => {
           return item.key.includes(checkNameAndType);
@@ -287,95 +293,111 @@ export class ConventionalCandidateUploadComponent implements OnInit {
 
         let indexEduPGDoc;
         while ((indexEduPGDoc = this.EducationPGDocTypeList.findIndex(item => item.key && item.key === fullcheckName)) !== -1) {
-
             this.EducationPGDocTypeList.splice(indexEduPGDoc, 1);
-
+            console.warn("List UG after removal:", this.EducationPGDocTypeList);
         }
-
+        
         let indexEduPG;
         while ((indexEduPG = this.educationSelectedFiles.findIndex(item => item.key && item.key === fullcheckName)) !== -1) {
-
           this.educationSelectedFiles.splice(indexEduPG, 1);
-
+          console.warn("List educationSelectedFiles after removal:", this.educationSelectedFiles);
         }
 
-
+        // console.warn("After filtering by checkNameAndType : ", this.educationPGSelectedFiles);
         this.removeTheCheckByDoc(checkName, fullcheckName, checkNameAndType, this.educationPGSelectedFiles, type);
-
+        // console.warn("check.documents.length : ", check.documents.length) 
 
         break;
 
       case 'Education Diploma':
-
+        // console.warn("Education Diploma");
         // Your logic for Work Experience
         this.educationDiplomaSelectedFiles = this.educationSelectedFiles.filter(item => {
           return item.key !== fullcheckName;
         });
+        // console.warn("After educationDiplomaSelectedFiles : ", this.educationDiplomaSelectedFiles)
 
         this.educationDiplomaSelectedFiles = this.educationDiplomaSelectedFiles.filter(item => {
           return item.key.includes(checkNameAndType);
         });
+        // console.warn("After filtering by checkNameAndType : ", this.educationDiplomaSelectedFiles);
 
         let indexEduDiplomaDoc;
         while ((indexEduDiplomaDoc = this.EducationDiplomaTHDocTypeList.findIndex(item => item.key && item.key === fullcheckName)) !== -1) {
             this.EducationDiplomaTHDocTypeList.splice(indexEduDiplomaDoc, 1);
+            console.warn("List Diploma after removal:", this.EducationDiplomaTHDocTypeList);
         }
-
+        
         let indexEduDiploma;
         while ((indexEduDiploma = this.educationSelectedFiles.findIndex(item => item.key && item.key === fullcheckName)) !== -1) {
           this.educationSelectedFiles.splice(indexEduDiploma, 1);
+          console.warn("List educationSelectedFiles after removal:", this.educationSelectedFiles);
         }
 
         this.removeTheCheckByDoc(checkName, fullcheckName, checkNameAndType, this.educationDiplomaSelectedFiles, type);
+        // console.warn("check.documents.length : ", check.documents.length) 
 
         break;
 
       case 'Education 10TH':
+        // console.warn("Education 10TH");
         // Your logic for Work Experience
         this.education10THSelectedFiles = this.educationSelectedFiles.filter(item => {
           return item.key !== fullcheckName;
         });
+        // console.warn("After education10THSelectedFiles : ", this.education10THSelectedFiles)
 
         this.education10THSelectedFiles = this.education10THSelectedFiles.filter(item => {
           return item.key.includes(checkNameAndType);
         });
+        // console.warn("After filtering by checkNameAndType : ", this.education10THSelectedFiles);
         let indexEdu10THDoc;
         while ((indexEdu10THDoc = this.Education10THDocTypeList.findIndex(item => item.key && item.key === fullcheckName)) !== -1) {
             this.Education10THDocTypeList.splice(indexEdu10THDoc, 1);
+            console.warn("List 10TH after removal:", this.Education10THDocTypeList);
         }
-
+        
         let indexEdu10TH;
         while ((indexEdu10TH = this.educationSelectedFiles.findIndex(item => item.key && item.key === fullcheckName)) !== -1) {
           this.educationSelectedFiles.splice(indexEdu10TH, 1);
+          console.warn("List educationSelectedFiles after removal:", this.educationSelectedFiles);
         }
         this.removeTheCheckByDoc(checkName, fullcheckName, checkNameAndType, this.education10THSelectedFiles, type);
+        // console.warn("check.documents.length : ", check.documents.length) 
 
         break;
 
 
       case 'Education 12TH':
+        // console.warn("Education 12TH");
         // Your logic for Work Experience
         this.education12THSelectedFiles = this.educationSelectedFiles.filter(item => {
           return item.key !== fullcheckName;
         });
+        // console.warn("After education12THSelectedFiles : ", this.education12THSelectedFiles)
 
         this.education12THSelectedFiles = this.education12THSelectedFiles.filter(item => {
           return item.key.includes(checkNameAndType);
         });
+        // console.warn("After filtering by checkNameAndType : ", this.education12THSelectedFiles);
         let indexEdu12THDoc;
         while ((indexEdu12THDoc = this.Education12THDocTypeList.findIndex(item => item.key && item.key === fullcheckName)) !== -1) {
             this.Education12THDocTypeList.splice(indexEdu12THDoc, 1);
+            console.warn("List Diploma after removal:", this.Education12THDocTypeList);
         }
-
+        
         let indexEdu12TH;
         while ((indexEdu12TH = this.educationSelectedFiles.findIndex(item => item.key && item.key === fullcheckName)) !== -1) {
           this.educationSelectedFiles.splice(indexEdu12TH, 1);
+          console.warn("List educationSelectedFiles after removal:", this.educationSelectedFiles);
         }
         this.removeTheCheckByDoc(checkName, fullcheckName, checkNameAndType, this.education12THSelectedFiles, type);
+        // console.warn("check.documents.length : ", check.documents.length) 
 
         break;
 
       // default:
+      //   console.warn("Handle default case");
       //   // Your default logic
       //   break;
 
@@ -384,43 +406,63 @@ export class ConventionalCandidateUploadComponent implements OnInit {
     //   return item.key !== fullcheckName;
     // });
 
+    // console.warn("After educationSelectedFiles : ", this.educationSelectedFiles)
 
     // this.educationSelectedFiles = this.educationSelectedFiles.filter(item => {
     //   return item.key.includes(checkNameAndType);
     // });
 
+    // console.warn("After filtering by checkNameAndType : ", this.educationSelectedFiles);
 
     // this.removeTheCheckByDoc(checkName, fullcheckName, checkNameAndType, this.educationSelectedFiles, type);
 
 
+    // console.warn("check.documents.length : ", check.documents.length)
 
     if (check.documents && check.documents.length > index) {
       check.documents.splice(index, 1);
+      // console.warn("this.checks : ", check.documents)
     }
   }
 
 
   removeEmploymentDoc(employmentCheck: any, fullcheckName: any, index: number, checkNameAndType: any, type: any) {
+    console.warn("check : ", fullcheckName)
+    console.warn("INDEX : ", index)
+    console.warn("checkNameAndType : ", checkNameAndType)
+    console.warn("Type : ",type)
+    // console.warn("Before educationSelectedFiles : ", this.employmentSelectedFiles)
     const checkName = "education";
+    // console.warn("TYPE:: ", type)
 
     switch (checkNameAndType) {
       case 'Employment EMP1':
+        // console.warn("Handle Employment EMP1");
         // Your logic for Education UG
+        console.warn("employmentSelectedFiles : ",this.employmentSelectedFiles)
         this.employmentEMP1SelectedFiles = this.employmentSelectedFiles.filter(item => {
           return item.key !== fullcheckName;
         });
+        console.warn("After employmentEMP1SelectedFiles : ", this.employmentEMP1SelectedFiles)
+
         this.employmentEMP1SelectedFiles = this.employmentEMP1SelectedFiles.filter(item => {
           return item.key.includes(checkNameAndType);
         });
+        // console.warn("After filtering by checkNameAndType : ", this.employmentEMP1SelectedFiles);
+        console.log("EmploymentEMP1DocTypeList : ", this.EmploymentEMP1DocTypeList);
+        console.log("EmploymentEMP1DocTypeList : ");
 
         this.EmploymentEMP1DocTypeList.forEach((item, index) => {
       });
+        console.warn("Remove File EmploymentEMP2DocTypeList : ",this.EmploymentEMP2DocTypeList)
+        console.warn("Remove File EmploymentEMP3DocTypeList : ",this.EmploymentEMP3DocTypeList)
 
 //         let index;
 // while ((index = this.EmploymentEMP1DocTypeList.findIndex(item => item.key.includes("Offer Letter"))) !== -1) {
 //     this.EmploymentEMP1DocTypeList.splice(index, 1);
-// }
+// }    
 
+console.log("fullcheckName : ",fullcheckName)
 
 let index;
 while ((index = this.EmploymentEMP1DocTypeList.findIndex(item => item.key && item.key === fullcheckName)) !== -1) {
@@ -431,24 +473,27 @@ while ((index = this.EmploymentEMP1DocTypeList.findIndex(item => item.key && ite
     this.EmploymentEMP1DocTypeList.forEach((item, index) => {
     });
           console.log("Remove AFter============ File EmploymentEMP1DocTypeList : ",this.EmploymentEMP1DocTypeList)
-
+          
           let index2;
           while ((index2 = this.employmentSelectedFiles.findIndex(item => item.key && item.key === fullcheckName)) !== -1) {
             this.employmentSelectedFiles.splice(index2, 1);
+            console.warn("List employmentEMP1SelectedFiles after removal:", this.employmentSelectedFiles);
           }
-
+          
           console.log("Remove AFter============ File employmentEMP1SelectedFiles : ",this.employmentEMP1SelectedFiles)
           console.log("Remove AFter============ File employmentSelectedFiles : ",this.employmentSelectedFiles)
 
         this.removeTheCheckByDoc(checkName, fullcheckName, checkNameAndType, this.employmentEMP1SelectedFiles, type);
-
+        // console.warn("check.documents.length : ", employmentCheck.documents.length)
         break;
 
       case 'Employment EMP2':
+        // console.warn("Handle Employment EMP2");
         // Your logic for Education UG
         this.employmentEMP2SelectedFiles = this.employmentSelectedFiles.filter(item => {
           return item.key !== fullcheckName;
         });
+        // console.warn("After employmentEMP2SelectedFiles : ", this.employmentEMP2SelectedFiles)
 
         this.employmentEMP2SelectedFiles = this.employmentEMP2SelectedFiles.filter(item => {
           return item.key.includes(checkNameAndType);
@@ -489,7 +534,7 @@ while ((indexEmp2 = this.employmentSelectedFiles.findIndex(item => item.key && i
             this.EmploymentEMP3DocTypeList.splice(indexEmp3Doc, 1);
             console.warn("List EMP3 after removal:", this.EmploymentEMP3DocTypeList);
         }
-
+        
         let indexEmp3;
         while ((indexEmp3 = this.employmentSelectedFiles.findIndex(item => item.key && item.key === fullcheckName)) !== -1) {
           this.employmentSelectedFiles.splice(indexEmp3, 1);
@@ -597,7 +642,7 @@ handleEducationDocChange(newValue: string, doc: any, check: any): void {
 
     // Remove files associated with the previous education level
     // if (this.previousEducationLevel) {
-    //   this.educationSelectedFiles = this.educationSelectedFiles.filter(fileObj =>
+    //   this.educationSelectedFiles = this.educationSelectedFiles.filter(fileObj => 
     //     !fileObj.key.startsWith(`Education ${this.previousEducationLevel}`)
     //   );
     // }
@@ -621,7 +666,7 @@ handleEducationDocChange(newValue: string, doc: any, check: any): void {
       // console.warn("Before educationUGSelectedFiles : ", this.educationSelectedFiles)
       // console.log('Before filtering:', this.newProofList);
 
-    //  console.log("UG OLD DOCUMENT : ",check.documents[0].EducationDoc)
+    //  console.log("UG OLD DOCUMENT : ",check.documents[0].EducationDoc) 
 
     const documentType = check.documents[0].EducationDoc;
     // Do something with documentType if needed
@@ -636,7 +681,7 @@ handleEducationDocChange(newValue: string, doc: any, check: any): void {
   //   this.uploadFile(null, "Education", selectedEducation, documentType, file.file);
   // });
 
-
+  
 
   // console.log("this.educationUGSelectedFiles : ",this.educationUGSelectedFiles)
   // console.log("this.educationUniqueSelectedFiles : ",this.educationUniqueSelectedFiles)
@@ -720,7 +765,7 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
     //     }
     // });
   //   for (let index = this.educationSelectedFiles.length - 1; index >= 0; index--) {
-  //     const item = this.educationSelectedFiles[index];
+  //     const item = this.educationSelectedFiles[index]; 
   //     documentTypes.forEach((documentType:any) => {
   //       // this.uploadFile(null, "Education", selectedEducation, documentType, file.file);
   //       if(documentType !== null){
@@ -732,7 +777,7 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
   //             this.educationSelectedFiles.splice(index, 1);
   //         }
   //       }
-  //   });
+  //   }); 
   // }
 
   for (let index = this.educationSelectedFiles.length - 1; index >= 0; index--) {
@@ -751,7 +796,7 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
 //   this.educationSelectedFiles = this.educationSelectedFiles.filter((file) => {
 //     // Extract the filename from the file object
 //     const filename = file.file.name;
-
+    
 //     // Check if the filename already exists in the uniqueFilenames object
 //     if (!uniqueFilenames[filename]) {
 //         // If the filename doesn't exist, mark it as seen in the uniqueFilenames object
@@ -789,7 +834,7 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
       // this.educationUGSelectedFiles = [];
       // console.warn("Before educationUGSelectedFiles : ", this.educationSelectedFiles)
       // console.log('Before filtering:', this.newProofList);
-      // console.log("UG OLD DOCUMENT PG : ",check.documents[0].EducationDoc)
+      // console.log("UG OLD DOCUMENT PG : ",check.documents[0].EducationDoc) 
       const documentType = check.documents[0].EducationDoc;
       // this.educationPGSelectedFiles.forEach(file => {
       //   console.log('File:', file.file);
@@ -885,7 +930,7 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
       // console.log('Before filtering:', this.newProofList);
 
       // console.warn("selectedEducation in 10th : ", selectedEducation)
-      // console.log("UG OLD DOCUMENT 10TH : ",check.documents[0].EducationDoc)
+      // console.log("UG OLD DOCUMENT 10TH : ",check.documents[0].EducationDoc) 
       const documentType = check.documents[0].EducationDoc;
       // console.log('After modification: education10THSelectedFiles', this.education10THSelectedFiles);
       // if (selectedEducation == '12TH') {
@@ -894,7 +939,7 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
         //   this.uploadFile(null, "Education", selectedEducation, documentType, file.file);
         // });
         // console.log("")
-
+        
         console.warn("============== Education10THDocTypeList ================ ",this.Education10THDocTypeList)
         Object.entries(this.Education10THDocTypeList).forEach(([key, file]) => {
           console.log('Key:', file.key);
@@ -979,7 +1024,7 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
       // console.log('Before filtering:', this.newProofList);
       // this.education12THSelectedFiles = [];
       // console.log("Before : education12THSelectedFiles ", this.education12THSelectedFiles);
-      // console.log("UG OLD DOCUMENT 12TH : ",check.documents[0].EducationDoc)
+      // console.log("UG OLD DOCUMENT 12TH : ",check.documents[0].EducationDoc) 
       const documentType = check.documents[0].EducationDoc;
       // this.education12THSelectedFiles.forEach(file => {
       //   console.log('File:', file.file);
@@ -1059,7 +1104,7 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
       // this.educationUGSelectedFiles = [];
       // console.warn("Before educationUGSelectedFiles : ", this.educationSelectedFiles)
       // console.log('Before filtering:', this.newProofList);
-      // console.log("UG OLD DOCUMENT Diploma : ",check.documents[0].EducationDoc)
+      // console.log("UG OLD DOCUMENT Diploma : ",check.documents[0].EducationDoc) 
       const documentType = check.documents[0].EducationDoc;
       // this.educationDiplomaSelectedFiles.forEach(file => {
       //   console.log('File:', file.file);
@@ -1154,7 +1199,7 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
       // this.educationUGSelectedFiles = [];
       // console.warn("Before EmploymentEMP1SelectedFiles : ", this.employmentSelectedFiles)
       // console.log('Before filtering:', this.newProofList);
-      // console.log("EMP1 OLD DOCUMENT EMP1 : ",check.documents[0].EmploymentDoc)
+      // console.log("EMP1 OLD DOCUMENT EMP1 : ",check.documents[0].EmploymentDoc) 
       const documentType = check.documents[0].EmploymentDoc;
       // this.employmentEMP1SelectedFiles.forEach(file => {
       //   console.log('File:', file.file);
@@ -1216,7 +1261,7 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
     else if (this.previousEmploymentLevel == 'EMP2') {
       // console.warn("Before EmploymentEMP1SelectedFiles : ", this.employmentSelectedFiles)
       // console.log('Before filtering:', this.newProofList);
-      // console.log("EMP1 OLD DOCUMENT EMP2 : ",check.documents[0].EmploymentDoc)
+      // console.log("EMP1 OLD DOCUMENT EMP2 : ",check.documents[0].EmploymentDoc) 
       const documentType = check.documents[0].EmploymentDoc;
 
       // this.employmentEMP2SelectedFiles.forEach(file => {
@@ -1297,7 +1342,7 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
       //   }
       //   return item; // Return the unmodified string if it doesn't contain 'Education UG'
       // });
-      // console.log("EMP1 OLD DOCUMENT EMP3 : ",check.documents[0].EmploymentDoc)
+      // console.log("EMP1 OLD DOCUMENT EMP3 : ",check.documents[0].EmploymentDoc) 
       const documentType = check.documents[0].EmploymentDoc;
 
       // this.employmentEMP3SelectedFiles.forEach(file => {
@@ -1371,7 +1416,7 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
       //   return item; // Return the unmodified string if it doesn't contain 'Education UG'
       // });
 
-
+      
       this.idAadharSelectedFiles.forEach(file => {
         // console.log('File:', file.file);
         this.uploadFile(null, "ID", selectedIDItems, '', file.file);
@@ -1951,7 +1996,6 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
 
                   // Set the input element's files to the combined list
                   educationInput.files = totalCount > 0 ? remainingEducationFiles.files : null;
-
                 }
                 // console.warn("zip file converted : ")
                 zip.file(file.file.name, file.file);
@@ -2012,7 +2056,6 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
 
                   // Set the input element's files to the combined list
                   employmentInput.files = totalCount > 0 ? remainingEmploymentFiles.files : null;
-
                 }
                 console.warn("zip file converted : ")
                 zip.file(file.file.name, file.file);
@@ -2063,7 +2106,6 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
 
                   // Set the input element's files to the combined list
                   criminalInput.files = totalCount > 0 ? remainingCriminalFiles.files : null;
-
                 }
                 // console.warn("zip file converted : ")
                 zip.file(file.file.name, file.file);
@@ -2112,7 +2154,6 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
 
                   // Set the input element's files to the combined list
                   idInput.files = totalCount > 0 ? remainingIdFiles.files : null;
-
                 }
                 console.warn("zip file converted : ")
                 zip.file(file.file.name, file.file);
@@ -2154,7 +2195,6 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
 
                   // Set the input element's files to the combined list
                   databaseInput.files = totalCount > 0 ? remainingDatabaseFiles.files : null;
-
                 }
                 console.warn("zip file converted : ")
                 zip.file(file.file.name, file.file);
@@ -2203,7 +2243,6 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
 
                   // Set the input element's files to the combined list
                   addressInput.files = totalCount > 0 ? remainingIdFiles.files : null;
-
                 }
                 console.warn("zip file converted : ")
                 zip.file(file.file.name, file.file);
@@ -2482,19 +2521,19 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
             // index = this.educationUGSelectedFiles.findIndex(item => item.key === checkNameAndCheckType && item.file != file);
             const  index2 = this.EducationUGDocTypeList.findIndex(item => item.file === file);
             // console.log("INDEX : ",index2)
-            this.EducationUGDocTypeList.splice(index2,1)
+            this.EducationUGDocTypeList.splice(index2,1) 
           }
           if(checkType.includes('PG') && this.EducationPGDocTypeList != null){
             // index = this.educationPGSelectedFiles.findIndex(item => item.key === checkNameAndCheckType && item.file != file);
             const  index2 = this.EducationPGDocTypeList.findIndex(item => item.file === file);
             // console.log("INDEX : ",index2)
-            this.EducationPGDocTypeList.splice(index2,1)
+            this.EducationPGDocTypeList.splice(index2,1) 
           }
           if(checkType.includes('Diploma') && this.EducationDiplomaTHDocTypeList != null){
             // index = this.educationDiplomaSelectedFiles.findIndex(item => item.key === checkNameAndCheckType && item.file != file);
             const  index2 = this.EducationDiplomaTHDocTypeList.findIndex(item => item.file === file);
             // console.log("INDEX : ",index2)
-            this.EducationDiplomaTHDocTypeList.splice(index2,1)
+            this.EducationDiplomaTHDocTypeList.splice(index2,1) 
           }
 
 
@@ -2594,7 +2633,7 @@ Object.entries(this.EducationUGDocTypeList).forEach(([key, file]) => {
           }
           if(checkType.includes('EMP3') && this.EmploymentEMP3DocTypeList != null){
             const  index2 = this.EmploymentEMP3DocTypeList.findIndex(item => item.file === file);
-            this.EmploymentEMP3DocTypeList.splice(index2,1)
+            this.EmploymentEMP3DocTypeList.splice(index2,1) 
           }
 
           this.employmentSelectedFiles.splice(fileIndex, 1);

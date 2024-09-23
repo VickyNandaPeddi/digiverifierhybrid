@@ -147,9 +147,14 @@ export class OrgadminDashboardService {
     return this.http.get(`${environment.apiUrl}/api/report/getConventionalReport?candidateCode=${candidateCode}&type=CONVENTIONALINTERIM&overrideReportStatus=${reportStatus}&conventionalReport=${conventionalReport}`);
   }
 
-  //TECHM Report
+  //TECHM Report INTERIM REPORT
   getConventionalTechMReportByCandidateCode(candidateCode:any,reportStatus:any,conventionalReport:any){
     return this.http.get(`${environment.apiUrl}/api/report/generateTechMConventional?candidateCode=${candidateCode}&type=CONVENTIONALINTERIM&overrideReportStatus=${reportStatus}&conventionalReport=${conventionalReport}`);
+  }
+
+  //TECHM conventional FINAL REPORT
+  getConventionalTechMReportByCandidateCodeFinalReport(candidateCode:any,reportStatus:any,conventionalReport:any){
+    return this.http.get(`${environment.apiUrl}/api/report/generateTechMConventional?candidateCode=${candidateCode}&type=${reportStatus}&overrideReportStatus=${reportStatus}&conventionalReport=${conventionalReport}`);
   }
 
   //OverAllSearch
@@ -233,4 +238,9 @@ export class OrgadminDashboardService {
   oldCandidatePurge(orgId: any) { 
     return this.http.get(`${environment.apiUrl}/api/candidate/oldCandidatesPurge/${orgId}`);
   }
+
+  conventionalReferenceData(data:any){
+    return this.http.post(`${environment.apiUrl}/api/candidate/saveConventionalReferenceData`,data);
+  }
+ 
 }

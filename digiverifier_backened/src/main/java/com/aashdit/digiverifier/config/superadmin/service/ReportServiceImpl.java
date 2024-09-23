@@ -253,6 +253,9 @@ public class ReportServiceImpl implements ReportService {
     
     @Autowired
     private WeekDaysCalculation weekDaysCalculation;
+    
+    @Autowired
+    private ConventionalReferenceDataRepository conventionalReferenceDataRepository;
 
     SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
@@ -2210,7 +2213,7 @@ public class ReportServiceImpl implements ReportService {
                                             ObjectMapper objectMapper = new ObjectMapper();
                                             JsonNode arrNode = objectMapper.readTree(epfoResponse).get("message");
 
-                                            if (arrNode.isArray()) {
+                                            if (arrNode != null && arrNode.isArray()) {
                                                 for (final JsonNode objNode : arrNode) {
                                                     EpfoDataResDTO epfoData = new EpfoDataResDTO();
                                                     epfoData.setName(objNode.get("name").asText());
@@ -2910,7 +2913,7 @@ public class ReportServiceImpl implements ReportService {
                                     vendorChecksss.getVendorChecks().getVendorcheckId(),
                                     vendorChecksss.getVendorUploadedDocument(), vendorChecksss.getDocumentname(),
                                     vendorChecksss.getAgentColor().getColorName(),
-                                    vendorChecksss.getAgentColor().getColorHexCode(), null, null, vendorChecksss.getCreatedOn(), null, null, null, null, null);
+                                    vendorChecksss.getAgentColor().getColorHexCode(), null, null, vendorChecksss.getCreatedOn(), null, null, null, null, null,null);
 
 //						ArrayList<String> combinedList = new ArrayList<>(vendorChecks.getAgentAttirbuteValue());
 //						System.out.println("vendorChecks.getAgentAttirbuteValue() : "+vendorChecks.getAgentAttirbuteValue());
@@ -3758,7 +3761,7 @@ public class ReportServiceImpl implements ReportService {
                 } else if (orgServices != null && orgServices.contains("EPFO") && orgServices.contains("DNHDB")
                         && !orgServices.contains("DIGILOCKER") && !orgServices.contains("ITR") || orgServices.contains("PANTOUAN")
                         || orgServices.contains("EPFOEMPLOYEELOGIN")) {
-                    if (candidateReportDTO.getProject().equalsIgnoreCase("CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED")) {
+                    if (candidateReportDTO.getProject().equalsIgnoreCase("CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED") || candidateReportDTO.getProject().contains("IBM")) {
                         htmlStr = pdfService.parseThymeleafTemplate("CG_UAN-Report", candidateReportDTO);
                     } else {
                         htmlStr = pdfService.parseThymeleafTemplate("EPFO_Employee-Report", candidateReportDTO);
@@ -4447,7 +4450,7 @@ public class ReportServiceImpl implements ReportService {
                                     vendorChecksss.getVendorChecks().getVendorcheckId(),
                                     vendorChecksss.getVendorUploadedDocument(), vendorChecksss.getDocumentname(),
                                     vendorChecksss.getAgentColor().getColorName(),
-                                    vendorChecksss.getAgentColor().getColorHexCode(), null, null, vendorChecksss.getCreatedOn(), null, null, null, null, null);
+                                    vendorChecksss.getAgentColor().getColorHexCode(), null, null, vendorChecksss.getCreatedOn(), null, null, null, null, null,null);
 
                             ArrayList<String> combinedList = new ArrayList<>(vendorChecks.getAgentAttirbuteValue());
                             combinedList.addAll(vendorChecksss.getVendorAttirbuteValue());
@@ -6135,7 +6138,7 @@ public class ReportServiceImpl implements ReportService {
                                 vendorChecksss.getVendorChecks().getVendorcheckId(),
                                 vendorChecksss.getVendorUploadedDocument(), vendorChecksss.getDocumentname(),
                                 vendorChecksss.getAgentColor().getColorName(),
-                                vendorChecksss.getAgentColor().getColorHexCode(), null, null, vendorChecksss.getCreatedOn(), null, null, null, null, null);
+                                vendorChecksss.getAgentColor().getColorHexCode(), null, null, vendorChecksss.getCreatedOn(), null, null, null, null, null,null);
                         vendordocDtoList.add(vendorUploadChecksDto);
                     }
                 }
@@ -8253,7 +8256,7 @@ public class ReportServiceImpl implements ReportService {
                     case PRE_OFFER:
                         candidateVerificationState.setPreApprovalTime(ZonedDateTime.now());
                         break;
-                    case FINAL:
+                    case CONVENTIONALFINAL:
                         candidateVerificationState.setFinalReportTime(ZonedDateTime.now());
                         break;
                     case CONVENTIONALINTERIM:
@@ -8268,6 +8271,9 @@ public class ReportServiceImpl implements ReportService {
 //						}
 
                         break;
+                    case CONVENTIONALSUPPLEMENTARY:
+                    	candidateVerificationState.setSupplementaryReport(ZonedDateTime.now());
+                    	break;
 
                 }
                 candidateVerificationState = conventionalCandidateService.addOrUpdateConventionalCandidateVerificationStateByCandidateId(
@@ -8297,28 +8303,88 @@ public class ReportServiceImpl implements ReportService {
 //							DateUtil.convertToString(candidateVerificationState.getCaseInitiationTime()));
                 
                 // Calculation for From caseInitiation and Interim Generation in Days (Interim Report SLA (No of Days)
-                ZonedDateTime caseInitiationTime = candidateVerificationState.getCaseInitiationTime();
-                ZonedDateTime interimReportTime = candidateVerificationState.getInterimReportTime();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                String formattedCaseInitiationDate = caseInitiationTime.format(formatter);
-                String formattedInterimDate = interimReportTime.format(formatter);
-                
-                // Print the formatted dates
-                System.out.println("Caseinitiation Date New format: " + formattedCaseInitiationDate);
-                System.out.println("Interim Date  New format: " + formattedInterimDate);
+                	
+                	ZonedDateTime caseInitiationTime = candidateVerificationState.getCaseInitiationTime();
+                	ZonedDateTime interimReportTime = candidateVerificationState.getInterimReportTime();
+                	ZonedDateTime finalReportTime = candidateVerificationState.getFinalReportTime();
+                	ZonedDateTime supplementaryReportTime = candidateVerificationState.getSupplementaryReport();
+
+
+                	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                	String formattedCaseInitiationDate = caseInitiationTime != null ? caseInitiationTime.format(formatter): "";
+                	String formattedInterimDate = interimReportTime != null ? interimReportTime.format(formatter) : "";
+                	String finalInterimDate = finalReportTime != null ? finalReportTime.format(formatter) : "";
+                	String supplementaryReportDate = supplementaryReportTime != null ? supplementaryReportTime.format(formatter) : "";
+
 //                LocalDate startDate = LocalDate.of(formattedCaseInitiationDate);
 //                LocalDate endDate = LocalDate.of(formattedCaseInitiationDate);
-                
-                LocalDate startDate = LocalDate.parse(formattedCaseInitiationDate, formatter);
-                LocalDate endDate = LocalDate.parse(formattedInterimDate, formatter);
+                	
+                	LocalDate startDate = LocalDate.parse(formattedCaseInitiationDate, formatter);
+                	
+                	
+                	if(formattedInterimDate != null) {
+                		LocalDate endDate = LocalDate.parse(formattedInterimDate, formatter);
+                		long workingDays = weekDaysCalculation.calculateWeekdays(startDate, endDate);
+                		candidateReportDTO.setInterimReportSla(workingDays);
+                	}
+                	if(finalReportTime != null) {	
+                		LocalDate finalReportDate = LocalDate.parse(finalInterimDate, formatter);
+                		long finalReportWorkingDays = weekDaysCalculation.calculateWeekdays(startDate, finalReportDate);
+                		candidateReportDTO.setFinalReportSla(finalReportWorkingDays);
+                	}
+                	if(supplementaryReportTime != null) {
+                		LocalDate supplementaryDate = LocalDate.parse(supplementaryReportDate, formatter);
+                		long supplementaryReportWorkingDays = weekDaysCalculation.calculateWeekdays(startDate, supplementaryDate);
+                		candidateReportDTO.setSupplementaryReportSLA(supplementaryReportWorkingDays);        		
+                	}
 
+
+                	
 //              long workingDays = calculateWorkingDays(startDate, endDate);
 //              HolidayCalculation holidayCalculation = new HolidayCalculation();
-                long workingDays = weekDaysCalculation.calculateWeekdays(startDate, endDate);
+
+                	
+//                System.out.println("Number of working days: " + workingDays);
                 
-                System.out.println("Number of working days: " + workingDays);
                 
-                candidateReportDTO.setInterimReportSla(workingDays);              
+                
+                //Reference Data Block.
+                ConventionalReferenceData byCandidateId = conventionalReferenceDataRepository.findByCandidateId(candidate);
+                if(byCandidateId != null) {
+                	try {
+                		
+                        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+                        LocalDate dateOfJoining = LocalDate.parse(byCandidateId.getDateOfJoining(), inputFormatter);
+                        LocalDate dateOfBirth = LocalDate.parse(byCandidateId.getDateOfBirth(), inputFormatter);
+                        LocalDate ceaInitiationDate = LocalDate.parse(byCandidateId.getCeaInitiationDate(), inputFormatter);
+                        LocalDate ceInsufficiency = LocalDate.parse(byCandidateId.getCeInsufficiency(), inputFormatter);
+                        LocalDate reInitiationDate = LocalDate.parse(byCandidateId.getReInitiationDate(), inputFormatter);
+//                        LocalDate supplementary = LocalDate.parse(byCandidateId.getSupplementaryDate(), inputFormatter);
+
+                        
+                        String dateOfJoiningformattedDate = dateOfJoining.format(outputFormatter);
+                        String dateOfBirthformattedDate = dateOfBirth.format(outputFormatter);
+                        String ceaInitiationDateformattedDate = ceaInitiationDate.format(outputFormatter);
+                        String inSufficienyDateformattedDate = ceInsufficiency.format(outputFormatter);
+                        String reInitiationDateformattedDate = reInitiationDate.format(outputFormatter);
+//                        String SupplementaryFormattedDate = supplementary.format(outputFormatter);
+                        
+
+                    	candidateReportDTO.setDateOfJoining(dateOfJoiningformattedDate);
+                    	candidateReportDTO.setFresherLateral(byCandidateId.getFresher());
+                    	candidateReportDTO.setCeaInitiationDate(ceaInitiationDateformattedDate);
+                    	candidateReportDTO.setCeInsufficiencyCleareanceDate(inSufficienyDateformattedDate);
+                    	candidateReportDTO.setReInitiationDate(reInitiationDateformattedDate);
+//                    	candidateReportDTO.setSupplementaryReportDate(SupplementaryFormattedDate);
+                    	candidateReportDTO.setDateOfBirth(dateOfBirthformattedDate);
+                		
+                	}catch (DateTimeParseException e) {
+                        log.info("Error parsing date: " + byCandidateId.getCeaInitiationDate(), e);
+                    }
+                	
+                }
+
                 // executive summary
                 Long organizationId = organization.getOrganizationId();
 //				List<OrganizationExecutive> organizationExecutiveByOrganizationId = organizationService
@@ -8516,7 +8582,7 @@ public class ReportServiceImpl implements ReportService {
                                     vendorChecksss.getVendorChecks().getVendorcheckId(),
                                     vendorChecksss.getVendorUploadedDocument(), vendorChecksss.getDocumentname(),
                                     vendorChecksss.getAgentColor().getColorName(),
-                                    vendorChecksss.getAgentColor().getColorHexCode(), null, null, vendorChecksss.getCreatedOn(), null, null, null, null, null);
+                                    vendorChecksss.getAgentColor().getColorHexCode(), null, null, vendorChecksss.getCreatedOn(), null, null, null, null, null,null);
 
                             ArrayList<String> combinedList = new ArrayList<>();
                             combinedList.addAll(vendorChecks.getAgentAttirbuteValue());
@@ -8689,6 +8755,9 @@ public class ReportServiceImpl implements ReportService {
 //                            	gapVerificationDto.add(gapVerification);
                             	                            	
                             }
+                            else if(vendorChecks.getCheckType().contains("LOA")) {
+                            	candidateReportDTO.setLoaStatus(byVendorCheckStatusMasterId.getCheckStatusName());
+                            }
 
                             
                             String employerName = extractValue(combinedList.toString(), "Employer Name");
@@ -8772,8 +8841,10 @@ public class ReportServiceImpl implements ReportService {
                                 checkAttributeAndValueDto.setCheckRemarks(remarks);
                             }
                             checkAttributeAndValueDto.setAttributeAndValue(combinedList);
+                            checkAttributeAndValueDto.setConventionalQcPending(vendorChecksss.getConventionalQcPending());
                             individualValuesList.add(checkAttributeAndValueDto);
                             vendorUploadChecksDto.setVendorAttirbuteValue(individualValuesList);
+                            vendorUploadChecksDto.setConventionalQcPending(vendorChecksss.getConventionalQcPending());
                             vendorUploadChecksDto.setCheckStatus(vendorChecks.getVendorCheckStatusMaster().getCheckStatusCode());
 
 
@@ -8975,7 +9046,9 @@ public class ReportServiceImpl implements ReportService {
 
 //								log.info("encodedImagesForDocument::::: {}"+encodedImagesForDocument.size());
 
-                                encodedImageMap.put(nameOfCheck, allEncodedImages);
+                            	if(vendorUploadCheck.getConventionalQcPending() != null && vendorUploadCheck.getConventionalQcPending() != null) {	
+                            		encodedImageMap.put(nameOfCheck, allEncodedImages);
+                            	}
                             } else {
 								log.info("Vendor uploaded document is null {}");
                                 encodedImageMap.put(nameOfCheck, null);
@@ -9312,8 +9385,10 @@ public class ReportServiceImpl implements ReportService {
                         content.setContentSubCategory(ContentSubCategory.PRE_APPROVAL);
                     } else if (reportType.name().equalsIgnoreCase("CONVENTIONALINTERIM")) {
                         content.setContentSubCategory(ContentSubCategory.CONVENTIONALINTERIM);
-                    } else if (reportType.name().equalsIgnoreCase("FINAL")) {
-                        content.setContentSubCategory(ContentSubCategory.FINAL);
+                    } else if (reportType.name().equalsIgnoreCase("CONVENTIONALFINAL")) {
+                        content.setContentSubCategory(ContentSubCategory.CONVENTIONALFINAL);
+                    } else if (reportType.name().equalsIgnoreCase("CONVENTIONALSUPPLEMENTARY")) {
+                        content.setContentSubCategory(ContentSubCategory.CONVENTIONALSUPPLEMENTARY);
                     }
                     content.setFileType(FileType.PDF);
                     content.setContentType(ContentType.GENERATED);

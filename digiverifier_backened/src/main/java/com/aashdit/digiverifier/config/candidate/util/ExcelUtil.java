@@ -889,7 +889,8 @@ public class ExcelUtil {
 		            XSSFRow row = worksheet.getRow(i);
 				  if(getCellValue(row, 1) != null && !getCellValue(row, 1).equals("")
 						  && getCellValue(row, 2) != null && !getCellValue(row, 2).equals("") 
-						  && getCellValue(row, 3) != null && !getCellValue(row, 3).equals("")) {
+						  && getCellValue(row, 3) != null && !getCellValue(row, 3).equals("")
+						  && getCellValue(row, 2).trim().length()==10) {
 					  String dob = getCellValue(row, 2).trim();
 					  String pan = getCellValue(row, 3).trim();
 					  String uan =getCellValue(row, 4).trim();
@@ -998,14 +999,21 @@ public class ExcelUtil {
 							candidate.setCreatedBy(findByUserName);
 							candidate = candidateRepository.save(candidate);
 							
-							
 							CandidateStatus candidateStatus = new CandidateStatus();
 							candidateStatus.setCandidate(candidate);
 							candidateStatus.setCreatedBy(findByUserName);
 							candidateStatus.setCreatedOn(new Date());
+							candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("NEWUPLOAD"));
+							candidateStatus = candidateStatusRepository.save(candidateStatus);
+							candidateService.createCandidateStatusHistory(candidateStatus, "NOTCANDIDATE");
+							
+							
+							candidateStatus.setLastUpdatedBy(findByUserName);
+							candidateStatus.setLastUpdatedOn(new Date());
 							candidateStatus.setStatusMaster(statusMasterRepository.findByStatusCode("INVALIDUPLOAD"));
 							candidateStatus = candidateStatusRepository.save(candidateStatus);
 							candidateService.createCandidateStatusHistory(candidateStatus, "NOTCANDIDATE");
+							
 				    	 
 				     }
 				  }

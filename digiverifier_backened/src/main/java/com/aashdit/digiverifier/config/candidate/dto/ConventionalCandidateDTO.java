@@ -74,15 +74,13 @@ public class ConventionalCandidateDTO {
 
     private long interimReportSla;
 
-    private String finalReportSla;
+    private long finalReportSla;
 
     private String supplementartReportSla;
 
     private String totalExperienceVerified;
 
     private String colorCode;
-
-    private String ceaInitiationDate;
 
     private String ceInsufficiencyCleareanceDate;
 
@@ -245,6 +243,14 @@ private String loaStatus;
 	private ArrayList<Map<String, String>> drugTestStatus;
 	private ArrayList<Map<String, String>> creditCheckStatus;
 	private String globalDatabaseCheckStatus;
+	private String dateOfJoining;
+	private String ceaInitiationDate;
+//	private String ceInsufficiencyDate;
+	private String reInitiationDate;
+	private String finalReportSLA;
+	private String supplementaryReportDate;
+	private long supplementaryReportSLA;
+	private String dateOfBirth;
 
 
 
