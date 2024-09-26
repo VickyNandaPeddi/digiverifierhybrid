@@ -59,7 +59,6 @@ import com.aashdit.digiverifier.constants.EPFOConstants;
 import com.aashdit.digiverifier.epfo.dto.EpfoDataFromApiDto;
 import com.aashdit.digiverifier.epfo.dto.EpfoDetailsDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.EntityManager;
@@ -1117,24 +1116,6 @@ public class EpfoServiceImpl implements EpfoService {
 				candidateEPFOResponse.setCreatedOn(new Date());
 				candidateEPFOResponse.setLastUpdatedOn(new Date());
 				log.info("\n____________________before candidateEPFOResponse"+candidateByCandidateCode.getData().getCandidateId()+candidateEPFOResponse);
-				
-				List<CandidateEPFOResponse> candidateEPFOResponseByCanidateId = candidateEPFOResponseRepository.findByCandidateId(candidateByCandidateCode.getData().getCandidateId());
-				candidateEPFOResponseByCanidateId.stream()
-					    .forEach(temp -> {
-                            ObjectMapper objectMapper = new ObjectMapper();
-                            JsonNode arrNode = null;
-							try {
-								arrNode = objectMapper.readTree(temp.getEPFOResponse()).get("message");
-							} catch (Exception e) {
-                                log.error("Exception occured in epfoOTPCaptchaSubmit method in EpfoServiceImpl-->", e);
-							}
- 
-					        // Check if EPFOResponse.message is not an array
-					        if (arrNode == null || !arrNode.isArray()) {
-					        	candidateEPFOResponse.setId(temp.getId());
-					        }
-					    });
-				
 				candidateEPFOResponseRepository.save(candidateEPFOResponse);
 				log.info("\n____________________after candidateEPFOResponse "+candidateByCandidateCode.getData().getCandidateId()+candidateEPFOResponse);
 				if(!obj.getString("code").equals("fail") && obj.has("message") && obj.get("message") instanceof JSONArray){

@@ -2213,7 +2213,7 @@ public class ReportServiceImpl implements ReportService {
                                             ObjectMapper objectMapper = new ObjectMapper();
                                             JsonNode arrNode = objectMapper.readTree(epfoResponse).get("message");
 
-                                            if (arrNode != null && arrNode.isArray()) {
+                                            if (arrNode.isArray()) {
                                                 for (final JsonNode objNode : arrNode) {
                                                     EpfoDataResDTO epfoData = new EpfoDataResDTO();
                                                     epfoData.setName(objNode.get("name").asText());

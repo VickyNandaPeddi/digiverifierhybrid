@@ -10,26 +10,16 @@ import Swal from 'sweetalert2';
 export class CustomerListComponent implements OnInit {
   pageTitle = 'View Customers';
   allPost: any=[];
-  filteredPosts: any[] = []; 
-  searchTerm: string = '';
   constructor( private customers:CustomerService, private _router: Router) { 
     this.customers.getCustomers().subscribe((data: any)=>{
       this.allPost=data.data;
       console.log(this.allPost);
-      this.filteredPosts = this.allPost;
     })
   }
 
   ngOnInit(): void {
   }
 
-  filterPosts() {
-    const searchTermUpper = this.searchTerm.toUpperCase();
-    this.filteredPosts = this.allPost.filter((post: any) => {
-      return post.organizationName.toUpperCase().includes(searchTermUpper);
-    });
-  }
-  
   getCustID(custID: any){
     this._router.navigate(['admin/custedit',custID]);
   }

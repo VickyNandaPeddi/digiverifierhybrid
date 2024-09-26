@@ -340,19 +340,20 @@ public class RemittanceServiceImpl implements RemittanceService{
 	}
 	
 	public String getRemittanceImagesData(EpfoData epfoData,List<String> yearsToFetchRemittance,String tID,
-			 String captcha) {
+			RemittanceEmployerRequestDto remittanceEmployerRequestDto) {
 		String message ="";
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			setHeaderDetails(headers);
 			//request object
 			JSONObject requestJson = new JSONObject();
-			requestJson.put("name",epfoData.getName());
+			requestJson.put("name", remittanceEmployerRequestDto.getName()!=null 
+					&& !remittanceEmployerRequestDto.getName().isEmpty() ? remittanceEmployerRequestDto.getName().strip() : epfoData.getName());
 			requestJson.put("company_name",epfoData.getCompany());
 			requestJson.put("years",yearsToFetchRemittance);
 			requestJson.put("member_id",epfoData.getMemberId());//hard coded member id for testing
 			
-			requestJson.put("captcha",captcha);
+			requestJson.put("captcha",remittanceEmployerRequestDto.getRemittanceCaptchaText());
 			
 			log.info("Request to fetch remitance Images ::{}",requestJson.toString());
 			HttpEntity<String> requestEntity = new HttpEntity<>(requestJson.toString(), headers);
@@ -547,7 +548,7 @@ public class RemittanceServiceImpl implements RemittanceService{
 						
 						//call the remitance apis for getting images..
 							String res = getRemittanceImagesData(epfoData,yearsToFetchRemittance,remittanceTID,
-									                            remittanceEmployerRequestDto.getRemittanceCaptchaText());
+									                            remittanceEmployerRequestDto);
 						//	log.info("Response of remitance Images ::{}",res);
 							JSONObject obj = new JSONObject(res);
 							

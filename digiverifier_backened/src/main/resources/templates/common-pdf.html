@@ -1459,8 +1459,13 @@ span {
 		<div  th:if="${root.itrEpfoHeaderDetails}">
            <!-- <span style="font-size:15px" class="grey-text">Candidate: </span>
             <span style="margin-right:300px;font-size:10px" th:text="${root.itrEpfoHeaderDetails.epfoName1}" class="grey-text"></span>-->
-            <span style="font-size:15px;" class="grey-text">UAN Number: </span>
-            <span style="font-size:10px;" th:text="${root.itrEpfoHeaderDetails.uanNo1}" class="grey-text"></span>
+            <!--<span style="font-size:15px; float: right;" class="grey-text">UAN Number: </span>
+            <span style="font-size:10px;" th:text="${root.itrEpfoHeaderDetails.uanNo1}" class="grey-text"></span>-->
+            
+            <span class="inline-block left output-data grey-text" style="float: left;" 
+             th:text="'UAN Name: ' + ${root.itrEpfoHeaderDetails.epfoName1}"></span>
+            <span class="inline-block left output-data grey-text" style="float: right;" 
+             th:text="'UAN Number: ' + ${root.itrEpfoHeaderDetails.uanNo1}"></span>
         </div>
 <!--		<span class="line-break"></span>
 -->		<table class="table-st" border="0" 
@@ -1596,16 +1601,31 @@ span {
 						<span class="white-text">Result</span>
 					</td>-->
 				</tr>
-				<tr class="text-center" th:each="epfo,stat: ${root.employementDetailsDTOlist}" th:if="${epfo.serviceName == 'DNHDB' || epfo.secondaryServiceName == 'DNHDB'}" th:unless="${epfo.uan != null}">
+		<!--		<tr class="text-center" th:each="epfo,stat: ${root.employementDetailsDTOlist}" th:if="${epfo.serviceName == 'DNHDB' || epfo.secondaryServiceName == 'DNHDB'}" th:unless="${epfo.uan != null}">-->
+				<tr class="text-center" th:each="epfo,stat: ${root.employementDetailsDTOlist}" th:if="${epfo.serviceName == 'DNHDB' || epfo.secondaryServiceName == 'DNHDB'}">
 					<td class="grey-text text-left">
 						<span style="font-size: 12px" th:text="${epfo.candidateEmployerName}"></span>
 					</td>
-					<td class="grey-text text-center">
+					<!--<td class="grey-text text-center">
 						<span style="font-size: 12px" th:text="${#strings.substring(epfo.inputDateOfJoining, 3)}"></span>
 					</td>
 					<td class="grey-text text-center">
 						<span style="font-size: 12px" th:text="${#strings.substring(epfo.inputDateOfExit, 3)}"></span>
-					</td>
+					</td>-->
+					
+					<td class="grey-text text-center">
+	                    <span style="font-size: 12px" th:text="${epfo.inputDateOfJoining != null ? 
+	                     (epfo.inputDateOfJoining != 'NOT_AVAILABLE' ? #strings.replace(#strings.substring(epfo.inputDateOfJoining, 3), '/', '-') : 
+	                     'NOT_AVAILABLE') : ''}">
+	                    </span>
+	                </td>
+	                <td class="grey-text text-center">
+						<span style="font-size: 12px" th:text="${epfo.inputDateOfExit != null ? 
+	                     (epfo.inputDateOfExit != 'NOT_AVAILABLE' ? #strings.replace(#strings.substring(epfo.inputDateOfExit, 3), '/', '-') : 
+	                     'NOT_AVAILABLE') : ''}">
+	                    </span>
+	                </td>
+					
 					<td class="grey-text text-center">
 						<span style="font-size: 12px" th:if="${epfo.serviceName!=null}" th:text="${epfo.serviceName}"></span><span style="font-size: 12px" th:if="${epfo.secondaryServiceName!=null}" th:text="'/' + ${epfo.secondaryServiceName}"></span>
 						<span style="font-size: 12px" th:if="${epfo.serviceName==null or epfo.serviceName==''}">DNT </span>
