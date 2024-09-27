@@ -2213,7 +2213,7 @@ public class ReportServiceImpl implements ReportService {
                                             ObjectMapper objectMapper = new ObjectMapper();
                                             JsonNode arrNode = objectMapper.readTree(epfoResponse).get("message");
 
-                                            if (arrNode.isArray()) {
+                                            if (arrNode != null && arrNode.isArray()) {
                                                 for (final JsonNode objNode : arrNode) {
                                                     EpfoDataResDTO epfoData = new EpfoDataResDTO();
                                                     epfoData.setName(objNode.get("name").asText());
@@ -3754,32 +3754,81 @@ public class ReportServiceImpl implements ReportService {
 
 //				String htmlStr = null;
 //				String conventionalHtmlStr = null;
-                if (reportType.toString().equalsIgnoreCase(FINAL) && candidateReportDTO.getProject().contains("Wipro")) {
-                    htmlStr = pdfService.parseThymeleafTemplate("wipro-final", candidateReportDTO);
-                } else if (candidateReportDTO.getProject().contains("LTIMindtree") && orgServices.contains("ITR")) {
-                    htmlStr = pdfService.parseThymeleafTemplate("template_LTIMT", candidateReportDTO);
-                } else if (orgServices != null && orgServices.contains("EPFO") && orgServices.contains("DNHDB")
-                        && !orgServices.contains("DIGILOCKER") && !orgServices.contains("ITR") || orgServices.contains("PANTOUAN")
-                        || orgServices.contains("EPFOEMPLOYEELOGIN")) {
-                    if (candidateReportDTO.getProject().equalsIgnoreCase("CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED") || candidateReportDTO.getProject().contains("IBM")) {
-                        htmlStr = pdfService.parseThymeleafTemplate("CG_UAN-Report", candidateReportDTO);
-                    } else {
-                        htmlStr = pdfService.parseThymeleafTemplate("EPFO_Employee-Report", candidateReportDTO);
+                
+                //new logic to choose templates
+                
+                String project = candidateReportDTO.getProject();
+                String reportTypeString = reportType.toString();
+ 
+                if (project.contains("Wipro")) {
+                    if (reportTypeString.equalsIgnoreCase("FINAL")) {
+                        htmlStr = pdfService.parseThymeleafTemplate("wipro-final", candidateReportDTO);
                     }
-                }else if(candidateReportDTO.getProject().contains("Infosys")){
-			    	if(reportType.toString().equalsIgnoreCase("INTERIM")) {
-			    		candidateReportDTO.setAddressVerificationDtoList(null);
-			    	}
-			    	
-			    	if(reportType.toString().equalsIgnoreCase("INTERIM") && isSecondReport!=null && isSecondReport) {
-			    		candidateReportDTO.setItrData(null);
-			    		
-			    	}
-			    	htmlStr = pdfService.parseThymeleafTemplate("Infosys_template", candidateReportDTO);
-			    } else {
+ 
+                } else if (project.contains("LTIMindtree")) {
+                    if (orgServices.contains("ITR")) {
+                        htmlStr = pdfService.parseThymeleafTemplate("template_LTIMT", candidateReportDTO);
+                    }
+ 
+                } else if (project.contains("CAPGEMINI") || project.contains("IBM") || project.contains("Accenture") || project.contains("KPMG") || project.contains("Ernst & Young")) {
+                	
+                    if (orgServices != null && orgServices.contains("EPFO") && orgServices.contains("DNHDB")
+                            && !orgServices.contains("DIGILOCKER") && !orgServices.contains("ITR")
+                            && !orgServices.contains("EPFOEMPLOYEELOGIN") || orgServices.contains("PANTOUAN")) {
+                    	
+                        htmlStr = pdfService.parseThymeleafTemplate("CG_UAN-Report", candidateReportDTO);
+                        
+                    } else  if(orgServices.contains("EPFOEMPLOYEELOGIN") && !orgServices.contains("ITR")){
+                    	
+                        htmlStr = pdfService.parseThymeleafTemplate("EPFO_Employee-Report", candidateReportDTO);
+                    }                
+                    else if(orgServices.contains("ITR") && orgServices.contains("EPFO")) {
+                        htmlStr = pdfService.parseThymeleafTemplate("common-pdf", candidateReportDTO);
+                    }
+ 
+                } else if (project.contains("Infosys")) {
+                	
+                    if (reportTypeString.equalsIgnoreCase("INTERIM")) {
+                        candidateReportDTO.setAddressVerificationDtoList(null);
+                        if (isSecondReport != null && isSecondReport) {
+                            candidateReportDTO.setItrData(null);
+                        }
+                    }
+                    htmlStr = pdfService.parseThymeleafTemplate("Infosys_template", candidateReportDTO);
+ 
+                } else {
                     htmlStr = pdfService.parseThymeleafTemplate("common-pdf", candidateReportDTO);
-
                 }
+ 
+                
+                //old logic to choose templates
+                
+//                if (reportType.toString().equalsIgnoreCase(FINAL) && candidateReportDTO.getProject().contains("Wipro")) {
+//                    htmlStr = pdfService.parseThymeleafTemplate("wipro-final", candidateReportDTO);
+//                } else if (candidateReportDTO.getProject().contains("LTIMindtree") && orgServices.contains("ITR")) {
+//                    htmlStr = pdfService.parseThymeleafTemplate("template_LTIMT", candidateReportDTO);
+//                } else if (orgServices != null && orgServices.contains("EPFO") && orgServices.contains("DNHDB")
+//                        && !orgServices.contains("DIGILOCKER") && !orgServices.contains("ITR") || orgServices.contains("PANTOUAN")
+//                        || orgServices.contains("EPFOEMPLOYEELOGIN")) {
+//                    if (candidateReportDTO.getProject().equalsIgnoreCase("CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED") || candidateReportDTO.getProject().contains("IBM")) {
+//                        htmlStr = pdfService.parseThymeleafTemplate("CG_UAN-Report", candidateReportDTO);
+//                    } else {
+//                        htmlStr = pdfService.parseThymeleafTemplate("EPFO_Employee-Report", candidateReportDTO);
+//                    }
+//                }else if(candidateReportDTO.getProject().contains("Infosys")){
+//			    	if(reportType.toString().equalsIgnoreCase("INTERIM")) {
+//			    		candidateReportDTO.setAddressVerificationDtoList(null);
+//			    	}
+//			    	
+//			    	if(reportType.toString().equalsIgnoreCase("INTERIM") && isSecondReport!=null && isSecondReport) {
+//			    		candidateReportDTO.setItrData(null);
+//			    		
+//			    	}
+//			    	htmlStr = pdfService.parseThymeleafTemplate("Infosys_template", candidateReportDTO);
+//			    } else {
+//                    htmlStr = pdfService.parseThymeleafTemplate("common-pdf", candidateReportDTO);
+//
+//                }
 
                 pdfService.generatePdfFromHtml(htmlStr, report);
 
@@ -3886,6 +3935,7 @@ public class ReportServiceImpl implements ReportService {
                     List<Content> uploadedDocContentList = new ArrayList<>();
                     if (candidateCaseDetails != null && candidateCaseDetails.getCriminalDocContentId() != null) {
                         Optional<Content> content = contentRepository.findByContentId(candidateCaseDetails.getCriminalDocContentId());
+//                      List<Content> content = contentRepository.findByCandidateIdAndContentSubCategory(candidateCaseDetails.getCriminalDocContentId(),ContentSubCategory.RESUME);
                         if (content.isPresent()) {
                             uploadedDocContentList.add(content.get());
                         }

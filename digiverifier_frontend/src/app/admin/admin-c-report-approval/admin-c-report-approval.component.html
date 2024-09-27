@@ -831,7 +831,7 @@
 <!--              capg card starts-->
               <div class="card shadow mb-2">
                 <!-- <div *ngIf="getServiceConfigCodes.includes('EPFO') && !getServiceConfigCodes.includes('ITR') && !getServiceConfigCodes.includes('DIGILOCKER') && !getServiceConfigCodes.includes('PANTOUAN')" class="card-body"> -->
-                <div *ngIf="orgName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'" class="card-body">
+                <div *ngIf="orgName == 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED' || orgName == 'IBM'" class="card-body">
                     <!-- Table -->
                   <div class="table-responsive" style="max-height: 500px; overflow: scroll;">
                     <table class="table table-bordered">
@@ -870,7 +870,7 @@
 
               <!-- capg card ends -->
                 <!-- <div *ngIf="!(getServiceConfigCodes.includes('EPFO') && !getServiceConfigCodes.includes('ITR') && !getServiceConfigCodes.includes('DIGILOCKER') && !getServiceConfigCodes.includes('PANTOUAN'))" class="card-body"> -->
-                <div *ngIf="orgName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED'" class="card-body">  
+                <div *ngIf="orgName != 'CAPGEMINI TECHNOLOGY SERVICES INDIA LIMITED' && orgName != 'IBM'" class="card-body">  
                     <div class="row">
                         <div class="col-md-12">
 
@@ -1106,8 +1106,49 @@
                                     </label>
                                 </div> -->
                                 <div class="col-md-5">
-                                    <input type="file" class="form-control" (change)="uploadCaseDetails($event)" accept=".pdf" id="" required multiple>
+                                    <input type="file" class="form-control" (change)="uploadCaseDetails($event)" accept=".pdf" id="" required multiple>                       
                                 </div>
+                                <!-- <div *ngIf="fileNames.length > 0">
+                                    <h5>Selected Files:</h5>
+                                    <ul>
+                                      <li *ngFor="let fileName of fileNames">{{ fileName }}</li>
+                                    </ul>
+                                  </div> -->
+
+                                  <div *ngIf="files.length > 0" style="width: -webkit-fill-available">
+                                    <h5 class="text-center mt-3">Selected Files:</h5>
+                                    <ul class="list-group" id="fileList">
+                                        <li *ngFor="let file of files; let i = index" 
+                                        class="list-group-item d-flex justify-content-between align-items-center w-100"
+                                            draggable="true" 
+                                            (dragstart)="onDragStart($event, i)" 
+                                            (dragover)="onDragOver($event)" 
+                                            (drop)="onDrop($event, i)" 
+                                            (dragend)="onDragEnd($event)">
+                                          <!-- Drag Button -->
+                                          {{ file.name }}
+                                          
+                                    <div class="d-flex align-items-center">   
+                                        <button 
+                                            class="btn btn-secondary btn-sm" 
+                                            (mousedown)="$event.stopPropagation()" 
+                                            (dragstart)="onDragStart($event, i)">
+                                            ☰
+                                        </button>
+
+                                        <button 
+                                          class="btn btn-danger btn-sm me-2" 
+                                          (click)="deleteFile(i)">
+                                          <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                        </li>
+                                      </ul>
+                                  
+                                    <!-- Sort Button -->
+                                    <!-- <button (click)="sortFiles()" class="btn btn-primary mt-2">Sort Files</button> -->
+                                  </div>
+                                  
                             </div>
                         </div>
                     </div>

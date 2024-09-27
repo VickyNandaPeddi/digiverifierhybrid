@@ -137,6 +137,12 @@ export class AdminCReportApprovalComponent implements OnInit {
   drugtestCheckValidation:boolean = false;
   showGlobalCheck: boolean = true
   scopeValidation: boolean = false;
+  fileNames: string[] = [];  // Array to hold the names of selected files
+  files: File[] = [];  // Array to hold the selected File objects
+  draggedIndex: number | null = null;  // Track the index of the dragged item
+  maxFilesAllowed = 10;  // Maximum number of files allowed
+
+
 
   formEditEdu = new FormGroup({
     colorId: new FormControl('', Validators.required),
@@ -1323,16 +1329,37 @@ export class AdminCReportApprovalComponent implements OnInit {
 
     const files = event.target.files;
   const validFiles: File[] = [];
+  const fileList: FileList = event.target.files;
+
+   // Check if the selected files exceed the maximum allowed
+   if (fileList.length + this.files.length > this.maxFilesAllowed) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'File Limit Exceeded',
+      text: `You can select a maximum of ${this.maxFilesAllowed} files.`,
+      confirmButtonText: 'OK'
+    }).then((result) => {
+      // Reload the page after the alert is confirmed
+      if (result.isConfirmed) {
+        location.reload();
+      }
+    });
+
+    return;
+  }
 
   for (let i = 0; i < files.length; i++) {
     const fileType = files[i].name.split('.').pop();
+    const file = files[i];
     if (fileType === 'pdf' || fileType === 'PDF') {
       validFiles.push(files[i]);
+      this.fileNames.push(files[i].name);
+      this.files.push(files[i]);  // Store the entire File object
     }
   }
-
   if (validFiles.length > 0) {
     this.CaseDetailsDoc = validFiles;
+    // this.CaseDetailsDoc = files;
   } else {
     event.target.value = null;
     Swal.fire({
@@ -1341,6 +1368,48 @@ export class AdminCReportApprovalComponent implements OnInit {
     });
   }
   }
+
+  onDragStart(event: DragEvent, index: number): void {
+    this.draggedIndex = index; // Store the index of the dragged item
+    event.dataTransfer?.setData('text/plain', ''); // Required for Firefox
+  }
+
+  // Method to allow dropping
+  onDragOver(event: DragEvent): void {
+    event.preventDefault(); // Prevent default to allow drop
+  }
+
+  // Method to handle dropping
+  onDrop(event: DragEvent, index: number): void {
+    event.preventDefault(); // Prevent default action (open as link for some elements)
+  
+    if (this.draggedIndex !== null) {
+      // Move the item in the array
+      const movedFile = this.files[this.draggedIndex];
+      this.files.splice(this.draggedIndex, 1); // Remove from old position
+      this.files.splice(index, 0, movedFile); // Insert at new position
+      this.draggedIndex = null; // Reset dragged index
+      this.CaseDetailsDoc = this.files;
+    }
+  }
+
+  // Method to clean up after dragging
+  onDragEnd(event: DragEvent): void {
+    this.draggedIndex = null; // Reset dragged index
+  }
+  
+
+  sortFiles(): void {
+    this.fileNames.sort();  // Sorts the array in place
+  }
+
+  deleteFile(index: number): void {
+    // this.CaseDetailsDoc.splice(index, 1);
+    this.files.splice(index, 1);
+
+    this.CaseDetailsDoc = [...this.files];
+  }
+
   uploadGlobalCaseDetails(event: any) {
     const globalfile = event.target.files[0];
     const fileType = event.target.files[0].name.split('.').pop();
@@ -1392,6 +1461,7 @@ export class AdminCReportApprovalComponent implements OnInit {
       'candidateReportApproval',
       JSON.stringify(candidateReportApproval)
     );
+ //   console.log("this.CaseDetailsDoc : ",this.CaseDetailsDoc)
     for (let i = 0; i < this.CaseDetailsDoc.length; i++) {
       formData.append('criminalVerificationDocument', this.CaseDetailsDoc[i]);
     }

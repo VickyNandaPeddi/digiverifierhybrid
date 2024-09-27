@@ -424,7 +424,6 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 	@Autowired
 	private ConventionalReferenceDataRepository conventionalReferenceDataRepository;
 	
-	
 	public ServiceOutcome<Boolean> updateCandidateOrganisationScope(OrganisationScope organisationScope) {
 		ServiceOutcome<Boolean> svcSearchResult = new ServiceOutcome<Boolean>();
 		OrganisationScope result = null;
@@ -2757,7 +2756,11 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 				
 				if (criminalVerificationDocument != null) {
 					//if files coming in list then merge that files into single file and get bytes
+//				    for (int i = 0; i < criminalVerificationDocument.length; i++) {
+
 					byte[] mergedBytes = null;
+//				        byte[] mergedBytes = criminalVerificationDocument[i].getBytes();
+				        
 					if(criminalVerificationDocument.length>1) {
 						mergedBytes = PdfUtil.multiplePdfMergedSingleFile(Arrays.asList(criminalVerificationDocument));
 					}
@@ -2768,6 +2771,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 							: null);
 
 			      	String path = "Candidate/".concat(candidateCode + "/Generated".concat("/Resume").concat(".pdf"));
+//			      	String path = "Candidate/".concat(candidateCode + "/Generated".concat(criminalVerificationDocument[i].getOriginalFilename()));
 					awsUtils.uploadFileAndGetPresignedUrl_bytes(DIGIVERIFIER_DOC_BUCKET_NAME, path, 
 							mergedBytes !=null ? mergedBytes : criminalVerificationDocument[0].getBytes());
 					Content content = new Content();
@@ -2784,6 +2788,7 @@ public class CandidateServiceImpl implements CandidateService, MessageSourceAwar
 					if(saveObj != null)
 						candidateCaseDetails.setCriminalDocContentId(saveObj.getContentId());
 				}
+//			}
 
 				if (globalDatabseCaseDetailsDocument != null) {
 //					candidateCaseDetails.setGlobalDatabaseCaseDetailsDocument(
@@ -10181,7 +10186,7 @@ public ServiceOutcome<Boolean> reFetchPanToUANData(CandidateInvitationSentDto ca
 			for (int i = 0; i < candidateInvitationSentDto.getCandidateReferenceNo().size(); i++) {
 				Candidate candidate =candidateRepository.
 						findByCandidateCode(candidateInvitationSentDto.getCandidateReferenceNo().get(i));
-				if(candidate.getUan()!=null) {
+				if(candidate.getUan()!=null && StringUtils.isNumeric(candidate.getUan())) {
 					log.info("Not processing reFetchPanToUANDat if UAN already present::{}",candidate.getUan());
 					candidateReferenceNoHaveUans.add(candidate.getCandidateCode());
 				}

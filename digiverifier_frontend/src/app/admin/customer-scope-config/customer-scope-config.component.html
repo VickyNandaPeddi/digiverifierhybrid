@@ -222,21 +222,17 @@
                                             <option value="true">Yes</option>
                                             <option value="false">No</option>
                                         </select> -->
-                                        <div class="checkbox">
-                                            <span>
-                                                <label class="checkbox-label" for="accessToRelativesBillYes">Yes</label>
+                                        <div class="radio-group">
+                                            <span class="radio-item">
+                                                <input type="radio" class="inputradio" id="accessToRelativesBillYes" formControlName="accessToRelativesBill" [value]="true">
+                                                <label class="radio-label" for="accessToRelativesBillYes">Yes</label>
                                             </span>
-                                            <span>
-                                                <input type="checkbox" class="inputcheckbox" id="accessToRelativesBillYes" formControlName="accessToRelativesBill" [value]="true">
-                                            </span>
-                                            <span class="space"></span>
-                                            <span>
-                                                <label class="checkbox-label" for="accessToRelativesBillNo">NO</label>
-                                            </span>
-                                            <span>
-                                                <input type="checkbox" class="inputcheckbox" id="accessToRelativesBillNo" formControlName="accessToRelativesBill" [value]="false">
+                                            <span class="radio-item">
+                                                <input type="radio" class="inputradio" id="accessToRelativesBillNo" formControlName="accessToRelativesBill" [value]="false">
+                                                <label class="radio-label" for="accessToRelativesBillNo">No</label>
                                             </span>
                                         </div>
+                                        
                                     </div>
                                 </div>
                               <div class="col-md-12 text-center">

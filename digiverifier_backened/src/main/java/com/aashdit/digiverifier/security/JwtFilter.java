@@ -79,6 +79,12 @@ public class JwtFilter extends OncePerRequestFilter {
 		httpServletResponse.setHeader("X-Xss-Protection", "1; mode=block");
 		httpServletResponse.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 		
+		//vunerability browser cache fix
+		httpServletResponse.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+		httpServletResponse.setHeader("Pragma", "no-cache");httpServletResponse.setHeader("Expires", "0");
+		// vunerability webserver info disclouser
+		httpServletResponse.setHeader("Server", "");
+		
 		Boolean skipThis = false;
 		if (httpServletRequest.getRequestURI().contains("/api/login/authenticate")
 				|| httpServletRequest.getRequestURI().contains("/configuration/ui")

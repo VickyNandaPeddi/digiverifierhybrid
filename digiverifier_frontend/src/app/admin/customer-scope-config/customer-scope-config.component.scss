@@ -102,3 +102,19 @@
 .horizontal-list li {
   margin-right: 10px; /* Adjust the margin as needed */
 }
+
+
+.radio-group {
+  display: flex;
+  align-items: center;
+}
+ 
+.radio-item {
+  margin-right: 20px; /* Adjust the spacing between radio buttons */
+  display: inline-flex;
+  align-items: center;
+}
+ 
+.inputradio {
+  margin-right: 5px; /* Space between radio button and label */
+}
